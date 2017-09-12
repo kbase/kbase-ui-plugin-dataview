@@ -51,7 +51,7 @@ define([
                     nodes: [],
                     links: []
                 },
-            div = html.tag('div'),
+                div = html.tag('div'),
                 br = html.tag('br'),
                 table = html.tag('table'),
                 tr = html.tag('tr'),
@@ -59,7 +59,7 @@ define([
                 svg = html.tag('svg'),
                 rect = html.tag('rect'),
                 b = html.tag('b');
-            
+
 
             // config settings?
             config.width = 1200;
@@ -68,17 +68,17 @@ define([
             function renderLayout() {
                 return div([
                     div(['This is a visualization of the relationships between this piece of data and other data in KBase.  Mouse over objects to show additional information (shown below the graph). Double click on an object to select and recenter the graph on that object in a new window.', br(), br()]),
-                    div({id: 'objgraphview', style: {overflow: 'auto', height: '450px', resize: 'vertical'}}),
-                    div({id: 'nodeColorKey'})
+                    div({ id: 'objgraphview', style: { overflow: 'auto', height: '450px', resize: 'vertical' } }),
+                    div({ id: 'nodeColorKey' })
                 ]);
             }
-            
-             /* Construct an ObjectIdentity that can be used to query the WS*/
+
+            /* Construct an ObjectIdentity that can be used to query the WS*/
             function getObjectIdentity(wsNameOrId, objNameOrId, objVer) {
                 if (objVer) {
-                    return {ref: wsNameOrId + "/" + objNameOrId + "/" + objVer};
+                    return { ref: wsNameOrId + "/" + objNameOrId + "/" + objVer };
                 }
-                return {ref: wsNameOrId + "/" + objNameOrId};
+                return { ref: wsNameOrId + "/" + objNameOrId };
             }
             function getObjectRefShort(objectInfo) {
                 return [objectInfo[6], objectInfo[0]].join('/');
@@ -123,36 +123,36 @@ define([
             function addNodeColorKey() {
                 if (needColorKey) {
                     needColorKey = false;
-                    var content = table({cellpadding: '0', cellspacing: '0', border: '0', width: '100%', style: {border: '1px silver solid; padding: 4px;'}}, [
+                    var content = table({ cellpadding: '0', cellspacing: '0', border: '0', width: '100%', style: { border: '1px silver solid; padding: 4px;' } }, [
                         tr([
-                            td({valign: 'top'}, [
-                                table({cellpadding: '2', cellspacing: '0', border: '0', id: 'graphkey', style: ''},
+                            td({ valign: 'top' }, [
+                                table({ cellpadding: '2', cellspacing: '0', border: '0', id: 'graphkey', style: '' },
                                     Object.keys(types).map(function (type) {
-                                    if (type === 'selected') {
-                                        return;
-                                    }
-                                    if (types[type].name === '') {
-                                        return;
-                                    }
-                                    return tr([
-                                        td([
-                                            svg({width: '40', height: '20'}, [
-                                                rect({x: '0', y: '0', width: '40', height: '20', fill: types[type].color})
+                                        if (type === 'selected') {
+                                            return;
+                                        }
+                                        if (types[type].name === '') {
+                                            return;
+                                        }
+                                        return tr([
+                                            td([
+                                                svg({ width: '40', height: '20' }, [
+                                                    rect({ x: '0', y: '0', width: '40', height: '20', fill: types[type].color })
+                                                ])
+                                            ]),
+                                            td({ valign: 'middle' }, [
+                                                types[type].name
                                             ])
-                                        ]),
-                                        td({valign: 'middle'}, [
-                                            types[type].name
-                                        ])
-                                    ]);
-                                }).filter(function (x) {
-                                    if (x === undefined) {
-                                        return false;
-                                    }
-                                    return true;
-                                }))
+                                        ]);
+                                    }).filter(function (x) {
+                                        if (x === undefined) {
+                                            return false;
+                                        }
+                                        return true;
+                                    }))
                             ]),
                             td([
-                                div({id: 'objdetailsdiv'})
+                                div({ id: 'objdetailsdiv' })
                             ])
                         ])
                     ]);
@@ -175,8 +175,8 @@ define([
                     $container.find('#objdetailsdiv').html(text);
                 } else {
                     workspace.get_object_provenance([{
-                            ref: d.objId
-                        }])
+                        ref: d.objId
+                    }])
                         .then(function (objdata) {
                             var info = d.info,
                                 found = false,
@@ -251,8 +251,8 @@ define([
 
 
             function renderSankeyStyleGraph() {
-                var margin = {top: 10, right: 10, bottom: 10, left: 10},
-                width = config.width - 50 - margin.left - margin.right,
+                var margin = { top: 10, right: 10, bottom: 10, left: 10 },
+                    width = config.width - 50 - margin.left - margin.right,
                     height = graph.nodes.length * 38 - margin.top - margin.bottom,
                     color = d3.scale.category20(),
                     svg, sankey, path, link, node;
@@ -332,7 +332,7 @@ define([
                         }
                         return d.text;
                     });
-                $(link).tooltip({delay: {"show": 0, "hide": 100}});
+                $(link).tooltip({ delay: { "show": 0, "hide": 100 } });
 
                 // add in the nodes
                 node = svg.append("g")
@@ -351,14 +351,14 @@ define([
                             this.parentNode.appendChild(this);
                         })
                         .on("drag",
-                            function (d) {
-                                d.x = Math.max(0, Math.min(width - d.dx, d3.event.x));
-                                d.y = Math.max(0, Math.min(height - d.dy, d3.event.y));
-                                d3.select(this).attr("transform",
-                                    "translate(" + d.x + "," + d.y + ")");
-                                sankey.relayout();
-                                link.attr("d", path);
-                            }))
+                        function (d) {
+                            d.x = Math.max(0, Math.min(width - d.dx, d3.event.x));
+                            d.y = Math.max(0, Math.min(height - d.dy, d3.event.y));
+                            d3.select(this).attr("transform",
+                                "translate(" + d.x + "," + d.y + ")");
+                            sankey.relayout();
+                            link.attr("d", path);
+                        }))
                     .on('dblclick', function (d) {
                         if (d3.event.defaultPrevented) {
                             return;
@@ -378,8 +378,8 @@ define([
                             //    // TODO: Fix this
                             //    window.location.href = "#provenance/" + encodeURI(d.info[7] + "/" + d.info[0]);
                             //} else {
-                                // TODO: Fix this
-                                runtime.navigate("provenance/" + encodeURI(d.info[6] + "/" + d.info[0] + '/' + d.info[4]));
+                            // TODO: Fix this
+                            runtime.navigate("provenance/" + encodeURI(d.info[6] + "/" + d.info[0] + '/' + d.info[4]));
                             //}
                         }
                     })
@@ -577,11 +577,11 @@ define([
             }
             function getTableRow(rowTitle, rowContent) {
                 return tr([
-                    td({style: {maxWidth: '250px'}}, [
+                    td({ style: { maxWidth: '250px' } }, [
                         b(rowTitle)
                     ]),
-                    td({style: {maxWidth: '300px'}}, [
-                        div({style: {maxWidth: '300px', maxHeight: '250px', overflowY: 'auto', whiteSpace: 'pre', wordWrap: 'break-word'}}, [
+                    td({ style: { maxWidth: '300px' } }, [
+                        div({ style: { maxWidth: '300px', maxHeight: '250px', overflowY: 'auto', whiteSpace: 'pre', wordWrap: 'break-word' } }, [
                             rowContent
                         ])
                     ])
@@ -620,7 +620,7 @@ define([
                         latestObjId = objId;
                     }
                     objRefToNodeIdx[objId] = nodeId;
-                    objIdentities.push({ref: objId});
+                    objIdentities.push({ ref: objId });
                 });
                 if (latestObjId.length > 0) {
                     graph.nodes[objRefToNodeIdx[latestObjId].nodeType] = 'selected';
@@ -698,7 +698,7 @@ define([
                         }
                     });
             }
-            
+
             function makeLink(source, target, value) {
                 return {
                     source: source,
@@ -712,27 +712,27 @@ define([
                     .then(function (objdata) {
                         var uniqueRefs = {},
                             uniqueRefObjectIdentities = [],
-                            links = [];                            
-                            
+                            links = [];
+
                         objdata.forEach(function (objectProvenance) {
                             var objRef = getObjectRef(objectProvenance.info);
-                            
+
                             // extract the references contained within the object
                             objectProvenance.refs.forEach(function (ref) {
                                 if (!(ref in uniqueRefs)) {
                                     uniqueRefs[ref] = 'included';
-                                    uniqueRefObjectIdentities.push({ref: ref});
+                                    uniqueRefObjectIdentities.push({ ref: ref });
                                 }
                                 links.push(makeLink(ref, objRef, 1));
                             });
-                            
+
                             // extract the references from the provenance                            
                             objectProvenance.provenance.forEach(function (provenance) {
                                 if (provenance.resolved_ws_objects) {
                                     provenance.resolved_ws_objects.forEach(function (resolvedObjectRef) {
-                                         if (!(resolvedObjectRef in uniqueRefs)) {
+                                        if (!(resolvedObjectRef in uniqueRefs)) {
                                             uniqueRefs[resolvedObjectRef] = 'included'; // TODO switch to prov??
-                                            uniqueRefObjectIdentities.push({ref: resolvedObjectRef});
+                                            uniqueRefObjectIdentities.push({ ref: resolvedObjectRef });
                                         }
                                         links.push(makeLink(resolvedObjectRef, objRef, 1));
                                     });
@@ -746,7 +746,7 @@ define([
                                 if (copyShort !== thisShort) { // only add if it wasn't copied from an older version
                                     if (!(objectProvenance.copied in uniqueRefs)) {
                                         uniqueRefs[objectProvenance.copied] = 'copied'; // TODO switch to prov??
-                                        uniqueRefObjectIdentities.push({ref: objectProvenance.copied});
+                                        uniqueRefObjectIdentities.push({ ref: objectProvenance.copied });
                                     }
                                     links.push(makeLink(objectProvenance.copied, objRef, 1));
                                 }
@@ -759,7 +759,7 @@ define([
                         };
                     });
             }
-            
+
             function isUndefNull(obj) {
                 if (obj === null || obj === undefined) {
                     return true;
@@ -801,13 +801,13 @@ define([
                                 // there is a reference, but we no longer have access; could do something better
                                 // here, but instead we just skip
                                 // At least warn... there be bugs if this happens...
-                                console.warn('In provenance widget reference '  + ref + ' is not accessible');
+                                console.warn('In provenance widget reference ' + ref + ' is not accessible');
                             }
                         }
                         // add the link info
                         refData.links.forEach(function (link) {
-                            if ( isUndefNull(objRefToNodeIdx[link.source]) || isUndefNull(objRefToNodeIdx[link.target]) ) {
-                                console.warn('skipping link', link);                                
+                            if (isUndefNull(objRefToNodeIdx[link.source]) || isUndefNull(objRefToNodeIdx[link.target])) {
+                                console.warn('skipping link', link);
                             } else {
                                 graph.links.push(makeLink(objRefToNodeIdx[link.source], objRefToNodeIdx[link.target], link.value));
                             }
@@ -824,7 +824,7 @@ define([
                                 name: ref,
                                 info: [refTokens[1], "Data not found, object may be deleted",
                                     "Unknown", "", refTokens[2], "Unknown", refTokens[0],
-                                    refTokens[0], "Unknown", "Unknown", {}],
+                                refTokens[0], "Unknown", "Unknown", {}],
                                 nodeType: uniqueRefs[ref],
                                 objId: ref
                             });
@@ -833,7 +833,7 @@ define([
                         // add the link info
                         var links = refData['links'];
                         for (var i = 0; i < links.length; i++) {
-                            graph['links'].push(makeLink(objRefToNodeIdx[links[i]['source']], objRefToNodeIdx[links[i]['target']],links[i]['value']));
+                            graph['links'].push(makeLink(objRefToNodeIdx[links[i]['source']], objRefToNodeIdx[links[i]['target']], links[i]['value']));
                         }
                     });
             }
@@ -842,7 +842,7 @@ define([
                 // init the graph
                 $container.find('#loading-mssg').show();
                 $container.find('#objgraphview').hide();
-                graph = {nodes: [], links: []};
+                graph = { nodes: [], links: [] };
 
                 workspace.get_object_history(objref)
                     .then(function (data) {
@@ -890,14 +890,14 @@ define([
                     expectedNextId = node.info[6] + "/" + node.info[0] + "/" + expectedNextVersion;
                     if (objRefToNodeIdx[expectedNextId]) {
                         // add the link now too
-                        graph.links.push(makeLink(objRefToNodeIdx[node.objId], objRefToNodeIdx[expectedNextId], 1)); 
+                        graph.links.push(makeLink(objRefToNodeIdx[node.objId], objRefToNodeIdx[expectedNextId], 1));
                     }
                 });
             }
             function getData() {
-                return {title: "Data Object Reference Network", workspace: workspaceId, id: "This view shows the data reference connections to object " + objectId};
+                return { title: "Data Object Reference Network", workspace: workspaceId, id: "This view shows the data reference connections to object " + objectId };
             }
-           
+
             // Widget API
             function attach(node) {
                 mount = node;

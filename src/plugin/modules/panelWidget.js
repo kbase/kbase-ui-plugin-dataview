@@ -59,6 +59,11 @@ define([
                             icon: 'sitemap',
                             content: div({ id: widgetSet.addWidget('kb_dataview_provenance') })
                         }),
+                        renderBSCollapsiblePanel({
+                            title: 'Data Provenance and Reference Network ... in Progress',
+                            icon: 'sitemap',
+                            content: div({ id: widgetSet.addWidget('kb_dataview_provenance_v2') })
+                        }),
                         div({ id: widgetSet.addWidget('kb_dataview_dataObjectVisualizer') })
                     ])
                 ])
