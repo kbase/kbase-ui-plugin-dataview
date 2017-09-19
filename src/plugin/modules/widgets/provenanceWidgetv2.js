@@ -32,24 +32,27 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
             objWidth= 20,
             types = {
                 startingNode: {
-                    color: '#FF9800',
+                    color: '#ffeaad',
+                    borderColor: '#dbbc60',
                     name: 'Current object',
                     width: objWidth,
                     stroke: (10,0)                    },
                 functionNode: {
-                    color: 'grey',
+                    color: '#bbb6c1',
+                    borderColor: 'grey',
                     name: 'Functions',
                     width: objWidth,
                     stroke: (10,0)
                 },
                 noRefs: {
-                    color: '#8eb3ed',
-                    name: 'Objects with no provenance or dependancies',
+                    color: '#b5d6ff',
+                    name: 'All References and Dependencies Displayed',
                     width: objWidth,
                     stroke: (10,0)
                 },
                 node: {
-                    color: '#386cc1',
+                    color: '#87abff',
+                    borderColor: '#6079b2',
                     name: 'Objects',
                     width: objWidth,
                     stroke: (10,0)
@@ -68,8 +71,7 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                 }
             },
             monthLookup = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            objIdtoDataCombine = {
-                '-1' : 1
+            existingNodeGraphId = {
             },
             combineGraph = {
                 nodes: [],
@@ -84,6 +86,10 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
             existingFunctions ={
 
             },
+            exemptObjects ={
+                // 'KBaseReport.Report':true,
+                'DataPalette.DataPalette': true
+            },
             div = html.tag('div'),
             br = html.tag('br'),
             tr = html.tag('tr'),
@@ -97,7 +103,7 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
         function renderLayout() {
             return div([
                 div(['This is a visualization of the relationships between this piece of data and other data in KBase.  Click objects to show additional information (shown below the graph). Double click on an object expand graph.', br(), br()]),
-                div({id: 'objgraphview2', style: {overflow: 'auto', height: '450px', resize: 'vertical'}}),
+                div({id: 'objgraphview2', style: {overflow: 'auto', height: "" + (config.height * 3/4) + "px", resize: 'vertical'}}),
                 div({id: 'nodeColorKey2'})
             ]);
         }
@@ -142,8 +148,9 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
             if (needColorKey) {
                 needColorKey = false;
 
-                var content = $('<div/>', {  id: 'graphkey' });
-                $('#nodeColorKey2').append(content);
+                var content = $('<div/>', {  id: 'graphkey2' });
+                var nodeColorKey2 = $('#nodeColorKey2');
+                nodeColorKey2.append(content);
 
                 Object.keys(types).map(function (type){
                     var row = $('<tr/>', { class: 'prov-graph-color' });
@@ -155,7 +162,7 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                         
                     row.append(colorGrid);
                     row.append(colorName);
-                    $('#graphkey').append(row);
+                    $('#graphkey2').append(row);
                     var temp = '#' + colorId;
                     var colorSvg = d3.select(temp)
                         .append('svg')
@@ -170,11 +177,9 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                         .attr('stroke-dasharray', types[type].stroke)
                         .attr('stroke-width', types[type].width)
                         .attr('stroke', types[type].color);    
-        
-
                 });
 
-                $('#nodeColorKey2').append($('<div/>', {id : 'objdetailsdiv'}));
+                nodeColorKey2.append($('<div/>', {id : 'objdetailsdiv'}));
             }
         }
 
@@ -214,7 +219,7 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                     text += '<h4>Provenance</h4><table cellpadding="2" cellspacing="0" class="table table-bordered table-striped">';
 
                     if (objdata.copied) {
-                        text += getTableRow('Copied from', '<a href="#/dataview/' + objdata[0].copied + '" target="_blank">' + objdata[0].copied + '</a>');
+                        text += getTableRow('Copied from', '<a href="#/dataview/' + objdata.copied + '" target="_blank">' + objdata.copied + '</a>');
                     }
                     if (objdata.provenance.length > 0) {
                         var prefix = '';
@@ -421,27 +426,29 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                 //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
                 var objectInfo = objectData.info;
                 var t = objectInfo[2].split('-')[0],
+                    objIdGen = objectInfo[6] + '/' + objectInfo[0],
                     objId = objectInfo[6] + '/' + objectInfo[0] + '/' + objectInfo[4],
+                    versionSet = {},
                     //first object must be 0; TODO: change this to depend on usage or provenance
                     nodeId = 0;
+                versionSet[objectInfo[4]] = true;
 
                 if (objectInfo[4] > latestVersion) {
                     node = {
                         name: getNodeLabel(objectInfo),
-                        info: objectInfo,
                         objId: objId,
                         type: t,
                         data: objectData,
                         isPresent: true,
                         startingObject : true,
                         referencesFrom : [],
+                        versions: versionSet,
                         referencesTo : []
                     };
-            
                     latestVersion = objectInfo[4];
                     latestObjId = objId;
                 }
-                objIdtoDataCombine[objId] = nodeId;
+                existingNodeGraphId[objIdGen] = nodeId;
                 nodePaths [objId] = objId;
                 objIdentities.push({ref: objId});
             });
@@ -475,7 +482,8 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                 functionId = combineGraph.nodes.length;
                 existingFunctions[functionNode.objId] = functionId;
             }
-            var targetId = objIdtoDataCombine[objIdentity.ref];
+            var objIdGen = objIdentity.ref.split('/').slice(0,2).join('/');
+            var targetId = existingNodeGraphId[objIdGen];
             combineGraph.nodes.push(functionNode);
             makeLink(targetId, functionId, isDep, flip);
             return functionId;
@@ -494,30 +502,32 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                 //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
                 var refInfo =data[i].info;
                 var objId = refInfo[6] + '/' + refInfo[0] + '/' + refInfo[4];
+                var objIdGen = refInfo[6] + '/' + refInfo[0];
 
                 var nodeId;
-                if(objIdtoDataCombine[objId] !== undefined){
-                    nodeId = objIdtoDataCombine[objId];
+                if(existingNodeGraphId[objIdGen] !== undefined){
+                    nodeId = existingNodeGraphId[objIdGen];
+                    combineGraph.nodes[nodeId].versions[refInfo[4]] = true;
                 }else{
                     var t = refInfo[2].split('-')[0];
                     var endNode = ((data[i].provenance.length + data[i].refs.length) > 0) ? false : true;
+                    var versionSet = {};
+                    versionSet[refInfo[4]] = true;
                     var node = {
                         name: getNodeLabel(refInfo),
-                        info: refInfo,
                         objId: objId,
                         type: t,
                         data: data[i],
                         endNode: endNode,
+                        versions : versionSet,
                         referencesFrom: [],
                         referencesTo: []
                     };
                     nodeId = combineGraph.nodes.length;
 
-                    objIdtoDataCombine[objId] = nodeId;
+                    existingNodeGraphId[objIdGen] = nodeId;
                     combineGraph.nodes.push(node);
-
-                }
-                
+                }         
                 makeLink(targetId, nodeId, isDep, flip);
                 
             }
@@ -532,27 +542,34 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                         objects: objectIds,
                         no_data: 1
                     }).then(refHelper.bind(null,objectIdentity));
+                })
+                .catch(function(){
+                    //will not look for references of object you don't have access to
                 });
         }
         function refHelper(objectIdentity, provData){
             var flip = true;
             for (var i = 0; i < provData.data.length; i++) {
                 var data = provData.data[i];
+                if (exemptObjects[data.info[2].split('-')[0]]) continue;
+
                 for (var j = 0; j < data.refs.length; j++) {
                     if (objectIdentity.ref === data.refs[j]) {
                         var isDep = true;
-                        addNodeLink([data], objIdtoDataCombine[objectIdentity.ref], isDep,flip);
+                        var objIdGen = objectIdentity.ref.split('/').slice(0, 2).join('/');
+
+                        addNodeLink([data], existingNodeGraphId[objIdGen], isDep,flip);
                         break;
                     }
                 }
                 for (var k = 0; k < data.provenance.length; k++) {
                     var provenance = data.provenance[k];
                     var refInfo = data.info;
-                    var objId = refInfo[6] + '/' + refInfo[0] + '/' + refInfo[4];
+                    var objIdGen = refInfo[6] + '/' + refInfo[0];
                     var functionNode = {
-                        type:'Function',
+                        type: 'App',
                         isFunction: true,
-                        objId: objId + 'to' + provenance.service,
+                        objId: objIdGen + 'to' + provenance.service,
                         name: provenance.service,
                         method: provenance.method,
                         referencesFrom : [],
@@ -574,7 +591,6 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                 var temp = source;
                 source = target;
                 target = temp;
-
             }
             var name = source + 'to' + target;
 
@@ -616,11 +632,12 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
 
                 var objectProvenance = provData[i];
                 objectProvenance.provenance.forEach(function (provenance) {
+                    var objIdGen = objectIdentity.ref.split('/').slice(0, 2).join('/');
 
                     functionNode = {
                         isFunction: true,
-                        type: 'Function',
-                        objId: objectIdentity.ref + 'to' + provenance.service,
+                        type: 'App',
+                        objId: objIdGen + 'to' + provenance.service,
                         name: provenance.service,
                         method: provenance.method,
                         referencesFrom: [],
@@ -665,7 +682,7 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                         no_data: 1
                     }]), objectIdentity, functionId])
                         .spread(function (refData, objectIdentity, functionId) {
-                            if (refData !== null) {
+                            if (refData !== null || exemptObjects[refData[0].data.info[2].split('-')[0]]) {
                                 refData = refData[0].data;
                                 var isDep = false;                                
                                 addNodeLink(refData, functionId, isDep, null, refData);
@@ -685,11 +702,9 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                             if (refData !== null) {
                                 refData = refData[0].data;
                                 var isDep = true;
-                                //TODO set type of link
-                                var objId = objIdtoDataCombine[objectIdentity.ref];
+                                var objIdGen = objectIdentity.ref.split('/').slice(0, 2).join('/');
+                                var objId = existingNodeGraphId[objIdGen];
                                 addNodeLink(refData, objId, isDep, refData);
-
-
                             }
                         });
            
@@ -702,7 +717,6 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
         function buildDataAndRender(objref) {
             $container.find('#loading-mssg').show();
             $container.find('#objgraphview2').hide();
-            //gets verions of object
 
             workspace.get_objects2({
                 objects: [objref],
@@ -711,23 +725,13 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                 .then(function (objData) {
                     return processObjectHistory(objData.data);
                 })
-                .then(function (objectIdentity) {
-
-                    // TODO: ADD CHECK TO MAKE SURE THIS IS LATEST VERSION
-                    // const objectIdentity = objIdentities[objIdentities.length -1];
-                    // we have the history of the object of interest,
-                    // now we can fetch all referencing object, and
-                    // get prov info for each of these objects
-                        
+                .then(function (objectIdentity) {   
                     return Promise.all([
                         getObjectProvenance(objectIdentity),
                         getReferencingObjects(objectIdentity)
                     ]);
-
                 })
-
                 .then(function () {
-
                     finishUpAndRender();
                 })
                 .catch(function (err) {
@@ -738,20 +742,21 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
 
         function renderForceTree(nodesData, linksData){
             //TODO: copy loop through nodes and get provenances, with nodes hidden
-            var width = 1200,
-                height = 800,
+            var width = config.width,
+                height = config.height,
                 oldNodes, // data
                 svg, node, link,
-                rectWidth = 100,
-                rectHeight = 50,
+                rectWidth = 110,
+                rectHeight = 40,
                 nodes = nodesData,
                 links = linksData,
+                increase = 100,
                 t = d3.transition()
                     .duration(1750); // d3 selections
 
             var force = d3.layout.force()
-                .charge(-800)
-                .linkDistance(50)
+                .charge(-1800)
+                .linkDistance(30)
                 .size([width, height]);
 
             force.drag()
@@ -759,27 +764,50 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                 .on('dragend', dragstop);
 
             force.on('tick', tick);
-            svg = d3.select($container.find('#prov-tab')[0])
+            svg = d3.select($container.find('#objgraphview2')[0])
                 .append('svg')
                 .attr('width', width)
                 .attr('height', height)
                 .attr('class', 'prov');
-
-            var borderPath = svg.append('rect')
+            
+            var background = svg.append('rect')
                 .attr('x', 0)
                 .attr('y', 0)
                 .attr('height', height)
                 .attr('width', width)
-                .style('fill', '#dbdcdd')
+                .style('fill', '#efefef')
                 .style('stroke-width', 0);
+
+            svg.append('rect')
+                .attr('x', 0)
+                .attr('y', 0)
+                .attr('height', 20)
+                .attr('width', 30)
+                .style('fill', 'yellow')
+                .on('click', function(){
+                    height += increase;
+                    svg.attr('height', height);
+                    background.attr('height', height);
+                    force.size([width, height]);
+                    for(var i = 0; i<nodes.length;i++){
+                        var d = nodes[i];
+                        if(!node.startingNode){
+                            d.y += increase/2;
+                            d.py += increase/2;
+                        }
+                    }
+                    update();
+                });
+
        
 
             function update() {
                 force.nodes(nodes).links(links);
+                var n = svg.selectAll('.node')
+                    .data(nodes, function (d) { return d.objId; });
                 var l = svg.selectAll('.link')
                     .data(links, function(d) {return d.source + ',' + d.target;});
-                var n = svg.selectAll('.node')
-                    .data(nodes, function(d) {return d.objId;});
+
                 enterLinks(l);
                 enterNodes(n);
                 link = svg.selectAll('.link');
@@ -797,16 +825,66 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                     .append('g')
                     .attr('class', 'node')
                     .each(function (d) {oldNodes.push(d);})
-                    .on('dblclick',dblClick)
                     .on('click', onNodeClick)
                     .call(force.drag);
 
-                g.append('rect')
+                var rect = g.append('rect')
+                    .attr('class', 'nodeObj')
                     .attr('x', -rectWidth/2)
                     .attr('y', -rectHeight/2)
                     .attr('width', rectWidth)
                     .attr('height', rectHeight)
+                    .attr('stroke-width', '1px')
+                    .on('dblclick', dblClick)
+                    .attr('stroke', getBorderColor)
+                    .attr('rx', function(d){return d.isFunction ? rectWidth/2 : 0;})
+                    .attr('ry', function(d){return d.isFunction ? rectWidth/2 : 0;})
+                    .on('mouseover', function (d) {
+                        d3.select(this)
+                            .attr('stroke-width', '3px');
+                    })
+                    .on('mouseleave', function(d){
+                        d3.select(this)
+                            .attr('stroke-width', '1px');
+                    })
                     .transition(t);
+                d3.selectAll('.nodeObj').each(function (d){
+
+                    if(!(d.versions === undefined)){
+                        for (var i = 1; i < Object.keys(d.versions).length; i++){
+                            d3.select(this.parentNode).insert('rect', ':first-child')
+                                .attr('class', 'versions')
+                                .attr('x', -rectWidth/2 + i*5)
+                                .attr('y', -rectHeight/2 - i*5)
+                                .attr('width', rectWidth)
+                                .attr('height', rectHeight)
+                                .attr('stroke-width', '1px')
+                                .attr('stroke', getBorderColor)
+                                .on('mouseover', function (d) {
+                                    d3.select(this)
+                                        .attr('stroke-width', '3px');
+                                })
+                                .on('mouseleave', function (d) {
+                                    d3.select(this)
+                                        .attr('stroke-width', '1px');
+                                });
+                        }
+                    }
+                });
+
+                g.append('title')
+                    .html(function (d) {
+                        //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
+                        var text = 'Type: ' + d.type +'\n' 
+                                    + 'Name: ' + d.name;
+                        if(!d.isFunction){
+                            var info = d.data.info;
+                            text += '\n' + 'Saved on:  ' + getTimeStampStr(info[3]) + '\n' +
+                                'Saved by:  ' + info[5];
+                        }
+                        return text;
+                    });
+               
 
                 g.transition;
         
@@ -816,15 +894,20 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                 text.append('tspan')
                     .text(function (d) { return (d.type.length < 15) ? d.type : (d.type.slice(0, 10) + '...');})                    
                     .attr('font-weight', 'bold')
-                    .attr('x', -rectWidth/2)
-                    .attr('y', -rectHeight / 2 + 15)
+                    .attr('x', function (d) {return (-rectWidth / 2) + (d.isFunction ? 40 : 5);})
+                    .attr('y', -rectHeight/2 + 15)
                     .attr('dy', 0);
 
                 text.append('tspan')
                     .attr('dy', 15)
-                    .attr('x', -rectWidth / 2)
+                    .attr('x', function (d) { return (-rectWidth / 2) + (d.isFunction ? 12 : 5); })
                     .attr('y', -rectHeight/2 + 15)
-                    .text(function (d) { return (d.name.length < 15) ? d.name : (d.name.slice(0, 10) + '...'); });                    
+                    .text(function (d) { 
+                        if(d.isFunction){
+                            return (d.name.length < 12) ? d.name : (d.name.slice(0, 9) + '...'); 
+                        }
+                        return (d.name.length < 20) ? d.name : (d.name.slice(0, 12) + '...'); 
+                    });                    
 
             }
 
@@ -850,6 +933,7 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                     .attr('id', 'markerArrow')
                     .attr('markerHeight', 3)
                     .attr('markerWidth', 3)
+                    .attr('refX', 5)
                     .attr('orient', 'auto')
                     .attr('viewBox', '-5 -5 10 10')
                     .append('svg:path')
@@ -873,8 +957,22 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
             }
 
             function tick(e) {
-                node.attr('cx', function (d) { return d.x = Math.max(rectWidth/2, Math.min(width - rectWidth/2, d.x)); })
-                    .attr('cy', function (d) { return d.y = Math.max(rectHeight/2, Math.min(height - rectHeight/2, d.y)); })
+                node.attr('cx', function (d) { 
+                    if (d.startingObject) {
+                        d.fixed = true;
+                        return d.x = width / 2;
+                    } else {
+                        return d.x = Math.max(rectWidth/2, Math.min(width - rectWidth/2, d.x)); 
+                    }
+                })
+                    .attr('cy', function (d) { 
+                        if(d.startingObject){
+                            d.fixed = true;
+                            return d.y = height/2;
+                        }else{
+                            return d.y = Math.max(rectHeight / 2, Math.min(height - rectHeight / 2, d.y)); 
+                        }
+                    })
                     .attr('transform', function (d) { return 'translate(' + d.x + ',' + d.y + ')'; })
                     .style('fill', function (d) {
                         if (d.isFunction) return types.functionNode.color;
@@ -886,7 +984,6 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
 
                 link
                     .each(function (d) {
-        
                         if (d.source.y < d.target.y) {
                             if (!d.target.fixed) {
                                 d.target.y = d.source.y - (rectHeight / 2);
@@ -894,7 +991,6 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                                 d.source.y = d.target.y + (rectHeight / 2);
                             }
                         } 
-
                         var distance = Math.abs(d.source.y - d.target.y);
                         if(distance < rectHeight){
                             if (!d.target.fixed) {
@@ -903,9 +999,10 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                                 d.source.y += (rectHeight - distance);
                             }
                         } 
+                        
                         if (d.target.isFunction && !d.target.fixed) {
                             d.target.x = d.source.x;
-                        }
+                        }                        
                     })
                     .attr('x1', function (d) { return d.source.x; })
                     .attr('y1', function (d) { return d.source.y - rectHeight/2; })
@@ -913,28 +1010,26 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                     .attr('y2', function (d) { return d.target.y + rectHeight/2; })
                     .attr('display', function (d) { return (d.toggle === false) ? 'none' : 'initial'; });
 
-
             }
-
-
             force.on('end', function(e){
                 oldNodes = nodes;
                 maintainNodePositions();
 
             });
-
+            function getBorderColor(type){
+                if (type.isFunction) return types.functionNode.borderColor;
+                if (type.startingObject) return types.startingNode.borderColor;
+                return types.node.borderColor;
+            }
             function dblClick(node){
                 var nodeId = {ref: node.objId};
                 if(node.isPresent || node.isFunction){
-                    var condition;
-
+                    if(node.startingObject && (node.expanded === undefined)) node.expanded = true;
                     node.expanded = !node.expanded;
-                    condition = node.expanded;
+                    var condition = node.expanded;
                     
                     toggleNode(node, condition);
-                    update();
-
-                    
+                    update();   
                 }
                 else if (!node.endNode){
 
@@ -949,14 +1044,17 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                         });
                 }
             }
-            function toggleNode(node, condition){
+            function toggleNode(node){
+                var condition = node.expanded;
                 var queue = addLinkstoQueue(node.referencesTo);
                 while (queue.length > 0){
                     var link = queue.pop();
                     link.toggle = condition;
                     if((condition === false && !hasLinkDep(link.target)) || (condition === true && condition !== link.target.toggle)){
+                        if (!(link.target.expanded === false && condition === true)){
+                            queue = queue.concat(addLinkstoQueue(link.target.referencesTo));
+                        }
                         link.target.toggle = condition;
-                        queue = queue.concat(addLinkstoQueue(link.target.referencesTo));
                     } 
                 }
             }
@@ -975,7 +1073,6 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
                 }
                 return false;
             }
-              
             update();
         }
         
@@ -983,14 +1080,15 @@ function (Promise, $, d3, html, dom, Workspace, GenericClient) {
 
             d3.select($container.find('#objgraphview2')).html('');
             $container.find('#objgraphview2').show();
-            var ul = $('<ul class="nav nav-tabs"  role="tablist"/>');
-            ul.append('<li role="presentation" class="active"><a href="#prov-tab" aria-controls="prov-tab" role="tab" data-toggle="tab">Provenance and Dependencies</a></li>');
-            ul.append('<li role="presentation"  ><a href="#ref-tab" aria-controls="usage-tab" role="tab" data-toggle="tab">Object Usage</a></li>');
-            var content = $('<div/>',{class:'tab-content'});
-            content.append('<div role="tabpanel" class="tab-pane active" id="prov-tab"></div>');
-            content.append('<div role="tabpanel" class="tab-pane " id="ref-tab"></div>');
-            $('#objgraphview2').append(ul);
-            $('#objgraphview2').append(content);
+            //add back in if want to have different tabs
+            // var ul = $('<ul class="nav nav-tabs"  role="tablist"/>');
+            // ul.append('<li role="presentation" class="active"><a href="#prov-tab" aria-controls="prov-tab" role="tab" data-toggle="tab">Provenance and Dependencies</a></li>');
+            // ul.append('<li role="presentation"  ><a href="#ref-tab" aria-controls="usage-tab" role="tab" data-toggle="tab">Object Usage</a></li>');
+            // var content = $('<div/>',{class:'tab-content'});
+            // content.append('<div role="tabpanel" class="tab-pane active" id="prov-tab"></div>');
+            // content.append('<div role="tabpanel" class="tab-pane " id="ref-tab"></div>');
+            // $('#objgraphview2').append(ul);
+            // $('#objgraphview2').append(content);
             renderForceTree(combineGraph.nodes, combineGraph.links, false);
             addNodeColorKey();
             $container.find('#loading-mssg').hide();
