@@ -18,18 +18,46 @@ define([
             headingId = html.genId(),
             collapseId = html.genId();
 
-        return div({ class: 'panel-group kb-widget', id: panelId, role: 'tablist', 'aria-multiselectable': 'true' }, [
-            div({ class: 'panel panel-default' }, [
-                div({ class: 'panel-heading', role: 'tab', id: headingId }, [
-                    h4({ class: 'panel-title' }, [
-                        span({ 'data-toggle': 'collapse', 'data-parent': '#' + panelId, 'data-target': '#' + collapseId, 'aria-expanded': 'false', 'aria-controls': collapseId, class: 'collapsed', style: { cursor: 'pointer' } }, [
-                            span({ class: 'fa fa-' + config.icon + ' fa-rotate-90', style: { 'margin-left': '10px', 'margin-right': '10px' } }),
+        return div({ 
+            class: 'panel-group kb-widget', 
+            id: panelId, 
+            role: 'tablist', 'aria-multiselectable': 'true' }, [
+            div({ 
+                class: 'panel panel-default' 
+            }, [
+                div({ 
+                    class: 'panel-heading', 
+                    role: 'tab', 
+                    id: headingId }, [
+                    h4({ 
+                        class: 'panel-title' }, [
+                        span({ 
+                            'data-toggle': 'collapse', 
+                            'data-parent': '#' + panelId, 'data-target': '#' + collapseId, 
+                            'aria-expanded': 'false', 
+                            'aria-controls': collapseId, 
+                            class: (config.collapsed === false ? '' : 'collapsed'), 
+                            style: { 
+                                cursor: 'pointer' 
+                            } 
+                        }, [
+                            span({ 
+                                class: 'fa fa-' + config.icon + ' fa-rotate-90', 
+                                style: { 
+                                    'margin-left': '10px', 
+                                    'margin-right': '10px' 
+                                } 
+                            }),
                             config.title
                         ])
                     ])
                 ]),
-                div({ class: 'panel-collapse collapse', id: collapseId, role: 'tabpanel', 'aria-labelledby': 'provHeading' }, [
-                    div({ class: 'panel-body' }, [
+                div({ 
+                    class: 'panel-collapse collapse ' + (config.collapsed === false ? 'in' : ''), 
+                    id: collapseId, 
+                    role: 'tabpanel', 'aria-labelledby': 'provHeading' }, [
+                    div({ 
+                        class: 'panel-body' }, [
                         config.content
                     ])
                 ])
@@ -53,12 +81,28 @@ define([
                         div({ id: widgetSet.addWidget('kb_dataview_copy') })
                     ]),
                     div({ class: 'col-sm-12' }, [
-                        div({ id: widgetSet.addWidget('kb_dataview_overview') }),
+                        div({ id: widgetSet.addWidget('kb_dataview_overview') })
+                    ]),
+                    (function () {
+                        return div({ class: 'col-sm-12' }, [
+                            renderBSCollapsiblePanel({
+                                title: 'Knowledge Engine',
+                                icon: 'superpowers',
+                                collapsed: false,
+                                content: div({
+                                    id: widgetSet.addWidget('kb_dataview_knowledgeEngine')
+                                })
+                            })
+                        ]);
+                    }()),
+                    div({ class: 'col-sm-12' }, [
                         renderBSCollapsiblePanel({
                             title: 'Data Provenance and Reference Network',
                             icon: 'sitemap',
                             content: div({ id: widgetSet.addWidget('kb_dataview_provenance') })
-                        }),
+                        })
+                    ]),
+                    div({ class: 'col-sm-12' }, [                        
                         renderBSCollapsiblePanel({
                             title: 'Data Provenance and Reference Network ... in Progress',
                             icon: 'sitemap',
@@ -93,38 +137,37 @@ define([
                     params.objectInfo = objectInfo;
                     return Promise.all([objectInfo, widgetSet.start(params)]);
                 })
+                .spread(function(objectInfo) {
+                    // Disable download button for the time being.
+                    // Will re-enable when we have time to deal with it.
+                    //     runtime.send('ui', 'addButton', {
+                    //         name: 'downloadObject',
+                    //         label: 'Download',
+                    //         style: 'default',
+                    //         icon: 'download',
+                    //         toggle: true,
+                    //         params: {
+                    //             ref: objectInfo.ref
+                    //         },
+                    //         callback: function () {
+                    //             runtime.send('downloadWidget', 'toggle');
+                    //         }
+                    //     });
 
-            .spread(function(objectInfo) {
-                // Disable download button for the time being.
-                // Will re-enable when we have time to deal with it.
-                //     runtime.send('ui', 'addButton', {
-                //         name: 'downloadObject',
-                //         label: 'Download',
-                //         style: 'default',
-                //         icon: 'download',
-                //         toggle: true,
-                //         params: {
-                //             ref: objectInfo.ref
-                //         },
-                //         callback: function () {
-                //             runtime.send('downloadWidget', 'toggle');
-                //         }
-                //     });
-
-                runtime.send('ui', 'addButton', {
-                    name: 'copyObject',
-                    label: 'Copy',
-                    style: 'default',
-                    icon: 'copy',
-                    toggle: true,
-                    params: {
-                        ref: objectInfo.ref
-                    },
-                    callback: function() {
-                        runtime.send('copyWidget', 'toggle');
-                    }
+                    runtime.send('ui', 'addButton', {
+                        name: 'copyObject',
+                        label: 'Copy',
+                        style: 'default',
+                        icon: 'copy',
+                        toggle: true,
+                        params: {
+                            ref: objectInfo.ref
+                        },
+                        callback: function() {
+                            runtime.send('copyWidget', 'toggle');
+                        }
+                    });
                 });
-            });
         }
 
         function run(params) {

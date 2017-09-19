@@ -54,7 +54,6 @@ source:
         -
             module: kb_dataview_widget_provenance
             file: widgets/provenanceWidget
-
         -   
             module: kb_dataview_widget_provenance_v2
             file: widgets/provenanceWidgetv2
@@ -247,6 +246,10 @@ source:
         -
             module: kb_dataview_genericObject
             file: widgets/genericDataObject
+
+        -
+            module: kb_dataview_knowledgeEngine
+            file: widgets/knowledgeEngine
         
     styles:
         - 
@@ -255,10 +258,19 @@ source:
             file: sankeystyle
         
 install:
+    ko-components:
+        -
+            name: dataview/knowledge-engine
+            module: components/knowledgeEngine
+            type: factory
     widgets:
         -
             module: kb_dataview_widget_panel
             name: kb_dataview_panel
+            type: factory
+        -
+            module: kb_dataview_knowledgeEngine
+            name: kb_dataview_knowledgeEngine
             type: factory
         -
             module: kb_dataview_widget_provenancePanel
