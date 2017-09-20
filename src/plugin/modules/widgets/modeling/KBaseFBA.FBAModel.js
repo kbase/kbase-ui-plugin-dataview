@@ -2,12 +2,14 @@ define([
     'jquery',
     'kb_service/client/workspace',
     'kb_service/client/fba',
+    'kb_common/jsonRpc/dynamicServiceClient',
     'kb_dataview_widget_modeling_modeling',
     'plugins/dataview/modules/widgets/modeling/kbasePathways'
 ], function(
         $,
         Workspace,
         FBA,
+        DynamicServiceClient,
         KBModeling
     ) {
     'use strict';
@@ -18,10 +20,6 @@ define([
         this.runtime = modeltabs.runtime;
 
         this.workspaceClient = new Workspace(this.runtime.config('services.workspace.url'), {
-            token: this.runtime.service('session').getAuthToken()
-        });
-
-        this.fbaClient = new FBA(this.runtime.config('services.fba.url'), {
             token: this.runtime.service('session').getAuthToken()
         });
 
@@ -300,22 +298,29 @@ define([
             });
 
             if (rxn.rxnkbid !== 'rxn00000') {
-                return this.fbaClient.get_reactions({
+                var client = new DynamicServiceClient({
+                    url: this.runtime.config('services.service_wizard.url'),
+                    token: this.runtime.service('session').getAuthToken(),
+                    module: 'BiochemistryAPI'
+                });
+                return client.callFunc('get_reactions', [{
                     reactions: [rxn.rxnkbid],
                     biochemistry: self.biochem,
                     biochemistry_workspace: 'kbase'
-                })
-                    .then(function(data) {
+                }])
+                    .spread(function(data) {
                         if ('deltaG' in data[0]) {
                             output.push({
                                 'label': 'Delta G',
                                 'data': data[0].deltaG + ' (' + data[0].deltaGErr + ') kcal/mol'
                             });
                         }
-                        output.push({
-                            'label': 'Enzymes',
-                            'data': data[0].enzymes.join(', ')
-                        });
+                        if (data[0].enzymes) {
+                            output.push({
+                                'label': 'Enzymes',
+                                'data': data[0].enzymes.join(', ')
+                            });
+                        }
                         var aliashash = {};
                         var finalaliases = [];
                         for (var i = 0; i < data[0].aliases.length; i++) {
@@ -371,13 +376,18 @@ define([
                 'label': 'Compartment',
                 'data': self.cmphash[cpd.cmpkbid].name + ' ' + self.cmphash[cpd.cmpkbid].compartmentIndex
             }];
+            var client = new DynamicServiceClient({
+                url: this.runtime.config('services.service_wizard.url'),
+                token: this.runtime.service('session').getAuthToken(),
+                module: 'BiochemistryAPI'
+            });
             if (cpd.cpdkbid !== 'cpd00000') {
-                return this.fbaClient.get_compounds({
+                return client.callFunc('get_compounds', [{
                     compounds: [cpd.cpdkbid],
                     biochemistry: self.biochem,
                     biochemistry_workspace: 'kbase'
-                })
-                    .then(function(data) {
+                }])
+                    .spread(function(data) {
                         if ('deltaG' in data[0]) {
                             output.push({
                                 'label': 'Delta G',
