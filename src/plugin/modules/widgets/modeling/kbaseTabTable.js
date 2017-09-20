@@ -2,6 +2,7 @@ define([
     'jquery',
     'bluebird',
     'kb_common/html',
+    'kb_common/jsonRpc/dynamicServiceClient',
     'kb_service/client/workspace',
     'kb_service/client/fba',
     'kb_dataview_widget_modeling_modeling',
@@ -16,7 +17,15 @@ define([
     //'kb_dataview_widget_modeling_genomeSet',
     'kb_widget/legacy/helpers',
     'datatables_bootstrap'
-], function($, Promise, html, Workspace, FBA, KBModeling) {
+], function(
+    $, 
+    Promise, 
+    html, 
+    DynamicServiceClient,
+    Workspace, 
+    FBA, 
+    KBModeling
+) {
     'use strict';
     $.KBWidget({
         name: 'kbaseTabTable',
@@ -87,9 +96,7 @@ define([
             this.workspaceClient = new Workspace(this.runtime.config('services.workspace.url'), {
                 token: this.runtime.service('session').getAuthToken()
             });
-            this.fbaClient = new FBA(this.runtime.config('services.fba.url'), {
-                token: this.runtime.service('session').getAuthToken()
-            });
+
 
             this.workspaceClient.get_object_info_new({ objects: [param], includeMetadata: 1 })
                 .then(function(res) {
@@ -268,46 +275,48 @@ define([
                             ws: $(this).data('ws'),
                             action: $(this).data('action')
                         },
-                        contentDiv = $('<div>'),
-                        methodResult;
+                        contentDiv = $('<div>');
 
-                    if (info.method && info.method !== 'undefined') {
+                    tabs.addTab({ 
+                        name: info.id, 
+                        content: contentDiv, 
+                        removable: true 
+                    });
+                    tabs.showTab(info.id);
 
-                        try {
-                            methodResult = self.obj[info.method](info);
-                            if (methodResult) {
+                    Promise.try(function () {
+                        if (info.method && info.method !== 'undefined') {
+                            return Promise.try(function () {
                                 contentDiv.loading();
-                                Promise.resolve(methodResult)
-                                    .then(function(rows) {
-                                        contentDiv.rmLoading();
+                                return self.obj[info.method](info);
+                            })
+                                .then(function (rows) {
+                                    contentDiv.rmLoading();
+                                    if (!rows) {
+                                        contentDiv.append('<br>No data found for ' + info.id);
+                                    } else {
                                         var table = self.verticalTable({ rows: rows });
                                         contentDiv.append(table);
-                                        return null;
-                                    })
-                                    .catch(function(err) {
-                                        console.error(err);
-                                        contentDiv.append('ERROR');
-                                        contentDiv.append(err.message);
-                                    });
-                            } else {
-                                contentDiv.append('<br>No data found for ' + info.id);
-                            }
-                        } catch (ex) {
-                            console.error(ex);
-                            contentDiv.append('ERROR');
-                            contentDiv.append(ex.message);
+                                        newTabEvents(info.id);
+                                    }
+                                });
+                        } else if (info.action === 'openWidget') {
+                            contentDiv.kbaseTabTable({ 
+                                ws: info.ws, 
+                                type: info.type, 
+                                obj: info.name 
+                            });
                         }
-
-                        tabs.addTab({ name: info.id, content: contentDiv, removable: true });
-                        tabs.showTab(info.id);
-                        newTabEvents(info.id);
-
-                    } else if (info.action === 'openWidget') {
-                        contentDiv.kbaseTabTable({ ws: info.ws, type: info.type, obj: info.name });
-                        tabs.addTab({ name: info.id, content: contentDiv, removable: true });
-                        tabs.showTab(info.id);
-                        newTabEvents(info.id);
-                    }
+                    })
+                        .catch(function (err) {
+                            console.error(err);
+                            contentDiv.empty();
+                            contentDiv.append('ERROR: ' + err.message)
+                                .css('color', 'red')
+                                .css('text-align', 'center')
+                                .css('padding', '10px');
+                        
+                        });
                 });
             }
 
@@ -464,21 +473,45 @@ define([
             };
 
             this.getBiochemReaction = function(id) {
-                return this.fbaClient.get_reactions({ reactions: [id] })
-                    .then(function(data) {
+                var client = new DynamicServiceClient({
+                    url: this.runtime.config('services.service_wizard.url'),
+                    token: this.runtime.service('session').getAuthToken(),
+                    module: 'BiochemistryAPI'
+                });
+                return client.callFunc('get_reactions', [{
+                    reactions: [id]
+                }])
+                    .spread(function (data) {
                         return data[0];
                     });
             };
 
             this.getBiochemCompound = function(id) {
-                return this.fbaClient.get_compounds({ compounds: [id] })
-                    .then(function(data) {
+                var client = new DynamicServiceClient({
+                    url: this.runtime.config('services.service_wizard.url'),
+                    token: this.runtime.service('session').getAuthToken(),
+                    module: 'BiochemistryAPI'
+                });
+                return client.callFunc('get_compounds', [{
+                    compounds: [id]
+                }])
+                    .spread(function (data) {
                         return data[0];
                     });
             };
 
             this.getBiochemCompounds = function(ids) {
-                return this.fbaClient.get_compounds({ compounds: ids });
+                var client = new DynamicServiceClient({
+                    url: this.runtime.config('services.service_wizard.url'),
+                    token: this.runtime.service('session').getAuthToken(),
+                    module: 'BiochemistryAPI'
+                });
+                return client.callFunc('get_compounds', [{
+                    compounds: ids
+                }])
+                    .spread(function (data) {
+                        return data;
+                    });
             };
 
             /* TODO: replace these remote calls with locally installed images. */
@@ -529,7 +562,7 @@ define([
                 }
 
                 var cpd_ids = cpds.left.concat(cpds.right);
-                this.fbaClient.get_compounds({ compounds: cpd_ids })
+                this.getBiochemCompounds(cpd_ids)
                     .then(function(d) {
                         var map = {};
                         for (var i in d) {

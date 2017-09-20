@@ -10,16 +10,16 @@ define([
 
         this.setMetadata = function(data) {
             this.overview = {
-                wsid: data[7] + "/" + data[1],
+                wsid: data[7] + '/' + data[1],
                 objecttype: data[2],
                 owner: data[5],
                 instance: data[4],
                 moddate: data[3],
-                name: data[10]["Name"],
-                source: data[10]["Source ID"],
-                minimal: data[10]["Is Minimal"],
-                defined: data[10]["Is Defined"],
-                numcompounds: data[10]["Number compounds"]
+                name: data[10]['Name'],
+                source: data[10]['Source ID'],
+                minimal: data[10]['Is Minimal'],
+                defined: data[10]['Is Defined'],
+                numcompounds: data[10]['Number compounds']
             };
         };
 
@@ -32,7 +32,7 @@ define([
 
             for (var i = 0; i < this.mediacompounds.length; i++) {
                 var cpd = this.mediacompounds[i];
-                cpd.id = cpd.compound_ref.split("/").pop();
+                cpd.id = cpd.compound_ref.split('/').pop();
 
                 this.cpdhash[cpd.id] = cpd;
                 cpdarray.push(cpd.id);
@@ -55,93 +55,93 @@ define([
         this.CompoundTab = function(info) {
             var cpd = this.cpdhash[info.id];
             return [{
-                "label": "Compound",
-                "data": cpd.id
+                'label': 'Compound',
+                'data': cpd.id
             }, {
-                "label": "Name",
-                "data": cpd.name
+                'label': 'Name',
+                'data': cpd.name
             }, {
-                "label": "Formula",
-                "data": cpd.formula
+                'label': 'Formula',
+                'data': cpd.formula
             }, {
-                "label": "Charge",
-                "data": cpd.charge
+                'label': 'Charge',
+                'data': cpd.charge
             }, {
-                "label": "deltaG",
-                "data": cpd.deltaG
+                'label': 'deltaG',
+                'data': cpd.deltaG
             }, {
-                "label": "Max flux",
-                "data": cpd.maxFlux
+                'label': 'Max flux',
+                'data': cpd.maxFlux
             }, {
-                "label": "Min flux",
-                "data": cpd.minFlux
+                'label': 'Min flux',
+                'data': cpd.minFlux
             }, {
-                "label": "Concentration",
-                "data": cpd.concentration
+                'label': 'Concentration',
+                'data': cpd.concentration
             }];
         }
 
         this.tabList = [{
-            "key": "overview",
-            "name": "Overview",
-            "type": "verticaltbl",
-            "rows": [{
-                "label": "ID",
-                "key": "wsid"
+            'key': 'overview',
+            'name': 'Overview',
+            'type': 'verticaltbl',
+            'rows': [{
+                'label': 'ID',
+                'key': 'wsid'
             }, {
-                "label": "Object type",
-                "key": "objecttype",
-                "type": "typelink"
+                'label': 'Object type',
+                'key': 'objecttype',
+                'type': 'typelink'
             }, {
-                "label": "Owner",
-                "key": "owner"
+                'label': 'Owner',
+                'key': 'owner'
             }, {
-                "label": "Version",
-                "key": "instance"
+                'label': 'Version',
+                'key': 'instance'
             }, {
-                "label": "Mod-date",
-                "key": "moddate"
+                'label': 'Mod-date',
+                'key': 'moddate'
             }, {
-                "label": "Name",
-                "key": "name"
+                'label': 'Name',
+                'key': 'name'
             }, {
-                "label": "Source",
-                "key": "source"
+                'label': 'Source',
+                'key': 'source'
             }, {
-                "label": "Is minimal",
-                "key": "minimal",
+                'label': 'Is minimal',
+                'key': 'minimal',
             }, {
-                "label": "Is defined",
-                "key": "defined"
+                'label': 'Is defined',
+                'key': 'defined'
             }, {
-                "label": "Number compounds",
-                "key": "numcompounds"
+                'label': 'Number compounds',
+                'key': 'numcompounds'
             }]
         }, {
-            "key": "mediacompounds",
-            "name": "Media compounds",
-            "type": "dataTable",
-            "columns": [{
-                "label": "Compound",
-                "key": "id",
-                "type": "tabLink",
-                "linkformat": "dispID",
-                "method": "CompoundTab",
+            'key': 'mediacompounds',
+            'name': 'Media compounds',
+            'type': 'dataTable',
+            'columns': [{
+                'label': 'Compound',
+                'key': 'id',
+                'type': 'tabLink',
+                'linkformat': 'dispID',
+                'method': 'CompoundTab',
             }, {
-                "label": "Name",
-                "key": "name"
+                'label': 'Name',
+                'key': 'name'
             }, {
-                "label": "Formula",
-                "key": "formula"
+                'label': 'Formula',
+                'key': 'formula'
             }, {
-                "label": "Charge",
-                "key": "charge"
+                'label': 'Charge',
+                'key': 'charge'
             }, {
-                "label": "Min uptake<br>(mol/g CDW hr)",
-                "key": "minFlux"
+                'label': 'Min uptake<br>(mol/g CDW hr)',
+                'key': 'minFlux'
             }, {
-                "label": "Max uptake<br>(mol/g CDW hr)",
-                "key": "maxFlux"
+                'label': 'Max uptake<br>(mol/g CDW hr)',
+                'key': 'maxFlux'
             }]
         }];
     }
