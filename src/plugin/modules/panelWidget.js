@@ -81,8 +81,8 @@ define([
                         div({ id: widgetSet.addWidget('kb_dataview_copy') }),
                         div({ id: widgetSet.addWidget('kb_dataview_overview') }),
                         (function () {
-                            if (runtime.config('deploy.environment') === 'prod') {
-                                return ;
+                            if (!runtime.allow('alpha')) {
+                                return;
                             }
                             return renderBSCollapsiblePanel({
                                 title: 'Knowledge Engine',
@@ -100,8 +100,8 @@ define([
                             content: div({ id: widgetSet.addWidget('kb_dataview_provenance') })
                         }),
                         (function () {
-                            if (runtime.config('deploy.environment') === 'prod') {
-                                return ;
+                            if (!runtime.allow('alpha')) {
+                                return;
                             }
                             return renderBSCollapsiblePanel({
                                 title: 'Data Provenance and Reference Network ... in Progress',
