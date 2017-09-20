@@ -20,8 +20,6 @@ define([
         }
 
         function start(params) {
-            // console.log('params?', params);
-
             // crude for now...
             if (params.objectInfo.typeName !== 'Genome') {
                 container.innerHTML =  'Sorry, Knowledge Engine Connections not yet available for ' + params.objectInfo.typeName;
