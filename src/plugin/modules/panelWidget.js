@@ -4,17 +4,20 @@ define([
     'kb_widget/widgetSet',
     'plugins/dataview/modules/utils'
 ], function(
-    Promise,
-    html,
-    WidgetSet,
-    utils) {
+        Promise,
+        html,
+        WidgetSet,
+        utils
+    ) {
     'use strict';
 
+    var t = html.tag,
+        div = t('div'),
+        span = t('span'),
+        h4 = t('h4');
+
     function renderBSCollapsiblePanel(config) {
-        var div = html.tag('div'),
-            span = html.tag('span'),
-            h4 = html.tag('h4'),
-            panelId = html.genId(),
+        var panelId = html.genId(),
             headingId = html.genId(),
             collapseId = html.genId();
 
@@ -71,43 +74,41 @@ define([
             rendered;
 
         function renderPanel() {
-            var div = html.tag('div');
             return div({ class: 'kbase-view kbase-dataview-view container-fluid', 'data-kbase-view': 'dataview' }, [
                 div({ class: 'row' }, [
                     div({ class: 'col-sm-12' }, [
-                        div({ id: widgetSet.addWidget('kb_dataview_download') })
-                    ]),
-                    div({ class: 'col-sm-12' }, [
-                        div({ id: widgetSet.addWidget('kb_dataview_copy') })
-                    ]),
-                    div({ class: 'col-sm-12' }, [
-                        div({ id: widgetSet.addWidget('kb_dataview_overview') })
-                    ]),
-                    (function () {
-                        return div({ class: 'col-sm-12' }, [
-                            renderBSCollapsiblePanel({
+                        div({ id: widgetSet.addWidget('kb_dataview_download') }),
+                        div({ id: widgetSet.addWidget('kb_dataview_copy') }),
+                        div({ id: widgetSet.addWidget('kb_dataview_overview') }),
+                        (function () {
+                            if (runtime.config('deploy.environment') === 'prod') {
+                                return ;
+                            }
+                            return renderBSCollapsiblePanel({
                                 title: 'Knowledge Engine',
                                 icon: 'superpowers',
                                 collapsed: false,
                                 content: div({
                                     id: widgetSet.addWidget('kb_dataview_knowledgeEngine')
                                 })
-                            })
-                        ]);
-                    }()),
-                    div({ class: 'col-sm-12' }, [
+                            });
+                            
+                        }()),
                         renderBSCollapsiblePanel({
                             title: 'Data Provenance and Reference Network',
                             icon: 'sitemap',
                             content: div({ id: widgetSet.addWidget('kb_dataview_provenance') })
-                        })
-                    ]),
-                    div({ class: 'col-sm-12' }, [                        
-                        renderBSCollapsiblePanel({
-                            title: 'Data Provenance and Reference Network ... in Progress',
-                            icon: 'sitemap',
-                            content: div({ id: widgetSet.addWidget('kb_dataview_provenance_v2') })
                         }),
+                        (function () {
+                            if (runtime.config('deploy.environment') === 'prod') {
+                                return ;
+                            }
+                            return renderBSCollapsiblePanel({
+                                title: 'Data Provenance and Reference Network ... in Progress',
+                                icon: 'sitemap',
+                                content: div({ id: widgetSet.addWidget('kb_dataview_provenance_v2') })
+                            });
+                        }()),
                         div({ id: widgetSet.addWidget('kb_dataview_dataObjectVisualizer') })
                     ])
                 ])
