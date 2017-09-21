@@ -1,5 +1,5 @@
 {
-    "onSave": false,
+    "onSave": true,
     "javascript": {
         "indent_size": 4,
         "indent_char": " ",
