@@ -1,14 +1,29 @@
 define([
     'knockout-plus',
-    'kb_common/html'
+    'kb_common/html',
+    'kb_common/jsonRpc/dynamicServiceClient'
 ], function (
     ko,
-    html
+    html,
+    DynamicServiceClient
 ) {
     'use strict';
 
     var t = html.tag,
         div = t('div');
+
+
+
+
+    // Chemical inferences
+    // ¬ Similarity to other chemicals used to predict effects on genes, roles in pathways, which taxa might be affected by it. (functional enrichment of responsive genes)
+    // ¬ Co-occurrence with other chemicals in environments, similarity in genes associated leading to predictions of common pathway/traits involved in. 
+    // ¬ Predictions of enzymes/reactions expected to participate in/interfere with
+    // ¬ Chemotypephenotype relationships
+
+    // Environment/Condition/Media inferences
+    // ¬ Similarity to other conditions and predictions of affects on taxa/genes 
+    // ¬ Functional enrichment of biological responses to conditions`
 
     function factory(config) {
         var runtime = config.runtime,
@@ -22,7 +37,7 @@ define([
         function start(params) {
             // crude for now...
             if (params.objectInfo.typeName !== 'Genome') {
-                container.innerHTML =  'Sorry, Knowledge Engine Connections not yet available for ' + params.objectInfo.typeName;
+                container.innerHTML = 'Sorry, Knowledge Engine not available for ' + params.objectInfo.typeName;
                 return;
             }
 
@@ -30,12 +45,7 @@ define([
                 class: 'row'
             }, [
                 div({
-                    class: 'col-sm-6'
-                }, [
-                    'This is the Knowledge Engine Connections Panel'
-                ]),
-                div({
-                    class: 'col-sm-6'
+                    class: 'col-sm-12'
                 }, [
                     div({
                         dataBind: {
@@ -43,6 +53,7 @@ define([
                                 name: '"dataview/knowledge-engine"',
                                 params: {
                                     ref: 'ref',
+                                    objectInfo: 'objectInfo',
                                     runtime: 'runtime'
                                 }
                             }
@@ -52,12 +63,12 @@ define([
             ]);
             ko.applyBindings({
                 runtime: runtime,
-                ref: params.objectInfo.ref
+                ref: params.objectInfo.ref,
+                objectInfo: params.objectInfo
             }, container);
         }
 
-        function stop () {
-        }
+        function stop() {}
 
         function detach() {
             if (hostNode && container) {
@@ -74,7 +85,7 @@ define([
     }
 
     return {
-        make: function(config) {
+        make: function (config) {
             return factory(config);
         }
     };
