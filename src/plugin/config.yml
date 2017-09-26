@@ -263,6 +263,7 @@ install:
             name: dataview/knowledge-engine
             module: components/knowledgeEngine
             type: factory
+            css: true
     widgets:
         -
             module: kb_dataview_widget_panel
