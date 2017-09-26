@@ -3,13 +3,15 @@ define([
     'knockout-plus',
     'kb_common/html',
     'kb_common/bootstrapUtils',
-    'kb_common/jsonRpc/dynamicServiceClient'
+    'kb_common/jsonRpc/dynamicServiceClient',
+    '../singleTaskPoller'
 ], function (
     Promise,
     ko,
     html,
     BS,
-    DynamicServiceClient
+    DynamicServiceClient,
+    Poller
 ) {
     var t = html.tag,
         div = t('div'),
@@ -174,6 +176,7 @@ define([
 
         }
 
+
         /*
         fetchConnectors
         This does not, but should one day, fetch the connectors relevant to this
@@ -182,9 +185,15 @@ define([
         var error = ko.observable();
 
         function updateConnectors() {
-            connectorsState('loading');
             return fetchConnectorStatus()
                 .then(function (status) {
+                    // TODO: fetch connector status should return a set of connector apps and their status.
+                    // For now: it just returns one status, and just one of our fake connector apps will ever
+                    // match any type and that type is Genome.
+                    // So ... we use the status for that one returned connector app, if any.
+                    // If the status is accepted, queued, or started we monitor it every 5 sec.
+                    // If none, we should monitor every 10-15 sec for maybe a minute, just in case it was kicked off and
+                    // just isn't registering yet. Otherwise, no polling.
                     var type = objectInfo.typeName;
                     var cat = data.categories.map(function (category) {
                         return {
@@ -205,6 +214,7 @@ define([
                         // connector. Not sure why.
                         return {
                             category: category.category,
+                            showApps: ko.observable(false),
                             apps: category.apps.map(function (app) {
                                 return {
                                     title: app.title,
@@ -217,21 +227,72 @@ define([
                         };
                     });
                     connectors(cat);
+                    connectorsState('loaded');
+                    return cat;
                 })
                 .catch(function (err) {
                     error(err.message);
                     connectorsState('error');
-                })
-                .finally(function () {
-                    connectorsState('loaded');
                 });
         }
-        updateConnectors();
+
+        var poller = Poller();
+        var normalPollingInterval = 5000;
+        // var activePollingInterval = 5000;
+        var pollStatus = ko.observable();
+
+        function startPolling() {
+            poller.start({
+                name: 'updater',
+                interval: normalPollingInterval,
+                runInitially: true,
+                // a test to see if we need to keep the poller going.
+                doContinue: function () {
+                    var c = (connectors()
+                        .some(function (category) {
+                            return category.apps.some(function (app) {
+                                switch (app.state) {
+                                case 'accepted':
+                                case 'queued':
+                                case 'started':
+                                    return true;
+                                }
+                            });
+                        }));
+                    return c;
+                },
+                task: function () {
+                    pollStatus('busy');
+                    return updateConnectors()
+                        .catch(function (err) {
+                            console.error('ERROR', err);
+                        })
+                        .finally(function () {
+                            pollStatus('idle');
+                        });
+                }
+            });
+        }
+
+        // get the initial connectors.
+        // if 
+        connectorsState('loading');
+        updateConnectors()
+            .then(function () {
+                startPolling();
+            })
+            .finally(function () {
+                connectorsState('loaded');
+            });
+
+
+
 
         function updateCatalog(data) {
             var cat = data.categories.map(function (category) {
                 return {
                     category: category,
+                    showApps: ko.observable(false),
                     apps: data.apps.filter(function (app) {
                         return (app.categories.indexOf(category.id) >= 0);
                     })
@@ -250,11 +311,24 @@ define([
             });
         }
 
+        function doShowApps(data, event) {
+            var show = !data.showApps();
+            if (event.shiftKey) {
+                catalog()
+                    .forEach(function (cat) {
+                        cat.showApps(show);
+                    });
+            } else {
+                data.showApps(show);
+            }
+        }
+
         return {
             connectors: connectors,
             doViewConnector: doViewConnector,
             catalog: catalog,
-            connectorsState: connectorsState
+            connectorsState: connectorsState,
+            doShowApps: doShowApps
         };
     }
 
@@ -295,7 +369,7 @@ define([
 
         return BS.buildCollapsiblePanel({
             title: 'Connector Catalog',
-            collapsed: true,
+            collapsed: false,
             classes: ['kb-panel-light'],
             body: div({
                 dataBind: {
@@ -303,11 +377,18 @@ define([
                 }
             }, [
                 div({
+                    dataBind: {
+                        click: '$component.doShowApps'
+                    },
+                    class: '-connector-category unselectable',
                     style: {
                         backgroundColor: 'gray',
                         color: 'white',
                         fontWeight: 'bold',
-                        padding: '5px'
+                        padding: '5px',
+                        cursor: 'pointer',
+                        marginBottom: '4px',
+                        userSelect: 'none'
                     }
                 }, [
                     span({
@@ -320,9 +401,30 @@ define([
                         dataBind: {
                             text: 'apps.length'
                         }
+                    }),
+                    ' app',
+                    span({
+                        dataBind: {
+                            if: 'apps.length > 1'
+                        }
+                    }, 's'),
+                    ' ',
+                    span({
+                        dataBind: {
+                            css: {
+                                'fa-chevron-right': '!showApps()',
+                                'fa-chevron-down': 'showApps()'
+                            }
+                        },
+                        style: {
+                            marginLeft: '4px'
+                        },
+                        class: 'fa'
                     })
                 ]),
-                buildApps()
+                '<!-- ko if: showApps -->',
+                buildApps(),
+                '<!-- /ko -->'
             ])
         });
     }
@@ -525,7 +627,7 @@ define([
 
     function template() {
         return div({
-            class: 'container-fluid'
+            class: 'container-fluid component_dataview_knowledge-engine'
         }, [
             div({
                 class: 'row'
