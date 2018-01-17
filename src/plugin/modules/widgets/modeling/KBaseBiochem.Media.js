@@ -42,12 +42,14 @@ define([
                 .then(function(cpds) {
                     for (var i = 0; i < self.mediacompounds.length; i++) {
                         var cpd = self.mediacompounds[i];
-                        cpd.name = cpds[i].name;
-                        cpd.formula = cpds[i].formula;
-                        cpd.charge = cpds[i].charge;
-                        cpd.deltaG = cpds[i].deltaG;
-                        cpd.deltaGErr = cpds[i].deltaGErr;
-                        cpd.abbrev = cpds[i].abbrev;
+                        if (cpds[i]){
+                            cpd.name = cpds[i].name;
+                            cpd.formula = cpds[i].formula;
+                            cpd.charge = cpds[i].charge;
+                            cpd.deltaG = cpds[i].deltaG;
+                            cpd.deltaGErr = cpds[i].deltaGErr;
+                            cpd.abbrev = cpds[i].abbrev;
+                        }
                     }
                 });
         };

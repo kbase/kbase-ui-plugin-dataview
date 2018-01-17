@@ -364,11 +364,20 @@ define([
                 'label': 'Compound',
                 'data': cpd.dispid
             }, {
+                "label": "Image",
+                "data":  "<img src=http://minedatabase.mcs.anl.gov/compound_images/ModelSEED/"+cpd.id.split("_")[0]+".png style='height:300px !important;'>"
+            },{
                 'label': 'Name',
                 'data': cpd.name
             }, {
                 'label': 'Formula',
                 'data': cpd.formula
+            }, {
+                "label": "InChIKey",
+                "data": cpd.inchikey
+            }, {
+                "label": "SMILES",
+                "data": cpd.smiles
             }, {
                 'label': 'Charge',
                 'data': cpd.charge
@@ -381,6 +390,18 @@ define([
                 token: this.runtime.service('session').getAuthToken(),
                 module: 'BiochemistryAPI'
             });
+            if (cpd.smiles && cpd.cpdkbid == "cpd00000") {
+                var p = client.callFunc('depict_compounds', [{
+                    structures: [cpd.smiles]
+                }]).then(function(data) {
+                        output[1] = {
+                            "label": "Image",
+                            "data": data[0]
+                        };
+                        return output;
+                    });
+                return p;
+            }
             if (cpd.cpdkbid !== 'cpd00000') {
                 return client.callFunc('get_compounds', [{
                     compounds: [cpd.cpdkbid],
@@ -549,7 +570,7 @@ define([
                             var abscoef = Math.round(-1 * 100 * biocpd.coefficient) / 100;
                             reactants += '(' + abscoef + ') ';
                         }
-                        reactants += biocpd.name + '[' + biocpd.cmpkbid + ']';
+                        reactants += '<a class="id-click" data-id="'+biocpd.cpdkbid+'" data-method="CompoundTab">'+this.cpdhash[biocpd.cpdkbid].name+"["+this.cpdhash[biocpd.cpdkbid].cmpkbid+"]</a>";
                     } else {
                         if (products.length > 0) {
                             products += ' + ';
@@ -558,7 +579,7 @@ define([
                             var abscoef = Math.round(100 * biocpd.coefficient) / 100;
                             products += '(' + abscoef + ') ';
                         }
-                        products += biocpd.name + '[' + biocpd.cmpkbid + ']';
+                        products += '<a class="id-click" data-id="'+biocpd.cpdkbid+'" data-method="CompoundTab">'+this.cpdhash[biocpd.cpdkbid].name+"["+this.cpdhash[biocpd.cpdkbid].cmpkbid+"]</a>";
                     }
                 }
                 biomass.equation = reactants + ' => ' + products;
