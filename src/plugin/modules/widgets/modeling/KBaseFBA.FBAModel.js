@@ -364,11 +364,20 @@ define([
                 'label': 'Compound',
                 'data': cpd.dispid
             }, {
+                "label": "Image",
+                "data":  "<img src=http://minedatabase.mcs.anl.gov/compound_images/ModelSEED/"+cpd.id.split("_")[0]+".png style='height:300px !important;'>"
+            },{
                 'label': 'Name',
                 'data': cpd.name
             }, {
                 'label': 'Formula',
                 'data': cpd.formula
+            }, {
+                "label": "InChIKey",
+                "data": cpd.inchikey
+            }, {
+                "label": "SMILES",
+                "data": cpd.smiles
             }, {
                 'label': 'Charge',
                 'data': cpd.charge
@@ -381,6 +390,18 @@ define([
                 token: this.runtime.service('session').getAuthToken(),
                 module: 'BiochemistryAPI'
             });
+            if (cpd.smiles && cpd.cpdkbid == "cpd00000") {
+                var p = client.callFunc('depict_compounds', [{
+                    structures: [cpd.smiles]
+                }]).then(function(data) {
+                        output[1] = {
+                            "label": "Image",
+                            "data": data[0]
+                        };
+                        return output;
+                    });
+                return p;
+            }
             if (cpd.cpdkbid !== 'cpd00000') {
                 return client.callFunc('get_compounds', [{
                     compounds: [cpd.cpdkbid],

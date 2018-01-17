@@ -514,9 +514,8 @@ define([
                     });
             };
 
-            /* TODO: replace these remote calls with locally installed images. */
             this.compoundImage = function(id) {
-                return 'http://bioseed.mcs.anl.gov/~chenry/jpeg/' + id + '.jpeg';
+                return "<img src=http://minedatabase.mcs.anl.gov/compound_images/ModelSEED/"+id.split("_")[0]+".png style='height:300px !important;'>"
             };
 
             var imageURL = 'http://bioseed.mcs.anl.gov/~chenry/jpeg/';
