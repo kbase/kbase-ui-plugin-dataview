@@ -549,7 +549,7 @@ define([
                             var abscoef = Math.round(-1 * 100 * biocpd.coefficient) / 100;
                             reactants += '(' + abscoef + ') ';
                         }
-                        reactants += biocpd.name + '[' + biocpd.cmpkbid + ']';
+                        reactants += '<a class="id-click" data-id="'+biocpd.cpdkbid+'" data-method="CompoundTab">'+this.cpdhash[biocpd.cpdkbid].name+"["+this.cpdhash[biocpd.cpdkbid].cmpkbid+"]</a>";
                     } else {
                         if (products.length > 0) {
                             products += ' + ';
@@ -558,7 +558,7 @@ define([
                             var abscoef = Math.round(100 * biocpd.coefficient) / 100;
                             products += '(' + abscoef + ') ';
                         }
-                        products += biocpd.name + '[' + biocpd.cmpkbid + ']';
+                        products += '<a class="id-click" data-id="'+biocpd.cpdkbid+'" data-method="CompoundTab">'+this.cpdhash[biocpd.cpdkbid].name+"["+this.cpdhash[biocpd.cpdkbid].cmpkbid+"]</a>";
                     }
                 }
                 biomass.equation = reactants + ' => ' + products;
