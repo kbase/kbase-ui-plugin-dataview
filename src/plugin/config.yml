@@ -877,6 +877,35 @@ install:
         -
             type:
                 module: KBaseAssembly
+                name: SingleEndLibrary
+                version: any
+            icon:   
+                type: kbase
+                classes: ['icon-reads', 'kb-data-icon-dnudge']
+                color: brown
+            viewers:
+                # -
+                #     title: Data View
+                #     widget:
+                #         name: kb_dataview_pairedEndLibrary
+                #         config:
+                #             jqueryName: kbasePairedEndLibrary
+                #     panel: true
+                #     default: true
+                #     options:
+                #         -
+                #             from: workspaceId
+                #             to: workspaceId
+                #         -    
+                #             from: objectId
+                #             to: objId
+                #         -    
+                #             from: objectVersion
+                #             to: objVer
+                #             optional: true                            
+        -
+            type:
+                module: KBaseAssembly
                 name: ReferenceAssembly
                 version: any
             viewers:
