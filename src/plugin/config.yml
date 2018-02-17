@@ -882,7 +882,7 @@ install:
             icon:   
                 type: kbase
                 classes: ['icon-reads', 'kb-data-icon-dnudge']
-                color: brown
+                color: '#795548'
             viewers:
                 # -
                 #     title: Data View
