@@ -53,7 +53,7 @@ function (Promise, $, d3, html, dom, Workspace) {
             table = html.tag('table'),
             tr = html.tag('tr'),
             td = html.tag('td'),
-            svgTag = html.tag('svg'),
+            svg = html.tag('svg'),
             rect = html.tag('rect'),
             b = html.tag('b');
 
@@ -133,7 +133,7 @@ function (Promise, $, d3, html, dom, Workspace) {
                                     }
                                     return tr([
                                         td([
-                                            svgTag({ width: '40', height: '20' }, [
+                                            svg({ width: '40', height: '20' }, [
                                                 rect({ x: '0', y: '0', width: '40', height: '20', fill: types[type].color })
                                             ])
                                         ]),
