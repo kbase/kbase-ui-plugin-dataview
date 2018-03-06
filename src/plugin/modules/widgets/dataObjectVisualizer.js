@@ -28,14 +28,15 @@ define([
             var mapping = runtime.getService('type').getViewer({ type: type, id: params.viewer });
             if (mapping) {
                 if (params.sub && params.subid) {
+                    var sub = params.sub.toLowerCase();
                     if (mapping.sub) {
-                        if (mapping.sub.hasOwnProperty(params.sub)) {
-                            mapping = mapping.sub[params.sub]; // ha, crazy line, i know.
+                        if (mapping.sub.hasOwnProperty(sub)) {
+                            mapping = mapping.sub[sub]; // ha, crazy line, i know.
                         } else {
-                            throw new Error('Sub was specified, but config has no correct sub handler, sub:' + params.sub + 'config:');
+                            throw new Error('Sub was specified, but config has no correct sub handler, sub:' + sub + 'config:');
                         }
                     } else {
-                        throw new Error('Sub was specified, but config has no sub handler, sub:' + params.sub);
+                        throw new Error('Sub was specified, but config has no sub handler, sub:' + sub);
                     }
                     //} else {
                     //    console.error('Something was in sub, but no sub.sub or sub.subid found', params.sub);
@@ -75,10 +76,10 @@ define([
                     }),
                     objectRefs = [{ ref: makeObjectRef(params) }];
                 return workspace.get_object_info_new({
-                        objects: objectRefs,
-                        ignoreErrors: 1,
-                        includeMetadata: 1
-                    })
+                    objects: objectRefs,
+                    ignoreErrors: 1,
+                    includeMetadata: 1
+                })
                     .then(function (data) {
                         if (data.length === 0) {
                             throw new Error('Object not found');
