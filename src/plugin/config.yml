@@ -1157,7 +1157,7 @@ install:
                             to: workspaceID
 
                     sub: 
-                        Feature: 
+                        feature: 
                             widget:
                                 name: kb_dataview_genomes_genePage
                                 config:
