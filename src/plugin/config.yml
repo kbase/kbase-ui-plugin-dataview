@@ -101,6 +101,9 @@ source:
         -
             module: kb_dataview_widget_modeling_phenotypeSet
             file: widgets/modeling/KBasePhenotypes.PhenotypeSet
+        -
+            module: kb_dataview_widget_modeling_compoundSet
+            file: widgets/modeling/KBaseBiochem.CompoundSet
             
         # SEARCH (but in modeling dir)
         -
@@ -352,6 +355,10 @@ install:
         -
             module: kb_dataview_widget_modeling_phenotypeSet
             name: kb_dataview_phenotypeSet
+            type: kbwidget
+        -
+            module: kb_dataview_widget_modeling_compoundSet
+            name: kb_dataview_compoundSet
             type: kbwidget
             
         # SEARCH (but in modeling dir)
@@ -703,6 +710,34 @@ install:
                             to: type
         -
             type:
+                module: KBaseBiochem
+                name: CompoundSet
+                version: any
+            icon:
+                type: fontAwesome
+                classes: ['fa-list-ul']
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_compoundSet
+                        config:
+                            jqueryName: kbaseTabTable
+                    panel: true
+                    default: true
+                    options:
+                        -
+                            from: workspaceName
+                            to: ws
+                        -
+                            from: objectName
+                            to: obj
+                        -
+                            from: objectType
+                            to: type
+
+        -
+            type:
                 module: Communities
                 name: FunctionalMatrix
                 version: any
@@ -928,14 +963,14 @@ install:
                             from: objectVersion
                             to: objVer
                             optional: true
-                            
+
         # BIOCHHEM
         -
             type:
                 module: KBaseBiochem
                 name: Media
                 version: any
-            icon:   
+            icon:
                 type: fontAwesome
                 classes: ['fa-flask']
             viewers:
@@ -947,15 +982,15 @@ install:
                             jqueryName: kbaseTabTable
                     panel: true
                     default: true
-                    options: 
+                    options:
                         -
-                            from: workspaceName 
+                            from: workspaceName
                             to: ws
                         -
-                            from: objectName 
+                            from: objectName
                             to: obj
                         -
-                            from: objectType 
+                            from: objectType
                             to: type
         
         # EXPRESSION
