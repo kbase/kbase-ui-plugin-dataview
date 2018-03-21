@@ -400,10 +400,28 @@ define([
             var body, metadata = state.get('object.metadata');
             if (metadata && (Object.keys(metadata).length > 0)) {
                 body = table({ class: 'table' }, [
-                    Object.keys(metadata).map(function (key) {
+                    Object.keys(metadata).map(function (key) {                    
                         return tr([
-                            td(key),
-                            td(metadata[key])
+                            td({
+                                style: {
+                                    maxWidth: '0',
+                                    width: '30%',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                },
+                                title: key
+                            }, key),
+                            td({
+                                style: {
+                                    maxWidth: '0',
+                                    width: '70%',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                },
+                                title: metadata[key]
+                            }, metadata[key])
                         ]);
                     })
                 ]);
