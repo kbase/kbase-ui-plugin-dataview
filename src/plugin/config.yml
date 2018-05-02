@@ -1133,6 +1133,10 @@ install:
                 module: KBaseFile
                 name: PairedEndLibrary
                 version: any
+            icon:   
+                type: kbase
+                classes: ['icon-reads', 'kb-data-icon-dnudge']
+                color: '#795548'
             viewers:
                 -
                     title: Data View
@@ -1153,6 +1157,17 @@ install:
                             from: objectVersion
                             to: objVer 
                             optional: true
+        -
+            type:
+                module: KBaseFile
+                name: SingleEndLibrary
+                version: any
+            icon:   
+                type: kbase
+                classes: ['icon-reads', 'kb-data-icon-dnudge']
+                color: '#795548'
+            viewers:
+
                             
         -
             type:
