@@ -19,6 +19,17 @@ define([
 ) {
     'use strict';
 
+    var t = html.tag,
+        div = t('div'),
+        h3 = t('h3'),
+        h4 = t('h4'),
+        span = t('span'),
+        a = t('a'),
+        table = t('table'),
+        tr = t('tr'),
+        th = t('th'),
+        td = t('td');
+
     function factory(config) {
         var mount, container, runtime = config.runtime,
             workspaceId,
@@ -42,8 +53,8 @@ define([
 
         function fetchVersions() {
             return workspaceClient.get_object_history({
-                    ref: objectRef
-                })
+                ref: objectRef
+            })
                 .then(function (dataList) {
                     var versions = dataList.map(function (version) {
                         return APIUtils.object_info_to_object(version);
@@ -84,9 +95,9 @@ define([
                     return { ref: ref };
                 });
                 return workspaceClient.get_object_info_new({
-                        objects: objIds,
-                        ignoreErrors: 1
-                    })
+                    objects: objIds,
+                    ignoreErrors: 1
+                })
                     .then(function (dataList) {
                         var objects = dataList.filter(function (data) {
                             if (data) {
@@ -106,8 +117,8 @@ define([
 
         function checkRefCount() {
             return workspaceClient.list_referencing_object_counts([{
-                    ref: objectRef
-                }])
+                ref: objectRef
+            }])
                 .then(function (sizes) {
                     if (sizes[0] > 100) {
                         state.set('too_many_inc_refs', true);
@@ -138,8 +149,8 @@ define([
 
         function fetchReferences() {
             return workspaceClient.list_referencing_objects([{
-                    ref: objectRef
-                }])
+                ref: objectRef
+            }])
                 .then(function (dataList) {
                     var refs = [];
                     if (dataList[0]) {
@@ -184,11 +195,11 @@ define([
             //}
 
             return workspaceClient.get_object_info_new({
-                    objects: [{
-                        ref: objectRef
-                    }],
-                    includeMetadata: 1
-                })
+                objects: [{
+                    ref: objectRef
+                }],
+                includeMetadata: 1
+            })
                 .then(function (data) {
                     if (!data || data.length === 0) {
                         state.set('status', 'notfound');
@@ -206,9 +217,9 @@ define([
                     // YUCK!
                     var isIntegerId = /^\d+$/.test(workspaceId);
                     return workspaceClient.get_workspace_info({
-                            id: isIntegerId ? workspaceId : null,
-                            workspace: isIntegerId ? null : workspaceId
-                        })
+                        id: isIntegerId ? workspaceId : null,
+                        workspace: isIntegerId ? null : workspaceId
+                    })
                         .then(function (data) {
                             state.set('workspace', APIUtils.workspace_metadata_to_object(data));
                         });
@@ -231,8 +242,8 @@ define([
                 .then(function () {
                     // Other narratives this user has.
                     return workspaceClient.list_workspace_info({
-                            perm: 'w'
-                        })
+                        perm: 'w'
+                    })
                         .then(function (data) {
                             var objects = data.map(function (x) {
                                 return APIUtils.workspace_metadata_to_object(x);
@@ -265,17 +276,6 @@ define([
                 ])
             });
         }
-        var t = html.tag,
-            div = t('div'),
-            h3 = t('h3'),
-            h4 = t('h4'),
-            span = t('span'),
-            p = t('p'),
-            a = t('a'),
-            table = t('table'),
-            tr = t('tr'),
-            th = t('th'),
-            td = t('td');
 
         function renderTitleRow() {
             return tr({ style: { verticalAlign: 'baseline' } }, [
@@ -518,7 +518,6 @@ define([
         }
 
         function render() {
-
             return div({ class: 'row' }, [
                 div({ class: 'col-sm-6' }, [
                     table({ class: 'kb-dataview-header-tbl' }, [
@@ -550,107 +549,86 @@ define([
 
         // Widget lifecycle API
 
-        function init(config) {
-            return Promise.try(function () {});
-        }
-
         function attach(node) {
-            return Promise.try(function () {
-                mount = node;
-                container = dom.createElement('div');
-                mount.appendChild(container);
-                container.innerHTML = renderLayout();
-                container.querySelector('[data-placeholder="content"]').innerHTML = html.loading();
-            });
+            mount = node;
+            container = dom.createElement('div');
+            mount.appendChild(container);
+            container.innerHTML = renderLayout();
+            container.querySelector('[data-placeholder="content"]').innerHTML = html.loading();
         }
 
         function start(params) {
-            return Promise.try(function () {
-                workspaceId = params.workspaceId;
-                objectId = params.objectId;
-                objectVersion = params.objectVersion;
-                objectRef = APIUtils.makeWorkspaceObjectRef(params.objectInfo.wsid, params.objectInfo.id, params.objectInfo.version);
-                if (!workspaceId) {
-                    throw 'Workspace ID is required';
-                }
+            workspaceId = params.workspaceId;
+            objectId = params.objectId;
+            objectVersion = params.objectVersion;
+            objectRef = APIUtils.makeWorkspaceObjectRef(params.objectInfo.wsid, params.objectInfo.id, params.objectInfo.version);
+            if (!workspaceId) {
+                throw 'Workspace ID is required';
+            }
 
-                if (!objectId) {
-                    throw 'Object ID is required';
-                }
-                return fetchData()
-                    .then(function () {
-                        container.innerHTML = renderLayout();
-                        var content = container.querySelector('[data-placeholder="content"]');
-                        if (content) {
-                            content.innerHTML = render();
-                        }
-                    })
-                    .catch(function (err) {
-                        console.error(err);
-                        if (err.status && err.status === 500) {
-                            // User probably doesn't have access -- but in any case we can just tell them
-                            // that they don't have access.
-                            if (err.error.error.match(/^us.kbase.workspace.database.exceptions.NoSuchObjectException:/)) {
-                                state.set('status', 'notfound');
-                                state.set('error', {
-                                    type: 'client',
-                                    code: 'notfound',
-                                    shortMessage: 'This object does not exist',
-                                    originalMessage: err.error.message
-                                });
-                            } else if (err.error.error.match(/^us.kbase.workspace.database.exceptions.InaccessibleObjectException:/)) {
-                                state.set('status', 'denied');
-                                state.set('error', {
-                                    type: 'client',
-                                    code: 'denied',
-                                    shortMessage: 'You do not have access to this object',
-                                    originalMessage: err.error.message
-                                });
-                            } else {
-                                state.set('status', 'error');
-                                state.set('error', {
-                                    type: 'client',
-                                    code: 'error',
-                                    shortMessage: 'An unknown error occured',
-                                    originalMessage: err.error.message
-                                });
-                            }
-                            resolve();
-                        } else {
+            if (!objectId) {
+                throw 'Object ID is required';
+            }
+            return fetchData()
+                .then(function () {
+                    container.innerHTML = renderLayout();
+                    var content = container.querySelector('[data-placeholder="content"]');
+                    if (content) {
+                        content.innerHTML = render();
+                    }
+                })
+                .catch(function (err) {
+                    console.error(err);
+                    if (err.status && err.status === 500) {
+                        // User probably doesn't have access -- but in any case we can just tell them
+                        // that they don't have access.
+                        if (err.error.error.match(/^us.kbase.workspace.database.exceptions.NoSuchObjectException:/)) {
+                            state.set('status', 'notfound');
                             state.set('error', {
-                                type: 'general',
+                                type: 'client',
+                                code: 'notfound',
+                                shortMessage: 'This object does not exist',
+                                originalMessage: err.error.message
+                            });
+                        } else if (err.error.error.match(/^us.kbase.workspace.database.exceptions.InaccessibleObjectException:/)) {
+                            state.set('status', 'denied');
+                            state.set('error', {
+                                type: 'client',
+                                code: 'denied',
+                                shortMessage: 'You do not have access to this object',
+                                originalMessage: err.error.message
+                            });
+                        } else {
+                            state.set('status', 'error');
+                            state.set('error', {
+                                type: 'client',
                                 code: 'error',
-                                shortMessage: 'An unknown error occured'
+                                shortMessage: 'An unknown error occured',
+                                originalMessage: err.error.message
                             });
                         }
-                    });
+                    } else {
+                        state.set('error', {
+                            type: 'general',
+                            code: 'error',
+                            shortMessage: 'An unknown error occured'
+                        });
+                    }
+                });
 
-            });
         }
 
         function stop() {
-            return Promise.try(function () {});
+            return null;
         }
 
         function detach() {
-            return Promise.try(function () {
+            if (mount && container) {
                 mount.removeChild(container);
-            });
+            }
         }
 
-        function destroy() {
-            return Promise.try(function () {});
-        }
-
-        return {
-            init: init,
-            attach: attach,
-            start: start,
-            stop: stop,
-            detach: detach,
-            destroy: destroy
-        };
-
+        return Object.freeze({attach, start, stop, detach});
     }
     return {
         make: function (config) {

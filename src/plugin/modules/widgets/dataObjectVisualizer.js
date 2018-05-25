@@ -1,21 +1,20 @@
 define([
-    'jquery',
     'bluebird',
     'underscore',
-    'kb_service/client/workspace',
+    'kb_common/jsonRpc/genericClient',
     'kb_common/html',
     'kb_common/bootstrapUtils',
     'kb_service/utils'
 ], function (
-    $,
     Promise,
     _,
-    Workspace,
+    GenericClient,
     html,
     BS,
     APIUtils
 ) {
     'use strict';
+
     var t = html.tag,
         div = t('div');
 
@@ -25,7 +24,10 @@ define([
 
         function findMapping(type, params) {
             // var mapping = typeMap[objectType];
-            var mapping = runtime.getService('type').getViewer({ type: type, id: params.viewer });
+            var mapping = runtime.getService('type').getViewer({ 
+                type: type, 
+                id: params.viewer 
+            });
             if (mapping) {
                 if (params.sub && params.subid) {
                     var sub = params.sub.toLowerCase();
@@ -38,9 +40,6 @@ define([
                     } else {
                         throw new Error('Sub was specified, but config has no sub handler, sub:' + sub);
                     }
-                    //} else {
-                    //    console.error('Something was in sub, but no sub.sub or sub.subid found', params.sub);
-                    //    return $('<div>');
                 }
             } else {
                 // Now we have a default mapping.
@@ -71,27 +70,29 @@ define([
 
             // Get other params from the runtime.
             return Promise.try(function () {
-                var workspace = new Workspace(runtime.getConfig('services.workspace.url'), {
-                        token: runtime.getService('session').getAuthToken()
-                    }),
-                    objectRefs = [{ ref: makeObjectRef(params) }];
-                return workspace.get_object_info_new({
+                let workspace = new GenericClient({
+                    module: 'Workspace',
+                    url: runtime.getConfig('services.workspace.url'), 
+                    token: runtime.getService('session').getAuthToken()
+                });
+                let objectRefs = [{ 
+                    ref: makeObjectRef(params) 
+                }];
+                return workspace.callFunc('get_object_info3', [{
                     objects: objectRefs,
                     ignoreErrors: 1,
                     includeMetadata: 1
-                })
-                    .then(function (data) {
-                        if (data.length === 0) {
+                }])
+                    .spread(function (result) {
+                        let objectInfos = result.infos;
+                        if (objectInfos.length > 1) {
+                            throw new Error('Too many (' + objectInfos.length + ') objects found.');
+                        }
+                        if (objectInfos[0] === null) {
                             throw new Error('Object not found');
                         }
-                        if (data.length > 1) {
-                            throw new Error('Too many (' + data.length + ') objects found.');
-                        }
-                        if (data[0] === null) {
-                            throw new Error('Null object returned');
-                        }
 
-                        var wsobject = APIUtils.object_info_to_object(data[0]);
+                        var wsobject = APIUtils.objectInfoToObject(objectInfos[0]);
                         var type = APIUtils.parseTypeId(wsobject.type),
                             mapping = findMapping(type, params);
                         if (!mapping) {
@@ -99,8 +100,8 @@ define([
                         }
                         // These params are from the found object.
                         var widgetParams = {
-                            workspaceId: params.workspaceId,
-                            objectId: params.objectId,
+                            workspaceId: wsobject.wsid,
+                            objectId: wsobject.id,
                             objectName: wsobject.name,
                             workspaceName: wsobject.ws,
                             objectVersion: wsobject.version,
