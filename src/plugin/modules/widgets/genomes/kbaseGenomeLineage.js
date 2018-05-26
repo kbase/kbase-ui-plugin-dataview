@@ -60,7 +60,7 @@ define([
                             style: {
                                 width: '11em'
                             }
-                        }, 'Scientific name'),
+                        }, 'Scientific Name'),
                         td({
                             dataField: 'scientific-name',
                             style: {
@@ -69,7 +69,7 @@ define([
                         }, this.genome.scientific_name)
                     ]),
                     tr([
-                        th('Taxonomic lineage'),
+                        th('Taxonomic Lineage'),
                         td(this.buildLineage())
                     ])
                 ]));
@@ -106,7 +106,7 @@ define([
                 }, item));
             }));
         },
-        
+
         renderError: function(error) {
             var errorMessage;
             if (typeof error === 'string') {
