@@ -7,6 +7,7 @@
  */
 define([
     'jquery',
+    'uuid',
     'kb_common/html',
     'kb_service/client/workspace',
     'kb_sdk_clients/GenomeAnnotationAPI/dev/GenomeAnnotationAPIClient',
@@ -19,6 +20,7 @@ define([
     'kb_dataview_genomes_wideAssemblyAnnotation'
 ], function (
     $,
+    Uuid,
     html,
     Workspace,
     GenomeAnnotationAPI,
@@ -42,7 +44,7 @@ define([
             return this;
         },
         fetchGenome: function () {
-            var self = this,
+            var _this = this,
                 scope = {
                     ws: this.options.workspaceID,
                     id: this.options.genomeID,
@@ -61,7 +63,8 @@ define([
                     'id',
                     'contig_ids',
                     'contig_lengths',
-                    'gc_content'
+                    'gc_content',
+                    'taxonomy'
                 ],
                 feature_fields = [
                     'type',
@@ -101,10 +104,6 @@ define([
                 genomes: [{ ref: objId }],
                 included_fields: genome_fields
             }]).spread(function (data) {
-                // self.ga_api.get_genome_v1({
-                //     genomes: [{ ref: objId }],
-                //     included_fields: genome_fields
-                // }).then(function(data) {
                 var assembly_ref = null,
                     gnm = data.genomes[0].data,
                     metadata = data.genomes[0].info[10],
@@ -144,19 +143,20 @@ define([
                 }
 
                 if (gnm.domain === 'Eukaryota' || gnm.domain === 'Plant') {
+                    // TODO: DANGER: sortof relying upon metadata structure!
                     if (metadata && metadata['GC content'] && metadata['Size'] && metadata['Number contigs']) {
                         add_stats(gnm,
                             metadata['Size'],
                             metadata['GC content'],
                             metadata['Number contigs']);
-                        self.render(data.genomes[0]);
+                        _this.render(data.genomes[0]);
                     } else {
-                        self.asm_api.get_stats(assembly_ref).then(function (stats) {
+                        _this.asm_api.get_stats(assembly_ref).then(function (stats) {
                             add_stats(gnm,
                                 stats.dna_size,
                                 stats.gc_content,
                                 stats.num_contigs);
-                            self.render(data.genomes[0]);
+                            _this.render(data.genomes[0]);
                             return null;
                         }).catch(function (error) {
                             assembly_error(gnm, error);
@@ -165,53 +165,55 @@ define([
                     return null;
                 } else {
                     genome_fields.push('features');
-                    self.ga_api.get_genome_v1({
+                    _this.dynClient.callFunc('get_genome_v1', [{
                         'genomes': [{ 'ref': objId }],
                         'included_fields': genome_fields,
                         'included_feature_fields': feature_fields
-                    }).then(function (data) {
-                        gnm = data.genomes[0].data;
-                        metadata = data.genomes[0].info[10];
+                    }])
+                        .spread(function (data) {
+                            gnm = data.genomes[0].data;
+                            metadata = data.genomes[0].info[10];
 
-                        if (metadata && metadata['GC content'] && metadata['Size'] && metadata['Number contigs']) {
-                            add_stats(gnm,
-                                metadata['Size'],
-                                metadata['GC content'],
-                                metadata['Number contigs']);
-                            self.render(data.genomes[0]);
-                        } else if (!gnm.hasOwnProperty('dna_size')) {
-                            self.asm_api.get_stats(assembly_ref).then(function (stats) {
+                            if (metadata && metadata['GC content'] && metadata['Size'] && metadata['Number contigs']) {
                                 add_stats(gnm,
-                                    stats.dna_size,
-                                    stats.gc_content,
-                                    stats.num_contigs);
-                                self.render(data.genomes[0]);
-                                return null;
-                            }).catch(function (error) {
-                                assembly_error(gnm, error);
-                            });
-                        } else {
-                            self.render(data.genomes[0]);
-                        }
+                                    metadata['Size'],
+                                    metadata['GC content'],
+                                    metadata['Number contigs']);
+                                _this.render(data.genomes[0]);
+                            } else if (!gnm.hasOwnProperty('dna_size')) {
+                                _this.asm_api.get_stats(assembly_ref).then(function (stats) {
+                                    add_stats(gnm,
+                                        stats.dna_size,
+                                        stats.gc_content,
+                                        stats.num_contigs);
+                                    _this.render(data.genomes[0]);
+                                    return null;
+                                }).catch(function (error) {
+                                    assembly_error(gnm, error);
+                                });
+                            } else {
+                                _this.render(data.genomes[0]);
+                            }
 
-                        return null;
-                    }).catch(function (error) {
-                        console.error(error);
-                    });
+                            return null;
+                        })
+                        .catch(function (error) {
+                            console.error(error);
+                        });
                 }
 
                 return null;
             }).catch(function (error) {
                 console.error('Error loading genome subdata');
                 console.error(error);
-                self.showError(self.view.panels[0].inner_div, error);
-                self.view.panels[1].inner_div.empty();
-                self.view.panels[2].inner_div.empty();
-                self.view.panels[3].inner_div.empty();
+                _this.showError(_this.view.panels[0].inner_div, error);
+                _this.view.panels[1].inner_div.empty();
+                _this.view.panels[2].inner_div.empty();
+                _this.view.panels[3].inner_div.empty();
             });
         },
         fetchAssembly: function (genomeInfo, callback) {
-            var self = this,
+            var _this = this,
                 assembly_ref = null,
                 gnm = genomeInfo.data;
 
@@ -221,7 +223,7 @@ define([
                 assembly_ref = gnm.assembly_ref;
             }
 
-            self.asm_api.get_contig_ids(assembly_ref).then(function (contig_ids) {
+            _this.asm_api.get_contig_ids(assembly_ref).then(function (contig_ids) {
                 Object.defineProperties(gnm, {
                     'contig_ids': {
                         __proto__: null,
@@ -230,7 +232,7 @@ define([
                         enumerable: true
                     }
                 });
-                return self.asm_api.get_contig_lengths(assembly_ref, contig_ids).then(function (contig_lengths) {
+                return _this.asm_api.get_contig_lengths(assembly_ref, contig_ids).then(function (contig_lengths) {
                     Object.defineProperties(gnm, {
                         'contig_lengths': {
                             __proto__: null,
@@ -243,10 +245,10 @@ define([
                     callback(genomeInfo);
                     return null;
                 }).catch(function (error) {
-                    self.showError(self.view.panels[3].inner_div, error);
+                    _this.showError(_this.view.panels[3].inner_div, error);
                 });
             }).catch(function (error) {
-                self.showError(self.view.panels[3].inner_div, error);
+                _this.showError(_this.view.panels[3].inner_div, error);
             });
         },
         init_view: function () {
@@ -290,7 +292,7 @@ define([
             });
         },
         render: function (genomeInfo) {
-            var self = this,
+            var _this = this,
                 scope = {
                     ws: this.options.workspaceID,
                     id: this.options.genomeID,
@@ -298,98 +300,93 @@ define([
                 },
                 panelError = function (p, e) {
                     console.error(e);
-                    self.showError(p, e.message);
-                },
-                objId = scope.ws + '/' + scope.id;
+                    _this.showError(p, e.message);
+                };
 
-            if (self.options.ver) {
-                objId += '/' + self.options.ver;
-            }
-
-            self.view.panels[0].inner_div.empty();
+            _this.view.panels[0].inner_div.empty();
             try {
-                self.view.panels[0].inner_div.KBaseGenomeWideOverview({
+                _this.view.panels[0].inner_div.KBaseGenomeWideOverview({
                     genomeID: scope.id,
                     workspaceID: scope.ws,
                     genomeInfo: genomeInfo,
-                    runtime: self.runtime
+                    runtime: _this.runtime
                 });
             } catch (e) {
-                panelError(self.view.panels[0].inner_div, e);
+                panelError(_this.view.panels[0].inner_div, e);
             }
 
             var searchTerm = '';
             if (genomeInfo && genomeInfo.data['scientific_name']) {
                 searchTerm = genomeInfo.data['scientific_name'];
             }
-            self.view.panels[1].inner_div.empty();
+            _this.view.panels[1].inner_div.empty();
             try {
-                self.view.panels[1].inner_div.KBaseLitWidget({
+                _this.view.panels[1].inner_div.KBaseLitWidget({
                     literature: searchTerm,
                     genomeInfo: genomeInfo,
-                    runtime: self.runtime
+                    runtime: _this.runtime
                 });
             } catch (e) {
-                panelError(self.view.panels[1].inner_div, e);
+                panelError(_this.view.panels[1].inner_div, e);
             }
 
             /*
-            self.view.panels[2].inner_div.empty();
+            _this.view.panels[2].inner_div.empty();
             try {
-                self.view.panels[2].inner_div.KBaseGenomeWideCommunity({genomeID: scope.id, workspaceID: scope.ws, kbCache: kb, genomeInfo: genomeInfo});
+                _this.view.panels[2].inner_div.KBaseGenomeWideCommunity({genomeID: scope.id, workspaceID: scope.ws, kbCache: kb, genomeInfo: genomeInfo});
             }
             catch (e) {
-                panelError(self.view.panels[2].inner_div, e);
+                panelError(_this.view.panels[2].inner_div, e);
             }
             */
 
-            self.view.panels[2].inner_div.empty();
+            _this.view.panels[2].inner_div.empty();
             try {
-                self.view.panels[2].inner_div.KBaseGenomeWideTaxonomy({
+                _this.view.panels[2].inner_div.KBaseGenomeWideTaxonomy({
                     genomeID: scope.id,
                     workspaceID: scope.ws,
                     genomeInfo: genomeInfo,
-                    runtime: self.runtime
+                    runtime: _this.runtime
                 });
             } catch (e) {
-                panelError(self.view.panels[2].inner_div, e);
+                panelError(_this.view.panels[2].inner_div, e);
             }
 
             if (genomeInfo && genomeInfo.data['domain'] === 'Eukaryota' ||
                 genomeInfo && genomeInfo.data['domain'] === 'Plant') {
-                self.view.panels[3].inner_div.empty();
-                self.view.panels[3].inner_div.append('Browsing Eukaryotic Genome Features is not supported at this time.');
+                _this.view.panels[3].inner_div.empty();
+                _this.view.panels[3].inner_div.append('Browsing Eukaryotic Genome Features is not supported at this time.');
             } else {
                 var gnm = genomeInfo.data,
                     assembly_callback = function (genomeInfo) {
-                        self.view.panels[3].inner_div.empty();
+                        _this.view.panels[3].inner_div.empty();
                         try {
-                            self.view.panels[3].inner_div.KBaseGenomeWideAssemAnnot({
+                            _this.view.panels[3].inner_div.KBaseGenomeWideAssemAnnot({
                                 genomeID: scope.id,
                                 workspaceID: scope.ws,
                                 ver: scope.ver,
                                 genomeInfo: genomeInfo,
-                                runtime: self.runtime
+                                runtime: _this.runtime
                             });
                         } catch (e) {
-                            panelError(self.view.panels[3].inner_div, e);
+                            panelError(_this.view.panels[3].inner_div, e);
                         }
                     };
 
                 if (gnm.contig_ids && gnm.contig_lengths && gnm.contig_ids.length === gnm.contig_lengths.length) {
                     assembly_callback(genomeInfo);
                 } else {
-                    self.fetchAssembly(genomeInfo, assembly_callback);
+                    _this.fetchAssembly(genomeInfo, assembly_callback);
                 }
             }
         },
         // TODO: This is 
         makeWidgetPanel: function ($panel, title, name, $widgetDiv) {
-            var id = this.genUUID();
+            var id = new Uuid(4).format();
             $panel.append(
                 $('<div class="panel-group" id="accordion_' + id + '" role="tablist" aria-multiselectable="true" data-panel="' + name + '">')
-                .append($('<div class="panel panel-default kb-widget">')
-                    .append('' +
+                    .append($('<div class="panel panel-default kb-widget">')
+                        .append('' +
                         '<div class="panel-heading" role="tab" id="heading_' + id + '">' +
                         '<h4 class="panel-title">' +
                         '<span data-toggle="collapse" data-parent="#accordion_' + id + '" data-target="#collapse_' + id + '" aria-expanded="false" aria-controls="collapse_' + id + '" style="cursor:pointer;" data-element="title">' +
@@ -397,11 +394,11 @@ define([
                         '</span>' +
                         '</h4>' +
                         '</div>'
+                        )
+                        .append($('<div id="collapse_' + id + '" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_' + id + '" area-expanded="true">')
+                            .append($('<div class="panel-body">').append($widgetDiv))
+                        )
                     )
-                    .append($('<div id="collapse_' + id + '" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_' + id + '" area-expanded="true">')
-                        .append($('<div class="panel-body">').append($widgetDiv))
-                    )
-                )
             );
         },
         getData: function () {
@@ -415,13 +412,6 @@ define([
         showError: function (panel, e) {
             panel.empty();
             panel.append('Error: ' + JSON.stringify(e));
-        },
-        genUUID: function () {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                var r = Math.random() * 16 | 0,
-                    v = c === 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
         }
     });
 });

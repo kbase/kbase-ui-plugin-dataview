@@ -4,244 +4,129 @@
  */
 define([
     'jquery',
+    'uuid',
     'kb_common/html',
-    'kb_service/client/workspace',
-    'kb_service/client/trees',
 
     'kb_widget/legacy/authenticatedWidget'
 ], function(
     $,
-    html,
-    Workspace,
-    KBaseTrees) {
+    Uuid,
+    html
+) {
     'use strict';
+
+    var t = html.tag,
+        a = t('a'),
+        div = t('div'),
+        span = t('span'),
+        table = t('table'),
+        tr = t('tr'),
+        th = t('th'),
+        td = t('td');
+
     $.KBWidget({
         name: 'KBaseGenomeLineage',
-        parent: 'kbaseAuthenticatedWidget',
+        parent: 'kbaseWidget',
         version: '1.0.0',
         options: {
-            genomeID: null,
-            workspaceID: null,
-            objVer: null,
             width: 600,
-            //isInCard: false,
             genomeInfo: null
         },
+        genome: null,
         token: null,
-        $infoTable: null,
-        pref: null,
+        uniqueId: null,
+
         init: function(options) {
-
             this._super(options);
-
-            if (this.options.genomeID === null) {
-                //throw an error
+            if (!this.options.genomeInfo) {
+                this.renderError('Genome information not supplied');
                 return;
             }
+            this.genome = options.genomeInfo.data;
 
-            this.pref = this.uuid();
-
-            this.$messagePane = $('<div/>').hide();
-            this.$elem.append(this.$messagePane);
+            this.uniqueId = new Uuid(4).format();
 
             this.render();
-            if (this.options.workspaceID === null) {
-                this.renderCentralStore();
-            } else {
-                this.renderWorkspace();
-            }
-
             return this;
         },
+
         render: function() {
-            this.$infoPanel = $('<div>');
-
-            this.$infoTable = $('<table>').addClass('table table-striped table-bordered');
-            this.$infoPanel.append($('<div>').append(this.$infoTable));
-
-            this.$infoPanel.hide();
-            this.$elem.append(this.$infoPanel);
+            this.$elem.empty()
+                .append(table({
+                    class: 'table table-bordered'
+                }, [
+                    tr([
+                        th({
+                            style: {
+                                width: '11em'
+                            }
+                        }, 'Scientific name'),
+                        td({
+                            dataField: 'scientific-name',
+                            style: {
+                                fontStyle: 'italic'
+                            }
+                        }, this.genome.scientific_name)
+                    ]),
+                    tr([
+                        th('Taxonomic lineage'),
+                        td(this.buildLineage())
+                    ])
+                ]));
         },
-        renderCentralStore: function() {
-            var self = this;
 
-            this.$infoPanel.hide();
-            this.showMessage(html.loading('loading...'));
-
-            // Fields to show:
-            // ID
-            // Workspace (if from a workspace)
-            // Owner (KBase Central Store vs. username)
-            // Scientific Name
-            // Taxonomy
-            // Taxonomy
-            this.entityClient.get_entity_Genome(
-                [this.options.genomeID], ['id', 'scientific_name', 'domain', 'taxonomy'],
-                $.proxy(
-                    function(genome) {
-                        genome = genome[0].data;
-                        self.showData(genome);
-                    },
-                    this
-                ),
-                this.renderError
-            );
-        },
-        renderWorkspace: function() {
-            var self = this;
-            this.showMessage(html.loading('loading...'));
-            this.$infoPanel.hide();
-            if (self.options.genomeInfo) {
-                self.showData(self.options.genomeInfo.data);
-            } else {
-                var obj = this.getObjectIdentity(this.options.workspaceID, this.options.genomeID);
-                obj.included = ['/taxonomy', '/scientific_name'];
-
-                var workspace = new Workspace(this.runtime.config('services.workspace.url'), {
-                    token: this.runtime.service('session').getAuthToken()
-                });
-
-                workspace.get_object_subset([obj],
-                    function(data) {
-                        if (data[0]) {
-                            var genome = data[0].data;
-                            self.showData(genome);
-                        }
-                    },
-                    function(error) {
-                        var obj = self.buildObjectIdentity(self.options.workspaceID, self.options.genomeID);
-                        obj.included = ['/scientific_name'];
-                        workspace.get_object_subset([obj], function(data) {
-                                if (data[0]) {
-                                    var genome = data[0].data;
-                                    self.showData(genome);
-                                }
-                            },
-                            function(error) {
-                                self.renderError(error);
-                            });
-                    });
+        buildLineage: function() {
+            if (!this.genome.taxonomy) {
+                return  'No taxonomic data for this genome.';
             }
-        },
-        showData: function(genome) {
-            var self = this;
 
-            this.$infoTable.empty()
-                .append('<tr><th>' + 'Name' + '</th><td data-field="scientific-name">' + genome.scientific_name + '</td></tr>')
-                .append('<tr><th>Taxonomic Lineage</th><td id="tax_td_' + this.pref + '"/></tr>');
+            // Note that the taxonomy lineage path is just a string, with semicolon or comma separators
+            // (depends on what the developer or user decided to use...)
+            let separator = ';';
+            if (this.genome.taxonomy.indexOf(',') >= 0) {
+                separator = ',';
+            }
+            var splittax = this.genome.taxonomy
+                .split(separator)
+                .map((item) => {return item.trim();});
 
-            self.hideMessage();
-            this.$infoPanel.show();
-            this.showLinage(genome.taxonomy);
-        },
-        showLinage: function(taxonomy) {
-            var self = this;
-            var finaltax = '';
-            var needGuess = this.options.workspaceID !== null;
-            if (taxonomy) {
-                var splittax = taxonomy.replace('/ /g', '');
-                splittax = splittax.split(';');
-                if (splittax.length >= 2) {
-                    needGuess = false;
+            // The display is a simple vertical un-indented list of links to the taxonomy
+            // page at NCBI.
+            return div({
+                style: {
+                    whiteSpace: 'nowrap',
+                    overflowX: 'auto'
                 }
-                finaltax += '<pre style="white-space: pre-wrap">';
-                var a, b, pad, searchtax, str;
-                for (a = 0; a < splittax.length; a += 1) {
-                    pad = '';
-                    for (b = 0; b < a; b += 1) {
-                        pad += ' ';
-                    }
-                    //http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?name=drosophila+miranda
-                    searchtax = splittax[a].replace('/ /g', '+');
-                    str = pad + '<a href="http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?name=' + searchtax + '" target="_blank">' + splittax[a] + '</a><br>';
-                    finaltax += str;
-                }
-                finaltax += '</pre>';
-            } else {
-                finaltax += 'No taxonomic data for this genome.';
-            }
-            if (needGuess) {
-                finaltax += '<button id="guess_btn_' + this.pref + '">Search by similarity</button>';
-            }
-            var tdElem = $('#tax_td_' + self.pref);
-            tdElem.html(finaltax);
-
-            if (needGuess) {
-                $('#guess_btn_' + this.pref).click(function() {
-                    self.guessLinage();
-                });
-            }
+            }, splittax.map((item) => {
+                var searchtax = item.replace('/ /g', '+');
+                var link = 'http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?name=' + searchtax;
+                return div(a({
+                    href: link,
+                    target: '_blank'
+                }, item));
+            }));
         },
-        guessLinage: function() {
-            var self = this;
-            var tdElem = $('#tax_td_' + self.pref);
-            tdElem.html(html.loading('loading...'));
-            var treesSrv = new KBaseTrees(this.runtime.config('services.trees.url'), {
-                token: this.runtime.service('session').getAuthToken()
-            });
-            var genomeRef = this.options.workspaceID + '/' + this.options.genomeID;
-            treesSrv.guess_taxonomy_path({ query_genome: genomeRef }, function(data) {
-                    self.showLinage(data);
-                },
-                function(data) {
-                    tdElem.html('Error accessing [trees] service: ' + data.error.message);
-                });
-        },
-        getData: function() {
-            return {
-                title: 'Taxonomic lineage for :',
-                id: this.options.genomeID,
-                workspace: this.options.workspaceID
-            };
-        },
-        /*
-         *Returns the full workspace identifier, optionally with the version.
-         */
-        getObjectIdentity: function(wsNameOrId, objNameOrId, objVer) {
-            //console.log(wsNameOrId + " " + objNameOrId + " " + objVer);
-            if (objVer) {
-                return {
-                    ref: wsNameOrId + '/' + objNameOrId + '/' + objVer
-                };
-            }
-            return {
-                ref: wsNameOrId + '/' + objNameOrId
-            };
-        },
-        showMessage: function(message) {
-
-            var span = $('<span/>').append(message);
-
-            this.$messagePane.empty()
-                .append(span)
-                .show();
-        },
-        hideMessage: function() {
-            this.$messagePane.hide();
-        },
+        
         renderError: function(error) {
-            var errString = 'Sorry, an unknown error occurred';
+            var errorMessage;
             if (typeof error === 'string') {
-                errString = error;
+                errorMessage = error;
             } else if (error.error && error.error.message) {
-                errString = error.error.message;
+                errorMessage = error.error.message;
+            } else {
+                errorMessage = 'Sorry, an unknown error occurred';
             }
 
-
-            var $errorDiv = $('<div>').addClass('alert alert-danger').append('<b>Error:</b>').append('<br>' + errString);
+            var errorAlert = div({
+                class: 'alert alert-danger'
+            }, [
+                span({
+                    textWeight: 'bold'
+                }, 'Error: '),
+                span(errorMessage)
+            ]);
             this.$elem.empty();
-            this.$elem.append($errorDiv);
-        },
-        addInfoRow: function(a, b) {
-            return '<tr><th>' + a + '</th><td>' + b + '</td></tr>';
-        },
-        uuid: function() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,
-                function(c) {
-                    var r = (Math.random() * 16) | 0,
-                        v = c === 'x' ? r : (r & 0x3 | 0x8);
-                    return v.toString(16);
-                });
+            this.$elem.append(errorAlert);
         }
     });
 });

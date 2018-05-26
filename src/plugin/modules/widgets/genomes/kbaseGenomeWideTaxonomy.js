@@ -43,59 +43,73 @@ define([
                 token: this.runtime.service('session').getAuthToken()
             });
             workspace.list_referencing_objects([objectIdentity], function(data) {
-                    var treeName = null,
-                        treeWs = null,
-                        i;
-                    for (i in data[0]) {
-                        var objInfo = data[0][i],
-                            wsName = objInfo[7],
-                            wsId = objInfo[6],
-                            objName = objInfo[1],
-                            type = objInfo[2].split('-')[0];
+                var treeName = null,
+                    treeWs = null,
+                    i;
+                for (i in data[0]) {
+                    var objInfo = data[0][i],
+                        wsName = objInfo[7],
+                        wsId = objInfo[6],
+                        objName = objInfo[1],
+                        type = objInfo[2].split('-')[0];
                         // either match exactly the string, or we match with coercion the number
-                        if (type === 'KBaseTrees.Tree') {
-                            treeName = objName;
-                            treeWs = wsId;
-                            break;
-                        }
+                    if (type === 'KBaseTrees.Tree') {
+                        treeName = objName;
+                        treeWs = wsId;
+                        break;
                     }
-                    var $buildBtn = $('<button>')
-                        .addClass('kb-primary-btn')
-                        .append('Build Another Tree in a New Narrative');
-                    var $buildNarPanel = $('<div>')
-                        .append($('<a href="#/narrativemanager/new?copydata=' + scope.ws + '/' + scope.id + '&app=build_species_tree&appparam=1,param0,' + scope.id + '" target="_blank">')
-                            .append($buildBtn));
+                }
+                var $buildBtn = $('<button>')
+                    .addClass('kb-primary-btn')
+                    .append('Build Another Tree in a New Narrative');
 
-                    if (treeName) {
-                        var $widgetDiv = $('<div>');
-                        $div.append(
-                            $('<table>').append($('<tr>')
-                                .append($('<td>')
-                                    .append('<h4>Showing Phylogenetic Tree: <a href="#/dataview/' + treeWs + '/' + treeName + '" target="_blank">' + treeName + '</a></h4>'))
-                                .append($('<td>')
-                                    .append($buildNarPanel))));
+                // TODO: fix this bug -- this "build narrative" code below does not insert and populate the app, it just
+                // creates a narrative with the object. It should create markdown to document what to do, insert the app,
+                // and populate the app as far as it can.
+                // SpeciesTreeBuilder/insert_set_of_genomes_into_species_tree
+                // var buildUrl = '#narrativemanager/new';
+                // var query = {
+                //     copydat: scope.ws + '/' + scope.id,
+                //     app: 'SpeciesTreeBuilder/insert_set_of_genomes_into_species_tree',
+                //     appparam: [1, 'param0', scope.id].join(',')
+                // };
+                // buildUrl = html.makeUrl
 
-                        $widgetDiv.kbaseTree({ treeID: treeName, workspaceID: treeWs, genomeInfo: self.options.genomeInfo });
-                        $div.append($widgetDiv);
-                    } else {
-                        $buildBtn.html('Launch a new Tree Building Narrative');
-                        $div
-                            .append('<b>There are no species trees created for this genome, but you can use the Narrative to build a new species tree of closely related genomes.</b>');
 
-                        $div.append('<br><br>');
-                        $div.append($buildNarPanel);
-                        $div.append('<br><br>');
-                    }
-                },
-                function(error) {
-                    var err = '<b>Sorry!</b>  Error retreiveing species trees info';
-                    if (typeof error === 'string') {
-                        err += ': ' + error;
-                    } else if (error.error && error.error.message) {
-                        err += ': ' + error.error.message;
-                    }
-                    $div.append(err);
-                });
+                var $buildNarPanel = $('<div>')
+                    .append($('<a href="#/narrativemanager/new?copydata=' + scope.ws + '/' + scope.id + '&app=build_species_tree&appparam=1,param0,' + scope.id + '" target="_blank">')
+                        .append($buildBtn));
+
+                if (treeName) {
+                    var $widgetDiv = $('<div>');
+                    $div.append(
+                        $('<table>').append($('<tr>')
+                            .append($('<td>')
+                                .append('<h4>Showing Phylogenetic Tree: <a href="#/dataview/' + treeWs + '/' + treeName + '" target="_blank">' + treeName + '</a></h4>'))
+                            .append($('<td>')
+                                .append($buildNarPanel))));
+1
+                    $widgetDiv.kbaseTree({ treeID: treeName, workspaceID: treeWs, genomeInfo: self.options.genomeInfo });
+                    $div.append($widgetDiv);
+                } else {
+                    $buildBtn.html('Launch a new Tree Building Narrative');
+                    $div
+                        .append('<b>There are no species trees created for this genome, but you can use the Narrative to build a new species tree of closely related genomes.</b>');
+
+                    $div.append('<br><br>');
+                    $div.append($buildNarPanel);
+                    $div.append('<br><br>');
+                }
+            },
+            function(error) {
+                var err = '<b>Sorry!</b>  Error retreiveing species trees info';
+                if (typeof error === 'string') {
+                    err += ': ' + error;
+                } else if (error.error && error.error.message) {
+                    err += ': ' + error.error.message;
+                }
+                $div.append(err);
+            });
         },
         getData: function() {
             return {
