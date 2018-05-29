@@ -9,9 +9,18 @@ define([
     'kb_service/client/workspace',
     'kb_service/client/userAndJobState',
     'kb_dataview_easyTree',
+
     'kb_widget/legacy/authenticatedWidget'
-], function($, Uuid, html, Workspace, UserAndJobState, EasyTree) {
+], function(
+    $, 
+    Uuid, 
+    html, 
+    Workspace, 
+    UserAndJobState, 
+    EasyTree
+) {
     'use strict';
+
     $.KBWidget({
         name: 'kbaseTree',
         parent: 'kbaseAuthenticatedWidget',
@@ -72,7 +81,7 @@ define([
                 table.append('<tr><td>Job was created with id</td><td>' + self.options.jobID + '</td></tr>');
                 table.append('<tr><td>Output result will be stored as</td><td>' + self.options.treeID + '</td></tr>');
                 table.append('<tr><td>Current job state is</td><td id="' + self.pref + 'job"></td></tr>');
-                var timeLst = function(event) {
+                var timeLst = function() {
                     jobSrv.get_job_status(self.options.jobID)
                         .then(function(data) {
                             var status = data[2];

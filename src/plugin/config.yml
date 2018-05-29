@@ -27,6 +27,10 @@ source:
         -
             module: kb_dataview_easyTree
             file: lib/easyTree
+
+        -
+            module: kb_dataview_post
+            file: lib/post
             
         # JsonView
         -
