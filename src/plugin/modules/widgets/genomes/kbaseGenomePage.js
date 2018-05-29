@@ -10,6 +10,7 @@ define([
     'uuid',
     'kb_common/html',
     'kb_service/client/workspace',
+    'kb_service/utils',
     'kb_sdk_clients/GenomeAnnotationAPI/dev/GenomeAnnotationAPIClient',
     'kb_sdk_clients/AssemblyAPI/dev/AssemblyAPIClient',
     'kb_sdk_clients/genericClient',
@@ -23,6 +24,7 @@ define([
     Uuid,
     html,
     Workspace,
+    serviceUtils,
     GenomeAnnotationAPI,
     AssemblyAPI,
     GenericClient
@@ -103,11 +105,12 @@ define([
             this.dynClient.callFunc('get_genome_v1', [{
                 genomes: [{ ref: objId }],
                 included_fields: genome_fields
-            }]).spread(function (data) {
-                var assembly_ref = null,
-                    gnm = data.genomes[0].data,
-                    metadata = data.genomes[0].info[10],
-                    add_stats = function (obj, size, gc, num_contigs) {
+            }]).spread(function (result) {
+                let genomeObject = result.genomes[0];
+                let assembly_ref = null;
+                let gnm = genomeObject.data;
+                let metadata = genomeObject.info[10];
+                let add_stats = function (obj, size, gc, num_contigs) {
                         Object.defineProperties(obj, {
                             dna_size: {
                                 __proto__: null,
@@ -142,6 +145,8 @@ define([
                     assembly_error(gnm, 'No assembly reference present!');
                 }
 
+                genomeObject.objectInfo = serviceUtils.objectInfoToObject(genomeObject.info);
+
                 if (gnm.domain === 'Eukaryota' || gnm.domain === 'Plant') {
                     // TODO: DANGER: sortof relying upon metadata structure!
                     if (metadata && metadata['GC content'] && metadata['Size'] && metadata['Number contigs']) {
@@ -149,14 +154,14 @@ define([
                             metadata['Size'],
                             metadata['GC content'],
                             metadata['Number contigs']);
-                        _this.render(data.genomes[0]);
+                        _this.render(genomeObject);
                     } else {
                         _this.asm_api.get_stats(assembly_ref).then(function (stats) {
                             add_stats(gnm,
                                 stats.dna_size,
                                 stats.gc_content,
                                 stats.num_contigs);
-                            _this.render(data.genomes[0]);
+                            _this.render(genomeObject);
                             return null;
                         }).catch(function (error) {
                             assembly_error(gnm, error);
@@ -172,14 +177,14 @@ define([
                     }])
                         .spread(function (data) {
                             gnm = data.genomes[0].data;
-                            metadata = data.genomes[0].info[10];
+                            metadata = genomeObject.info[10];
 
                             if (metadata && metadata['GC content'] && metadata['Size'] && metadata['Number contigs']) {
                                 add_stats(gnm,
                                     metadata['Size'],
                                     metadata['GC content'],
                                     metadata['Number contigs']);
-                                _this.render(data.genomes[0]);
+                                _this.render(genomeObject);
                             } else if (!gnm.hasOwnProperty('dna_size')) {
                                 _this.asm_api.get_stats(assembly_ref).then(function (stats) {
                                     add_stats(gnm,
