@@ -203,6 +203,7 @@ define([
                             return null;
                         })
                         .catch(function (error) {
+                            _this.showError(_this.view.panels[0].inner_div, error);
                             console.error(error);
                         });
                 }
@@ -416,7 +417,15 @@ define([
         },
         showError: function (panel, e) {
             panel.empty();
-            panel.append('Error: ' + JSON.stringify(e));
+            let $err = $('<div>')
+                .addClass('alert alert-danger')
+                .append($('<div>')
+                    .addClass('text-danger')
+                    .css('font-weight', 'bold')
+                    .text('Error'))
+                .append($('<p>').text(JSON.stringify(e.message)))
+                .append($('<div>').text(JSON.stringify(e)));
+            panel.append($err);
         }
     });
 });
