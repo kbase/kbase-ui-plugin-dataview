@@ -465,15 +465,51 @@ define([
                 content = 'Sorry, there are too many references to this data to display.';
             } else {
                 if (refs && refs.length > 0) {
-                    content = table({ class: 'table' }, [
+                    content = table({ 
+                        class: 'table kb-overview-table',
+                        style: {
+                            
+                        }
+                    }, [
                         tr([
-                            th('Name'), th('Type'), th()
+                            th({
+                                style: {
+                                    width: '40%'
+                                }
+                            }, 'Name'), 
+                            th({
+                                style: {
+                                    width: '20%'
+                                }
+                            },'Type'), 
+                            th({
+                                style: {
+                                    width: '20%'
+                                }
+                            },'Saved'),
+                            th({
+                                style: {
+                                    width: '20%'
+                                }
+                            },'By')
                         ])
                     ].concat(refs.map(function (ref) {
                         return tr([
-                            td(a({ href: ['#dataview', ref.wsid, ref.id, ref.version].join('/') }, ref.name)),
-                            td(a({ href: ['#spec', 'type', ref.type].join('/') }, ref.typeName)),
-                            td(['Saved on ', dateFormat(ref.save_date), ' by ', a({ href: ['#people', ref.saved_by].join('/') })])
+                            td(a({ 
+                                href: ['#dataview', ref.wsid, ref.id, ref.version].join('/'),
+                                title: ref.name
+                            }, ref.name)),
+                            td(a({ 
+                                href: ['#spec', 'type', ref.type].join('/'),
+                                title: ref.typeName
+                            }, ref.typeName)),
+                            td(span({
+                                title:  dateFormat(ref.save_date)
+                            }, dateFormat(ref.save_date))),
+                            td( a({ 
+                                href: ['#people', ref.saved_by].join('/'),
+                                title: ref.saved_by
+                            }, ref.saved_by))
                         ]);
                     })));
                 } else {
@@ -495,15 +531,48 @@ define([
                 content = 'Sorry, there are too many references from this data to display.';
             } else {
                 if (refs && refs.length > 0) {
-                    content = table({ class: 'table' }, [
+                    content = table({ 
+                        class: 'table kb-overview-table' 
+                    }, [
                         tr([
-                            th('Name'), th('Type'), th()
+                            th({
+                                style: {
+                                    width: '40%'
+                                }
+                            }, 'Name'), 
+                            th({
+                                style: {
+                                    width: '20%'
+                                }
+                            },'Type'), 
+                            th({
+                                style: {
+                                    width: '20%'
+                                }
+                            },'Saved'),
+                            th({
+                                style: {
+                                    width: '20%'
+                                }
+                            },'By')
                         ])
                     ].concat(refs.map(function (ref) {
                         return tr([
-                            td(a({ href: ['#dataview', ref.wsid, ref.id, ref.version].join('/') }, ref.name)),
-                            td(a({ href: ['#spec', 'type', ref.type].join('/') }, ref.typeName)),
-                            td(['Saved on ', dateFormat(ref.save_date), ' by ', a({ href: ['#people', ref.saved_by].join('/') }, ref.saved_by)])
+                            td(a({ 
+                                href: ['#dataview', ref.wsid, ref.id, ref.version].join('/'),
+                                title: ref.name
+                            }, ref.name)),
+                            td(a({ 
+                                href: ['#spec', 'type', ref.type].join('/'),
+                                title: ref.typeName
+                            }, ref.typeName)),
+                            td(span({
+                                title: dateFormat(ref.save_date)
+                            }, dateFormat(ref.save_date))),
+                            td(a({ 
+                                href: ['#people', ref.saved_by].join('/'),
+                                title: ref.saved_by
+                            }, ref.saved_by))
                         ]);
                     })));
                 } else {
@@ -523,7 +592,9 @@ define([
                     table({ class: 'kb-dataview-header-tbl' }, [
                         renderTitleRow()
                     ]),
-                    table({ class: 'table' }, [
+                    table({ 
+                        class: 'table' 
+                    }, [
                         renderVersionRow(),
                         renderTypeRow(),
                         renderNarrativeRow(),

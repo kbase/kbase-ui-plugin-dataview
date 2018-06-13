@@ -1129,3 +1129,15 @@ button.kb-method-run:hover {
     border: 1px solid #ddd;
     height: 209px;
 }
+
+table.kb-overview-table {
+    table-layout: fixed;
+    width: 100%;
+    white-space: nowrap;
+    margin-bottom: 0;
+}
+
+table.kb-overview-table td {
+    overflow-x: auto;
+    text-overflow: ellipsis;
+}
