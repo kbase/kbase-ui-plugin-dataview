@@ -277,22 +277,34 @@ define([
             });
         }
 
-        function renderTitleRow() {
-            return tr({ style: { verticalAlign: 'baseline' } }, [
-                th(state.get('dataicon')),
-                td((function () {
-                    if (state.get('sub.id')) {
-                        return [
-                            td(h3(state.get('sub.subid'))),
-                            td(['(in', a({ href: '#dataview/' + objectRef }, state.get('object.name')), ')'])
-                        ];
-                    } else {
-                        return [
-                            td(h3(state.get('object.name'))),
-                            td(['v', state.get('object.version')])
-                        ];
+        function renderHeader() {
+            return div({ 
+                style: {
+                    display: 'flex',
+                    flexDirection: 'row'
+                }
+            }, [
+                div({
+                    flex: '0 1 0px'
+                }, state.get('dataicon')),
+                div({
+                    style: {
+                        flex: '1 1 0px',
+                        marginRight: '4px',
+                        minWidth: '0'
                     }
-                }()))
+                },  h3({
+                    style: {
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                    }
+                }, (function () {
+                        if (state.get('sub.id')) {
+                            return state.get('sub.subid');
+                        }
+                        return state.get('object.name');
+                    }()))),
             ]);
         }
 
@@ -589,9 +601,7 @@ define([
         function render() {
             return div({ class: 'row' }, [
                 div({ class: 'col-sm-6' }, [
-                    table({ class: 'kb-dataview-header-tbl' }, [
-                        renderTitleRow()
-                    ]),
+                    renderHeader(),
                     table({ 
                         class: 'table' 
                     }, [
