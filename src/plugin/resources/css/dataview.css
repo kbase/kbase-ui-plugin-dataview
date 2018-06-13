@@ -1101,15 +1101,6 @@ button.kb-method-run:hover {
     margin: 20px;
 }
 
-.kb-dataview-header-tbl tr {
-    vertical-align: baseline;
-}
-
-.kb-dataview-header-tbl th,
-.kb-dataview-header-tbl td {
-    padding: 5px;
-}
-
 .genome-comparison-tooltip {
     position: absolute;
     z-index: 9999999;
