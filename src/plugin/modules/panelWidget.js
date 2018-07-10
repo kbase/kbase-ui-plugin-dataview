@@ -3,12 +3,12 @@ define([
     'kb_common/html',
     'kb_widget/widgetSet',
     'plugins/dataview/modules/utils'
-], function(
-        Promise,
-        html,
-        WidgetSet,
-        utils
-    ) {
+], function (
+    Promise,
+    html,
+    WidgetSet,
+    utils
+) {
     'use strict';
 
     var t = html.tag,
@@ -21,45 +21,45 @@ define([
             headingId = html.genId(),
             collapseId = html.genId();
 
-        return div({ 
-            class: 'panel-group kb-widget', 
-            id: panelId, 
+        return div({
+            class: 'panel-group kb-widget',
+            id: panelId,
             role: 'tablist', 'aria-multiselectable': 'true' }, [
-            div({ 
-                class: 'panel panel-default' 
+            div({
+                class: 'panel panel-default'
             }, [
-                div({ 
-                    class: 'panel-heading', 
-                    role: 'tab', 
+                div({
+                    class: 'panel-heading',
+                    role: 'tab',
                     id: headingId }, [
-                    h4({ 
+                    h4({
                         class: 'panel-title' }, [
-                        span({ 
-                            'data-toggle': 'collapse', 
-                            'data-parent': '#' + panelId, 'data-target': '#' + collapseId, 
-                            'aria-expanded': 'false', 
-                            'aria-controls': collapseId, 
-                            class: (config.collapsed === false ? '' : 'collapsed'), 
-                            style: { 
-                                cursor: 'pointer' 
-                            } 
+                        span({
+                            'data-toggle': 'collapse',
+                            'data-parent': '#' + panelId, 'data-target': '#' + collapseId,
+                            'aria-expanded': 'false',
+                            'aria-controls': collapseId,
+                            class: (config.collapsed === false ? '' : 'collapsed'),
+                            style: {
+                                cursor: 'pointer'
+                            }
                         }, [
-                            span({ 
-                                class: 'fa fa-' + config.icon + ' fa-rotate-90', 
-                                style: { 
-                                    'margin-left': '10px', 
-                                    'margin-right': '10px' 
-                                } 
+                            span({
+                                class: 'fa fa-' + config.icon + ' fa-rotate-90',
+                                style: {
+                                    'margin-left': '10px',
+                                    'margin-right': '10px'
+                                }
                             }),
                             config.title
                         ])
                     ])
                 ]),
-                div({ 
-                    class: 'panel-collapse collapse ' + (config.collapsed === false ? 'in' : ''), 
-                    id: collapseId, 
+                div({
+                    class: 'panel-collapse collapse ' + (config.collapsed === false ? 'in' : ''),
+                    id: collapseId,
                     role: 'tabpanel', 'aria-labelledby': 'provHeading' }, [
-                    div({ 
+                    div({
                         class: 'panel-body' }, [
                         config.content
                     ])
@@ -80,20 +80,6 @@ define([
                         div({ id: widgetSet.addWidget('kb_dataview_download') }),
                         div({ id: widgetSet.addWidget('kb_dataview_copy') }),
                         div({ id: widgetSet.addWidget('kb_dataview_overview') }),
-                        (function () {
-                            if (!runtime.allow('alpha')) {
-                                return;
-                            }
-                            return renderBSCollapsiblePanel({
-                                title: 'Knowledge Engine',
-                                icon: 'superpowers',
-                                collapsed: false,
-                                content: div({
-                                    id: widgetSet.addWidget('kb_dataview_knowledgeEngine')
-                                })
-                            });
-                            
-                        }()),
                         renderBSCollapsiblePanel({
                             title: 'Data Provenance and Reference Network',
                             icon: 'sitemap',
@@ -130,15 +116,15 @@ define([
 
         function start(params) {
             return utils.getObjectInfo(runtime, params)
-                .then(function(objectInfo) {
+                .then(function (objectInfo) {
                     runtime.send('ui', 'setTitle', 'Data View for ' + objectInfo.name);
                     return objectInfo;
                 })
-                .then(function(objectInfo) {
+                .then(function (objectInfo) {
                     params.objectInfo = objectInfo;
                     return Promise.all([objectInfo, widgetSet.start(params)]);
                 })
-                .spread(function(objectInfo) {
+                .spread(function (objectInfo) {
                     // Disable download button for the time being.
                     // Will re-enable when we have time to deal with it.
                     //     runtime.send('ui', 'addButton', {
@@ -164,7 +150,7 @@ define([
                         params: {
                             ref: objectInfo.ref
                         },
-                        callback: function() {
+                        callback: function () {
                             runtime.send('copyWidget', 'toggle');
                         }
                     });
@@ -181,7 +167,7 @@ define([
 
         function detach() {
             return widgetSet.detach()
-                .finally(function() {
+                .finally(function () {
                     if (mount && container) {
                         mount.removeChild(container);
                         container.innerHTML = '';
@@ -200,7 +186,7 @@ define([
     }
 
     return {
-        make: function(config) {
+        make: function (config) {
             return widget(config);
         }
     };
