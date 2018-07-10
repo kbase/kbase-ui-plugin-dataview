@@ -10,7 +10,7 @@ define([
         var root = config.node,
             minidom = Minidom.make({node: root}),
             places = {};
-        
+
         function setLayout(content) {
             root.innerHTML = content;
             // scan for places
@@ -20,7 +20,7 @@ define([
                     places[name] = node;
                 });
         }
-        
+
         function setContent(place, content) {
             var node = places[place];
             if (!node) {
@@ -28,12 +28,12 @@ define([
             }
             node.innerHTML = content;
         }
-        
+
         return {
             setLayout: setLayout
         };
     }
-    
+
     return {
         make: function (config) {
             return factory(config);
