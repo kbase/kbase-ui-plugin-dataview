@@ -95,6 +95,11 @@ define([
                                 content: div({ id: widgetSet.addWidget('kb_dataview_provenance_v2') })
                             });
                         }()),
+                        renderBSCollapsiblePanel({
+                            title: 'Similar Genomes',
+                            icon: 'copy',
+                            content: div({id: widgetSet.addWidget('kb_dataview_similarGenomes')})
+                        }),
                         div({ id: widgetSet.addWidget('kb_dataview_dataObjectVisualizer') })
                     ])
                 ])
