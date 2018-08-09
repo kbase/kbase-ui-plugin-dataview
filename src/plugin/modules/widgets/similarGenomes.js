@@ -1,109 +1,98 @@
-/*global define */
-/*jslint browser: true, white: true */
 define([
-    'bluebird',
-    'jquery',
-    'd3',
     'kb_common/html',
-    'kb_common/dom',
-    'kb_service/client/workspace',
     'kb_common/jsonRpc/dynamicServiceClient',
-    'dagre',
-    'bootstrap',
-    'd3_sankey'
+    'bootstrap'
 ],
-function (Promise, $, d3, html, dom, Workspace, DynamicServiceClient, dagre) {
+function (
+    html,
+    DynamicServiceClient
+) {
     'use strict';
-    function widget(config) {
 
-        var runtime = config.runtime;
-        var mount, container, $container, workspaceId, objectId;
-        var sketchClient = new DynamicServiceClient({
-            url: runtime.config('services.service_wizard.url'),
-            token: runtime.service('session').getAuthToken(),
-            module: 'sketch_service'
-        });
+    const t = html.tag,
+        div = t('div'),
+        p = t('p'),
+        table = t('table'),
+        thead = t('thead'),
+        tr = t('tr'),
+        th = t('th'),
+        tbody = t('tbody'),
+        td = t('td');
 
-        /**
-         * HTML to render when the genome similarity data is finished loading.
-         */
-        function dataLayout(data) {
-            var distances = data.distances;
-            return html.tag('div')([
-                html.tag('table')({class: 'table'}, [
-                    html.tag('thead')([
-                        html.tag('tr')([
-                            html.tag('th')('Distance'),
-                            html.tag('th')('Scientific name'),
-                            html.tag('th')('Database name'),
-                            html.tag('th')('Database ID')
+    class Widget {
+        constructor({runtime}) {
+            this.runtime = runtime;
+            // Both of the props below are assigned in the attach method
+            this.hostNode = null;
+            this.container = null;
+        }
+
+        dataLayout({distances}) {
+            return div(
+                table({class: 'table'}, [
+                    thead(
+                        tr([
+                            th('Distance'),
+                            th('Scientific name'),
+                            th('Database name'),
+                            th('Database ID')
                         ])
-                    ]),
-                    html.tag('tbody')(distances.map(function (each) {
-                          return html.tag('tr')([
-                              html.tag('td')([String(each.dist)]),
-                              html.tag('td')([each.sciname]),
-                              html.tag('td')([each.namespaceid]),
-                              html.tag('td')([each.sourceid])
-                          ]);
+                    ),
+                    tbody(distances.map((each) => {
+                        return tr([
+                            td([String(each.dist)]),
+                            td([each.sciname]),
+                            td([each.namespaceid]),
+                            td([each.sourceid])
+                        ]);
                     }))
                 ])
-            ]);
+            );
         }
 
-        /**
-         * HTML to render while the data is loading.
-         */
-        function loadingLayout() {
-            return html.tag('div')([
-                html.tag('p')([html.loading('Finding similar genomes')])
-            ])
+        loadingLayout() {
+            return div(p(html.loading('Finding similar genomes')));
         }
 
-        /**
-         * Construct an ObjectIdentity that can be used to query the WS.
-         */
-        function getObjectIdentity(wsNameOrId, objNameOrId, objVer) {
-            if (objVer) {
-                return {ref: wsNameOrId + '/' + objNameOrId + '/' + objVer};
-            }
-            return {ref: wsNameOrId + '/' + objNameOrId};
+        attach(node) {
+            this.hostNode = node;
+            this.container = node.appendChild(document.createElement('div'));
+            this.container.innerHTML = this.loadingLayout();
         }
 
-        // Widget API
-        function attach(node) {
-            mount = node;
-            container = dom.createElement('div');
-            $container = $(container);
-            container.innerHTML = loadingLayout();
-            mount.appendChild(container);
-        }
-        function start(params) {
-            workspaceId = params.workspaceId;
-            objectId = params.objectId;
-            var objectIdentity = getObjectIdentity(params.workspaceId, params.objectId, params.objectVersion);
-            var workspaceRef = [workspaceId, params.objectId, params.objectVersion || '1'].join('/');
-            sketchClient.callFunc('get_homologs', [workspaceRef]).then(function (data) {
-                container.innerHTML = dataLayout(data);
+        start({workspaceId, objectId, objectVersion}) {
+            const workspaceRef = [workspaceId, objectId, objectVersion || '1'].join('/');
+            const sketchClient = new DynamicServiceClient({
+                url: this.runtime.config('services.service_wizard.url'),
+                token: this.runtime.service('session').getAuthToken(),
+                module: 'sketch_service'
             });
-        }
-        function stop() {}
-        function detach() {
-            mount.removeChild(container);
+            // Make an RPC method call to the sketch_service dynamic service
+            // This will return a set of similar genomes, rendered by the dataLayout function
+            sketchClient.callFunc('get_homologs', [workspaceRef])
+                .then((data) => {
+                    this.container.innerHTML = this.dataLayout(data);
+                })
+                .catch((err) => {
+                    this.container.innerHTML = div({
+                        class: 'alert alert-danger'
+                    }, err.message);
+                });
         }
 
-        return {
-            attach: attach,
-            start: start,
-            stop: stop,
-            detach: detach
-        };
+        stop() {}
+
+        detach() {
+            // Just in case the widget attach method failed, or was never called...
+            if (this.hostNode && this.container) {
+                this.hostNode.removeChild(this.container);
+            }
+        }
     }
 
     return {
         make: function (config) {
-            return widget(config);
+            return new Widget(config);
         }
     };
 });
-
