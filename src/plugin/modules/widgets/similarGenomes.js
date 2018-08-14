@@ -1,11 +1,13 @@
 define([
     'kb_common/html',
     'kb_common/jsonRpc/dynamicServiceClient',
+    'plugins/dataview/modules/collapsiblePanel',
     'bootstrap'
 ],
 function (
     html,
-    DynamicServiceClient
+    DynamicServiceClient,
+    collapsiblePanel
 ) {
     'use strict';
 
@@ -28,30 +30,40 @@ function (
         }
 
         dataLayout({distances}) {
-            return div(
-                table({class: 'table'}, [
-                    thead(
-                        tr([
-                            th('Distance'),
-                            th('Scientific name'),
-                            th('Database name'),
-                            th('Database ID')
-                        ])
-                    ),
-                    tbody(distances.map((each) => {
-                        return tr([
-                            td([String(each.dist)]),
-                            td([each.sciname]),
-                            td([each.namespaceid]),
-                            td([each.sourceid])
-                        ]);
-                    }))
-                ])
-            );
+            const resultsTable = table({class: 'table'}, [
+                thead(
+                    tr([
+                        th('Distance'),
+                        th('Scientific name'),
+                        th('Database name'),
+                        th('Database ID')
+                    ])
+                ),
+                tbody(distances.map((each) => {
+                    return tr([
+                        td([String(each.dist)]), // Distance
+                        td([each.sciname]), // Scientific name
+                        td([each.namespaceid]), // Database name
+                        td([each.sourceid]) // Database ID
+                    ]);
+                }))
+            ]);
+            return collapsiblePanel({
+                title: 'Similar Genomes',
+                content: resultsTable,
+                icon: 'copy',
+                collapsed: true
+            });
         }
 
         loadingLayout() {
-            return div(p(html.loading('Finding similar genomes')));
+            const loader = p(html.loading('Finding similar genomes'));
+            return collapsiblePanel({
+                title: 'Similar Genomes',
+                content: loader,
+                icon: 'copy',
+                collapsed: true
+            });
         }
 
         attach(node) {
@@ -60,7 +72,11 @@ function (
             this.container.innerHTML = this.loadingLayout();
         }
 
-        start({workspaceId, objectId, objectVersion}) {
+        start({workspaceId, objectId, objectVersion, objectInfo}) {
+            if (!checkType(objectInfo.type)) {
+                this.container.innerHTML = '';
+                return;
+            }
             const workspaceRef = [workspaceId, objectId, objectVersion || '1'].join('/');
             const sketchClient = new DynamicServiceClient({
                 url: this.runtime.config('services.service_wizard.url'),
@@ -88,6 +104,25 @@ function (
                 this.hostNode.removeChild(this.container);
             }
         }
+    }
+
+    /**
+     * Check that the loaded workspace object is either a Reads, Assembly, or Genome type.
+     */
+    function checkType(type) {
+        const validTypes = [
+            'PairedEndLibrary-2.0',
+            'SingleEndLibrary-2.0',
+            'KBaseGenomeAnnotations.Assembly',
+            'ContigSet',
+            'Genome'
+        ];
+        for (const t of validTypes) {
+            if (type.indexOf(t) !== -1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     return {
