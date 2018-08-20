@@ -34,7 +34,7 @@ define([
                             content: div({ id: widgetSet.addWidget('kb_dataview_provenance') })
                         }),
                         (function () {
-                            if (!runtime.featureDisabled('new_provenance_widget')) {
+                            if (runtime.featureEnabled('new_provenance_widget')) {
                                 return collapsiblePanel({
                                     title: 'Data Provenance and Reference Network ... in Progress',
                                     icon: 'sitemap',
@@ -45,7 +45,7 @@ define([
                             }
                         }()),
                         (function () {
-                            if (!runtime.featureDisabled('similar_genomes')) {
+                            if (runtime.featureEnabled('similar_genomes')) {
                                 return [
                                     div({id: widgetSet.addWidget('kb_dataview_similarGenomes')}),
                                     div({id: widgetSet.addWidget('kb_dataview_dataObjectVisualizer')})
