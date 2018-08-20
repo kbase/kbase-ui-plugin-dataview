@@ -2,71 +2,19 @@ define([
     'bluebird',
     'kb_common/html',
     'kb_widget/widgetSet',
-    'plugins/dataview/modules/utils'
+    'plugins/dataview/modules/utils',
+    'plugins/dataview/modules/collapsiblePanel'
 ], function (
     Promise,
     html,
     WidgetSet,
-    utils
+    utils,
+    collapsiblePanel
 ) {
     'use strict';
 
     var t = html.tag,
-        div = t('div'),
-        span = t('span'),
-        h4 = t('h4');
-
-    function renderBSCollapsiblePanel(config) {
-        var panelId = html.genId(),
-            headingId = html.genId(),
-            collapseId = html.genId();
-
-        return div({
-            class: 'panel-group kb-widget',
-            id: panelId,
-            role: 'tablist', 'aria-multiselectable': 'true' }, [
-            div({
-                class: 'panel panel-default'
-            }, [
-                div({
-                    class: 'panel-heading',
-                    role: 'tab',
-                    id: headingId }, [
-                    h4({
-                        class: 'panel-title' }, [
-                        span({
-                            'data-toggle': 'collapse',
-                            'data-parent': '#' + panelId, 'data-target': '#' + collapseId,
-                            'aria-expanded': 'false',
-                            'aria-controls': collapseId,
-                            class: (config.collapsed === false ? '' : 'collapsed'),
-                            style: {
-                                cursor: 'pointer'
-                            }
-                        }, [
-                            span({
-                                class: 'fa fa-' + config.icon + ' fa-rotate-90',
-                                style: {
-                                    'margin-left': '10px',
-                                    'margin-right': '10px'
-                                }
-                            }),
-                            config.title
-                        ])
-                    ])
-                ]),
-                div({
-                    class: 'panel-collapse collapse ' + (config.collapsed === false ? 'in' : ''),
-                    id: collapseId,
-                    role: 'tabpanel', 'aria-labelledby': 'provHeading' }, [
-                    div({
-                        class: 'panel-body' }, [
-                        config.content
-                    ])
-                ])
-            ])
-        ]);
-    }
+        div = t('div');
 
     function widget(config) {
         var mount, container, runtime = config.runtime,
@@ -80,7 +28,7 @@ define([
                         div({ id: widgetSet.addWidget('kb_dataview_download') }),
                         div({ id: widgetSet.addWidget('kb_dataview_copy') }),
                         div({ id: widgetSet.addWidget('kb_dataview_overview') }),
-                        renderBSCollapsiblePanel({
+                        collapsiblePanel({
                             title: 'Data Provenance and Reference Network',
                             icon: 'sitemap',
                             content: div({ id: widgetSet.addWidget('kb_dataview_provenance') })
@@ -89,13 +37,13 @@ define([
                             if (!runtime.allow('alpha')) {
                                 return;
                             }
-                            return renderBSCollapsiblePanel({
+                            return collapsiblePanel({
                                 title: 'Data Provenance and Reference Network ... in Progress',
                                 icon: 'sitemap',
                                 content: div({ id: widgetSet.addWidget('kb_dataview_provenance_v2') })
                             });
                         }()),
-                        div({ id: widgetSet.addWidget('kb_dataview_dataObjectVisualizer') })
+                        div({id: widgetSet.addWidget('kb_dataview_similarGenomes')})
                     ])
                 ])
             ]);
