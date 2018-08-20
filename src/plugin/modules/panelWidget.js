@@ -34,16 +34,26 @@ define([
                             content: div({ id: widgetSet.addWidget('kb_dataview_provenance') })
                         }),
                         (function () {
-                            if (!runtime.allow('alpha')) {
-                                return;
+                            if (!runtime.featureDisabled('new_provenance_widget')) {
+                                return collapsiblePanel({
+                                    title: 'Data Provenance and Reference Network ... in Progress',
+                                    icon: 'sitemap',
+                                    content: div({ id: widgetSet.addWidget('kb_dataview_provenance_v2') })
+                                });
+                            } else {
+                                return null;
                             }
-                            return collapsiblePanel({
-                                title: 'Data Provenance and Reference Network ... in Progress',
-                                icon: 'sitemap',
-                                content: div({ id: widgetSet.addWidget('kb_dataview_provenance_v2') })
-                            });
                         }()),
-                        div({id: widgetSet.addWidget('kb_dataview_similarGenomes')})
+                        (function () {
+                            if (!runtime.featureDisabled('similar_genomes')) {
+                                return [
+                                    div({id: widgetSet.addWidget('kb_dataview_similarGenomes')}),
+                                    div({id: widgetSet.addWidget('kb_dataview_dataObjectVisualizer')})
+                                ];
+                            } else {
+                                return div({id: widgetSet.addWidget('kb_dataview_dataObjectVisualizer')});
+                            }
+                        }())
                     ])
                 ])
             ]);
