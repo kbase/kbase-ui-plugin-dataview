@@ -1,5 +1,5 @@
 /**
- * Ouput widget to display a pangenome object.
+ * Output widget to display a pangenome object.
  * @author Chris Henry <chrisshenry@gmail.com>, Roman Sutormin <rsutormin@lbl.gov>
  * @public
  */
@@ -510,7 +510,7 @@ define([
             })
                 .then(function () {
                     alert('Feature set object containing ' + size + ' genes ' +
-                        'was successfuly exported');
+                        'was successfully exported');
                 })
                 .catch(function (err) {
                     alert('Error: ' + err.error.message);
