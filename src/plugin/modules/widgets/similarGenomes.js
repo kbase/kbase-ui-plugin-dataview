@@ -19,7 +19,8 @@ function (
         tr = t('tr'),
         th = t('th'),
         tbody = t('tbody'),
-        td = t('td');
+        td = t('td'),
+        a = t('a');
 
     class Widget {
         constructor({runtime}) {
@@ -34,17 +35,20 @@ function (
                 thead(
                     tr([
                         th('Distance'),
-                        th('Scientific name'),
-                        th('Database name'),
-                        th('Database ID')
+                        th('Name')
                     ])
                 ),
                 tbody(distances.map((each) => {
+                    // Check if each genome has a KBase ID; if so, construct a dataview link
+                    let genomeName
+                    if (each.kbase_id) {
+                        genomeName = a({href: '/#dataview/' + each.kbase_id}, [each.sciname])
+                    } else {
+                        genomeName = `${each.sciname} (${each.sourceid})`
+                    }
                     return tr([
                         td([String(each.dist)]), // Distance
-                        td([each.sciname]), // Scientific name
-                        td([each.namespaceid]), // Database name
-                        td([each.sourceid]) // Database ID
+                        td([genomeName]) // Scientific name/link
                     ]);
                 }))
             ]);
@@ -90,9 +94,13 @@ function (
                     this.container.innerHTML = this.dataLayout(data);
                 })
                 .catch((err) => {
-                    this.container.innerHTML = div({
-                        class: 'alert alert-danger'
-                    }, err.message);
+                    console.log('Error loading similar genomes:', err)
+                    this.container.innerHTML = collapsiblePanel({
+                        title: 'Similar Genomes',
+                        content: 'Unable to search: ' + err.data.error,
+                        icon: 'copy',
+                        collapsed: true
+                    })
                 });
         }
 
