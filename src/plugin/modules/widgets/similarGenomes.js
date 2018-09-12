@@ -35,20 +35,24 @@ function (
                 thead(
                     tr([
                         th('Distance'),
-                        th('Name')
+                        th('Name'),
+                        th('Refseq ID'),
+                        th('KBase ID')
                     ])
                 ),
                 tbody(distances.map((each) => {
                     // Check if each genome has a KBase ID; if so, construct a dataview link
-                    let genomeName
+                    const ncbiHref = `https://www.ncbi.nlm.nih.gov/assembly/${each.sourceid}/`
+                    const ncbiLink = a({href: ncbiHref}, [each.sourceid])
+                    let kbaseLink = '(none)'
                     if (each.kbase_id) {
-                        genomeName = a({href: '/#dataview/' + each.kbase_id}, [each.sciname])
-                    } else {
-                        genomeName = `${each.sciname} (${each.sourceid})`
+                        kbaseLink = a({href: '/#dataview/' + each.kbase_id}, [each.kbase_id])
                     }
                     return tr([
                         td([String(each.dist)]), // Distance
-                        td([genomeName]) // Scientific name/link
+                        td([each.sciname]), // Scientific name
+                        td([ncbiLink]), // NCBI ID with link
+                        td([kbaseLink]) // KBase ID with link (if present)
                     ]);
                 }))
             ]);
