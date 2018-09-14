@@ -76,7 +76,7 @@ define([
                     'function'
                 ];
 
-            this.dynClient = new GenericClient({
+            this.genomeAnnotationAPI = new GenericClient({
                 url: this.runtime.getConfig('services.service_wizard.url'),
                 module: 'GenomeAnnotationAPI',
                 auth: {
@@ -102,35 +102,18 @@ define([
             if (this.options.ver) {
                 objId += '/' + this.options.ver;
             }
-            this.dynClient.callFunc('get_genome_v1', [{
+            this.genomeAnnotationAPI.callFunc('get_genome_v1', [{
                 genomes: [{ ref: objId }],
                 included_fields: genome_fields
             }]).spread(function (result) {
-                let genomeObject = result.genomes[0];
+                const genomeObject = result.genomes[0];
                 let assembly_ref = null;
-                let gnm = genomeObject.data;
+                const gnm = genomeObject.data;
                 let metadata = genomeObject.info[10];
-                let add_stats = function (obj, size, gc, num_contigs) {
-                        Object.defineProperties(obj, {
-                            dna_size: {
-                                __proto__: null,
-                                value: size,
-                                writable: false,
-                                enumerable: true
-                            },
-                            gc_content: {
-                                __proto__: null,
-                                value: gc,
-                                writable: false,
-                                enumerable: true
-                            },
-                            num_contigs: {
-                                __proto__: null,
-                                value: num_contigs,
-                                writable: false,
-                                enumerable: true
-                            }
-                        });
+                const add_stats = function (obj, size, gc, num_contigs) {
+                        obj.dna_size = size;
+                        obj.gc_content = gc;
+                        obj.num_contigs = num_contigs;
                     },
                     assembly_error = function (data, error) {
                         console.error('Error loading contigset subdata', data, error);
@@ -147,6 +130,7 @@ define([
 
                 genomeObject.objectInfo = serviceUtils.objectInfoToObject(genomeObject.info);
 
+                // We avoid getting features for big genomes.
                 if (gnm.domain === 'Eukaryota' || gnm.domain === 'Plant') {
                     // TODO: DANGER: sortof relying upon metadata structure!
                     if (metadata && metadata['GC content'] && metadata['Size'] && metadata['Number contigs']) {
@@ -156,7 +140,7 @@ define([
                             metadata['Number contigs']);
                         _this.render(genomeObject);
                     } else {
-                        _this.asm_api.get_stats(assembly_ref).then(function (stats) {
+                        return _this.asm_api.get_stats(assembly_ref).then(function (stats) {
                             add_stats(gnm,
                                 stats.dna_size,
                                 stats.gc_content,
@@ -170,14 +154,20 @@ define([
                     return null;
                 } else {
                     genome_fields.push('features');
-                    _this.dynClient.callFunc('get_genome_v1', [{
-                        'genomes': [{ 'ref': objId }],
-                        'included_fields': genome_fields,
-                        'included_feature_fields': feature_fields
+                    // we do a second call here to get the features, see above.
+                    _this.genomeAnnotationAPI.callFunc('get_genome_v1', [{
+                        genomes: [{ 'ref': objId }],
+                        included_fields: genome_fields,
+                        included_feature_fields: feature_fields
                     }])
                         .spread(function (data) {
-                            gnm = data.genomes[0].data;
+                            const features = data.genomes[0].data.features;
+                            genomeObject.data.features = features;
                             metadata = genomeObject.info[10];
+
+                            console.log('got features?', genomeObject);
+
+                            // This stuff is duplicated from above -- they can be combined.
 
                             if (metadata && metadata['GC content'] && metadata['Size'] && metadata['Number contigs']) {
                                 add_stats(gnm,
@@ -186,18 +176,17 @@ define([
                                     metadata['Number contigs']);
                                 _this.render(genomeObject);
                             } else if (!gnm.hasOwnProperty('dna_size')) {
-                                _this.asm_api.get_stats(assembly_ref).then(function (stats) {
+                                return _this.asm_api.get_stats(assembly_ref).then(function (stats) {
                                     add_stats(gnm,
                                         stats.dna_size,
                                         stats.gc_content,
                                         stats.num_contigs);
-                                    _this.render(data.genomes[0]);
-                                    return null;
+                                    _this.render(genomeObject);
                                 }).catch(function (error) {
                                     assembly_error(gnm, error);
                                 });
                             } else {
-                                _this.render(data.genomes[0]);
+                                _this.render(genomeObject);
                             }
 
                             return null;
@@ -386,7 +375,7 @@ define([
                 }
             }
         },
-        // TODO: This is 
+        // TODO: This is
         makeWidgetPanel: function ($panel, title, name, $widgetDiv) {
             var id = new Uuid(4).format();
             $panel.append(
@@ -417,7 +406,7 @@ define([
         },
         showError: function (panel, e) {
             panel.empty();
-            let $err = $('<div>')
+            const $err = $('<div>')
                 .addClass('alert alert-danger')
                 .append($('<div>')
                     .addClass('text-danger')
