@@ -165,8 +165,6 @@ define([
                             genomeObject.data.features = features;
                             metadata = genomeObject.info[10];
 
-                            console.log('got features?', genomeObject);
-
                             // This stuff is duplicated from above -- they can be combined.
 
                             if (metadata && metadata['GC content'] && metadata['Size'] && metadata['Number contigs']) {
