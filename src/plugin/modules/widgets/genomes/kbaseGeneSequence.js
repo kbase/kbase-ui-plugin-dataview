@@ -10,7 +10,7 @@ define([
     'kb_common/html',
     'kb_service/client/workspace',
     'kb_widget/legacy/widget'
-], function(
+], function (
     $,
     html,
     Workspace) {
@@ -28,7 +28,7 @@ define([
             seq_cell_height: 208,
             genomeInfo: null
         },
-        init: function(options) {
+        init: function (options) {
             this._super(options);
 
             if (this.options.featureID === null) {
@@ -44,7 +44,7 @@ define([
 
             return this;
         },
-        render: function() {
+        render: function () {
             this.$messagePane = $('<div/>')
                 .addClass('kbwidget-message-pane hide');
             this.$elem.append(this.$messagePane);
@@ -55,14 +55,14 @@ define([
 
             this.$elem.append(this.$infoPanel.append(this.$infoTable));
         },
-        makeRow: function(name, value, color) {
+        makeRow: function (name, value, color) {
             var $row = $('<tr>')
                 .append($('<th>').append(name))
                 .append($('<td>').append($('<div style=\'max-height:' + this.options.seq_cell_height + 'px; overflow:scroll; font-family:monospace; background-color:' + color + '; border:1px solid transparent\'>').append(value)));
             //.append("<td style='max-height: 100px; overflow:scroll; font-family: monospace'>").append($("<div style='max-height:100px; overflow:scroll; font-family: monospace'>").append(value));
             return $row;
         },
-        renderWorkspace: function() {
+        renderWorkspace: function () {
             var self = this;
             this.showMessage(html.loading());
             this.$infoPanel.hide();
@@ -76,16 +76,15 @@ define([
                     token: this.runtime.service('session').getAuthToken()
                 });
                 workspace.get_objects([obj])
-                    .then(function(genome) {
+                    .then(function (genome) {
                         self.ready(genome[0]);
                     })
-                    .catch(function(err) {
+                    .catch(function (err) {
                         self.renderError(err);
                     });
             }
         },
-        ready: function(genome) {
-            var self = this;
+        ready: function (genome) {
             if (genome.data.features) {
                 var feature = null;
                 for (var i = 0; i < genome.data.features.length; i++) {
@@ -171,7 +170,7 @@ define([
             this.hideMessage();
             this.$infoPanel.show();
         },
-        buildObjectIdentity: function(workspaceID, objectID) {
+        buildObjectIdentity: function (workspaceID, objectID) {
             var obj = {};
             if (/^\d+$/.exec(workspaceID))
                 obj['wsid'] = workspaceID;
@@ -185,7 +184,7 @@ define([
                 obj['name'] = objectID;
             return obj;
         },
-        getData: function() {
+        getData: function () {
             return {
                 type: 'Feature',
                 id: this.options.featureID,
@@ -193,17 +192,17 @@ define([
                 title: 'Gene Sequence'
             };
         },
-        showMessage: function(message) {
+        showMessage: function (message) {
             var span = $('<span/>').append(message);
 
             this.$messagePane.empty()
                 .append(span)
                 .removeClass('hide');
         },
-        hideMessage: function() {
+        hideMessage: function () {
             this.$messagePane.addClass('hide');
         },
-        renderError: function(error) {
+        renderError: function (error) {
             var errString = 'Sorry, an unknown error occurred';
             if (typeof error === 'string')
                 errString = error;
