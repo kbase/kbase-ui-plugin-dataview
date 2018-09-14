@@ -1,9 +1,9 @@
-/* Shows the SEED functional category hierarchy as a 
+/* Shows the SEED functional category hierarchy as a
  * collapsable/expandable bar chart
- * 
+ *
  * Found a collapsable hierarcy example from Mike Bostock to follow:
  * https://gist.github.com/mbostock/1093025
- * 
+ *
  * will adapt this to work with the KBase SEED annotations
  */
 define([
@@ -13,7 +13,7 @@ define([
     'kb_plugin_dataview',
 
     'kb_widget/legacy/authenticatedWidget'
-], function(
+], function (
     $,
     d3,
     Workspace,
@@ -55,7 +55,7 @@ define([
          * Initialize the widget.
          */
 
-        init: function(options) {
+        init: function (options) {
             this._super(options);
 
             // init SEED
@@ -74,30 +74,30 @@ define([
         },
         /*
          I need to load the SEED subsystem ontology. I am going to use
-         the "subsys.txt" file I found at: 
+         the "subsys.txt" file I found at:
          ftp.theseed.org/subsystems/subsys.txt
-         
-         Note that this file is updated weekly, but not versioned. It's 
+
+         Note that this file is updated weekly, but not versioned. It's
          possible that errors will arise because the subsystems assigned
          in the genome object are out of date relative to the current
          subsys.txt file.
-         
+
          file format is:
          Level 1 \t Level 2 \t Level 3 \t Level 4\t Optional GO id \t Optional GO desc \n
-         
+
          ontologyDepth is set to 4 for SEED
-         
+
          SEED is not a strict heirarchy, some nodes have multiple parents
          I'm going to keep track of a nodes parents to map things right.
-         
+
          to scale the graph, I'm going to keep track of the max count in the Level 1 of the
          hierarchy.
-         
+
          maxCount - count in the largest Level 1 category
-         
+
          loadSEEDHierarchy() function will parse file and populate the SEEDTree data structure
          */
-        loadSEEDHierarchy: function() {
+        loadSEEDHierarchy: function () {
             var self = this;
             var ontologyDepth = 4; //this should be moved up to the global variables
             var nodeMap = {};
@@ -108,7 +108,7 @@ define([
 
             //d3.text("assets/data/subsys.txt", function(text) {
             //d3.text("/static/subsys.txt", function(text) {
-            d3.text(Plugin.plugin.fullPath + '/data/subsys.txt', function(text) {
+            d3.text(Plugin.plugin.fullPath + '/data/subsys.txt', function (text) {
                 var data = d3.tsv.parseRows(text),
                     totalGenesWithFunctionalRoles = 0,
                     i, j, geneCount, nodeHierarchy, parentHierarchy, node, gene;
@@ -128,8 +128,8 @@ define([
                     }
 
                     for (j = 0; j < ontologyDepth; j += 1) {
-                        // some node names are an empty string "". I'm going to set these to 
-                        // a modified version of their parent node name 
+                        // some node names are an empty string "". I'm going to set these to
+                        // a modified version of their parent node name
                         data[i][j] = (data[i][j] === '') ? '--- ' + data[i][j - 1] + ' ---' : data[i][j];
                         nodeHierarchy = parentHierarchy + ':' + data[i][j];
 
@@ -150,7 +150,7 @@ define([
                                 nodeMap[nodeHierarchy] = node;
 
                                 if (j === ontologyDepth - 1 && subsysToGeneMap[data[i][j]] !== undefined) {
-                                    subsysToGeneMap[data[i][j]].forEach(function(f) {
+                                    subsysToGeneMap[data[i][j]].forEach(function (f) {
                                         gene = { 'name': f, 'size': '' };
                                         node.children.push(gene);
                                     });
@@ -172,14 +172,14 @@ define([
                         self.maxCount = self.maxCount > Level1[k] ? self.maxCount : Level1[k];
                     }
 
-                    $.when(self.SEEDTree.children.forEach(function(d) {
-                            self.collapse(d);
-                        }))
+                    $.when(self.SEEDTree.children.forEach(function (d) {
+                        self.collapse(d);
+                    }))
                         .done(self.update(self.root = self.SEEDTree));
                 }
             });
         },
-        update: function(source) {
+        update: function (source) {
             var self = this;
 
             var nodes = self.tree.nodes(self.SEEDTree);
@@ -196,29 +196,29 @@ define([
                 .style('height', height + 'px');
 
             // Compute the "layout".
-            nodes.forEach(function(n, i) {
+            nodes.forEach(function (n, i) {
                 n.x = i * self.barHeight;
             });
 
             // Update the nodes…
             var node = self.svg.selectAll('g.KBSnode')
-                .data(nodes, function(d) {
+                .data(nodes, function (d) {
                     return d.id || (d.id = ++self.i);
                 });
 
             var nodeEnter = node.enter().append('g')
                 .attr('class', 'KBSnode')
-                .attr('transform', function(d) {
+                .attr('transform', function () {
                     return 'translate(' + source.y0 + ',' + source.x0 + ')';
                 })
                 .style('opacity', 1e-6)
-                .on('mouseover', function(d) {
+                .on('mouseover', function () {
                     d3.select(this).selectAll('text, rect')
                         .style('font-weight', 'bold')
                         .style('font-size', '90%')
                         .style('stroke-width', '3px');
                 })
-                .on('mouseout', function(d) {
+                .on('mouseout', function () {
                     d3.select(this).selectAll('text, rect')
                         .style('font-weight', 'normal')
                         .style('font-size', '80%')
@@ -232,49 +232,49 @@ define([
                 .attr('height', self.barHeight)
                 .attr('width', self.barWidth)
                 .style('fill', self.color)
-                .on('click', $.proxy(function(d) {
+                .on('click', $.proxy(function (d) {
                     self.click(d);
                 }, self));
 
             nodeEnter.append('text')
                 .attr('dy', 3.5)
                 .attr('dx', 300 + 5.5)
-                .text(function(d) {
+                .text(function (d) {
                     return d.name;
                 });
 
             nodeEnter.append('rect')
                 .attr('y', -self.barHeight / 2)
-                .attr('x', function(d) {
+                .attr('x', function (d) {
                     return 0 + 275 - scale(d.size) - d.depth * self.stepSize;
                 })
                 .attr('height', self.barHeight)
-                .attr('width', function(d) {
+                .attr('width', function (d) {
                     return scale(d.size);
                 })
                 .style('fill', self.color)
-                .on('click', $.proxy(function(d) {
+                .on('click', $.proxy(function (d) {
                     self.click(d);
                 }, self));
 
             nodeEnter.append('text')
                 .attr('dy', 3.5)
                 .attr('x', 278)
-                .text(function(d) {
+                .text(function (d) {
                     return d.name === 'Functional Categories' ? '' : d.size;
                 });
 
             // Transition nodes to their new position.
             nodeEnter.transition()
                 .duration(self.duration)
-                .attr('transform', function(d) {
+                .attr('transform', function (d) {
                     return 'translate(' + d.y + ',' + d.x + ')';
                 })
                 .style('opacity', 1);
 
             node.transition()
                 .duration(self.duration)
-                .attr('transform', function(d) {
+                .attr('transform', function (d) {
                     return 'translate(' + d.y + ',' + d.x + ')';
                 })
                 .style('opacity', 1)
@@ -284,20 +284,20 @@ define([
             // Transition exiting nodes to the parent's new position.
             node.exit().transition()
                 .duration(self.duration)
-                .attr('transform', function(d) {
+                .attr('transform', function () {
                     return 'translate(' + source.y + ',' + source.x + ')';
                 })
                 .style('opacity', 1e-6)
                 .remove();
 
             // Stash the old positions for transition.
-            nodes.forEach(function(d) {
+            nodes.forEach(function (d) {
                 d.x0 = d.x;
                 d.y0 = d.y;
             });
         },
         // Toggle children on click.
-        click: function(d) {
+        click: function (d) {
             // open window with gene landing page
             // if (d.children === undefined || (d._children === null && d.children === null)) {
             // The size is set to an empty string for navigable leaves
@@ -316,18 +316,18 @@ define([
 
             this.update(d);
         },
-        color: function(d) {
+        color: function (d) {
             /*
              * leaf color is set here.
              * A parent node collapsed and a non-feature leaf without
              */
 
-            // terminal feature nodes are distinguished by having a string as 
+            // terminal feature nodes are distinguished by having a string as
             // the size. A 0 size node has no children, and just retains
             // the standard color.
-            // nodes with children become darker when expanded. Expansion is 
+            // nodes with children become darker when expanded. Expansion is
             // detected by the presense of _children -- which is used to store
-            // the children when the parent is collapsed (and swapped to 
+            // the children when the parent is collapsed (and swapped to
             // .children when it is expanded.)
             // The feature leaf nodes are always white.
             if (typeof d.size === 'number') {
@@ -341,24 +341,24 @@ define([
             }
             return '#ffffff';
         },
-        collapse: function(d) {
+        collapse: function (d) {
             var self = this;
             if (d.children) {
                 d._children = d.children;
-                d._children.forEach(function(n) {
+                d._children.forEach(function (n) {
                     self.collapse(n);
                 });
                 d.children = null;
             }
         },
-        getData: function() {
+        getData: function () {
             return { title: 'Functional Categories ', id: this.options.objNameOrId, workspace: this.options.wsNameOrId };
         },
-        render: function() {
+        render: function () {
             var self = this;
             self.showData(self.options.genomeInfo.data);
         },
-        showData: function(genomeObj) {
+        showData: function (genomeObj) {
             var margin = this.margin,
                 width = this.width;
 
@@ -386,15 +386,14 @@ define([
                 .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
             /*
-             First I am going to iterate over the Genome Typed Object and 
+             First I am going to iterate over the Genome Typed Object and
              create a mapping of the assigned functional roles (by SEED) to
-             an array of genes with those roles. 
-             
+             an array of genes with those roles.
+
              subsysToGeneMap [ SEED Role ] = Array of Gene Ids
              */
 
-            genomeObj.features.forEach(function(f) {
-
+            genomeObj.features.forEach(function (f) {
                 // Each function can have multiple genes, creating mapping of function to list of gene ids
                 if (subsysToGeneMap[f.function] === undefined) {
                     subsysToGeneMap[f.function] = [];
@@ -408,7 +407,7 @@ define([
 
             this.loadSEEDHierarchy();
         },
-        loggedInCallback: function(event, auth) {
+        loggedInCallback: function (event, auth) {
             this.authToken = auth;
             this.wsClient = new Workspace(this.runtime.getConfig('services.workspace.url'), {
                 token: this.runtime.service('session').getAuthToken()
@@ -416,7 +415,7 @@ define([
             this.render();
             return this;
         },
-        loggedOutCallback: function(event, auth) {
+        loggedOutCallback: function (event, auth) {
             this.authToken = null;
             this.wsClient = null;
             return this;
