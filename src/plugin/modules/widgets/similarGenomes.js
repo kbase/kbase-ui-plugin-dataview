@@ -1,6 +1,5 @@
 define([
     'kb_common/html',
-    'kb_common/jsonRpc/dynamicServiceClient',
     'plugins/dataview/modules/collapsiblePanel',
     'bootstrap'
 ],
@@ -22,15 +21,17 @@ function (
         }
 
         dataLayout({ upa, objName }) {
-            let url = 'https://kbaseincubator.github.io/object_relations_ui/';
-            url += '?upa=' + upa;
-            url += '&name=' + objName;
-            // TODO switch api url on current environment
-            url += '&api_url="https://ci.kbase.us/services/relation_engine_api_ci"';
+            let src = 'https://kbaseincubator.github.io/object_relations_ui/';
+            src += '?upa=' + upa;
+            src += '&name=' + objName;
+            // TODO switch api url on the current environment
+            // (only relevant when we have data for different environments)
+            src += '&api_url="https://ci.kbase.us/services/relation_engine_api_ci"';
             return iframe({
-                src: url,
+                src: src,
                 width: '100%',
-                height: '100%'
+                height: '600px',
+                style: { border: 'none' }
             });
         }
 
@@ -40,7 +41,6 @@ function (
         }
 
         start({workspaceId, objectId, objectVersion, objectInfo}) {
-            console.log({ workspaceId, objectId, objectVersion, objectInfo })
             const objName = objectInfo.name;
             // In the relation engine, we use ':' as the delimiter
             const upa = [workspaceId, objectId, objectVersion || '1'].join(':');
@@ -51,7 +51,7 @@ function (
                 content: this.dataLayout({ upa, objName }),
                 icon: 'copy',
                 collapsed: false
-            })
+            });
         }
 
         stop() {}
