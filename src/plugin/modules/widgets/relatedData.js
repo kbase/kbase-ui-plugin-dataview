@@ -9,8 +9,8 @@ function (
 ) {
     'use strict';
 
-    const t = html.tag,
-        iframe = t('iframe');
+    const t = html.tag;
+    const iframe = t('iframe');
 
     class Widget {
         constructor({runtime}) {
@@ -18,15 +18,16 @@ function (
             // Both of the props below are assigned in the attach method
             this.hostNode = null;
             this.container = null;
+            this.authToken = this.runtime.service('session').getAuthToken();
+            const config = this.runtime.rawConfig();
+            // Not sure how to get the root services endpoint, so getting it from Workspace
+            this.kbaseEndpoint = config.services.Workspace.url.replace(/ws$/, '');
+            this.narrURL = config.services.narrative.url;
         }
 
-        dataLayout({ upa, objName }) {
-            let src = 'https://kbaseincubator.github.io/object_relations_ui/';
-            src += '?upa=' + upa;
-            src += '&name=' + objName;
-            // TODO switch api url on the current environment
-            // (only relevant when we have data for different environments)
-            src += '&api_url="https://ci.kbase.us/services/relation_engine_api_ci"';
+        dataLayout({ upa }) {
+            // TODO use a dynamic service here
+            const src = 'https://kbaseincubator.github.io/object_relations_ui/';
             return iframe({
                 src: src,
                 width: '100%',
@@ -41,16 +42,28 @@ function (
         }
 
         start({workspaceId, objectId, objectVersion, objectInfo}) {
-            const objName = objectInfo.name;
             // In the relation engine, we use ':' as the delimiter
             const upa = [workspaceId, objectId, objectVersion || '1'].join(':');
-            // Make an RPC method call to the sketch_service dynamic service
-            // This will return a set of similar genomes, rendered by the dataLayout function
             this.container.innerHTML = collapsiblePanel({
                 title: 'Similar Data',
-                content: this.dataLayout({ upa, objName }),
+                content: this.dataLayout({ upa }),
                 icon: 'copy',
                 collapsed: false
+            });
+            const iframeElm = this.container.querySelector('iframe');
+            const config = {
+                upa,
+                authToken: this.authToken,
+                rootURL: this.narrURL,
+                kbaseEndpoint: this.kbaseEndpoint,
+                relEngURL: this.kbaseEndpoint + '/relation_engine_api'
+            };
+            // When the iframe content finishes loading, send a post message to it
+            iframeElm.addEventListener('load', () => {
+                iframeElm.contentWindow.postMessage(JSON.stringify({
+                    method: 'setConfig',
+                    params: { config }
+                }), '*');
             });
         }
 

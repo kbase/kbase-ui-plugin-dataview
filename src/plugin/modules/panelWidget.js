@@ -47,7 +47,7 @@ define([
                         (function () {
                             if (runtime.featureEnabled('similar_genomes')) {
                                 return [
-                                    div({id: widgetSet.addWidget('kb_dataview_similarGenomes')}),
+                                    div({id: widgetSet.addWidget('kb_dataview_relatedData')}),
                                     div({id: widgetSet.addWidget('kb_dataview_dataObjectVisualizer')})
                                 ];
                             } else {
