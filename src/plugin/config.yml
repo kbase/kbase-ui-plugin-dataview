@@ -62,8 +62,8 @@ source:
             module: kb_dataview_widget_provenance_v2
             file: widgets/provenanceWidgetv2
         -
-            module: kb_dataview_widget_similarGenomes
-            file: widgets/similarGenomes
+            module: kb_dataview_widget_relatedData
+            file: widgets/relatedData
         -
             module: kb_dataview_downloadWidget
             file: widgets/download/downloadWidget
@@ -288,8 +288,8 @@ install:
             name: kb_dataview_provenance_v2
             type: factory
         -
-            module: kb_dataview_widget_similarGenomes
-            name: kb_dataview_similarGenomes
+            module: kb_dataview_widget_relatedData
+            name: kb_dataview_relatedData
             type: factory
         -
             module: kb_dataview_downloadWidget
