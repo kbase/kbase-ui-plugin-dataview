@@ -22,6 +22,9 @@ function (
             const config = this.runtime.rawConfig();
             // Not sure how to get the root services endpoint, so getting it from Workspace
             this.kbaseEndpoint = config.services.Workspace.url.replace(/ws$/, '');
+            this.kbaseEndpoint = this.kbaseEndpoint
+              .replace(/^https:\/\/narrative-dev\./, 'https://')
+              .replace(/^https:\/\/narrative\./, 'https://');
             this.narrURL = config.services.narrative.url;
         }
 
