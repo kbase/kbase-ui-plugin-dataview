@@ -21,7 +21,7 @@ function (
             this.authToken = this.runtime.service('session').getAuthToken();
             const config = this.runtime.rawConfig();
             // Not sure how to get the root services endpoint, so getting it from Workspace
-            this.kbaseEndpoint = config.services.Workspace.url.replace(/ws$/, '');
+            this.kbaseEndpoint = config.services.Workspace.url.replace(/\/ws$/, '');
             // For narrative-dev and prod, the services endpoint should not have a subdomain
             this.kbaseEndpoint = this.kbaseEndpoint
               .replace(/^https:\/\/narrative-dev\./, 'https://')
