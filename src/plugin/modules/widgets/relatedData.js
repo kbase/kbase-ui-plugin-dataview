@@ -14,7 +14,7 @@ function (
     const iframe = t('iframe');
 
     class Widget {
-        constructor({runtime}) {
+        constructor({ runtime }) {
             this.runtime = runtime;
             // Both of the props below are assigned in the attach method
             this.hostNode = null;
@@ -22,10 +22,9 @@ function (
             this.authToken = runtime.service('session').getAuthToken();
             // Not sure how to get the root services endpoint, so getting it from Workspace
             // For narrative-dev and prod, the services endpoint should not have a subdomain
-            this.kbaseEndpoint = runtime.config('services.Workspace.url')
-                .replace(/\/ws$/, '') // remove the "/ws" suffix
-                .replace(/^https:\/\/narrative-dev\./, 'https://')
-                .replace(/^https:\/\/narrative\./, 'https://');
+
+            this.relationEngineURL = runtime.config('services.RelationEngine.url');
+
             this.narrURL = runtime.config('services.narrative.url');
             window.sketchService = new DynamicServiceClient({
                 module: 'sketch_service',
@@ -50,7 +49,7 @@ function (
             this.container = node.appendChild(document.createElement('div'));
         }
 
-        start({workspaceId, objectId, objectVersion, objectInfo}) {
+        start({ workspaceId, objectId, objectVersion, objectInfo }) {
             // In the relation engine, we use ':' as the delimiter
             const upa = [workspaceId, objectId, objectVersion || '1'].join(':');
             this.container.innerHTML = collapsiblePanel({
@@ -65,18 +64,18 @@ function (
                 authToken: this.authToken,
                 rootURL: this.narrURL,
                 kbaseEndpoint: this.kbaseEndpoint,
-                relEngURL: this.kbaseEndpoint + '/relation_engine_api'
+                relEngURL: this.relationEngineURL
             };
-            // Get the sketch service URL
+                // Get the sketch service URL
             const client = new DynamicServiceClient({
                 module: 'sketch_service',
                 url: this.runtime.config('services.service_wizard.url')
             });
-            // When the iframe content finishes loading, send a post message to it
+                // When the iframe content finishes loading, send a post message to it
             iframeElm.addEventListener('load', () => {
                 // Call the sketch client lookupModule method, which returns a promise
                 client.lookupModule().then(mod => {
-                    config.sketchURL = mod[0].url
+                    config.sketchURL = mod[0].url;
                     iframeElm.contentWindow.postMessage(JSON.stringify({
                         method: 'setConfig',
                         params: { config }
@@ -85,7 +84,7 @@ function (
             });
         }
 
-        stop() {}
+        stop() { }
 
         detach() {
             // Just in case the widget attach method failed, or was never called...
