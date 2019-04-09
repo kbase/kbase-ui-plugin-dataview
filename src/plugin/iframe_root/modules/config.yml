@@ -517,6 +517,12 @@ install:
             module:  widgets/genericDataObject
             name: kb_dataview_genericObject
             type: factory
+
+        # KBase Report
+        -
+            module: widgets/kbase-report/viewer
+            name: kb_dataview_kbaseReport
+            type: es6
             
     routes:
         -
@@ -1300,3 +1306,20 @@ install:
                         -
                             from: objectVersion 
                             to: treeObjVer
+
+        # KBASE REPORT
+        -
+            type:
+                module: KBaseReport
+                name: Report
+                version: any
+            icon:
+                type: fontAwesome
+                classes: [fa-file-text-o]
+            viewers:
+                -
+                    default: true
+                    title: 'KBase Report'
+                    widget:
+                        name: kb_dataview_kbaseReport
+                    panel: true
