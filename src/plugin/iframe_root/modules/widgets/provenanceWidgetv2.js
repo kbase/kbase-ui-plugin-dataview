@@ -19,8 +19,6 @@ define([
             container,
             $container,
             runtime = config.runtime,
-            workspaceId,
-            objectId,
             needColorKey = true,
             workspace = new Workspace(runtime.getConfig('services.workspace.url'), {
                 token: runtime.service('session').getAuthToken()
@@ -919,8 +917,7 @@ define([
                     .on('click', onNodeClick)
                     .call(force.drag);
 
-                var rect = g
-                    .append('rect')
+                g.append('rect')
                     .attr('class', 'nodeObj')
                     .attr('x', -rectWidth / 2)
                     .attr('y', -rectHeight / 2)
@@ -935,10 +932,10 @@ define([
                     .attr('ry', function (d) {
                         return d.isFunction ? rectWidth / 2 : 0;
                     })
-                    .on('mouseover', function (d) {
+                    .on('mouseover', function () {
                         d3.select(this).attr('stroke-width', '3px');
                     })
-                    .on('mouseleave', function (d) {
+                    .on('mouseleave', function () {
                         d3.select(this).attr('stroke-width', '1px');
                     })
                     .transition(t);
@@ -1051,7 +1048,7 @@ define([
                 force.stop();
             }
 
-            function tick(e) {
+            function tick() {
                 node.attr('cx', function (d) {
                     return (d.x = Math.max(rectWidth / 2, Math.min(svgWidth - rectWidth / 2, d.x)));
                 })
@@ -1087,7 +1084,7 @@ define([
                         return d.toggle === false ? 'none' : 'initial';
                     });
             }
-            force.on('end', function (e) {
+            force.on('end', function () {
                 oldNodes = nodes;
                 maintainNodePositions();
             });
@@ -1179,7 +1176,7 @@ define([
                 dgraph.setNode(node.objId, nodeInfo);
             }
             //add links to dgraph
-            for (var i = 0; i < combineGraph.links.length; i++) {
+            for (let i = 0; i < combineGraph.links.length; i++) {
                 var link = combineGraph.links[i];
                 //d3 sometimes mutates the integers to references of the actual object. Manually changing it back b/c of dagre only takes numbers or labels
                 if (isNaN(link.source)) {
@@ -1192,7 +1189,7 @@ define([
             dagre.layout(dgraph);
             var nodes = [];
             var nodeLabels = dgraph.nodes();
-            for (var i = 0; i < nodeLabels.length; i++) {
+            for (let i = 0; i < nodeLabels.length; i++) {
                 nodes.push(dgraph.node(nodeLabels[i]));
             }
 
@@ -1211,8 +1208,6 @@ define([
         }
         function start(params) {
             needColorKey = true; // so that the key renders
-            workspaceId = params.workspaceId;
-            objectId = params.objectId;
 
             var objectIdentity = getObjectIdentity(params.workspaceId, params.objectId);
             buildDataAndRender(objectIdentity);
