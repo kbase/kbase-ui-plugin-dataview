@@ -22,7 +22,6 @@ define(['bluebird', 'kb_lib/props', 'kb_lib/messenger', './services/session', '.
 
             this.heartbeatTimer = null;
 
-            console.log('CONFIG', pluginConfig);
             this.services = {
                 session: new SessionService({ runtime: this }),
                 widget: new WidgetService({ runtime: this }),

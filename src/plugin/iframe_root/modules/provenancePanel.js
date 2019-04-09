@@ -1,7 +1,7 @@
 define([
     'jquery',
     'bluebird',
-    'kb_common/html',
+    'kb_lib/html',
     'kbaseUI/widget/widgetSet',
     'kb_service/utils',
     'kb_service/client/workspace'

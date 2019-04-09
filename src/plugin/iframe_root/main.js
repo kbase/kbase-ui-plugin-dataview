@@ -25,7 +25,6 @@ require.config({
         'knockout-switch-case': 'vendor/knockout-switch-case/knockout-switch-case',
         'knockout-validation': 'vendor/knockout-validation/knockout.validation',
         'knockout-mapping': 'vendor/bower-knockout-mapping/knockout.mapping',
-        'knockout-plus': 'lib/knockout-plus/knockout-plus',
         knockout: 'vendor/knockout/knockout',
         marked: 'vendor/marked/marked',
         moment: 'vendor/moment/moment',
