@@ -15,7 +15,8 @@ define(['kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'], function (html, Wid
                     class: 'container-fluid',
                     style: {
                         width: '100%'
-                    }
+                    },
+                    dataKBTesthookPlugin: 'dataview'
                 },
                 [
                     div({ class: 'row' }, [

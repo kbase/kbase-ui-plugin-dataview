@@ -6,7 +6,7 @@ define([
     '../queryService',
     'kb_common/html',
     'kb_lib/htmlBootstrapBuilders',
-    './table',
+    '../table',
 
     'datatables_bootstrap'
 ], function (

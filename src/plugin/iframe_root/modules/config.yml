@@ -593,7 +593,24 @@ install:
                     optional: true
             widget: kb_dataview_jsonViewPanel 
             
-                
+    panels:
+        -             
+            view: dataView
+            module: panelWidget
+            type: factory
+        -
+            view: jsonView
+            module: jsonViewPanel
+            type: factory
+        -
+            view: provenanceView
+            module: provenancePanel
+            type: factory
+        -
+            view: provenanceView2
+            module: provenancePanel2
+            type: factory
+    
                     
     types:
         # COMMUNITIES
@@ -670,35 +687,7 @@ install:
                             
         # GENOMES
         
-#        -
-#            type:
-#                module: KBaseGenomes
-#                name: ContigSet
-#                version: any
-#            icon: 
-#                type: fontAwesome
-#                classes: ['fa-align-justify']
-#            viewers:
-#                -
-#                    title: Data View
-#                    widget: 
-#                        name: kb_dataview_contigSet
-#                        config:
-#                            jqueryName: kbaseContigSetView
-#                    panel: true
-#                    default: true
-#                    options: 
-#                        -
-#                            from: workspaceId 
-#                            to: ws_name
-#                        -
-#                            from: objectId
-#                            to: ws_id
-#                        -
-#                            from: objectVersion
-#                            to: ver 
-#                            optional: true
-                            
+                          
         # TYPES DEFINED IN MODELING WIDGETS
         -
             type:
@@ -1417,3 +1406,23 @@ install:
                     widget:
                         name: kb_dataview_kbaseReport
                     panel: true
+
+views:
+    -
+        view: dataView
+        module: panelWidget
+        type: factory
+    -
+        view: jsonView
+        module: jsonViewPanel
+        type: factory
+    -
+        view: provenanceView
+        module: provenancePanel
+        type: factory
+    -
+        view: provenanceView2
+        module: provenancePanel2
+        type: factory
+    
+    
