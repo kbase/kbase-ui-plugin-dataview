@@ -99,29 +99,8 @@ require([
             })
             .then(() => {
                 // Add routes to panels here
-                const panels = [
-                    {
-                        view: 'dataView',
-                        module: 'panelWidget',
-                        type: 'factory'
-                    },
-                    {
-                        view: 'jsonView',
-                        module: 'jsonViewPanel',
-                        type: 'factory'
-                    },
-                    {
-                        view: 'provenanceView',
-                        module: 'provenancePanel',
-                        type: 'factory'
-                    },
-                    {
-                        view: 'provenanceView2',
-                        module: 'provenancePanel2',
-                        type: 'factory'
-                    }
-                ];
-                dispatcher = new Dispatcher({ runtime: integration.runtime, node: rootNode, panels });
+                const views = pluginConfig.views;
+                dispatcher = new Dispatcher({ runtime: integration.runtime, node: rootNode, views });
                 return dispatcher.start();
             })
             .then((dispatcher) => {

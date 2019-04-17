@@ -18,37 +18,44 @@ define(['bluebird', 'kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils', 'collaps
             widgetSet = runtime.service('widget').newWidgetSet();
 
         function renderPanel() {
-            return div({ class: 'kbase-view kbase-dataview-view container-fluid', 'data-kbase-view': 'dataview' }, [
-                div({ class: 'row' }, [
-                    div({ class: 'col-sm-12' }, [
-                        div({ id: widgetSet.addWidget('kb_dataview_download') }),
-                        div({ id: widgetSet.addWidget('kb_dataview_copy') }),
-                        div({ id: widgetSet.addWidget('kb_dataview_overview') }),
-                        collapsiblePanel({
-                            title: 'Data Provenance and Reference Network',
-                            icon: 'sitemap',
-                            content: div({ id: widgetSet.addWidget('kb_dataview_provenance') })
-                        }),
-                        (function () {
-                            if (runtime.featureEnabled('new_provenance_widget')) {
-                                return collapsiblePanel({
-                                    title: 'Data Provenance and Reference Network ... in Progress',
-                                    icon: 'sitemap',
-                                    content: div({ id: widgetSet.addWidget('kb_dataview_provenance_v2') })
-                                });
-                            } else {
-                                return null;
-                            }
-                        })(),
-                        (function () {
-                            if (runtime.featureEnabled('similar_genomes')) {
-                                return div({ id: widgetSet.addWidget('kb_dataview_relatedData') });
-                            }
-                        })(),
-                        div({ id: widgetSet.addWidget('kb_dataview_dataObjectVisualizer') })
+            return div(
+                {
+                    class: 'kbase-view kbase-dataview-view container-fluid',
+                    dataKbaseView: 'dataview',
+                    dataKBTesthookPlugin: 'dataview'
+                },
+                [
+                    div({ class: 'row' }, [
+                        div({ class: 'col-sm-12' }, [
+                            div({ id: widgetSet.addWidget('kb_dataview_download') }),
+                            div({ id: widgetSet.addWidget('kb_dataview_copy') }),
+                            div({ id: widgetSet.addWidget('kb_dataview_overview') }),
+                            collapsiblePanel({
+                                title: 'Data Provenance and Reference Network',
+                                icon: 'sitemap',
+                                content: div({ id: widgetSet.addWidget('kb_dataview_provenance') })
+                            }),
+                            (function () {
+                                if (runtime.featureEnabled('new_provenance_widget')) {
+                                    return collapsiblePanel({
+                                        title: 'Data Provenance and Reference Network ... in Progress',
+                                        icon: 'sitemap',
+                                        content: div({ id: widgetSet.addWidget('kb_dataview_provenance_v2') })
+                                    });
+                                } else {
+                                    return null;
+                                }
+                            })(),
+                            (function () {
+                                if (runtime.featureEnabled('similar_genomes')) {
+                                    return div({ id: widgetSet.addWidget('kb_dataview_relatedData') });
+                                }
+                            })(),
+                            div({ id: widgetSet.addWidget('kb_dataview_dataObjectVisualizer') })
+                        ])
                     ])
-                ])
-            ]);
+                ]
+            );
         }
 
         function init(config) {

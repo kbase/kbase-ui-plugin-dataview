@@ -58,7 +58,11 @@ define([
         function renderPanel() {
             var div = html.tag('div'),
                 panel = div(
-                    { class: 'kbase-view kbase-dataview-view container-fluid', 'data-kbase-view': 'dataview' },
+                    {
+                        class: 'kbase-view kbase-dataview-view container-fluid',
+                        'data-kbase-view': 'dataview',
+                        dataKBTesthookPlugin: 'dataview'
+                    },
                     [
                         div({ class: 'row' }, [
                             div({ class: 'col-sm-12' }, [
