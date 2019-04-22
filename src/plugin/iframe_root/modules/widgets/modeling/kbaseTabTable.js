@@ -19,6 +19,12 @@ define([
     'datatables_bootstrap'
 ], function ($, Promise, html, DynamicServiceClient, Workspace, FBA, KBModeling) {
     'use strict';
+
+    const t = html.tag,
+        a = t('a'),
+        span = t('span'),
+        table = t('table');
+
     $.KBWidget({
         name: 'kbaseTabTable',
         parent: 'kbaseAuthenticatedWidget',
@@ -62,7 +68,7 @@ define([
                 var placeholder = $('<div>');
                 placeholder.loading();
 
-                uiTabs.push({ name: tabList[i].name, content: placeholder });
+                uiTabs.push({ name: tabList[i].name, key: tabList[i].key, content: placeholder });
             }
 
             uiTabs[0].active = true;
@@ -222,8 +228,18 @@ define([
 
                 // note: must add table first
                 tabPane.append(
-                    '<table class="table table-bordered table-striped" style="margin-left: auto; margin-right: auto;">'
+                    table({
+                        class: 'table table-bordered table-striped',
+                        dataKBTesthookElement: 'table',
+                        style: {
+                            marginLeft: 'auto',
+                            marginRight: 'auto'
+                        }
+                    })
                 );
+                // tabPane.append(
+                //     '<table class="table table-bordered table-striped" style="margin-left: auto; margin-right: auto;">'
+                // );
                 tabPane.find('table').dataTable(settings);
 
                 // add any events
@@ -342,27 +358,36 @@ define([
                 return settings;
             }
 
-            function ref(key, type, format, method, action) {
+            function ref(key, type, format, method) {
                 return function (d) {
                     if (type === 'tabLink' && format === 'dispIDCompart') {
                         var dispid = d[key];
                         if ('dispid' in d) {
                             dispid = d.dispid;
                         }
-                        return (
-                            '<a class="id-click" data-id="' +
-                            d[key] +
-                            '" data-method="' +
-                            method +
-                            '">' +
-                            dispid +
-                            '</a>'
+                        return a(
+                            {
+                                class: 'id-click',
+                                dataId: d[key],
+                                dataMethod: method,
+                                dataKBTesthookField: key
+                            },
+                            dispid
                         );
                     } else if (type === 'tabLink' && format === 'dispID') {
                         var id = d[key];
-                        return '<a class="id-click" data-id="' + id + '" data-method="' + method + '">' + id + '</a>';
+                        return a(
+                            {
+                                class: 'id-click',
+                                dataId: id,
+                                dataMethod: method,
+                                dataKBTesthookField: key
+                            },
+                            id
+                        );
                     } else if (type === 'wstype' && format === 'dispWSRef') {
                         var ref = refLookup[d[key]];
+                        // TODO: add testhook field here
                         if (ref && ref.link) {
                             return (
                                 '<a href="' +
@@ -396,12 +421,27 @@ define([
 
                     if ($.isArray(value)) {
                         if (type === 'tabLinkArray') {
-                            return tabLinkArray(value, method);
+                            return span(
+                                {
+                                    dataKBTesthookField: key
+                                },
+                                tabLinkArray(value, method)
+                            );
                         }
-                        return d[key].join(', ');
+                        return span(
+                            {
+                                dataKBTesthookField: key
+                            },
+                            d[key].join(', ')
+                        );
                     }
 
-                    return value;
+                    return span(
+                        {
+                            dataKBTesthookField: key
+                        },
+                        value
+                    );
                 };
             }
 
@@ -413,7 +453,15 @@ define([
                         dispid = d.dispid;
                     }
                     links.push(
-                        '<a class="id-click" data-id="' + d.id + '" data-method="' + method + '">' + dispid + '</a>'
+                        a(
+                            {
+                                class: 'id-click',
+                                dataId: d.id,
+                                dataMethod: method
+                            },
+                            dispid
+                        )
+                        // '<a class="id-click" data-id="' + d.id + '" data-method="' + method + '">' + dispid + '</a>'
                     );
                 });
                 return links.join(', ');
@@ -446,14 +494,22 @@ define([
                         if (type === 'tabLinkArray') {
                             value = tabLinkArray(row.data, row.method);
                         } else if (type === 'tabLink') {
-                            value =
-                                '<a class="id-click" data-id="' +
-                                row.data +
-                                '" data-method="' +
-                                row.method +
-                                '">' +
-                                row.dispid +
-                                '</a>';
+                            value = a(
+                                {
+                                    class: 'id-click',
+                                    dataId: row.data,
+                                    dataMethod: row.method
+                                },
+                                row.dispid
+                            );
+                            // value =
+                            //     '<a class="id-click" data-id="' +
+                            //     row.data +
+                            //     '" data-method="' +
+                            //     row.method +
+                            //     '">' +
+                            //     row.dispid +
+                            //     '</a>';
                         } else {
                             value = row.data;
                         }
@@ -481,7 +537,7 @@ define([
                                     return null;
                                 });
                         } else {
-                            r.append('<td>' + data[row.key] + '</td>');
+                            r.append('<td data-k-b-testhook-field="' + row.key + '">' + data[row.key] + '</td>');
                         }
                     } else if (row.type === 'pictureEquation') {
                         r.append($('<td></td>').append(this.pictureEquation(row.data)));
