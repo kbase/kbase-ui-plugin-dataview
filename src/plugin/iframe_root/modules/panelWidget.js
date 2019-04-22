@@ -51,7 +51,10 @@ define(['bluebird', 'kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils', 'collaps
                                     return div({ id: widgetSet.addWidget('kb_dataview_relatedData') });
                                 }
                             })(),
-                            div({ id: widgetSet.addWidget('kb_dataview_dataObjectVisualizer') })
+                            div({
+                                id: widgetSet.addWidget('kb_dataview_dataObjectVisualizer'),
+                                dataKBTesthookWidget: 'dataObjectVisualizer'
+                            })
                         ])
                     ])
                 ]
