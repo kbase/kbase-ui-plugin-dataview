@@ -11,7 +11,7 @@ define([
     'kb_dataview_genomes_geneInstanceInfo',
     'kb_dataview_genomes_geneBiochemistry',
     'kb_dataview_genomes_geneSequence'
-], function($, html, Workspace) {
+], function ($, html, Workspace) {
     'use strict';
     $.KBWidget({
         name: 'KBaseGenePage',
@@ -22,7 +22,7 @@ define([
             genomeID: null,
             workspaceID: null
         },
-        init: function(options) {
+        init: function (options) {
             this._super(options);
             if (this.options.workspaceID === 'CDS') {
                 this.options.workspaceID = 'KBasePublicGenomesV4';
@@ -33,7 +33,7 @@ define([
             this.render();
             return this;
         },
-        render: function() {
+        render: function () {
             var self = this;
             var scope = {
                 ws: this.options.workspaceID,
@@ -58,13 +58,27 @@ define([
             ///////////////////////////////////////////////////////////////////////////////
 
             var objId = scope.ws + '/' + scope.gid;
-            var included = ['/complete', '/contig_ids', '/contig_lengths', 'contigset_ref', '/dna_size',
-                '/domain', '/gc_content', '/genetic_code', '/id', '/md5', 'num_contigs',
-                '/scientific_name', '/source', '/source_id', '/tax_id', '/taxonomy',
+            var included = [
+                '/complete',
+                '/contig_ids',
+                '/contig_lengths',
+                'contigset_ref',
+                '/dna_size',
+                '/domain',
+                '/gc_content',
+                '/genetic_code',
+                '/id',
+                '/md5',
+                'num_contigs',
+                '/scientific_name',
+                '/source',
+                '/source_id',
+                '/tax_id',
+                '/taxonomy',
                 '/features/[*]/id'
             ];
 
-            var ready = function(genomeInfo) {
+            var ready = function (genomeInfo) {
                 panel1.empty();
                 try {
                     panel1.KBaseGeneInstanceInfo({
@@ -108,10 +122,14 @@ define([
                 });
             };
 
-            self.workspace.get_object_subset([{
-                    ref: objId,
-                    included: included
-                }], function(data) {
+            self.workspace.get_object_subset(
+                [
+                    {
+                        ref: objId,
+                        included: included
+                    }
+                ],
+                function (data) {
                     var genomeInfo = data[0];
                     var featureIdx = null;
                     for (var pos in genomeInfo.data.features) {
@@ -122,19 +140,22 @@ define([
                         }
                     }
                     if (featureIdx) {
-                        self.workspace.get_object_subset([{ ref: objId, included: ['/features/' + featureIdx] }], function(data) {
+                        self.workspace.get_object_subset(
+                            [{ ref: objId, included: ['/features/' + featureIdx] }],
+                            function (data) {
                                 var fInfo = data[0].data;
                                 genomeInfo.data.features[featureIdx] = fInfo.features[0];
                                 ready(genomeInfo);
                             },
-                            function(error) {
+                            function (error) {
                                 console.error('Error loading genome subdata');
                                 console.error(error);
                                 panel1.empty();
                                 self.showError(panel1, error);
                                 cell2.empty();
                                 cell3.empty();
-                            });
+                            }
+                        );
                     } else {
                         panel1.empty();
                         self.showError(panel1, 'Feature ' + scope.fid + ' is not found in genome');
@@ -142,39 +163,58 @@ define([
                         cell3.empty();
                     }
                 },
-                function(error) {
+                function (error) {
                     console.error('Error loading genome subdata');
                     console.error(error);
                     panel1.empty();
                     self.showError(panel1, error);
                     cell2.empty();
                     cell3.empty();
-                });
+                }
+            );
         },
-        makePleaseWaitPanel: function() {
+        makePleaseWaitPanel: function () {
             return $('<div>').html(html.loading('loading...'));
         },
-        makeDecoration: function($panel, title, $widgetDiv) {
+        makeDecoration: function ($panel, title, $widgetDiv) {
             var id = this.genUUID();
             $panel.append(
-                $('<div class="panel-group" id="accordion_' + id + '" role="tablist" aria-multiselectable="true">')
-                .append($('<div class="panel panel-default kb-widget">')
-                    .append('' +
-                        '<div class="panel-heading" role="tab" id="heading_' + id + '">' +
-                        '<h4 class="panel-title">' +
-                        '<span data-toggle="collapse" data-parent="#accordion_' + id + '" data-target="#collapse_' + id + '" aria-expanded="false" aria-controls="collapse_' + id + '" style="cursor:pointer;">' +
-                        ' ' + title +
-                        '</span>' +
-                        '</h4>' +
-                        '</div>'
-                    )
-                    .append($('<div id="collapse_' + id + '" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_' + id + '" area-expanded="true">')
-                        .append($('<div class="panel-body">').append($widgetDiv))
-                    )
+                $(
+                    '<div class="panel-group" id="accordion_' + id + '" role="tablist" aria-multiselectable="true">'
+                ).append(
+                    $('<div class="panel panel-default kb-widget">')
+                        .append(
+                            '' +
+                                '<div class="panel-heading" role="tab" id="heading_' +
+                                id +
+                                '">' +
+                                '<h4 class="panel-title">' +
+                                '<span data-toggle="collapse" data-parent="#accordion_' +
+                                id +
+                                '" data-target="#collapse_' +
+                                id +
+                                '" aria-expanded="false" aria-controls="collapse_' +
+                                id +
+                                '" style="cursor:pointer;">' +
+                                ' ' +
+                                title +
+                                '</span>' +
+                                '</h4>' +
+                                '</div>'
+                        )
+                        .append(
+                            $(
+                                '<div id="collapse_' +
+                                    id +
+                                    '" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_' +
+                                    id +
+                                    '" area-expanded="true">'
+                            ).append($('<div class="panel-body">').append($widgetDiv))
+                        )
                 )
             );
         },
-        getData: function() {
+        getData: function () {
             return {
                 type: 'Gene Page',
                 id: this.options.genomeID + '/' + this.options.featureID,
@@ -182,14 +222,14 @@ define([
                 title: 'Gene Page'
             };
         },
-        showError: function(panel, e) {
+        showError: function (panel, e) {
             panel.empty();
             panel.append('Error: ' + JSON.stringify(e));
         },
-        genUUID: function() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                var r = Math.random() * 16 | 0,
-                    v = c === 'x' ? r : (r & 0x3 | 0x8);
+        genUUID: function () {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = (Math.random() * 16) | 0,
+                    v = c === 'x' ? r : (r & 0x3) | 0x8;
                 return v.toString(16);
             });
         }

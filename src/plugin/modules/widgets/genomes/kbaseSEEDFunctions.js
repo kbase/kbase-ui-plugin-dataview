@@ -13,12 +13,7 @@ define([
     'kb_plugin_dataview',
 
     'kb_widget/legacy/authenticatedWidget'
-], function (
-    $,
-    d3,
-    Workspace,
-    Plugin
-) {
+], function ($, d3, Workspace, Plugin) {
     'use strict';
     $.KBWidget({
         name: 'KBaseSEEDFunctions',
@@ -59,7 +54,14 @@ define([
             this._super(options);
 
             // init SEED
-            this.SEEDTree = { 'name': 'Functional Categories', 'count': 0, 'children': [], 'size': 0, 'x0': 0, 'y0': 0 };
+            this.SEEDTree = {
+                name: 'Functional Categories',
+                count: 0,
+                children: [],
+                size: 0,
+                x0: 0,
+                y0: 0
+            };
             this.subsysToGeneMap = [];
             this.maxCount = 0;
 
@@ -111,47 +113,68 @@ define([
             d3.text(Plugin.plugin.fullPath + '/data/subsys.txt', function (text) {
                 var data = d3.tsv.parseRows(text),
                     totalGenesWithFunctionalRoles = 0,
-                    i, j, geneCount, nodeHierarchy, parentHierarchy, node, gene;
+                    i,
+                    j,
+                    geneCount,
+                    nodeHierarchy,
+                    parentHierarchy,
+                    node,
+                    gene;
+
+                // Uncomment section below to see function names which are not found
+                // in the seed subsystem.
+                // let unmapped = 0;
+                // const unmappedMap = {};
+                // const subsysMap = data.reduce((subsysMap, item) => {
+                //     subsysMap[item[3]] = item;
+                //     return subsysMap;
+                // }, {});
+                // Object.keys(subsysToGeneMap).forEach((functionName) => {
+                //     if (!subsysMap[functionName]) {
+                //         unmapped += 1;
+                //         unmappedMap[functionName] = unmappedMap[functionName] ? unmappedMap[functionName] + 1 : 1;
+                //     }
+                // });
+                // console.log('UNMAPPED', unmapped, unmappedMap);
 
                 for (i = 0; i < data.length; i += 1) {
                     geneCount = 0;
                     nodeHierarchy = '';
                     parentHierarchy = 'Functional Categories';
-
-                    if (subsysToGeneMap[data[i][3]] === undefined) {
+                    const functionName = data[i][3];
+                    if (subsysToGeneMap[functionName] === undefined) {
                         // if barchart needs to only show the subsystems that have genes in this genome,
                         // uncomment the continue statement.
                         //continue;
                     } else {
-                        geneCount = subsysToGeneMap[data[i][3]].length;
-                        totalGenesWithFunctionalRoles += subsysToGeneMap[data[i][3]].length;
+                        geneCount = subsysToGeneMap[functionName].length;
+                        totalGenesWithFunctionalRoles += subsysToGeneMap[functionName].length;
                     }
 
                     for (j = 0; j < ontologyDepth; j += 1) {
                         // some node names are an empty string "". I'm going to set these to
                         // a modified version of their parent node name
-                        data[i][j] = (data[i][j] === '') ? '--- ' + data[i][j - 1] + ' ---' : data[i][j];
+                        data[i][j] = data[i][j] === '' ? '--- ' + data[i][j - 1] + ' ---' : data[i][j];
                         nodeHierarchy = parentHierarchy + ':' + data[i][j];
 
                         // create new node for top level of hierarchy if it's not already defined.
                         if (j === 0) {
                             if (nodeMap[nodeHierarchy] === undefined) {
-                                node = { 'name': data[i][j], size: 0, 'children': [] };
+                                node = { name: data[i][j], size: 0, children: [] };
                                 SEEDTree.children.push(node);
                                 nodeMap[nodeHierarchy] = node;
                                 Level1[data[i][j]] = 0;
                             }
                             Level1[data[i][j]] += geneCount;
-
                         } else {
                             if (nodeMap[nodeHierarchy] === undefined) {
-                                node = { 'name': data[i][j], size: 0, 'children': [] };
+                                node = { name: data[i][j], size: 0, children: [] };
                                 nodeMap[parentHierarchy].children.push(node);
                                 nodeMap[nodeHierarchy] = node;
 
                                 if (j === ontologyDepth - 1 && subsysToGeneMap[data[i][j]] !== undefined) {
                                     subsysToGeneMap[data[i][j]].forEach(function (f) {
-                                        gene = { 'name': f, 'size': '' };
+                                        gene = { name: f, size: '' };
                                         node.children.push(gene);
                                     });
                                 }
@@ -162,9 +185,10 @@ define([
                     }
                 }
 
-                if (totalGenesWithFunctionalRoles < 100) {
-                    //console.log("No Functional Categories assigned, you can added them using the Narrative");
-                    self.$mainview.prepend('<b>No Functional Categories assigned, you can add them using the Narrative.</b>');
+                if (totalGenesWithFunctionalRoles === 0) {
+                    self.$mainview.prepend(
+                        '<b>No Functional Categories assigned, you can add them using the Narrative.</b>'
+                    );
                 } else {
                     // Set maxCount to scale bars
                     var k;
@@ -172,10 +196,11 @@ define([
                         self.maxCount = self.maxCount > Level1[k] ? self.maxCount : Level1[k];
                     }
 
-                    $.when(self.SEEDTree.children.forEach(function (d) {
-                        self.collapse(d);
-                    }))
-                        .done(self.update(self.root = self.SEEDTree));
+                    $.when(
+                        self.SEEDTree.children.forEach(function (d) {
+                            self.collapse(d);
+                        })
+                    ).done(self.update((self.root = self.SEEDTree)));
                 }
             });
         },
@@ -184,14 +209,20 @@ define([
 
             var nodes = self.tree.nodes(self.SEEDTree);
 
-            var scale = d3.scale.linear().domain([0, this.maxCount]).range([0, 275]);
+            var scale = d3.scale
+                .linear()
+                .domain([0, this.maxCount])
+                .range([0, 275]);
             var height = Math.max(500, nodes.length * self.barHeight + self.margin.top + self.margin.bottom);
 
-            d3.selectAll(this.$mainview).select('svg').transition()
+            d3.selectAll(this.$mainview)
+                .select('svg')
+                .transition()
                 .duration(self.duration)
                 .attr('height', height);
 
-            d3.select(self.frameElement).transition()
+            d3.select(self.frameElement)
+                .transition()
                 .duration(self.duration)
                 .style('height', height + 'px');
 
@@ -201,49 +232,58 @@ define([
             });
 
             // Update the nodes…
-            var node = self.svg.selectAll('g.KBSnode')
-                .data(nodes, function (d) {
-                    return d.id || (d.id = ++self.i);
-                });
+            var node = self.svg.selectAll('g.KBSnode').data(nodes, function (d) {
+                return d.id || (d.id = ++self.i);
+            });
 
-            var nodeEnter = node.enter().append('g')
+            var nodeEnter = node
+                .enter()
+                .append('g')
                 .attr('class', 'KBSnode')
                 .attr('transform', function () {
                     return 'translate(' + source.y0 + ',' + source.x0 + ')';
                 })
                 .style('opacity', 1e-6)
                 .on('mouseover', function () {
-                    d3.select(this).selectAll('text, rect')
+                    d3.select(this)
+                        .selectAll('text, rect')
                         .style('font-weight', 'bold')
                         .style('font-size', '90%')
                         .style('stroke-width', '3px');
                 })
                 .on('mouseout', function () {
-                    d3.select(this).selectAll('text, rect')
+                    d3.select(this)
+                        .selectAll('text, rect')
                         .style('font-weight', 'normal')
                         .style('font-size', '80%')
                         .style('stroke-width', '1.5px');
                 });
 
             // Enter any new nodes at the parent's previous position.
-            nodeEnter.append('rect')
+            nodeEnter
+                .append('rect')
                 .attr('y', -self.barHeight / 2)
                 .attr('x', 300)
                 .attr('height', self.barHeight)
                 .attr('width', self.barWidth)
                 .style('fill', self.color)
-                .on('click', $.proxy(function (d) {
-                    self.click(d);
-                }, self));
+                .on(
+                    'click',
+                    $.proxy(function (d) {
+                        self.click(d);
+                    }, self)
+                );
 
-            nodeEnter.append('text')
+            nodeEnter
+                .append('text')
                 .attr('dy', 3.5)
                 .attr('dx', 300 + 5.5)
                 .text(function (d) {
                     return d.name;
                 });
 
-            nodeEnter.append('rect')
+            nodeEnter
+                .append('rect')
                 .attr('y', -self.barHeight / 2)
                 .attr('x', function (d) {
                     return 0 + 275 - scale(d.size) - d.depth * self.stepSize;
@@ -253,11 +293,15 @@ define([
                     return scale(d.size);
                 })
                 .style('fill', self.color)
-                .on('click', $.proxy(function (d) {
-                    self.click(d);
-                }, self));
+                .on(
+                    'click',
+                    $.proxy(function (d) {
+                        self.click(d);
+                    }, self)
+                );
 
-            nodeEnter.append('text')
+            nodeEnter
+                .append('text')
                 .attr('dy', 3.5)
                 .attr('x', 278)
                 .text(function (d) {
@@ -265,7 +309,8 @@ define([
                 });
 
             // Transition nodes to their new position.
-            nodeEnter.transition()
+            nodeEnter
+                .transition()
                 .duration(self.duration)
                 .attr('transform', function (d) {
                     return 'translate(' + d.y + ',' + d.x + ')';
@@ -282,7 +327,8 @@ define([
                 .style('fill', self.color);
 
             // Transition exiting nodes to the parent's new position.
-            node.exit().transition()
+            node.exit()
+                .transition()
                 .duration(self.duration)
                 .attr('transform', function () {
                     return 'translate(' + source.y + ',' + source.x + ')';
@@ -302,7 +348,14 @@ define([
             // if (d.children === undefined || (d._children === null && d.children === null)) {
             // The size is set to an empty string for navigable leaves
             if (d.size === '') {
-                window.open('#dataview/' + this.options.wsNameOrId + '/' + this.options.objNameOrId + '?sub=Feature&subid=' + d.name);
+                window.open(
+                    '#dataview/' +
+                        this.options.wsNameOrId +
+                        '/' +
+                        this.options.objNameOrId +
+                        '?sub=Feature&subid=' +
+                        d.name
+                );
             }
 
             // expand tree
@@ -352,7 +405,11 @@ define([
             }
         },
         getData: function () {
-            return { title: 'Functional Categories ', id: this.options.objNameOrId, workspace: this.options.wsNameOrId };
+            return {
+                title: 'Functional Categories ',
+                id: this.options.objNameOrId,
+                workspace: this.options.wsNameOrId
+            };
         },
         render: function () {
             var self = this;
@@ -371,7 +428,7 @@ define([
 
             // doesn't work for Euks yet
             if (tax_domain === 'Eukaryota') {
-                container.prepend(('<b>Functional Categories not yet available for ' + tax_domain + '</b>'));
+                container.prepend('<b>Functional Categories not yet available for ' + tax_domain + '</b>');
                 return this;
             }
 
@@ -380,7 +437,9 @@ define([
             this.$mainview = $('<div>').css({ 'overflow-x': 'scroll' });
             container.append(this.$mainview);
 
-            this.svg = d3.select(this.$mainview[0]).append('svg')
+            this.svg = d3
+                .select(this.$mainview[0])
+                .append('svg')
                 .attr('width', width + margin.left + margin.right)
                 .append('g')
                 .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
@@ -393,12 +452,23 @@ define([
              subsysToGeneMap [ SEED Role ] = Array of Gene Ids
              */
 
-            genomeObj.features.forEach(function (f) {
+            genomeObj.features.forEach(function (feature) {
                 // Each function can have multiple genes, creating mapping of function to list of gene ids
-                if (subsysToGeneMap[f.function] === undefined) {
-                    subsysToGeneMap[f.function] = [];
+                if (!feature.functions) {
+                    if (feature.function) {
+                        feature.functions = [feature.function];
+                    } else {
+                        return;
+                    }
                 }
-                subsysToGeneMap[f.function].push(f.id);
+                feature.function = feature.functions.join('<br>');
+
+                feature.functions.forEach((functionName) => {
+                    if (subsysToGeneMap[functionName] === undefined) {
+                        subsysToGeneMap[functionName] = [];
+                    }
+                    subsysToGeneMap[functionName].push(feature.id);
+                });
 
                 // Not sure if this is necessary, but I'm going to keep track of the number of genes with
                 // SEED assigned functions in this count variable.
@@ -415,7 +485,7 @@ define([
             this.render();
             return this;
         },
-        loggedOutCallback: function (event, auth) {
+        loggedOutCallback: function () {
             this.authToken = null;
             this.wsClient = null;
             return this;
