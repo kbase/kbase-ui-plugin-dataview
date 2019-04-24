@@ -15,7 +15,7 @@ define([
     'kb_service/utils',
     'plugins/dataview/modules/poller',
     'kb_plugin_dataview'
-], function(
+], function (
     Promise,
     numeral,
     html,
@@ -34,7 +34,9 @@ define([
     'use strict';
 
     function factory(config) {
-        var parent, container, runtime = config.runtime,
+        var parent,
+            container,
+            runtime = config.runtime,
             tag = html.tag,
             div = tag('div'),
             button = tag('button'),
@@ -58,25 +60,25 @@ define([
 
         /*
          * Modes
-         * When the user stars the transform and download panel, there is a set of selections and a transform button. 
+         * When the user stars the transform and download panel, there is a set of selections and a transform button.
          * This is the 'new' mode.
-         * 
-         * The user may select one or more transforms, at which point each one is added to the "Requested Transforms" 
+         *
+         * The user may select one or more transforms, at which point each one is added to the "Requested Transforms"
          * table. The table shows the status of each transform, which initially indicates that nothing has happened.
-         * This is the 'selecting' mode. 
-         * 
+         * This is the 'selecting' mode.
+         *
          * The user will push the "Transform" button in order to initiate the transform of to each selected output format.
          * The progress of each transform is reflected in the "Status", "Next" and "Message" columns.
          * The initial Transform button and checkboxes are disabled, and there is a Stop button.
          * This is the 'transforming' mode.
-         * 
-         * If the use selects the Stop button, the 
-         * 
-         * A successful transform results in a download button, a failed download results in an error message and a 
+         *
+         * If the use selects the Stop button, the
+         *
+         * A successful transform results in a download button, a failed download results in an error message and a
          * "Report Issue" button.
          * This is the 'completed' mode.
-         * 
-         * In the completed mode the user may 
+         *
+         * In the completed mode the user may
          */
 
         // Renderers
@@ -101,9 +103,7 @@ define([
                                     div({ class: 'panel-heading' }, [
                                         div({ class: 'panel-title' }, 'Requested Transforms')
                                     ]),
-                                    div({ class: 'panel-body' }, [
-                                        div({ id: places.add('downloads') })
-                                    ]),
+                                    div({ class: 'panel-body' }, [div({ id: places.add('downloads') })]),
                                     div({ id: places.add('downloaders') })
                                 ])
                             ])
@@ -147,7 +147,7 @@ define([
         }
 
         function addEventManager(eventsToListenFor) {
-            eventsToListenFor.forEach(function(eventType) {
+            eventsToListenFor.forEach(function (eventType) {
                 container.addEventListener(eventType, eventListener);
             });
         }
@@ -156,7 +156,7 @@ define([
 
         function addButton(spec) {
             var buttonId = html.genId(),
-                handler = function(e) {
+                handler = function (e) {
                     e.preventDefault();
                     spec.handler();
                 },
@@ -167,12 +167,11 @@ define([
                     handler: handler
                 };
 
-
             if (spec.disabled) {
                 klass.push('disabled');
                 listener.disabled = true;
                 listener.disabledHandler = listener.handler;
-                listener.handler = function(e) {
+                listener.handler = function (e) {
                     e.preventDefault();
                 };
             }
@@ -185,11 +184,14 @@ define([
 
             var width = spec.width || '100%';
 
-            return button({
-                style: { width: width },
-                class: klass.join(' '),
-                id: buttonId
-            }, spec.label);
+            return button(
+                {
+                    style: { width: width },
+                    class: klass.join(' '),
+                    id: buttonId
+                },
+                spec.label
+            );
         }
 
         function disableButton(name) {
@@ -212,7 +214,7 @@ define([
             }
 
             listener.disabledHandler = listener.handler;
-            listener.handler = function(e) {
+            listener.handler = function (e) {
                 e.preventDefault;
             };
             buttonNode.classList.add('disabled');
@@ -243,15 +245,15 @@ define([
             listener.disabled = false;
         }
 
-        function removeButton(spec) {
-
-        }
+        function removeButton(spec) {}
 
         function makeUrl(path, query) {
             var fullPath = Plugin.plugin.fullPath + '/' + path.join('/'),
-                queryString = Object.keys(query).map(function(key) {
-                    return [encodeURIComponent(key), encodeURIComponent(query[key])].join('=');
-                }).join('&');
+                queryString = Object.keys(query)
+                    .map(function (key) {
+                        return [encodeURIComponent(key), encodeURIComponent(query[key])].join('=');
+                    })
+                    .join('&');
             return window.location.origin + fullPath + '?' + queryString;
         }
 
@@ -270,7 +272,8 @@ define([
                 }
                 download.limit -= 1;
                 if (download.limit === 0) {
-                    download.message = 'Download starting; if you need to download again, you will need to Reset and run Transform again';
+                    download.message =
+                        'Download starting; if you need to download again, you will need to Reset and run Transform again';
                 }
             } else {
                 download.message = 'You may download this file again.';
@@ -286,7 +289,7 @@ define([
                     return addButton({
                         type: 'default',
                         disabled: true,
-                        handler: function() {
+                        handler: function () {
                             alert('Can only download once');
                         },
                         label: 'Downloaded'
@@ -294,7 +297,7 @@ define([
                 }
                 return addButton({
                     type: 'primary',
-                    handler: function() {
+                    handler: function () {
                         doDownload(download);
                         download.status = 'downloaded';
                         renderDownloads();
@@ -304,7 +307,7 @@ define([
             case 'ready':
                 return addButton({
                     type: 'primary',
-                    handler: function() {
+                    handler: function () {
                         doDownload(download);
                         download.status = 'downloaded';
                         renderDownloads();
@@ -315,7 +318,7 @@ define([
             case 'error':
                 return addButton({
                     type: 'warning',
-                    handler: function() {
+                    handler: function () {
                         runtime.send('app', 'redirect', {
                             url: renderBugReportUrl(download),
                             newWindow: true
@@ -327,7 +330,7 @@ define([
             case 'waiting':
                 return addButton({
                     type: 'danger',
-                    handler: function() {
+                    handler: function () {
                         alert('cancel ');
                     },
                     label: 'Cancel'
@@ -348,7 +351,8 @@ define([
                 ]);
             } else {
                 content = table({ class: 'table table-bordered', style: { width: '100%' } }, [
-                    tr([th({ width: '10%' }, 'Format'),
+                    tr([
+                        th({ width: '10%' }, 'Format'),
                         th({ width: '10%' }, 'Started?'),
                         //th({width: '10%'}, 'Requested?'),
                         th({ width: '10%' }, 'Completed?'),
@@ -358,27 +362,29 @@ define([
                         th({ width: '10%' }, 'Next'),
                         th({ width: '40%' }, 'Message')
                     ]),
-                    Object.keys(state.downloads).map(function(key) {
-                        var download = state.downloads[key],
-                            // formatName = state.downloadConfig[download.formatId].name;
-                            formatName = key;
+                    Object.keys(state.downloads)
+                        .map(function (key) {
+                            var download = state.downloads[key],
+                                // formatName = state.downloadConfig[download.formatId].name;
+                                formatName = key;
 
-                        if (!download.completed) {
-                            finished = false;
-                        }
+                            if (!download.completed) {
+                                finished = false;
+                            }
 
-                        return tr([
-                            td(formatName),
-                            td(download.started ? 'Y' : 'n'),
-                            //td(download.requested ? 'Y' : 'n'),
-                            td(download.completed ? 'Y' : 'n'),
-                            //td(download.available ? 'Y' : 'n'),
-                            td(renderElapsed(download.elapsed)),
-                            td(download.status || ''),
-                            td(renderNextButton(download)),
-                            td(download.message || '')
-                        ]);
-                    }).join('')
+                            return tr([
+                                td(formatName),
+                                td(download.started ? 'Y' : 'n'),
+                                //td(download.requested ? 'Y' : 'n'),
+                                td(download.completed ? 'Y' : 'n'),
+                                //td(download.available ? 'Y' : 'n'),
+                                td(renderElapsed(download.elapsed)),
+                                td(download.status || ''),
+                                td(renderNextButton(download)),
+                                td(download.message || '')
+                            ]);
+                        })
+                        .join('')
                 ]);
             }
             places.setContent('downloads', content);
@@ -393,23 +399,32 @@ define([
                     table([
                         tr([
                             td('Transform to: '),
-                            td(span({ class: 'kb-btn-group', dataToggle: 'buttons' },
-                                Object.keys(downloadConfig).map(function(key) {
-                                    // var downloadMethod = downloadConfig[key];
-                                    return label({ class: 'kb-checkbox-control' }, [
-                                        input({
-                                            type: 'checkbox',
-                                            autocomplete: 'off',
-                                            checked: false,
-                                            value: key
-                                        }),
-                                        span({
-                                            style: {
-                                                marginLeft: '4px'
-                                            }
-                                        }, key)
-                                    ]);
-                                }).join(' ')))
+                            td(
+                                span(
+                                    { class: 'kb-btn-group', dataToggle: 'buttons' },
+                                    Object.keys(downloadConfig)
+                                        .map(function (key) {
+                                            // var downloadMethod = downloadConfig[key];
+                                            return label({ class: 'kb-checkbox-control' }, [
+                                                input({
+                                                    type: 'checkbox',
+                                                    autocomplete: 'off',
+                                                    checked: false,
+                                                    value: key
+                                                }),
+                                                span(
+                                                    {
+                                                        style: {
+                                                            marginLeft: '4px'
+                                                        }
+                                                    },
+                                                    key
+                                                )
+                                            ]);
+                                        })
+                                        .join(' ')
+                                )
+                            )
                         ]),
                         tr([
                             td(),
@@ -419,7 +434,7 @@ define([
                                         addButton({
                                             name: 'transform',
                                             type: 'primary',
-                                            handler: function() {
+                                            handler: function () {
                                                 doStartTransform();
                                             },
                                             label: 'Transform',
@@ -429,7 +444,7 @@ define([
                                         addButton({
                                             name: 'stop',
                                             type: 'danger',
-                                            handler: function() {
+                                            handler: function () {
                                                 doStopTransform();
                                             },
                                             label: 'Stop',
@@ -439,7 +454,7 @@ define([
                                         addButton({
                                             name: 'reset',
                                             type: 'default',
-                                            handler: function() {
+                                            handler: function () {
                                                 doReset();
                                             },
                                             label: 'Reset',
@@ -452,29 +467,31 @@ define([
                         ])
                     ])
                 ]),
-                events = [{
-                    type: 'change',
-                    selector: 'input[type="checkbox"]',
-                    handler: function(e) {
-                        var value = e.target.value;
-                        if (e.target.checked) {
-                            state.downloads[value] = {
-                                formatId: value,
-                                requested: false,
-                                completed: false,
-                                available: false
-                            };
-                        } else {
-                            delete state.downloads[value];
-                        }
-                        renderDownloads();
-                        if (Object.keys(state.downloads).length === 0) {
-                            disableButton('transform');
-                        } else {
-                            enableButton('transform');
+                events = [
+                    {
+                        type: 'change',
+                        selector: 'input[type="checkbox"]',
+                        handler: function (e) {
+                            var value = e.target.value;
+                            if (e.target.checked) {
+                                state.downloads[value] = {
+                                    formatId: value,
+                                    requested: false,
+                                    completed: false,
+                                    available: false
+                                };
+                            } else {
+                                delete state.downloads[value];
+                            }
+                            renderDownloads();
+                            if (Object.keys(state.downloads).length === 0) {
+                                disableButton('transform');
+                            } else {
+                                enableButton('transform');
+                            }
                         }
                     }
-                }];
+                ];
             return {
                 content: content,
                 events: events
@@ -495,14 +512,14 @@ define([
 
         function toggle() {
             switch (toggleState) {
-                case 'hidden':
-                    show();
-                    toggleState = 'showing';
-                    break;
-                case 'showing':
-                    hide();
-                    toggleState = 'hidden';
-                    break;
+            case 'hidden':
+                show();
+                toggleState = 'showing';
+                break;
+            case 'showing':
+                hide();
+                toggleState = 'hidden';
+                break;
             }
         }
 
@@ -521,11 +538,15 @@ define([
         }
 
         function encodeQuery(query) {
-            return Object.keys(query).map(function(key) {
-                return [key, String(query[key])].map(function(element) {
-                    return encodeURIComponent(element);
-                }).join('=');
-            }).join('&');
+            return Object.keys(query)
+                .map(function (key) {
+                    return [key, String(query[key])]
+                        .map(function (element) {
+                            return encodeURIComponent(element);
+                        })
+                        .join('=');
+                })
+                .join('&');
         }
 
         function makeDownloadUrl(exportResult, objectName) {
@@ -543,22 +564,22 @@ define([
 
         function transformAndDownload(download) {
             var downloadSpec = state.downloadConfig[download.formatId];
-                // args = {
-                //     external_type: downloadSpec.external_type,
-                //     kbase_type: state.type,
-                //     workspace_name: state.params.objectInfo.ws,
-                //     object_name: state.params.objectInfo.name,
-                //     optional_arguments: {
-                //         transform: downloadSpec.transform_options || {}
-                //     }
-                // },
-                // nameSuffix = '.' + downloadSpec.name.replace(/[^a-zA-Z0-9|\.\-_]/g, '_'),
-                // transformClient = new TransformClient(runtime.getConfig('services.transform.url'), {
-                //     token: runtime.service('session').getAuthToken()
-                // }),
-                // njs = new NarrativeJobService(runtime.getConfig('services.transform.url'), {
-                //     token: runtime.service('session').getAuthToken()
-                // }),
+            // args = {
+            //     external_type: downloadSpec.external_type,
+            //     kbase_type: state.type,
+            //     workspace_name: state.params.objectInfo.ws,
+            //     object_name: state.params.objectInfo.name,
+            //     optional_arguments: {
+            //         transform: downloadSpec.transform_options || {}
+            //     }
+            // },
+            // nameSuffix = '.' + downloadSpec.name.replace(/[^a-zA-Z0-9|\.\-_]/g, '_'),
+            // transformClient = new TransformClient(runtime.getConfig('services.transform.url'), {
+            //     token: runtime.service('session').getAuthToken()
+            // }),
+            // njs = new NarrativeJobService(runtime.getConfig('services.transform.url'), {
+            //     token: runtime.service('session').getAuthToken()
+            // }),
             var transformObjectInfo = state.params.objectInfo;
             var tag = 'dev'; //runtime.service('settings').getItem('sdk.tag')
 
@@ -567,7 +588,7 @@ define([
 
             console.log('DOWNLOAD SPEC', downloadSpec);
 
-            // Note that the generic can be used repeatedly and even with 
+            // Note that the generic can be used repeatedly and even with
             // overlapping requests. Each requst uses a fresh xhr request.
             var njs = new GenericClient({
                 module: 'NarrativeJobService',
@@ -576,28 +597,39 @@ define([
             });
 
             // The call looks a little strange, since it is job call wrapped in an rpc call...
-            console.log('running job', downloadSpec.module, downloadSpec.func, [downloadSpec.module, downloadSpec.func].join('.'), transformObjectInfo.ref, tag);
-            njs.callFunc('run_job', [{
+            console.log(
+                'running job',
+                downloadSpec.module,
+                downloadSpec.func,
+                [downloadSpec.module, downloadSpec.func].join('.'),
+                transformObjectInfo.ref,
+                tag
+            );
+            njs.callFunc('run_job', [
+                {
                     method: [downloadSpec.module, downloadSpec.func].join('.'),
-                    params: [{
-                        input_ref: transformObjectInfo.ref
-                    }],
-                    // Note: in the ui there is no concept of 
+                    params: [
+                        {
+                            input_ref: transformObjectInfo.ref
+                        }
+                    ],
+                    // Note: in the ui there is no concept of
                     // environment/tag other than release.
                     // We could add this via a dev tool...
-                    // For now: disable since we don't have a UI for selecting 
+                    // For now: disable since we don't have a UI for selecting
                     // the tag, and a downloader may be specified but not available at all
                     // in release.
-                    service_ver: tag 
-                }])
-                .then(function(result) {
+                    service_ver: tag
+                }
+            ])
+                .then(function (result) {
                     var jobId = result[0];
                     download.jobId = jobId;
                     download.requested = true;
                     download.message = 'Requested transform of this object...';
                     renderDownloads();
 
-                    // Hmm, it looks like UJS does not pick up the results of these jobs, so we 
+                    // Hmm, it looks like UJS does not pick up the results of these jobs, so we
                     // will emulate the kbaseNarrativeDownloadPanel and use njs.
                     // var jobs = new UserAndJobState(runtime.getConfig('services.user_job_state.url'), {
                     //     token: runtime.service('session').getAuthToken()
@@ -609,11 +641,11 @@ define([
 
                     poller.addTask({
                         timeout: 3600000,
-                        isCompleted: function(elapsed) {
-                            return njs.callFunc('check_job', [jobId])
-                                .then(function(result) {
+                        isCompleted: function (elapsed) {
+                            return njs
+                                .callFunc('check_job', [jobId])
+                                .then(function (result) {
                                     var jobState = result[0];
-                                    console.log('CHECK JOB', jobState);
                                     if (jobState.finished) {
                                         if (jobState.error) {
                                             console.error('ERROR', jobState);
@@ -624,48 +656,48 @@ define([
                                     download.elapsed = elapsed / 1000;
                                     download.status = jobState.job_state;
                                     switch (jobState.job_state) {
-                                        case 'queued':
-                                            download.message = 'In queue, at position ' + jobState.position + '.';
-                                            break;
-                                        case 'in-progress':
-                                            download.message = 'Processing...';
-                                            break;
-                                        default:
-                                            download.message = '';
+                                    case 'queued':
+                                        download.message = 'In queue, at position ' + jobState.position + '.';
+                                        break;
+                                    case 'in-progress':
+                                        download.message = 'Processing...';
+                                        break;
+                                    default:
+                                        download.message = '';
                                     }
                                     renderDownloads();
                                     return false;
                                 })
-                                .catch(function(err) {
+                                .catch(function (err) {
                                     throw err;
                                 });
                         },
-                        whenCompleted: function() {
-                            return njs.callFunc('check_job', [jobId])
-                                .then(function(result) {
+                        whenCompleted: function () {
+                            return njs
+                                .callFunc('check_job', [jobId])
+                                .then(function (result) {
                                     var jobState = result[0];
                                     download.completed = true;
                                     var url = makeDownloadUrl(jobState.result[0], state.objectName);
-                                    console.log('dl link', url);
                                     download.url = url;
                                     download.status = 'ready';
                                     download.available = true;
                                     download.message = 'Transform complete, ready for download.';
                                     renderDownloads();
                                 })
-                                .catch(function(err) {
+                                .catch(function (err) {
                                     console.error('ERROR', err);
                                     throw err;
                                 });
                         },
-                        whenTimedOut: function(elapsed) {
+                        whenTimedOut: function (elapsed) {
                             download.completed = true;
                             download.error = true;
                             download.status = 'timedout';
                             download.message = 'Timed out after ' + elapsed / 1000 + ' seconds';
                             renderDownloads();
                         },
-                        whenError: function(err) {
+                        whenError: function (err) {
                             console.error(err);
                             download.completed = true;
                             download.status = 'error';
@@ -682,18 +714,19 @@ define([
                             renderDownloads();
                             // us.kbase.userandjobstate.jobstate.exceptions.NoSuchJobException
                         },
-                        onCancel: function() {
-                            return njs.callFunc('cancel_job', [jobId])
-                                .then(function() {
+                        onCancel: function () {
+                            return njs
+                                .callFunc('cancel_job', [jobId])
+                                .then(function () {
                                     console.log('cancelling...');
                                 })
-                                .catch(function(err) {
+                                .catch(function (err) {
                                     console.error('ERROR canceling: ', err);
                                 });
                         }
                     });
                 })
-                .catch(function(err) {
+                .catch(function (err) {
                     download.status = 'error';
                     download.error = true;
                     var msg;
@@ -729,7 +762,11 @@ define([
             download.completed = true;
             download.available = true;
             download.limit = null;
-            var url = downloadFromWorkspace(state.params.objectInfo.ws, state.params.objectInfo.name, runtime.getConfig('services.workspace.url'));
+            var url = downloadFromWorkspace(
+                state.params.objectInfo.ws,
+                state.params.objectInfo.name,
+                runtime.getConfig('services.workspace.url')
+            );
             download.url = url;
             download.status = 'ready';
             download.message = '';
@@ -741,7 +778,7 @@ define([
             disableButton('transform');
             enableButton('stop');
 
-            Object.keys(state.downloads).forEach(function(id) {
+            Object.keys(state.downloads).forEach(function (id) {
                 var download = state.downloads[id];
                 if (id === 'JSON') {
                     justDownload(download);
@@ -757,14 +794,13 @@ define([
 
             // alert('Stopping a transform is not yet implemented');
             poller.cancelAllTasks();
-
         }
 
         function doReset() {
             disableButton('reset');
             enableButton('transform');
 
-            Object.keys(state.downloads).forEach(function(id) {
+            Object.keys(state.downloads).forEach(function (id) {
                 var download = state.downloads[id];
                 download.started = false;
                 download.requested = false;
@@ -784,10 +820,10 @@ define([
         function attach(node) {
             parent = node;
             container = node.appendChild(document.createElement('div'));
-            places = Places.make({
-                    root: container
-                }),
-                addEventManager(['click', 'load']);
+            (places = Places.make({
+                root: container
+            })),
+            addEventManager(['click', 'load']);
         }
 
         function getRef(params) {
@@ -820,17 +856,20 @@ define([
         }
 
         function fetchTypeMapping() {
-            var nms = new NarrativeMethodStore(runtime.config('services.narrative_method_store.url', {
-                token: runtime.service('session').getAuthToken()
-            }));
+            var nms = new NarrativeMethodStore(
+                runtime.config('services.narrative_method_store.url', {
+                    token: runtime.service('session').getAuthToken()
+                })
+            );
             var tag = 'dev'; //runtime.service('settings').getItem('sdk.tag')
-            return nms.list_categories({
+            return nms
+                .list_categories({
                     load_methods: 0,
                     load_apps: 0,
                     load_types: 1,
                     tag: tag
                 })
-                .then(function(result) {
+                .then(function (result) {
                     var types = result[3];
                     return types;
                 });
@@ -842,14 +881,14 @@ define([
             renderDownloads();
 
             // listen for events
-            runtime.recv('downloadWidget', 'toggle', function() {
+            runtime.recv('downloadWidget', 'toggle', function () {
                 toggle();
             });
 
             // We can instantiate the widget as soon as we are started or run,
             // because the params passed to the page are good enough for
             // us to get started with.
-            // TODO: the main panel could/should already have pulled down the 
+            // TODO: the main panel could/should already have pulled down the
             // basic object info, so in theory we could ask the parent widget
             // for the object info.
             var workspace = new WorkspaceClient(runtime.getConfig('services.workspace.url'), {
@@ -857,13 +896,13 @@ define([
                 }),
                 ref = getRef(params);
             return Promise.all([
-                    fetchTypeMapping(),
-                    workspace.get_object_info_new({
-                        objects: [{ ref: ref }],
-                        ignoreErrors: 1
-                    })
-                ])
-                .spread(function(typeMapping, objectInfoArray) {
+                fetchTypeMapping(),
+                workspace.get_object_info_new({
+                    objects: [{ ref: ref }],
+                    ignoreErrors: 1
+                })
+            ])
+                .spread(function (typeMapping, objectInfoArray) {
                     if (objectInfoArray.length === 0) {
                         throw new Error('No object found with ref ' + ref);
                     }
@@ -875,21 +914,19 @@ define([
                         typeConfig = typeMapping[type],
                         downloadConfig = {};
 
-
-                    // annoying... the export_functions in the typeConfig is a simple 
-                    // string which encodes the module.function  to be called 
+                    // annoying... the export_functions in the typeConfig is a simple
+                    // string which encodes the module.function  to be called
                     // in the format module/function. why? why not a structure or the
                     // actual invocable module.function?
 
                     if (typeConfig && typeConfig.export_functions) {
-                        Object.keys(typeConfig.export_functions)
-                            .forEach(function(key) {
-                                var temp = typeConfig.export_functions[key].split('.');
-                                downloadConfig[key] = {
-                                    module: temp[0],
-                                    func: temp[1]
-                                };
-                            });
+                        Object.keys(typeConfig.export_functions).forEach(function (key) {
+                            var temp = typeConfig.export_functions[key].split('.');
+                            downloadConfig[key] = {
+                                module: temp[0],
+                                func: temp[1]
+                            };
+                        });
                     }
 
                     // We use a little state object to stash away things.
@@ -906,7 +943,6 @@ define([
                     // call.
                     downloadConfig.JSON = {};
 
-
                     // var downloadConfig = typeDownloadConfig.concat({
                     //     name: 'JSON',
                     //     external_type: 'JSON.JSON',
@@ -919,14 +955,14 @@ define([
 
                     places.setContent('content', form.content);
 
-                    form.events.forEach(function(event) {
+                    form.events.forEach(function (event) {
                         var nodes = qsa(places.getNode('content'), event.selector);
-                        nodes.forEach(function(node) {
+                        nodes.forEach(function (node) {
                             node.addEventListener(event.type, event.handler);
                         });
                     });
                 })
-                .catch(function(err) {
+                .catch(function (err) {
                     console.error('ERROR', err);
                 });
         }
@@ -955,7 +991,7 @@ define([
         };
     }
     return {
-        make: function(config) {
+        make: function (config) {
             return factory(config);
         }
     };
