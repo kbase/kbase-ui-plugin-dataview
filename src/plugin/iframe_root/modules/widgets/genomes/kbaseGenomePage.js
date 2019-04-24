@@ -58,7 +58,7 @@ define([
                     'gc_content',
                     'taxonomy'
                 ],
-                feature_fields = ['type', 'id', 'contig_id', 'location', 'function'];
+                feature_fields = ['type', 'id', 'contig_id', 'location', 'function', 'functions'];
 
             this.genomeAnnotationAPI = new DynamicServiceClient({
                 url: this.runtime.getConfig('services.service_wizard.url'),

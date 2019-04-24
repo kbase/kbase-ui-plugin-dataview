@@ -5,9 +5,9 @@
  * Gene "instance" info (e.g. coordinates on a particular strain's genome)
  * is in a different widget.
  */
-define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widget/legacy/widget'], function (
+define(['jquery', 'kb_lib/htmlBuilders', 'kb_service/client/workspace', 'kbaseUI/widget/legacy/widget'], function (
     $,
-    html,
+    htmlBuilders,
     Workspace
 ) {
     'use strict';
@@ -53,7 +53,7 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
         },
         renderWorkspace: function () {
             var self = this;
-            this.showMessage(html.loading());
+            this.showMessage(htmlBuilders.loading());
             this.$infoPanel.hide();
 
             if (this.options.genomeInfo) {
@@ -76,7 +76,7 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
         ready: function (genome) {
             if (genome.data.features) {
                 var feature = null;
-                for (var i = 0; i < genome.data.features.length; i++) {
+                for (let i = 0; i < genome.data.features.length; i++) {
                     if (genome.data.features[i].id === this.options.featureID) {
                         feature = genome.data.features[i];
                         break;
@@ -84,10 +84,15 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                 }
 
                 // Function
-                var func = feature['function'];
-                if (!func) {
+                let func;
+                if (feature.function) {
+                    func = feature.function;
+                } else if (feature.functions) {
+                    func = feature.functions.join('; ');
+                } else {
                     func = 'Unknown';
                 }
+
                 this.$infoTable.append(this.makeRow('Function', func));
 
                 // Subsystems, single string
@@ -101,19 +106,11 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                 var subsysDataStr = 'No subsystem data found.';
                 if (feature.subsystem_data) {
                     subsysDataStr = '';
-                    for (var i = 0; i < feature.subsystem_data.length; i++) {
+                    for (let i = 0; i < feature.subsystem_data.length; i++) {
                         var subsys = feature.subsystem_data[i];
                         // typedef tuple<string subsystem, string variant, string role> subsystem_data;
                         subsysDataStr +=
-                            '<p>' +
-                            'Subsystem: ' +
-                            subsys[0] +
-                            '<br>' +
-                            'Variant: ' +
-                            subsys[1] +
-                            '<br>' +
-                            'Role: ' +
-                            subsys[2];
+              '<p>' + 'Subsystem: ' + subsys[0] + '<br>' + 'Variant: ' + subsys[1] + '<br>' + 'Role: ' + subsys[2];
                     }
                 }
                 this.$infoTable.append(this.makeRow('Subsystems', subsysDataStr));
@@ -143,10 +140,10 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
             } else {
                 this.renderError({
                     error:
-                        'No genetic features found in the genome with object id: ' +
-                        this.options.workspaceID +
-                        '/' +
-                        this.options.genomeID
+            'No genetic features found in the genome with object id: ' +
+            this.options.workspaceID +
+            '/' +
+            this.options.genomeID
                 });
             }
 

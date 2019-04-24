@@ -6,11 +6,13 @@
  *
  * will adapt this to work with the KBase SEED annotations
  */
-define(['jquery', 'd3', 'kb_service/client/workspace', 'kbaseUI/widget/legacy/authenticatedWidget'], function (
-    $,
-    d3,
-    Workspace
-) {
+define([
+    'jquery',
+    'd3',
+    'kb_service/client/workspace',
+    'kbaseUI/widget/legacy/authenticatedWidget',
+    'css!./kbaseSEEDFunctions'
+], function ($, d3, Workspace) {
     'use strict';
     $.KBWidget({
         name: 'KBaseSEEDFunctions',
@@ -116,13 +118,14 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'kbaseUI/widget/legacy/au
                     nodeHierarchy = '';
                     parentHierarchy = 'Functional Categories';
 
-                    if (subsysToGeneMap[data[i][3]] === undefined) {
+                    const functionName = data[i][3];
+                    if (subsysToGeneMap[functionName] === undefined) {
                         // if barchart needs to only show the subsystems that have genes in this genome,
                         // uncomment the continue statement.
                         //continue;
                     } else {
-                        geneCount = subsysToGeneMap[data[i][3]].length;
-                        totalGenesWithFunctionalRoles += subsysToGeneMap[data[i][3]].length;
+                        geneCount = subsysToGeneMap[functionName].length;
+                        totalGenesWithFunctionalRoles += subsysToGeneMap[functionName].length;
                     }
 
                     for (j = 0; j < ontologyDepth; j += 1) {
@@ -159,7 +162,7 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'kbaseUI/widget/legacy/au
                     }
                 }
 
-                if (totalGenesWithFunctionalRoles < 100) {
+                if (totalGenesWithFunctionalRoles === 0) {
                     self.$mainview.prepend(
                         '<b>No Functional Categories assigned, you can add them using the Narrative.</b>'
                     );
@@ -426,12 +429,23 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'kbaseUI/widget/legacy/au
              subsysToGeneMap [ SEED Role ] = Array of Gene Ids
              */
 
-            genomeObj.features.forEach(function (f) {
+            genomeObj.features.forEach(function (feature) {
                 // Each function can have multiple genes, creating mapping of function to list of gene ids
-                if (subsysToGeneMap[f.function] === undefined) {
-                    subsysToGeneMap[f.function] = [];
+                if (!feature.functions) {
+                    if (feature.function) {
+                        feature.functions = [feature.function];
+                    } else {
+                        return;
+                    }
                 }
-                subsysToGeneMap[f.function].push(f.id);
+                feature.function = feature.functions.join('<br>');
+
+                feature.functions.forEach((functionName) => {
+                    if (subsysToGeneMap[functionName] === undefined) {
+                        subsysToGeneMap[functionName] = [];
+                    }
+                    subsysToGeneMap[functionName].push(feature.id);
+                });
 
                 // Not sure if this is necessary, but I'm going to keep track of the number of genes with
                 // SEED assigned functions in this count variable.
@@ -448,7 +462,7 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'kbaseUI/widget/legacy/au
             this.render();
             return this;
         },
-        loggedOutCallback: function (event, auth) {
+        loggedOutCallback: function () {
             this.authToken = null;
             this.wsClient = null;
             return this;
