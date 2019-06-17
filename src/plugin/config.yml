@@ -4,7 +4,7 @@ package:
     author: KBase Developer
     name: example
     description: The example panel and associated widgets
-    type: iframe
+    type: legacy
 source:
     ## sources are relative to build/plugins/PACKAGE/source/javascript
     ## NB: need to quote file names, otherwise
