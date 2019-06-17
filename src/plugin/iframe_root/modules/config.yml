@@ -538,6 +538,18 @@ install:
             module: widgets/kbase-report/viewer
             name: kb_dataview_kbaseReport
             type: es6
+        # ONTOLOGY
+        - 
+            module: widgets/ontology/kbaseOntologyDictionary
+            # id: ontology_dictionary_panel
+            name: kb_dataview_ontologyDictionary
+            type: factory
+        - 
+            module: widgets/ontology/kbaseOntologyTranslation
+            # id: ontology_translation_panel
+            name: kb_dataview_ontologyTranslation
+            type: factory
+
             
     routes:
         -
@@ -1406,6 +1418,37 @@ install:
                     widget:
                         name: kb_dataview_kbaseReport
                     panel: true
+        # ONTOLOGY
+        -
+            type:
+                module: KBaseOntology
+                name: OntologyDictionary
+                version: any
+            icon: 
+                type: fontAwesome
+                classes: ['fa-file']
+            viewers:
+                -
+                    title: Data View - Ontology Dictionary
+                    default: true
+                    panel: true  
+                    widget: 
+                        name: kb_dataview_ontologyDictionary
+        -
+            type:
+                module: KBaseOntology
+                name: OntologyTranslation
+                version: any
+            icon: 
+                type: fontAwesome
+                classes: ['fa-file']
+            viewers:
+                -
+                    title: Data View - Ontology Translation
+                    default: true
+                    panel: true  
+                    widget: 
+                        name: kb_dataview_ontologyTranslation
 
 views:
     -

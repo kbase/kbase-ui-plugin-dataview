@@ -145,9 +145,12 @@ define(['./windowChannel', './runtime'], (WindowChannel, Runtime) => {
                 // ready message, is itself ready, and is ready for
                 // the iframe app to start running.
                 this.channel.on('start', (payload) => {
-                    const { token, username, config, realname, email } = payload;
+                    const {
+                        authorization: { token, username, realname },
+                        config
+                    } = payload;
                     if (token) {
-                        this.authorization = { token, username, realname, email };
+                        this.authorization = { token, username, realname };
                     } else {
                         this.authorization = null;
                     }
