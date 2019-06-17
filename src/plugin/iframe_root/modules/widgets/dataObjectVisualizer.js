@@ -3,9 +3,10 @@ define([
     'underscore',
     'kb_lib/jsonRpc/genericClient',
     'kb_lib/html',
+    'kb_lib/htmlBuilders',
     'kb_lib/htmlBootstrapBuilders',
     'kb_service/utils'
-], function (Promise, _, GenericClient, html, BS, APIUtils) {
+], function (Promise, _, GenericClient, html, htmlBuilders, BS, APIUtils) {
     'use strict';
 
     var t = html.tag,
@@ -156,7 +157,7 @@ define([
             } else {
                 content = 'Unknown Error';
             }
-            container.innerHTML = html.buildPanel({ title: 'Error', body: content });
+            container.innerHTML = BS.buildPanel({ title: 'Error', body: content, type: 'danger' });
         }
 
         // Widget Lifecycle Interface

@@ -33,6 +33,13 @@ define([
             this._super(options);
             this.init_view();
             this.fetchGenome();
+            this.assemblyAPI = new DynamicServiceClient({
+                url: this.runtime.getConfig('services.service_wizard.url'),
+                module: 'AssemblyAPI',
+                auth: {
+                    token: this.runtime.service('session').getAuthToken()
+                }
+            });
             return this;
         },
         fetchGenome: function () {
@@ -75,13 +82,7 @@ define([
             //     },
             //     version: 'release'
             // });
-            this.AssemblyAPI = new DynamicServiceClient({
-                url: this.runtime.getConfig('services.service_wizard.url'),
-                module: 'AssemblyAPI',
-                auth: {
-                    token: this.runtime.service('session').getAuthToken()
-                }
-            });
+
             // this.asm_api = new AssemblyAPI({
             //     url: this.runtime.getConfig('services.service_wizard.url'),
             //     auth: {
@@ -215,8 +216,7 @@ define([
                 });
         },
         fetchAssembly: function (genomeInfo, callback) {
-            var _this = this,
-                assembly_ref = null,
+            var assembly_ref = null,
                 gnm = genomeInfo.data;
 
             if (gnm.hasOwnProperty('contigset_ref')) {
@@ -225,10 +225,9 @@ define([
                 assembly_ref = gnm.assembly_ref;
             }
 
-            _this.assemblyAPI
+            this.assemblyAPI
                 .callFunc('get_contig_ids', [assembly_ref])
-                .get_contig_ids(assembly_ref)
-                .spread(function (contig_ids) {
+                .spread((contig_ids) => {
                     Object.defineProperties(gnm, {
                         contig_ids: {
                             __proto__: null,
@@ -237,9 +236,9 @@ define([
                             enumerable: true
                         }
                     });
-                    return _this.assemblyAPI
+                    return this.assemblyAPI
                         .callFunc('get_contig_lengths', [assembly_ref, contig_ids])
-                        .spread(function (contig_lengths) {
+                        .spread((contig_lengths) => {
                             Object.defineProperties(gnm, {
                                 contig_lengths: {
                                     __proto__: null,
@@ -252,12 +251,12 @@ define([
                             callback(genomeInfo);
                             return null;
                         })
-                        .catch(function (error) {
-                            _this.showError(_this.view.panels[3].inner_div, error);
+                        .catch((error) => {
+                            this.showError(this.view.panels[3].inner_div, error);
                         });
                 })
-                .catch(function (error) {
-                    _this.showError(_this.view.panels[3].inner_div, error);
+                .catch((error) => {
+                    this.showError(this.view.panels[3].inner_div, error);
                 });
         },
         init_view: function () {

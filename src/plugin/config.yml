@@ -4,6 +4,7 @@ package:
     author: KBase Developer
     name: example
     description: The example panel and associated widgets
+    type: legacy
 source:
     ## sources are relative to build/plugins/PACKAGE/source/javascript
     ## NB: need to quote file names, otherwise
@@ -11,10 +12,6 @@ source:
     styles:
         # - file: styles.css
 install:
-    widgets:
-        - module: ./panel
-          id: kb_plugin_dataview
-          type: es6
     routes:
         -
             path: 
@@ -33,7 +30,8 @@ install:
                 viewer: {}
             params:
                 view: dataView
-            widget: kb_plugin_dataview
+                plugin: dataview
+            widget: kb_iframe_loader
         -
             path:
                 -
@@ -47,7 +45,8 @@ install:
                     optional: true
             params:
                 view: jsonView
-            widget: kb_plugin_dataview 
+                plugin: dataview
+            widget: kb_iframe_loader 
         -
             path: 
                 - 
@@ -61,7 +60,8 @@ install:
                     optional: true
             params:
                 view: provenanceView
-            widget: kb_plugin_dataview
+                plugin: dataview
+            widget: kb_iframe_loader
         -
             path: 
                 - 
@@ -75,12 +75,5 @@ install:
                     optional: true
             params:
                 view: provenanceView2
-            widget: kb_plugin_dataview
-
-        # - path: ['example']
-        #   queryParams: {}
-        #   params: {
-        #       view: 'view'
-        #   }
-        #   widget: kb_plugin_example
-        #   authorization: true
+                plugin: dataview
+            widget: kb_iframe_loader
