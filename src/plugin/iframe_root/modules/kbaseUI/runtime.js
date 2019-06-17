@@ -1,21 +1,24 @@
-define(['bluebird', 'kb_lib/props', 'kb_lib/messenger', './services/session', './services/widget', './services/type'], (
-    Promise,
-    props,
-    Messenger,
-    SessionService,
-    WidgetService,
-    TypeService
-) => {
+define([
+    'bluebird',
+    'kb_lib/props',
+    'kb_lib/messenger',
+    './services/session',
+    './services/widget',
+    './services/type',
+    './services/rpc'
+], (Promise, props, Messenger, SessionService, WidgetService, TypeService, RPCService) => {
     'use strict';
 
     class Runtime {
-        constructor({ token, username, config, pluginConfig }) {
+        constructor({ token, username, config, pluginConfigDB }) {
             this.token = token;
             this.username = username;
 
-            this.configDb = new props.Props({ data: config });
+            this.configDB = new props.Props({ data: config });
+            this.pluginConfigDB = pluginConfigDB;
 
-            this.pluginPath = '/modules/plugins/dataview/iframe_root';
+            // TODO: fix this!
+            this.pluginPath = '/modules/plugins/' + pluginConfigDB.getItem('package.name') + '/iframe_root';
             this.pluginResourcePath = this.pluginPath + '/resources';
 
             this.messenger = new Messenger();
@@ -25,17 +28,21 @@ define(['bluebird', 'kb_lib/props', 'kb_lib/messenger', './services/session', '.
             this.services = {
                 session: new SessionService({ runtime: this }),
                 widget: new WidgetService({ runtime: this }),
-                type: new TypeService({ runtime: this, config: pluginConfig.install.types })
+                type: new TypeService({
+                    runtime: this,
+                    config: this.pluginConfigDB.getItem('install.types')
+                }),
+                rpc: new RPCService({ runtime: this })
             };
 
             this.featureSwitches = {};
-            this.configDb.getItem('ui.featureSwitches.available', []).forEach((featureSwitch) => {
+            this.configDB.getItem('ui.featureSwitches.available', []).forEach((featureSwitch) => {
                 this.featureSwitches[featureSwitch.id] = featureSwitch;
             });
         }
 
         config(path, defaultValue) {
-            return this.configDb.getItem(path, defaultValue);
+            return this.configDB.getItem(path, defaultValue);
         }
 
         getConfig(path, defaultValue) {
@@ -79,7 +86,7 @@ define(['bluebird', 'kb_lib/props', 'kb_lib/messenger', './services/session', '.
                 throw new Error('Feature switch "' + id + '" not defined');
             }
 
-            const enabledFeatureSwitches = this.configDb.getItem('ui.featureSwitches.enabled');
+            const enabledFeatureSwitches = this.configDB.getItem('ui.featureSwitches.enabled');
             const enabled = enabledFeatureSwitches.includes(id);
             return enabled || defaultValue;
         }

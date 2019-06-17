@@ -4,8 +4,7 @@ package:
     author: KBase Developer
     name: example
     description: The example panel and associated widgets
-    type: legacy
-
+    type: iframe
 source:
     ## sources are relative to build/plugins/PACKAGE/source/javascript
     ## NB: need to quote file names, otherwise
@@ -13,10 +12,6 @@ source:
     styles:
         # - file: styles.css
 install:
-    widgets:
-        - module: ./panel
-          id: kb_plugin_dataview
-          type: es6
     routes:
         -
             path: 

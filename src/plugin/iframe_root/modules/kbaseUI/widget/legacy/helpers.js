@@ -7,10 +7,9 @@ define(['jquery', 'kb_lib/html', 'kb_lib/htmlBuilders'], function ($, html, html
             .find('.loader')
             .remove();
     };
-    $.fn.loading = function (text, big) {
+    $.fn.loading = function (text) {
         var div = html.tag('div');
         $(this).rmLoading();
-        // TODO: handle "big"
         $(this).append(div({ class: 'loader' }, htmlBuilders.loading(text)));
         return this;
     };

@@ -543,12 +543,12 @@ install:
             module: widgets/ontology/kbaseOntologyDictionary
             # id: ontology_dictionary_panel
             name: kb_dataview_ontologyDictionary
-            type: factory
+            type: kbwidget
         - 
             module: widgets/ontology/kbaseOntologyTranslation
             # id: ontology_translation_panel
             name: kb_dataview_ontologyTranslation
-            type: factory
+            type: kbwidget
 
             
     routes:
@@ -1431,9 +1431,11 @@ install:
                 -
                     title: Data View - Ontology Dictionary
                     default: true
-                    panel: true  
+                    panel: false  
                     widget: 
                         name: kb_dataview_ontologyDictionary
+                        config:
+                            jqueryName: KBaseOntologyDictionary
         -
             type:
                 module: KBaseOntology
@@ -1446,9 +1448,11 @@ install:
                 -
                     title: Data View - Ontology Translation
                     default: true
-                    panel: true  
+                    panel: false  
                     widget: 
                         name: kb_dataview_ontologyTranslation
+                        config:
+                            jqueryName: KBaseOntologyTranslation
 
 views:
     -

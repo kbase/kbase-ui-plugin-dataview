@@ -2,14 +2,15 @@ define([
     'jquery',
     './colorbrewer/colorbrewer', // new dep
     'kb_service/client/workspace',
+    'uuid',
     'datatables_bootstrap',
     'kbaseUI/widget/legacy/authenticatedWidget',
     'kbaseUI/widget/legacy/kbaseTable'
-], function ($, colorbrewer, Workspace) {
+], function ($, colorbrewer, Workspace, Uuid) {
     'use strict';
 
     $.KBWidget({
-        name: 'kbaseOntologyTranslation',
+        name: 'KBaseOntologyTranslation',
         parent: 'kbaseAuthenticatedWidget',
         version: '1.0.0',
         options: {
@@ -175,10 +176,10 @@ define([
         },
 
         appendUI: function appendUI($elem) {
-            $elem.css({
-                width: '95%',
-                'padding-left': '10px'
-            });
+            // $elem.css({
+            //     width: '95%',
+            //     'padding-left': '10px'
+            // });
 
             $elem.append($.jqElem('style').text('.ontology-top { vertical-align : top }'));
 
@@ -227,6 +228,9 @@ define([
             return $elem;
         },
         createContainerElem: function (name, content, display) {
+            const panelHeadingId = new Uuid(4).format();
+            const panelCollapseId = new Uuid(4).format();
+
             var $panelBody = $.jqElem('div').addClass('panel-body collapse in');
 
             $.each(content, function (i, v) {
@@ -239,6 +243,8 @@ define([
                 .append(
                     $.jqElem('div')
                         .addClass('panel-heading')
+                        .attr('id', panelHeadingId)
+                        .attr('role', 'tab')
                         .on('click', function () {
                             $(this)
                                 .next()
@@ -248,17 +254,31 @@ define([
                                 .toggleClass('fa-rotate-90');
                         })
                         .append(
-                            $.jqElem('div')
+                            $.jqElem('h4')
                                 .addClass('panel-title')
                                 .append(
-                                    $.jqElem('i')
-                                        .addClass('fa fa-chevron-right fa-rotate-90')
-                                        .css('color', 'lightgray')
+                                    $.jqElem('span')
+                                        .attr('data-toggle', 'collapse')
+                                        .attr('data-target', '#' + panelCollapseId)
+                                        .attr('aria-expanded', 'true')
+                                        .attr('aria-controls', '#' + panelCollapseId)
+                                        .css('cursor', 'pointer')
+                                        .append(
+                                            $.jqElem('span')
+                                                .text(name)
+                                                .css('margin-left', '10px')
+                                        )
                                 )
-                                .append('&nbsp; ' + name)
                         )
                 )
-                .append($panelBody);
+                .append(
+                    $.jqElem('div')
+                        .addClass('panel-collapse collapse in')
+                        .attr('id', panelCollapseId)
+                        .attr('role', 'tabpanel')
+                        .attr('aria-expanded', 'true')
+                        .append($panelBody)
+                );
 
             return $containerElem;
         }

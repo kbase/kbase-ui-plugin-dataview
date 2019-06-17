@@ -36,8 +36,16 @@
 
  tabs.showTab('tab_name');
  */
+/*global
+ define
+ */
+/*jslint
+ browser: true,
+ white: true
+ */
 define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
     'use strict';
+
     const t = html.tag,
         a = t('a'),
         div = t('div');
@@ -74,7 +82,6 @@ define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
                             p.name
                         )
                     );
-                // tab_link = $('<a data-toggle="tab" data-id="' + p.name + '">' + p.name + '</a>');
 
                 // animate by sliding tab up
                 if (p.animate === false) {
@@ -95,7 +102,7 @@ define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
                     );
                     tab_link.append(rm_btn);
 
-                    rm_btn.click(function (e) {
+                    rm_btn.click(function () {
                         self.rmTab(p.name);
                     });
                 }
