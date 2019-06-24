@@ -162,7 +162,7 @@ define([
                 }
                 ///////////////////////////////////// Statistics ////////////////////////////////////////////
                 var tabStat = $('<div/>');
-                tabs.addTab({ name: 'Overview', content: tabStat, active: showOverview, removable: false });
+                tabs.addTab({ name: 'Pangenome Overview', content: tabStat, active: showOverview, removable: false });
 
                 const tableOver = $('<table class="table table-striped table-bordered" ' +
                     'style="margin-left: auto; margin-right: auto;" id="' + self.pref + 'overview-table"/>');
@@ -223,7 +223,7 @@ define([
 
                 ///////////////////////////////////// Shared orthologs ////////////////////////////////////////////
                 const tabShared = $('<div/>');
-                tabs.addTab({ name: 'Shared homolog families', content: tabShared, active: false, removable: false });
+                tabs.addTab({ name: 'Genome Comparison', content: tabShared, active: false, removable: false });
                 const tableShared = $('<table class="table table-striped table-bordered" ' +
                     'style="margin-left: auto; margin-right: auto;" id="' + self.pref + 'shared-table"/>');
                 tabShared.append(tableShared);
@@ -262,7 +262,7 @@ define([
                 }
                 tabOrth.append(tableOrth);
 
-                tabs.addTab({ name: 'Protein families', content: tabOrth, active: !showOverview, removable: false });
+                tabs.addTab({ name: 'Families', content: tabOrth, active: !showOverview, removable: false });
 
                 var orth_data = [];
                 for (const i in data.orthologs) {
