@@ -227,7 +227,7 @@ define([
                 const tableShared = $('<table class="table table-striped table-bordered" ' +
                     'style="margin-left: auto; margin-right: auto;" id="' + self.pref + 'shared-table"/>');
                 tabShared.append(tableShared);
-                var header = '';
+                var header = '<th>Genome</th><th>Legend</th>';
                 for (var genomePos in genomeOrder) {
                     var genomeNum = genomeOrder[genomePos][2];
                     header += '<td width="40"><center><b>G' + genomeNum + '</b></center></td>';
@@ -249,7 +249,7 @@ define([
                         row += '<td width="40"><font color="' + color + '">' + count + '</font></td>';
                     }
                     const genomeNum = genomeOrder[genomePos][2];
-                    tableShared.append('<tr>' + row + '<td><b>G' + genomeNum + '</b> - ' + genomeOrder[genomePos][1] + '</td></tr>');
+                    tableShared.append('<tr><td><b>G' + genomeNum + '</b> - ' + genomeOrder[genomePos][1] + "</td><td># homolog families</td>" +  row + '</tr>');
                 }
 
                 ///////////////////////////////////// Orthologs /////////////////////////////////////////////
