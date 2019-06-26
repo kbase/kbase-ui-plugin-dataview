@@ -195,7 +195,7 @@ define([
                     genomeOrder[i][2] = parseInt('' + i) + 1;
                 }
                 tableOver.append('<tr><td>Total # of genomes</td><td><b>' + totalGenomes + '</b></td></tr>');
-                tableOver.append('<tr><td>Total # of proteins</td><td><b>' + (totalGenesInOrth + totalOrphanGenes) + '</b> ' +
+                tableOver.append('<tr><td>Total # of protein coding genes</td><td><b>' + (totalGenesInOrth + totalOrphanGenes) + '</b> ' +
                     'proteins, <b>' + totalGenesInOrth + '</b> are in homolog families, <b>' + totalOrphanGenes + '</b> ' +
                     'are in singleton families</td></tr>');
                 tableOver.append('<tr><td>Total # of families</td><td><b>' + totalOrthologs + '</b> families, <b>' +
