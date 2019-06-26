@@ -201,6 +201,18 @@ define([
                 tableOver.append('<tr><td>Total # of families</td><td><b>' + totalOrthologs + '</b> families, <b>' +
                     totalHomFamilies + '</b> homolog families, <b>' + (totalOrthologs - totalHomFamilies) + '</b> ' +
                     'singleton families</td></tr>');
+                
+                const tableOver2 = $('<table class="table table-striped table-bordered" ' +
+                    'style="margin-left: auto; margin-right: auto;" id="' + self.pref + 'overview-table2"/>');
+                tabStat.append(tableOver2);
+                tableOver2.append($('<tr>')
+                        .append($('<th>Genome</th>'))
+                        .append($('<th># Genes</th>'))
+                        .append($('<th># Genes in Homologs</th>'))
+                        .append($('<th># Genes in Singletons</th>'))
+                        .append($('<th># Homolog Families</th>'))
+                        );
+
                 for (const genomePos in genomeOrder) {
                     const genomeRef = genomeOrder[genomePos][0];
                     const genomeName = self.genomeNames[genomeRef];
@@ -216,9 +228,12 @@ define([
                     // var genesAll = 0;
                     // for (var i in self.geneIndex[genomeRef])
                     //     genesAll++;
-                    tableOver.append('<tr><td>' + genomeName + '</td><td><b>' + (genesInOrth + genesInSingle) + '</b> proteins, <b>' +
-                        genesInOrth + '</b> proteins are in <b>' + orthCount + '</b> homolog families, <b>' +
-                        genesInSingle + '</b> proteins are in singleton families</td></tr>');
+                    tableOver2.append('<tr><td>' +
+                        genomeName + '</td><td>' +
+                        (genesInOrth + genesInSingle) + '</td><td>' +
+                        genesInOrth + '</td><td>' +
+                        genesInSingle + '</td><td>' +
+                        orthCount + '</td><tr>' );
                 }
 
                 ///////////////////////////////////// Shared orthologs ////////////////////////////////////////////
