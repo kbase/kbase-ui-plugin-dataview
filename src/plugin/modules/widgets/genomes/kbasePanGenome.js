@@ -285,8 +285,8 @@ define([
                     const id_text = '<a class="show-orthologs_' + self.pref + '" data-id="' + orth.id + '">' + orth.id + '</a>';
                     const genome_count = Object.keys(orthologStat[orth.id][1]).length;
                     orth_data.push({
-                        func: orth['function'],
                         id: id_text,
+                        func: orth['function'],
                         len: orth.orthologs.length,
                         genomes: genome_count
                     });
@@ -301,8 +301,8 @@ define([
                         [0, 'asc']
                     ],
                     aoColumns: [
+                        { sTitle: 'Family', mData: 'id' },
                         { sTitle: 'Function', mData: 'func' },
-                        { sTitle: 'ID', mData: 'id' },
                         { sTitle: 'Protein Count', mData: 'len' },
                         { sTitle: 'Genome Count', mData: 'genomes' }
                     ],
