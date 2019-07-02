@@ -12,12 +12,7 @@ define([
     'kb_widget/legacy/authenticatedWidget',
     'kb_widget/legacy/tabs',
     'datatables_bootstrap'
-], function (
-    $,
-    Uuid,
-    html,
-    Workspace
-) {
+], function ($, Uuid, html, Workspace) {
     'use strict';
 
     var t = html.tag,
@@ -25,9 +20,11 @@ define([
         span = t('span');
 
     function encodeQuery(queryMap) {
-        return Object.keys(queryMap).map(function (key) {
-            return [key, queryMap[key]].map(encodeURIComponent).join('=');
-        }).join('&');
+        return Object.keys(queryMap)
+            .map(function (key) {
+                return [key, queryMap[key]].map(encodeURIComponent).join('=');
+            })
+            .join('&');
     }
 
     function calcGenomeStats(data) {
@@ -129,10 +126,13 @@ define([
                 name = this.options.name,
                 container = this.$elem;
 
-            this.workspace.get_objects([{
-                workspace: this.options.ws,
-                name: name
-            }])
+            this.workspace
+                .get_objects([
+                    {
+                        workspace: this.options.ws,
+                        name: name
+                    }
+                ])
                 .then(function (data) {
                     if (self.loaded) {
                         return;
@@ -146,8 +146,7 @@ define([
                 .catch(function (err) {
                     console.error('ERROR', err);
                     container.empty();
-                    container.append('<div class="alert alert-danger">' +
-                        err.error.message + '</div>');
+                    container.append('<div class="alert alert-danger">' + err.error.message + '</div>');
                 });
 
             function buildTable(data) {
@@ -162,10 +161,14 @@ define([
                 }
                 ///////////////////////////////////// Statistics ////////////////////////////////////////////
                 var tabStat = $('<div/>');
-                tabs.addTab({ name: 'Overview', content: tabStat, active: showOverview, removable: false });
+                tabs.addTab({ name: 'Pangenome Overview', content: tabStat, active: showOverview, removable: false });
 
-                const tableOver = $('<table class="table table-striped table-bordered" ' +
-                    'style="margin-left: auto; margin-right: auto;" id="' + self.pref + 'overview-table"/>');
+                const tableOver = $(
+                    '<table class="table table-striped table-bordered" ' +
+                        'style="margin-top: 1em;" id="' +
+                        self.pref +
+                        'overview-table"/>'
+                );
                 tabStat.append(tableOver);
                 tableOver.append('<tr><td>Pan-genome object ID</td><td>' + self.options.name + '</td></tr>');
 
@@ -185,22 +188,52 @@ define([
                     genomeOrder.push([genomeRef, self.genomeNames[genomeRef], 0]);
                 }
                 genomeOrder.sort(function (a, b) {
-                    if (a[1] < b[1])
-                        return -1;
-                    if (a[1] > b[1])
-                        return 1;
+                    if (a[1] < b[1]) return -1;
+                    if (a[1] > b[1]) return 1;
                     return 0;
                 });
                 for (const i in genomeOrder) {
                     genomeOrder[i][2] = parseInt('' + i) + 1;
                 }
                 tableOver.append('<tr><td>Total # of genomes</td><td><b>' + totalGenomes + '</b></td></tr>');
-                tableOver.append('<tr><td>Total # of proteins</td><td><b>' + (totalGenesInOrth + totalOrphanGenes) + '</b> ' +
-                    'proteins, <b>' + totalGenesInOrth + '</b> are in homolog families, <b>' + totalOrphanGenes + '</b> ' +
-                    'are in singleton families</td></tr>');
-                tableOver.append('<tr><td>Total # of families</td><td><b>' + totalOrthologs + '</b> families, <b>' +
-                    totalHomFamilies + '</b> homolog families, <b>' + (totalOrthologs - totalHomFamilies) + '</b> ' +
-                    'singleton families</td></tr>');
+                tableOver.append(
+                    '<tr><td>Total # of protein coding genes</td><td><b>' +
+                        (totalGenesInOrth + totalOrphanGenes) +
+                        '</b> ' +
+                        'proteins, <b>' +
+                        totalGenesInOrth +
+                        '</b> are in homolog families, <b>' +
+                        totalOrphanGenes +
+                        '</b> ' +
+                        'are in singleton families</td></tr>'
+                );
+                tableOver.append(
+                    '<tr><td>Total # of families</td><td><b>' +
+                        totalOrthologs +
+                        '</b> families, <b>' +
+                        totalHomFamilies +
+                        '</b> homolog families, <b>' +
+                        (totalOrthologs - totalHomFamilies) +
+                        '</b> ' +
+                        'singleton families</td></tr>'
+                );
+
+                const tableOver2 = $(
+                    '<table class="table table-striped table-bordered" ' +
+                        'style="margin-top: 1em;" id="' +
+                        self.pref +
+                        'overview-table2"/>'
+                );
+                tabStat.append(tableOver2);
+                tableOver2.append(
+                    $('<tr>')
+                        .append($('<th>Genome</th>'))
+                        .append($('<th># Genes</th>'))
+                        .append($('<th># Genes in Homologs</th>'))
+                        .append($('<th># Genes in Singletons</th>'))
+                        .append($('<th># Homolog Families</th>'))
+                );
+
                 for (const genomePos in genomeOrder) {
                     const genomeRef = genomeOrder[genomePos][0];
                     const genomeName = self.genomeNames[genomeRef];
@@ -208,7 +241,7 @@ define([
                     let genesInOrth = 0;
                     let genesInSingle = 0;
                     if (genomeStat[genomeRef]) {
-                        [orthCount, ,genesInOrth, genesInSingle] = genomeStat[genomeRef];
+                        [orthCount, , genesInOrth, genesInSingle] = genomeStat[genomeRef];
                         // orthCount = stat[0];
                         // genesInOrth = stat[2];
                         // genesInSingle = stat[3];
@@ -216,23 +249,37 @@ define([
                     // var genesAll = 0;
                     // for (var i in self.geneIndex[genomeRef])
                     //     genesAll++;
-                    tableOver.append('<tr><td>' + genomeName + '</td><td><b>' + (genesInOrth + genesInSingle) + '</b> proteins, <b>' +
-                        genesInOrth + '</b> proteins are in <b>' + orthCount + '</b> homolog families, <b>' +
-                        genesInSingle + '</b> proteins are in singleton families</td></tr>');
+                    tableOver2.append(
+                        '<tr><td>' +
+                            genomeName +
+                            '</td><td>' +
+                            (genesInOrth + genesInSingle) +
+                            '</td><td>' +
+                            genesInOrth +
+                            '</td><td>' +
+                            genesInSingle +
+                            '</td><td>' +
+                            orthCount +
+                            '</td><tr>'
+                    );
                 }
 
                 ///////////////////////////////////// Shared orthologs ////////////////////////////////////////////
                 const tabShared = $('<div/>');
-                tabs.addTab({ name: 'Shared homolog families', content: tabShared, active: false, removable: false });
-                const tableShared = $('<table class="table table-striped table-bordered" ' +
-                    'style="margin-left: auto; margin-right: auto;" id="' + self.pref + 'shared-table"/>');
+                tabs.addTab({ name: 'Genome Comparison', content: tabShared, active: false, removable: false });
+                const tableShared = $(
+                    '<table class="table table-striped table-bordered" ' +
+                        'style="margin-top: 1em; width: 100%;" id="' +
+                        self.pref +
+                        'shared-table"/>'
+                );
                 tabShared.append(tableShared);
-                var header = '';
+                var header = '<th>Genome</th><th>Legend</th>';
                 for (var genomePos in genomeOrder) {
                     var genomeNum = genomeOrder[genomePos][2];
-                    header += '<td width="40"><center><b>G' + genomeNum + '</b></center></td>';
+                    header += '<th width="40" style="text-align: center;">G' + genomeNum + '</th>';
                 }
-                tableShared.append('<tr>' + header + '<td/></tr>');
+                tableShared.append('<tr>' + header + '</tr>');
                 for (const genomePos in genomeOrder) {
                     const genomeRef = genomeOrder[genomePos][0];
                     let row = '';
@@ -240,38 +287,48 @@ define([
                         const genomeRef2 = genomeOrder[genomePos2][0];
                         let count = 0;
                         for (var orth_id in orthologStat) {
-                            if (orthologStat[orth_id][0] <= 1)
-                                continue;
-                            if (orthologStat[orth_id][1][genomeRef] && orthologStat[orth_id][1][genomeRef2])
-                                count++;
+                            if (orthologStat[orth_id][0] <= 1) continue;
+                            if (orthologStat[orth_id][1][genomeRef] && orthologStat[orth_id][1][genomeRef2]) count++;
                         }
                         var color = genomeRef === genomeRef2 ? '#d2691e' : 'black';
                         row += '<td width="40"><font color="' + color + '">' + count + '</font></td>';
                     }
                     const genomeNum = genomeOrder[genomePos][2];
-                    tableShared.append('<tr>' + row + '<td><b>G' + genomeNum + '</b> - ' + genomeOrder[genomePos][1] + '</td></tr>');
+                    tableShared.append(
+                        '<tr><td><b>G' +
+                            genomeNum +
+                            '</b> - ' +
+                            genomeOrder[genomePos][1] +
+                            '</td><td># homolog families</td>' +
+                            row +
+                            '</tr>'
+                    );
                 }
 
                 ///////////////////////////////////// Orthologs /////////////////////////////////////////////
-                const tableOrth = $('<table cellpadding="0" cellspacing="0" border="0" class="table table-bordered ' +
-                    'table-striped" style="width: 100%; margin-left: 0px; margin-right: 0px;">');
+                const tableOrth = $(
+                    '<table class="table table-bordered table-striped" style="margin-top: 1em; width: 100%;">'
+                );
                 const tabOrth = $('<div/>');
                 if (self.options.withExport) {
-                    tabOrth.append('<p><b>Please choose homolog family and push \'Export\' ' +
-                        'button on opened ortholog tab.</b></p><br>');
+                    tabOrth.append(
+                        '<p><b>Please choose homolog family and push \'Export\' ' +
+                            'button on opened ortholog tab.</b></p><br>'
+                    );
                 }
                 tabOrth.append(tableOrth);
 
-                tabs.addTab({ name: 'Protein families', content: tabOrth, active: !showOverview, removable: false });
+                tabs.addTab({ name: 'Families', content: tabOrth, active: !showOverview, removable: false });
 
                 var orth_data = [];
                 for (const i in data.orthologs) {
                     const orth = data.orthologs[i];
-                    const id_text = '<a class="show-orthologs_' + self.pref + '" data-id="' + orth.id + '">' + orth.id + '</a>';
+                    const id_text =
+                        '<a class="show-orthologs_' + self.pref + '" data-id="' + orth.id + '">' + orth.id + '</a>';
                     const genome_count = Object.keys(orthologStat[orth.id][1]).length;
                     orth_data.push({
-                        func: orth['function'],
                         id: id_text,
+                        func: orth['function'],
                         len: orth.orthologs.length,
                         genomes: genome_count
                     });
@@ -281,13 +338,10 @@ define([
                     sPaginationType: 'full_numbers',
                     iDisplayLength: 10,
                     aaData: orth_data,
-                    aaSorting: [
-                        [2, 'desc'],
-                        [0, 'asc']
-                    ],
+                    aaSorting: [[2, 'desc'], [0, 'asc']],
                     aoColumns: [
+                        { sTitle: 'Family', mData: 'id' },
                         { sTitle: 'Function', mData: 'func' },
-                        { sTitle: 'ID', mData: 'id' },
                         { sTitle: 'Protein Count', mData: 'len' },
                         { sTitle: 'Genome Count', mData: 'genomes' }
                     ],
@@ -335,21 +389,20 @@ define([
                 req = genomeRefs.map(function (ref) {
                     return { ref: ref, included: ['scientific_name', 'features/[*]/id'] };
                 });
-            return this.workspace.get_object_subset(req)
-                .then(function (data) {
-                    for (var genomePos in genomeRefs) {
-                        var ref = genomeRefs[genomePos];
-                        self.genomeNames[ref] = data[genomePos].data.scientific_name;
-                        self.genomeRefs[ref] = data[genomePos].info[7] + '/' + data[genomePos].info[1];
-                        var geneIdToIndex = {};
-                        for (var genePos in data[genomePos].data.features) {
-                            var gene = data[genomePos].data.features[genePos];
-                            geneIdToIndex[gene.id] = genePos;
-                        }
-                        self.geneIndex[ref] = geneIdToIndex;
+            return this.workspace.get_object_subset(req).then(function (data) {
+                for (var genomePos in genomeRefs) {
+                    var ref = genomeRefs[genomePos];
+                    self.genomeNames[ref] = data[genomePos].data.scientific_name;
+                    self.genomeRefs[ref] = data[genomePos].info[7] + '/' + data[genomePos].info[1];
+                    var geneIdToIndex = {};
+                    for (var genePos in data[genomePos].data.features) {
+                        var gene = data[genomePos].data.features[genePos];
+                        geneIdToIndex[gene.id] = genePos;
                     }
-                    return genomeRefs;
-                });
+                    self.geneIndex[ref] = geneIdToIndex;
+                }
+                return genomeRefs;
+            });
             // .catch(function (err) {
             //     console.error('ERROR cacheGeneFunctions');
             //     console.error(err);
@@ -368,7 +421,8 @@ define([
                 var featurePos = self.geneIndex[genomeRef][featureId];
                 req.push({ ref: genomeRef, included: ['features/' + featurePos] });
             }
-            this.workspace.get_object_subset(req)
+            this.workspace
+                .get_object_subset(req)
                 .then(function (data) {
                     var genes = [];
                     for (var i in data) {
@@ -379,8 +433,7 @@ define([
                         var genome = self.genomeNames[genomeRef];
                         var id = feature.id;
                         var func = feature['function'];
-                        if (!func)
-                            func = '-';
+                        if (!func) func = '-';
                         var seq = feature.protein_translation;
                         var len = seq ? seq.length : 'no translation';
                         genes.push({ ref: ref, genome: genome, id: id, func: func, len: len, original: feature });
@@ -396,14 +449,22 @@ define([
             var pref2 = new Uuid(4).format();
             var self = this;
             tab.empty();
-            var table = $('<table cellpadding="0" cellspacing="0" border="0" class="table table-bordered ' +
-                'table-striped" style="width: 100%; margin-left: 0px; margin-right: 0px;">');
+            var table = $('<table class="table table-bordered ' + 'table-striped" style="margin-top: 1em;">');
             if (self.options.withExport) {
-                tab.append('<p><b>Name of feature set object:</b>&nbsp;' +
-                    '<input type="text" id="input_' + pref2 + '" ' +
-                    'value="' + self.options.name + '.' + orth_id + '.featureset" style="width: 350px;"/>' +
-                    '&nbsp;<button id="btn_' + pref2 + '">Export</button><br>' +
-                    '<font size="-1">(only features with protein translations will be exported)</font></p><br>'
+                tab.append(
+                    '<p><b>Name of feature set object:</b>&nbsp;' +
+                        '<input type="text" id="input_' +
+                        pref2 +
+                        '" ' +
+                        'value="' +
+                        self.options.name +
+                        '.' +
+                        orth_id +
+                        '.featureset" style="width: 350px;"/>' +
+                        '&nbsp;<button id="btn_' +
+                        pref2 +
+                        '">Export</button><br>' +
+                        '<font size="-1">(only features with protein translations will be exported)</font></p><br>'
                 );
             }
             tab.append(table);
@@ -411,46 +472,53 @@ define([
                 sPaginationType: 'full_numbers',
                 iDisplayLength: 10,
                 aaData: genes,
-                aaSorting: [
-                    [0, 'asc'],
-                    [1, 'asc']
-                ],
-                aoColumns: [{
-                    sTitle: 'Genome name',
-                    mData: function (d) {
-                        return a({
-                            target: '_blank',
-                            href: '#dataview/' + d.ref
-                        }, span({
-                            style: {
-                                whiteSpace: 'nowrap'
-                            }
-                        }, d.genome));
-                        // return '<a class="show-genomes_' + pref2 + '" data-id="' + d.ref + '">' +
-                        //     '<span style="white-space: nowrap;">' + d.genome + '</span></a>';
+                aaSorting: [[0, 'asc'], [1, 'asc']],
+                aoColumns: [
+                    {
+                        sTitle: 'Genome name',
+                        mData: function (d) {
+                            return a(
+                                {
+                                    target: '_blank',
+                                    href: '#dataview/' + d.ref
+                                },
+                                span(
+                                    {
+                                        style: {
+                                            whiteSpace: 'nowrap'
+                                        }
+                                    },
+                                    d.genome
+                                )
+                            );
+                            // return '<a class="show-genomes_' + pref2 + '" data-id="' + d.ref + '">' +
+                            //     '<span style="white-space: nowrap;">' + d.genome + '</span></a>';
+                        }
+                    },
+                    {
+                        sTitle: 'Feature ID',
+                        mData: function (d) {
+                            var query = {
+                                sub: 'Feature',
+                                subid: d.id
+                            };
+                            return a(
+                                {
+                                    target: '_blank',
+                                    href: '#dataview/' + d.ref + '?' + encodeQuery(query)
+                                },
+                                d.id
+                            );
+                        }
+                    },
+                    {
+                        sTitle: 'Function',
+                        mData: 'func'
+                    },
+                    {
+                        sTitle: 'Protein sequence length',
+                        mData: 'len'
                     }
-                },
-                {
-                    sTitle: 'Feature ID',
-                    mData: function (d) {
-                        var query = {
-                            sub: 'Feature',
-                            subid: d.id
-                        };
-                        return a({
-                            target: '_blank',
-                            href: '#dataview/' + d.ref + '?' + encodeQuery(query)
-                        }, d.id);
-                    }
-                },
-                {
-                    sTitle: 'Function',
-                    'mData': 'func'
-                },
-                {
-                    sTitle: 'Protein sequence length',
-                    'mData': 'len'
-                }
                 ],
                 oLanguage: {
                     sEmptyTable: 'No objects in workspace',
@@ -500,17 +568,17 @@ define([
                 }
             }
             var featureSet = {
-                description: 'Feature set exported from pan-genome "' +
-                    this.options.name + '", otholog "' + orth_id + '"',
+                description:
+                    'Feature set exported from pan-genome "' + this.options.name + '", otholog "' + orth_id + '"',
                 elements: elements
             };
-            this.workspace.save_objects({
-                workspace: this.options.ws,
-                objects: [{ type: 'KBaseSearch.FeatureSet', name: target_obj_name, data: featureSet }]
-            })
+            this.workspace
+                .save_objects({
+                    workspace: this.options.ws,
+                    objects: [{ type: 'KBaseSearch.FeatureSet', name: target_obj_name, data: featureSet }]
+                })
                 .then(function () {
-                    alert('Feature set object containing ' + size + ' genes ' +
-                        'was successfully exported');
+                    alert('Feature set object containing ' + size + ' genes ' + 'was successfully exported');
                 })
                 .catch(function (err) {
                     alert('Error: ' + err.error.message);
