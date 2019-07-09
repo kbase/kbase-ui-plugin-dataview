@@ -161,11 +161,11 @@ define([
                 }
                 ///////////////////////////////////// Statistics ////////////////////////////////////////////
                 var tabStat = $('<div/>');
-                tabs.addTab({ name: 'Overview', content: tabStat, active: showOverview, removable: false });
+                tabs.addTab({ name: 'Pangenome Overview', content: tabStat, active: showOverview, removable: false });
 
                 const tableOver = $(
                     '<table class="table table-striped table-bordered" ' +
-                        'style="margin-left: auto; margin-right: auto;" id="' +
+                        'style="margin-top: 1em;" id="' +
                         self.pref +
                         'overview-table"/>'
                 );
@@ -197,7 +197,7 @@ define([
                 }
                 tableOver.append('<tr><td>Total # of genomes</td><td><b>' + totalGenomes + '</b></td></tr>');
                 tableOver.append(
-                    '<tr><td>Total # of proteins</td><td><b>' +
+                    '<tr><td>Total # of protein coding genes</td><td><b>' +
                         (totalGenesInOrth + totalOrphanGenes) +
                         '</b> ' +
                         'proteins, <b>' +
@@ -217,6 +217,23 @@ define([
                         '</b> ' +
                         'singleton families</td></tr>'
                 );
+
+                const tableOver2 = $(
+                    '<table class="table table-striped table-bordered" ' +
+                        'style="margin-top: 1em;" id="' +
+                        self.pref +
+                        'overview-table2"/>'
+                );
+                tabStat.append(tableOver2);
+                tableOver2.append(
+                    $('<tr>')
+                        .append($('<th>Genome</th>'))
+                        .append($('<th># Genes</th>'))
+                        .append($('<th># Genes in Homologs</th>'))
+                        .append($('<th># Genes in Singletons</th>'))
+                        .append($('<th># Homolog Families</th>'))
+                );
+
                 for (const genomePos in genomeOrder) {
                     const genomeRef = genomeOrder[genomePos][0];
                     const genomeName = self.genomeNames[genomeRef];
@@ -232,37 +249,37 @@ define([
                     // var genesAll = 0;
                     // for (var i in self.geneIndex[genomeRef])
                     //     genesAll++;
-                    tableOver.append(
+                    tableOver2.append(
                         '<tr><td>' +
                             genomeName +
-                            '</td><td><b>' +
+                            '</td><td>' +
                             (genesInOrth + genesInSingle) +
-                            '</b> proteins, <b>' +
+                            '</td><td>' +
                             genesInOrth +
-                            '</b> proteins are in <b>' +
-                            orthCount +
-                            '</b> homolog families, <b>' +
+                            '</td><td>' +
                             genesInSingle +
-                            '</b> proteins are in singleton families</td></tr>'
+                            '</td><td>' +
+                            orthCount +
+                            '</td><tr>'
                     );
                 }
 
                 ///////////////////////////////////// Shared orthologs ////////////////////////////////////////////
                 const tabShared = $('<div/>');
-                tabs.addTab({ name: 'Shared homolog families', content: tabShared, active: false, removable: false });
+                tabs.addTab({ name: 'Genome Comparison', content: tabShared, active: false, removable: false });
                 const tableShared = $(
                     '<table class="table table-striped table-bordered" ' +
-                        'style="margin-left: auto; margin-right: auto;" id="' +
+                        'style="margin-top: 1em; width: 100%;" id="' +
                         self.pref +
                         'shared-table"/>'
                 );
                 tabShared.append(tableShared);
-                var header = '';
+                var header = '<th>Genome</th><th>Legend</th>';
                 for (var genomePos in genomeOrder) {
                     var genomeNum = genomeOrder[genomePos][2];
-                    header += '<td width="40"><center><b>G' + genomeNum + '</b></center></td>';
+                    header += '<th width="40" style="text-align: center;">G' + genomeNum + '</th>';
                 }
-                tableShared.append('<tr>' + header + '<td/></tr>');
+                tableShared.append('<tr>' + header + '</tr>');
                 for (const genomePos in genomeOrder) {
                     const genomeRef = genomeOrder[genomePos][0];
                     let row = '';
@@ -278,14 +295,19 @@ define([
                     }
                     const genomeNum = genomeOrder[genomePos][2];
                     tableShared.append(
-                        '<tr>' + row + '<td><b>G' + genomeNum + '</b> - ' + genomeOrder[genomePos][1] + '</td></tr>'
+                        '<tr><td><b>G' +
+                            genomeNum +
+                            '</b> - ' +
+                            genomeOrder[genomePos][1] +
+                            '</td><td># homolog families</td>' +
+                            row +
+                            '</tr>'
                     );
                 }
 
                 ///////////////////////////////////// Orthologs /////////////////////////////////////////////
                 const tableOrth = $(
-                    '<table cellpadding="0" cellspacing="0" border="0" class="table table-bordered ' +
-                        'table-striped" style="width: 100%; margin-left: 0px; margin-right: 0px;">'
+                    '<table class="table table-bordered table-striped" style="margin-top: 1em; width: 100%;">'
                 );
                 const tabOrth = $('<div/>');
                 if (self.options.withExport) {
@@ -296,7 +318,7 @@ define([
                 }
                 tabOrth.append(tableOrth);
 
-                tabs.addTab({ name: 'Protein families', content: tabOrth, active: !showOverview, removable: false });
+                tabs.addTab({ name: 'Families', content: tabOrth, active: !showOverview, removable: false });
 
                 var orth_data = [];
                 for (const i in data.orthologs) {
@@ -305,8 +327,8 @@ define([
                         '<a class="show-orthologs_' + self.pref + '" data-id="' + orth.id + '">' + orth.id + '</a>';
                     const genome_count = Object.keys(orthologStat[orth.id][1]).length;
                     orth_data.push({
-                        func: orth['function'],
                         id: id_text,
+                        func: orth['function'],
                         len: orth.orthologs.length,
                         genomes: genome_count
                     });
@@ -318,8 +340,8 @@ define([
                     aaData: orth_data,
                     aaSorting: [[2, 'desc'], [0, 'asc']],
                     aoColumns: [
+                        { sTitle: 'Family', mData: 'id' },
                         { sTitle: 'Function', mData: 'func' },
-                        { sTitle: 'ID', mData: 'id' },
                         { sTitle: 'Protein Count', mData: 'len' },
                         { sTitle: 'Genome Count', mData: 'genomes' }
                     ],
@@ -427,10 +449,7 @@ define([
             var pref2 = new Uuid(4).format();
             var self = this;
             tab.empty();
-            var table = $(
-                '<table cellpadding="0" cellspacing="0" border="0" class="table table-bordered ' +
-                    'table-striped" style="width: 100%; margin-left: 0px; margin-right: 0px;">'
-            );
+            var table = $('<table class="table table-bordered ' + 'table-striped" style="margin-top: 1em;">');
             if (self.options.withExport) {
                 tab.append(
                     '<p><b>Name of feature set object:</b>&nbsp;' +

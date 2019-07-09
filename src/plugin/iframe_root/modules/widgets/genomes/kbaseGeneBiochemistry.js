@@ -110,7 +110,15 @@ define(['jquery', 'kb_lib/htmlBuilders', 'kb_service/client/workspace', 'kbaseUI
                         var subsys = feature.subsystem_data[i];
                         // typedef tuple<string subsystem, string variant, string role> subsystem_data;
                         subsysDataStr +=
-              '<p>' + 'Subsystem: ' + subsys[0] + '<br>' + 'Variant: ' + subsys[1] + '<br>' + 'Role: ' + subsys[2];
+                            '<p>' +
+                            'Subsystem: ' +
+                            subsys[0] +
+                            '<br>' +
+                            'Variant: ' +
+                            subsys[1] +
+                            '<br>' +
+                            'Role: ' +
+                            subsys[2];
                     }
                 }
                 this.$infoTable.append(this.makeRow('Subsystems', subsysDataStr));
@@ -140,10 +148,10 @@ define(['jquery', 'kb_lib/htmlBuilders', 'kb_service/client/workspace', 'kbaseUI
             } else {
                 this.renderError({
                     error:
-            'No genetic features found in the genome with object id: ' +
-            this.options.workspaceID +
-            '/' +
-            this.options.genomeID
+                        'No genetic features found in the genome with object id: ' +
+                        this.options.workspaceID +
+                        '/' +
+                        this.options.genomeID
                 });
             }
 

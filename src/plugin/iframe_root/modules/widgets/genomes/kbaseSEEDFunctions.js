@@ -117,7 +117,6 @@ define([
                     geneCount = 0;
                     nodeHierarchy = '';
                     parentHierarchy = 'Functional Categories';
-
                     const functionName = data[i][3];
                     if (subsysToGeneMap[functionName] === undefined) {
                         // if barchart needs to only show the subsystems that have genes in this genome,
