@@ -21,6 +21,7 @@ define([
 
         function findMapping(type, params) {
             // var mapping = typeMap[objectType];
+            console.log('find mapping', type, params);
             var mapping = runtime.getService('type').getViewer({
                 type: type,
                 id: params.viewer
