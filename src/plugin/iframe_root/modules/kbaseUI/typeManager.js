@@ -98,7 +98,6 @@ define(['kb_lib/props'], function (props) {
         }
 
         function getViewer(arg) {
-            console.log('find viewer?', arg);
             if (arg.id) {
                 return getViewerById(arg);
             }
