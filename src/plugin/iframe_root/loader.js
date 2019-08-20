@@ -39,6 +39,7 @@ define([], function () {
             md5: 'vendor/spark-md5/spark-md5',
             moment: 'vendor/moment/moment',
             numeral: 'vendor/numeral/numeral',
+            preact: 'vendor/preact/preact.umd',
             text: 'vendor/requirejs-text/text',
             underscore: 'vendor/underscore/underscore',
             uuid: 'vendor/pure-uuid/uuid',

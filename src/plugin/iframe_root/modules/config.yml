@@ -519,6 +519,12 @@ install:
             module: widgets/contigset/kbaseContigSetView
             name: kb_dataview_contigset_contigSetView
             type: kbwidget
+
+        # METAGENOMES
+        -
+             module: widgets/metagenomes/annotatedMetagenomeAssembly
+             name: kb_dataview_metagenomes_annotatedMetagenomeAssembly
+             type: es6
             
         # TREES
         
@@ -1370,7 +1376,26 @@ install:
                             to: ws
                         -
                             from: objectId 
-                            to: id                
+                            to: id     
+
+        # METAGENOMES       
+        -
+            type:
+                module: KBaseMetagenomes
+                name: AnnotatedMetagenomeAssembly
+                version: any
+            icon:
+                type: fontAwesome
+                classes: ['fa-comment-o']
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_metagenomes_annotatedMetagenomeAssembly
+                        # config:
+                        #     jqueryName: AnnotatedMetagenomeAssembly
+                    panel: true
+                    default: true
 
         # TREES
         

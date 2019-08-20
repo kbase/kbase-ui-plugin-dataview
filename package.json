@@ -1,0 +1,22 @@
+{
+  "name": "kbase-ui-plugin-dataview",
+  "version": "1.0.0",
+  "description": "This is a sample readme for a plugin. Please use this space to splain it.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kbase/kbase-ui-plugin-dataview.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kbase/kbase-ui-plugin-dataview/issues"
+  },
+  "homepage": "https://github.com/kbase/kbase-ui-plugin-dataview#readme",
+  "dependencies": {
+    "eslint": "^6.2.0"
+  }
+}
