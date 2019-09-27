@@ -2,7 +2,7 @@
  * Shows taxonomic lineage.
  *
  */
-define(['jquery', 'uuid', 'kb_common/html', 'kbaseUI/widget/legacy/authenticatedWidget'], function ($, Uuid, html) {
+define(['jquery', 'uuid', 'kb_common/html', 'kbaseUI/widget/legacy/widget'], function ($, Uuid, html) {
     'use strict';
 
     var t = html.tag,

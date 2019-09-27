@@ -215,7 +215,7 @@ define([
                     text +=
                         '<tr><td><b>Name</b></td><td>' +
                         info[1] +
-                        ' (<a href="#dataview/' +
+                        ' (<a href="/#dataview/' +
                         info[6] +
                         '/' +
                         info[1] +
