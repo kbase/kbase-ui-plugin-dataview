@@ -70,6 +70,7 @@ define([
             $row.append($taxonomyColumn);
 
             // This area for the RE taxonomy widget
+            // console.log('genome info?', this.genomeInfo);
             var $reTaxonomyinfo = $('<div>');
             $taxonomyColumn.append($makeTitle('New Lineage'));
             $taxonomyColumn.append($reTaxonomyinfo);
@@ -237,6 +238,7 @@ define([
             $reTaxonomyinfo.KBaseGenomeRELineage({
                 genomeInfo: this.genomeInfo,
                 genomeRef: this.options.genomeRef,
+                timestamp: new Date(this.genomeInfo.created).getTime(),
                 runtime: this.runtime
             });
 
