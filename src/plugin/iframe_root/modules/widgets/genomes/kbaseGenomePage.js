@@ -11,7 +11,6 @@ define([
     'kb_common/html',
     'kb_service/client/workspace',
     'kb_service/utils',
-    // 'kb_sdk_clients/AssemblyAPI/dev/AssemblyAPIClient',
     'kb_lib/jsonRpc/dynamicServiceClient',
     'kbaseUI/widget/legacy/widget',
     'widgets/genomes/kbaseGenomeWideOverview',
@@ -66,8 +65,6 @@ define([
                     'taxonomy'
                 ],
                 feature_fields = ['type', 'id', 'contig_id', 'location', 'function', 'functions'];
-
-            console.log('SCOPE?', this.options, scope);
 
             this.genomeAnnotationAPI = new DynamicServiceClient({
                 url: this.runtime.getConfig('services.service_wizard.url'),

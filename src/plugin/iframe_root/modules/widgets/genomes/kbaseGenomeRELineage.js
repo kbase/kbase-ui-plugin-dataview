@@ -2,17 +2,17 @@
  * Shows taxonomic lineage.
  *
  */
-define(['jquery', 'uuid', 'kb_common/html', 'kb_lib/jsonRpc/dynamicServiceClient', 'kbaseUI/widget/legacy/widget'], function ($, Uuid, html, DynamicServiceClient) {
+define(['jquery', 'uuid', 'kb_lib/html', 'kb_lib/jsonRpc/dynamicServiceClient', 'kbaseUI/widget/legacy/widget'], function ($, Uuid, html, DynamicServiceClient) {
     'use strict';
 
-    var t = html.tag;
-    var a = t('a');
-    var div = t('div');
-    var span = t('span');
-    var table = t('table');
-    var tr = t('tr');
-    var th = t('th');
-    var td = t('td');
+    const t = html.tag;
+    const a = t('a');
+    const div = t('div');
+    const span = t('span');
+    const table = t('table');
+    const tr = t('tr');
+    const th = t('th');
+    const td = t('td');
 
     $.KBWidget({
         name: 'KBaseGenomeRELineage',
@@ -42,20 +42,47 @@ define(['jquery', 'uuid', 'kb_common/html', 'kb_lib/jsonRpc/dynamicServiceClient
             return this;
         },
 
-        render: function () {
+        renderLineageTable(lineage) {
+            this.$elem.empty().append(
+                table(
+                    {
+                        class: 'table table-bordered'
+                    },
+                    [
+                        tr([
+                            th(
+                                {
+                                    style: {
+                                        width: '11em'
+                                    }
+                                },
+                                'Scientific Name'
+                            ),
+                            td(
+                                {
+                                    dataField: 'scientific-name',
+                                    style: {
+                                        fontStyle: 'italic'
+                                    }
+                                },
+                                this.genome.scientific_name
+                            )
+                        ]),
+                        tr([th('Taxonomic Lineage'), td(this.buildLineage(lineage))])
+                    ]
+                )
+            );
+        },
+
+        fetchRELineage: function (genomeRef) {
             const taxonomyAPI = new DynamicServiceClient({
                 url: this.runtime.config('services.service_wizard.url'),
                 module: 'taxonomy_re_api',
                 token: this.runtime.service('session').getAuthToken()
             });
-
             const timestamp = Date.now();
 
-            const {ws, id, ver} = this.options.genomeRef;
-            const genomeRef = [ws, id, ver].join('/');
-
-
-            taxonomyAPI.callFunc('get_taxon_from_ws_obj', [{
+            return taxonomyAPI.callFunc('get_taxon_from_ws_obj', [{
                 obj_ref: genomeRef,
                 ns: 'ncbi_taxonomy',
                 ts: timestamp
@@ -76,41 +103,10 @@ define(['jquery', 'uuid', 'kb_common/html', 'kb_lib/jsonRpc/dynamicServiceClient
                 })
                 .then(([result]) => {
                     const lineage = result.results;
-                    this.$elem.empty().append(
-                        table(
-                            {
-                                class: 'table table-bordered'
-                            },
-                            [
-                                tr([
-                                    th(
-                                        {
-                                            style: {
-                                                width: '11em'
-                                            }
-                                        },
-                                        'Scientific Name'
-                                    ),
-                                    td(
-                                        {
-                                            dataField: 'scientific-name',
-                                            style: {
-                                                fontStyle: 'italic'
-                                            }
-                                        },
-                                        this.genome.scientific_name
-                                    )
-                                ]),
-                                tr([th('Taxonomic Lineage'), td(this.buildLineage(lineage))])
-                            ]
-                        )
-                    );
-                })
-                .catch((err) => {
-                    console.error('ERROR', err);
-                    this.renderError('Error fetching lineage: ' + err.message);
+                    this.renderLineageTable(lineage);
                 });
         },
+
 
         buildLineage: function (lineage) {
             // Trim off the "root" which is always at the top of the lineage.
@@ -135,6 +131,26 @@ define(['jquery', 'uuid', 'kb_common/html', 'kb_lib/jsonRpc/dynamicServiceClient
                     );
                 })
             );
+        },
+
+        renderLoading: function () {
+            this.$elem.empty();
+            this.$elem.append(div({
+                style: {
+                    textAlign: 'left',
+                    marginBottom: '10px',
+                    color: 'rgba(150, 150, 150, 1)'
+                }
+            }, [
+                span({
+                    class: 'fa fa-spinner fa-pulse'
+                }),
+                span({
+                    style: {
+                        marginLeft: '4px'
+                    }
+                }, 'Loading lineage...')
+            ]));
         },
 
         renderError: function (error) {
@@ -163,6 +179,18 @@ define(['jquery', 'uuid', 'kb_common/html', 'kb_lib/jsonRpc/dynamicServiceClient
             );
             this.$elem.empty();
             this.$elem.append(errorAlert);
-        }
+        },
+
+        render: function () {
+            const {ws, id, ver} = this.options.genomeRef;
+            const genomeRef = [ws, id, ver].join('/');
+            this.renderLoading();
+            this.fetchRELineage(genomeRef)
+                .catch((err) => {
+                    console.error('ERROR', err);
+                    this.renderError('Error fetching lineage: ' + err.message);
+                });
+        },
+
     });
 });
