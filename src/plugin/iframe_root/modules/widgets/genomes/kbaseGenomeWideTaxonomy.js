@@ -11,9 +11,7 @@
 // buildUrl = html.makeUrl
 
 define([
-    'bluebird',
     'jquery',
-    'uuid',
     'kb_common/html',
     'kb_common/jsonRpc/genericClient',
     'kb_common/jsonRpc/dynamicServiceClient',
@@ -22,8 +20,9 @@ define([
 
     'kbaseUI/widget/legacy/widget',
     'widgets/genomes/kbaseGenomeLineage',
+    'widgets/genomes/kbaseGenomeRELineage',
     'widgets/trees/kbaseTree'
-], function (Promise, $, Uuid, html, GenericClient, DynamicServiceClient, serviceUtils, post) {
+], function ($, html, GenericClient, DynamicServiceClient, serviceUtils, post) {
     'use strict';
 
     var t = html.tag,
@@ -32,6 +31,18 @@ define([
         button = t('button'),
         span = t('span');
 
+    function makeElement(tag, content) {
+        const el = document.createElement(tag);
+        el.innerText = content;
+        return el;
+    }
+
+    function $makeTitle(title) {
+        const el = makeElement('div', title);
+        el.style['font-weight'] = 'bold';
+        return $(el);
+    }
+
     $.KBWidget({
         name: 'KBaseGenomeWideTaxonomy',
         parent: 'kbaseWidget',
@@ -39,7 +50,8 @@ define([
         options: {
             genomeID: null,
             workspaceID: null,
-            genomeInfo: null
+            genomeInfo: null,
+            genomeRef: null
         },
         trees: null,
         currentTree: null,
@@ -52,11 +64,22 @@ define([
             return this;
         },
         render: function () {
-            var $row = $('<div class="row">');
+            const $row = $('<div class="row">');
+
+            const $taxonomyColumn = $('<div class="col-md-5">');
+            $row.append($taxonomyColumn);
+
+            // This area for the RE taxonomy widget
+            var $reTaxonomyinfo = $('<div>');
+            $taxonomyColumn.append($makeTitle('New Lineage'));
+            $taxonomyColumn.append($reTaxonomyinfo);
+
 
             // This area for the taxonomy widget
-            var $taxonomyinfo = $('<div class="col-md-5">');
-            $row.append($taxonomyinfo);
+            const $taxonomyinfo = $('<div>');
+            $taxonomyColumn.append($makeTitle('Old Lineage'));
+            $taxonomyColumn.append($taxonomyinfo);
+
 
             // This area for the tree display
             this.$tree = $('<div class="col-md-7">');
@@ -208,6 +231,12 @@ define([
             // Render the taxonomy/lineage widget
             $taxonomyinfo.KBaseGenomeLineage({
                 genomeInfo: this.genomeInfo,
+                runtime: this.runtime
+            });
+
+            $reTaxonomyinfo.KBaseGenomeRELineage({
+                genomeInfo: this.genomeInfo,
+                genomeRef: this.options.genomeRef,
                 runtime: this.runtime
             });
 

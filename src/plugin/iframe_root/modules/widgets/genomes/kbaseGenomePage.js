@@ -47,7 +47,7 @@ define([
                 scope = {
                     ws: this.options.workspaceID,
                     id: this.options.genomeID,
-                    ver: this.options.ver
+                    ver: this.options.objectVersion
                 },
                 objId = scope.ws + '/' + scope.id,
                 genome_fields = [
@@ -67,6 +67,8 @@ define([
                 ],
                 feature_fields = ['type', 'id', 'contig_id', 'location', 'function', 'functions'];
 
+            console.log('SCOPE?', this.options, scope);
+
             this.genomeAnnotationAPI = new DynamicServiceClient({
                 url: this.runtime.getConfig('services.service_wizard.url'),
                 module: 'GenomeAnnotationAPI',
@@ -75,24 +77,8 @@ define([
                 }
             });
 
-            // this.ga_api = new GenomeAnnotationAPI({
-            //     url: this.runtime.getConfig('services.service_wizard.url'),
-            //     auth: {
-            //         token: this.runtime.service('session').getAuthToken()
-            //     },
-            //     version: 'release'
-            // });
-
-            // this.asm_api = new AssemblyAPI({
-            //     url: this.runtime.getConfig('services.service_wizard.url'),
-            //     auth: {
-            //         token: this.runtime.service('session').getAuthToken()
-            //     },
-            //     version: 'release'
-            // });
-
-            if (this.options.ver) {
-                objId += '/' + this.options.ver;
+            if (this.options.objectVersion) {
+                objId += '/' + this.options.objectVersion;
             }
             this.genomeAnnotationAPI
                 .callFunc('get_genome_v1', [
@@ -306,7 +292,7 @@ define([
                 scope = {
                     ws: this.options.workspaceID,
                     id: this.options.genomeID,
-                    ver: this.options.ver
+                    ver: this.options.objectVersion
                 },
                 panelError = function (p, e) {
                     console.error(e);
@@ -355,6 +341,7 @@ define([
                 _this.view.panels[2].inner_div.KBaseGenomeWideTaxonomy({
                     genomeID: scope.id,
                     workspaceID: scope.ws,
+                    genomeRef: scope,
                     genomeInfo: genomeInfo,
                     runtime: _this.runtime
                 });
