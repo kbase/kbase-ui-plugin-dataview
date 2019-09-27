@@ -21,11 +21,11 @@ define(['jquery', 'uuid', 'kb_lib/html', 'kb_lib/jsonRpc/dynamicServiceClient', 
         options: {
             width: 600,
             genomeInfo: null,
-            genomeID: null
+            genomeID: null,
+            timestamp: null
         },
         genome: null,
         token: null,
-        uniqueId: null,
 
         init: function (options) {
             this._super(options);
@@ -36,13 +36,12 @@ define(['jquery', 'uuid', 'kb_lib/html', 'kb_lib/jsonRpc/dynamicServiceClient', 
             this.genome = options.genomeInfo.data;
             this.genomeID = options.genomeID;
 
-            this.uniqueId = new Uuid(4).format();
-
             this.render();
             return this;
         },
 
-        renderLineageTable(lineage) {
+        renderLineageTable(lineage, taxonRef, scientificName) {
+            const taxonURL = `/#review/taxonomy/${taxonRef.ns}/${taxonRef.id}/${taxonRef.ts}`;
             this.$elem.empty().append(
                 table(
                     {
@@ -65,7 +64,13 @@ define(['jquery', 'uuid', 'kb_lib/html', 'kb_lib/jsonRpc/dynamicServiceClient', 
                                         fontStyle: 'italic'
                                     }
                                 },
-                                this.genome.scientific_name
+                                a(
+                                    {
+                                        href: taxonURL,
+                                        target: '_blank'
+                                    },
+                                    scientificName
+                                )
                             )
                         ]),
                         tr([th('Taxonomic Lineage'), td(this.buildLineage(lineage))])
@@ -80,33 +85,47 @@ define(['jquery', 'uuid', 'kb_lib/html', 'kb_lib/jsonRpc/dynamicServiceClient', 
                 module: 'taxonomy_re_api',
                 token: this.runtime.service('session').getAuthToken()
             });
-            const timestamp = Date.now();
+            let timestamp = this.options.timestamp;
+            // console.warn('ts?', timestamp, Date.now());
+            // TODO: important, remove the following line after the demo! Currently things
+            //       break due to the database being incomplete, so there is not complete
+            //       coverage over time, and queries which should never fail, do.
+            // TODO: the actual timestamp should be ... based on the timestamp associated
+            //       with ... the taxon linked to the object?
+            //            ... the time the taxon was linked to the object?
+            timestamp = Date.now();
 
+            // TODO: resolve the usage of 'ts' in 'get_taxon...'. It should not be necessary
+            // since the taxon assignment to an object is not dependent upon some reference time,
+            // it is fixed in that respect.
             return taxonomyAPI.callFunc('get_taxon_from_ws_obj', [{
                 obj_ref: genomeRef,
-                ns: 'ncbi_taxonomy',
-                ts: timestamp
+                ns: 'ncbi_taxonomy'
             }])
                 .then(([result]) => {
                     if (result.results.length === 0) {
                         throw new Error('No taxon found for this object');
                     }
                     const [taxon] = result.results;
-                    const namespace = taxon.ns;
-                    const taxonID = taxon.id;
-                    const ts = result.ts;
-                    return taxonomyAPI.callFunc('get_lineage', [{
-                        ns: namespace,
-                        id: taxonID,
-                        ts
-                    }]);
-                })
-                .then(([result]) => {
-                    const lineage = result.results;
-                    this.renderLineageTable(lineage);
+                    const taxonRef = {
+                        ns: taxon.ns,
+                        id: taxon.id,
+                        ts: timestamp
+                    };
+                    return Promise.all([
+                        taxonomyAPI.callFunc('get_lineage', [taxonRef]),
+                        taxonomyAPI.callFunc('get_taxon', [taxonRef])
+                    ])
+                        .then(([[{results: lineageResults}], [{results: [taxon]}]]) => {
+                            if (!taxon) {
+                                throw new Error('Taxon not found');
+                            }
+                            const {scientific_name: scientificName} = taxon;
+                            this.renderLineageTable(lineageResults, taxonRef, scientificName);
+                        });
                 });
-        },
 
+        },
 
         buildLineage: function (lineage) {
             // Trim off the "root" which is always at the top of the lineage.
@@ -119,11 +138,11 @@ define(['jquery', 'uuid', 'kb_lib/html', 'kb_lib/jsonRpc/dynamicServiceClient', 
                     }
                 },
                 lineage.map((taxon) => {
-                    const link = `/#review/taxonomy/${taxon.ns}/${taxon.id}`;
+                    const url = `/#review/taxonomy/${taxon.ns}/${taxon.id}`;
                     return div(
                         a(
                             {
-                                href: link,
+                                href: url,
                                 target: '_blank'
                             },
                             taxon.scientific_name
