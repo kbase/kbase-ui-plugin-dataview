@@ -524,7 +524,7 @@ install:
         -
              module: widgets/metagenomes/annotatedMetagenomeAssembly
              name: kb_dataview_metagenomes_annotatedMetagenomeAssembly
-             type: es6
+             type: kbwidget
             
         # TREES
         
@@ -1372,11 +1372,11 @@ install:
                     default: true
                     options: 
                         -
-                            from: workspaceId 
+                            from: workspaceId
                             to: ws
                         -
-                            from: objectId 
-                            to: id     
+                            from: objectId
+                            to: id
 
         # METAGENOMES       
         -
@@ -1386,15 +1386,15 @@ install:
                 version: any
             icon:
                 type: fontAwesome
-                classes: ['fa-comment-o']
+                classes: ['icon-metagenome', 'kb-data-icon-dnudge']
             viewers:
                 -
                     title: Data View
                     widget:
                         name: kb_dataview_metagenomes_annotatedMetagenomeAssembly
-                        # config:
-                        #     jqueryName: AnnotatedMetagenomeAssembly
-                    panel: true
+                        config:
+                            jqueryName: AnnotatedMetagenomeAssembly
+                    panel: false
                     default: true
 
         # TREES

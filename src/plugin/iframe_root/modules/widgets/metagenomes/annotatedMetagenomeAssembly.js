@@ -1,184 +1,268 @@
-define(['kb_lib/jsonRpc/genericClient', 'kb_lib/jsonRpc/dynamicServiceClient', 'preact', 'bootstrap'], (
-    GenericClient,
-    DynamicServiceClient,
-    preact
-) => {
+/**
+ * Shows general gene info.
+ * Such as its name, synonyms, annotation, publications, etc.
+ *
+ * Gene "instance" info (e.g. coordinates on a particular strain's genome)
+ * is in a different widget.
+ */
+define([
+    'jquery',
+    'uuid',
+    'kb_common/html',
+    'kb_service/client/workspace',
+    'kb_service/utils',
+    'kb_lib/jsonRpc/dynamicServiceClient',
+    'kbaseUI/widget/legacy/widget',
+    'widgets/metagenomes/annotatedMetagenomeAssemblyWideOverview',
+    'widgets/metagenomes/annotatedMetagenomeAssembly_AssemblyandAnnotationTab'
+], function ($, Uuid, html, Workspace, serviceUtils, DynamicServiceClient) {
     'use strict';
-    // we have to do this here -- cannot destructure in the arguments in strict mode.
-    const { h, Component, render } = preact;
-
-    class ObjectInfo extends Component {
-        render(props) {
-            return h('table', { className: 'table table-bordered', style: { width: 'auto' } }, [
-                h('tbody', null, [
-                    h('tr', null, h('th', null, 'Workspace ID'), h('td', null, props.wsid)),
-                    h('tr', null, h('th', null, 'Object ID'), h('td', null, props.objid)),
-                    h('tr', null, h('th', null, 'Version'), h('td', null, props.version))
-                    // ... and so forth
-                ])
-            ]);
-        }
-    }
-
-    class Narratorials extends Component {
-        render(props) {
-            return props.narratorials.map(({ title, workspaceId, titleFromWorkspace }) => {
-                const confirmed = title === titleFromWorkspace;
-                return h('div', null, [
-                    h(
-                        'a',
-                        {
-                            href: `/narrative/${workspaceId}`,
-                            target: '_blank'
-                        },
-                        title,
-                        ' (',
-                        confirmed ? '✅' : '❌',
-                        ')'
-                    )
-                ]);
+    $.KBWidget({
+        name: 'AnnotatedMetagenomeAssembly',
+        parent: 'kbaseWidget',
+        version: '1.0.0',
+        options: {
+            metagenomeId: null,
+            workspaceId: null,
+            objectVersion: null
+        },
+        init: function (options) {
+            this._super(options);
+            this.init_view();
+            this.fetchMetagenome();
+            this.assemblyAPI = new DynamicServiceClient({
+                url: this.runtime.getConfig('services.service_wizard.url'),
+                module: 'AssemblyAPI',
+                auth: {
+                    token: this.runtime.service('session').getAuthToken()
+                }
             });
-        }
-    }
+            return this;
+        },
+        fetchMetagenome: function () {
+            var _this = this,
+                scope = {
+                    ws: this.options.workspaceId,
+                    id: this.options.objectId,
+                    ver: this.options.objectVersion
+                },
+                objId = scope.ws + '/' + scope.id,
 
-    function objectInfoToObject(objectInfo) {
-        const [objid, name, type, save_date, version, saved_by, wsid, workspace, chsum, size, meta] = objectInfo;
+                metagenome_fields = [
+                    'dna_size',
+                    'source_id',
+                    'genetic_code',
+                    'taxonomy',
+                    'genetic_code',
+                    'assembly_ref',
+                    'gc_content',
+                    'environment'
+                ],
 
-        return {
-            objid,
-            name,
-            type,
-            save_date,
-            version,
-            saved_by,
-            wsid,
-            workspace,
-            chsum,
-            size,
-            meta
-        };
-    }
+                feature_fields = ['type', 'id', 'contig_id', 'location', 'function', 'functions'];
 
-    function workspaceInfoToObject(workspaceInfo) {
-        const [
-            id,
-            workspace,
-            owner,
-            moddate,
-            max_objid,
-            user_permission,
-            globalread,
-            lockstat,
-            metadata
-        ] = workspaceInfo;
-        return {
-            id,
-            workspace,
-            owner,
-            moddate,
-            max_objid,
-            user_permission,
-            globalread,
-            lockstat,
-            metadata
-        };
-    }
+            this.metagenomeAPI = new DynamicServiceClient({
+                url: this.runtime.getConfig('services.service_wizard.url'),
+                module: 'MetagenomeAPI',
+                auth: {
+                    token: this.runtime.service('session').getAuthToken()
+                },
+                version: 'dev'
+            })
 
-    class AnnotatedMetagenomeAssembly {
-        constructor({ runtime }) {
-            this.runtime = runtime;
-            this.hostNode = null;
-            this.container = null;
-        }
+            if (this.options.objectVersion) {
+                objId += '/' + this.options.objectVersion;
+            }
 
-        /*
-            Lifecycle methods. Each of attach, start, stop, detach are called by the
-            parent component. Any of them may return a promise (they are wrapped in
-            promises anyway). This is most helpful for the start method, which often
-            will fetch data from services before rendering.
-        */
-
-        attach(node) {
-            this.hostNode = node;
-            this.container = node.appendChild(document.createElement('div'));
-        }
-
-        getObjectInfo(workspaceId, objectId, objectVersion) {
-            const workspaceClient = new GenericClient({
-                module: 'Workspace',
-                url: this.runtime.config('services.Workspace.url'),
-                token: this.runtime.service('session').getAuthToken()
-            });
-            return workspaceClient
-                .callFunc('get_object_info3', [
+            this.metagenomeAPI
+                .callFunc('get_annotated_metagenome_assembly', [
                     {
-                        objects: [
-                            {
-                                ref: [workspaceId, objectId, objectVersion].join('/')
-                            }
-                        ]
+                        ref: objId,
+                        included_fields: metagenome_fields
                     }
                 ])
-                .then(([{ infos: [objectInfo] }]) => {
-                    // Here we destructure the workspace's object info
-                    // tuple.
-                    return objectInfoToObject(objectInfo);
+                .spread(function (result) {
+                    const metagenomeObject = result.genomes[0];
+                    let assembly_ref = null;
+                    const metagenome = metagenomeObject.data;
+                    let metadata = metagenomeObject.info[10]
+                    const add_stats = function(obj, size, gc, num_contigs) {
+                            obj.dna_size = size;
+                            obj.gc_content = gc;
+                            obj.num_contigs = num_contigs;
+                        },
+                        assembly_error = function(data, error){
+                            console.error('Error loading contigset subdata', data, error);
+                        };
+                    if (metagenome.hasOwnProperty('assembly_ref')){
+                        assembly_ref = metagenome.assembly_ref
+                    } else {
+                        assembly_error(metagenome, 'No assembly reference present!')
+                    }
+
+                    metagenomeObject.objectInfo = serviceUtils.objectInfoToObject(metagenomeObject.info)
+
+                    if (metadata && metadata['gc_content'] && metadata['size'] && metadata['Number contigs']) {
+                        add_stats(metagenome, metadata['size'], metadata['GC content'], metadata['Number contigs']);
+                        _this.render(metagenomeObject);
+                    } else {
+                        return (
+                            _this.assemblyAPI
+                                .callFunc('get_stats', [assembly_ref])
+                                .spread(function (stats) {
+                                    add_stats(metagenome, stats.dna_size, stats.gc_content, stats.num_contigs);
+                                    _this.render(metagenomeObject)
+                                    return null;
+                                })
+                                .catch(function (error) {
+                                    assembly_error(metagenome, error);
+                                })
+                        );
+                    }
+                    return null
+                })
+                .catch(function (error) {
+                    console.error('Error loading genome subdata');
+                    console.error(error);
+                    _this.showError(_this.view.panels[0].inner_div, error);
+                    _this.view.panels[1].inner_div.empty();
+                    _this.view.panels[2].inner_div.empty();
                 });
-        }
+        },
 
-        getNarratorials() {
-            const narrativeServiceClient = new DynamicServiceClient({
-                module: 'NarrativeService',
-                url: this.runtime.config('services.ServiceWizard.url'),
-                token: this.runtime.service('session').getAuthToken()
+        init_view: function () {
+            var cell_html = '<div>';
+            var body = '<div data-element="body">';
+
+            this.view = {
+                panels: [
+                    {
+                        label: 'Overview',
+                        name: 'overview',
+                        outer_div: $(cell_html),
+                        inner_div: $(body)
+                    },
+                    {
+                        order: 2,
+                        label: 'Assembly and Annotation',
+                        name: 'assembly-annotation',
+                        outer_div: $(cell_html),
+                        inner_div: $(body)
+                    }
+                ]
+            };
+            var that = this;
+            this.view.panels.forEach(function (panel) {
+                that.makeWidgetPanel(panel.outer_div, panel.label, panel.name, panel.inner_div);
+                that.$elem.append(panel.outer_div);
+                panel.inner_div.html(html.loading('Loading...'));
             });
-            return narrativeServiceClient.callFunc('list_narratorials', [{}]).then(([{ narratorials }]) => {
-                return narratorials.map(({ ws, nar }) => {
-                    const narrativeObjectInfo = objectInfoToObject(nar);
-                    const workspaceInfo = workspaceInfoToObject(ws);
-                    return {
-                        title: narrativeObjectInfo.meta.name,
-                        titleFromWorkspace: workspaceInfo.metadata.narrative_nice_name,
-                        workspaceId: narrativeObjectInfo.wsid,
-                        objectId: narrativeObjectInfo.objid,
-                        objectVersion: narrativeObjectInfo.version
-                    };
+        },
+        render: function (genomeInfo) {
+            var _this = this,
+                scope = {
+                    ws: this.options.workspaceID,
+                    id: this.options.metagenomeID,
+                    ver: this.options.ver
+                },
+                panelError = function (p, e) {
+                    console.error(e);
+                    _this.showError(p, e.message);
+                };
+
+            _this.view.panels[0].inner_div.empty();
+            try {
+                _this.view.panels[0].inner_div.annotatedMetagenomeAssemblyWideOverview({
+                    metagenomeID: scope.id,
+                    workspaceID: scope.ws,
+                    genomeInfo: genomeInfo,
+                    runtime: _this.runtime
                 });
-            });
-        }
-
-        start({ workspaceId, objectId, objectVersion }) {
-            // This is the main entry point to the widget. It receives params
-            // which are parsed out of the url (actually just the url fragment, aka hash)
-            // and named according to the route config.
-
-            // here we can get the object info...
-            return Promise.all([this.getObjectInfo(workspaceId, objectId, objectVersion), this.getNarratorials()]).then(
-                ([objectInfo, narratorials]) => {
-                    const content = h('div', null, [
-                        h('h3', null, 'Object Info'),
-                        h('div', null, h(ObjectInfo, objectInfo, null)),
-                        h('h3', null, 'Narratorials'),
-                        h('div', null, h(Narratorials, { narratorials }, null))
-                    ]);
-                    render(content, this.container);
-                }
-            );
-        }
-
-        stop() {
-            // if anything was started during start (unlikely), like an interval or timeout,
-            // stop them here.
-            // any dom listeners set in start or attach will be removed when the widget
-            // is detached.
-        }
-
-        detach() {
-            if (this.hostNode && this.container) {
-                this.hostNode.removeChild(this.container);
+            } catch (e) {
+                panelError(_this.view.panels[0].inner_div, e);
             }
-        }
-    }
+            _this.view.panels[1].inner_div.empty();
+            try{
+                _this.view.panels[1].inner_div.KBaseAnnotatedMetagenomeAssemblyWideAssemAnnot({
+                                genomeID: scope.id,
+                                workspaceID: scope.ws,
+                                ver: scope.ver,
+                                genomeInfo: genomeInfo,
+                                runtime: _this.runtime
+                });
+            } catch (e){
+                panelError(_this.view.panels[1].inner_div, e);
+            }
 
-    return AnnotatedMetagenomeAssembly;
+            // _this.view.panels[1].inner_div.empty();
+            // _this.view.panels[1].inner_div.append(
+            //     'Browsing Metagenome Features is not supported at this time. Coming soon!'
+            // );
+        },
+        // TODO: This is
+        makeWidgetPanel: function ($panel, title, name, $widgetDiv) {
+            var id = new Uuid(4).format();
+            $panel.append(
+                $(
+                    '<div class="panel-group" id="accordion_' +
+                        id +
+                        '" role="tablist" aria-multiselectable="true" data-panel="' +
+                        name +
+                        '">'
+                ).append(
+                    $('<div class="panel panel-default kb-widget">')
+                        .append(
+                            '' +
+                                '<div class="panel-heading" role="tab" id="heading_' +
+                                id +
+                                '">' +
+                                '<h4 class="panel-title">' +
+                                '<span data-toggle="collapse" data-parent="#accordion_' +
+                                id +
+                                '" data-target="#collapse_' +
+                                id +
+                                '" aria-expanded="false" aria-controls="collapse_' +
+                                id +
+                                '" style="cursor:pointer;" data-element="title">' +
+                                ' ' +
+                                title +
+                                '</span>' +
+                                '</h4>' +
+                                '</div>'
+                        )
+                        .append(
+                            $(
+                                '<div id="collapse_' +
+                                    id +
+                                    '" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_' +
+                                    id +
+                                    '" area-expanded="true">'
+                            ).append($('<div class="panel-body">').append($widgetDiv))
+                        )
+                )
+            );
+        },
+        getData: function () {
+            return {
+                type: 'Annotated Metagenome Assembly Page',
+                id: this.options.metagenomeID,
+                workspace: this.options.workspaceID,
+                title: 'Annotated Metagenome Assembly Page'
+            };
+        },
+        showError: function (panel, e) {
+            panel.empty();
+            const $err = $('<div>')
+                .addClass('alert alert-danger')
+                .append(
+                    $('<div>')
+                        .addClass('text-danger')
+                        .css('font-weight', 'bold')
+                        .text('Error')
+                )
+                .append($('<p>').text(JSON.stringify(e.message)))
+                .append($('<div>').text(JSON.stringify(e)));
+            panel.append($err);
+        }
+    });
 });
