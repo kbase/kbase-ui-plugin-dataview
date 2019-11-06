@@ -1,9 +1,11 @@
-define(['bluebird', 'kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils', 'collapsiblePanel'], function (
+define(['bluebird', 'preact', 'kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils', 'collapsiblePanel', 'components/error'], function (
     Promise,
+    preact,
     html,
     WidgetSet,
     utils,
-    collapsiblePanel
+    collapsiblePanel,
+    ErrorComponent
 ) {
     'use strict';
 
@@ -77,13 +79,14 @@ define(['bluebird', 'kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils', 'collaps
         function start(params) {
             return utils
                 .getObjectInfo(runtime, params)
-                .then(function (objectInfo) {
+                .then((objectInfo) => {
                     runtime.send('ui', 'setTitle', 'Data View for ' + objectInfo.name);
 
                     params.objectInfo = objectInfo;
                     return Promise.all([objectInfo, widgetSet.start(params)]);
                 })
-                .spread(function (objectInfo) {
+                .spread((objectInfo) => {
+                    // TODO: re-enable object download.
                     // Disable download button for the time being.
                     // Will re-enable when we have time to deal with it.
                     //     runtime.send('ui', 'addButton', {
@@ -113,6 +116,16 @@ define(['bluebird', 'kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils', 'collaps
                             runtime.send('copyWidget', 'toggle');
                         }
                     });
+                })
+                .catch((error) => {
+                    // const errorWidget = new ErrorWidget({runtime});
+                    container.innerHTML = '';
+                    // console.error('GOT IT', errorWidget, err);
+                    // return errorWidget.attach(container).start({
+                    //     error: err
+                    // });
+
+                    preact.render(preact.h(ErrorComponent, {runtime, error}), container);
                 });
         }
 

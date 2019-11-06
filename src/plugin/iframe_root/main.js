@@ -62,13 +62,17 @@ require(['loader'], function () {
                         } else {
                             view = path[0];
                         }
-                        dispatcher.dispatch({ view, path, params });
+                        dispatcher.dispatch({ view, path, params })
+                            .catch((ex) => {
+                                // TODO: this should trigger an error display
+                                console.log('Dispatch Error', ex.message);
+                            });
                     });
                     integration.started();
                     // TODO: more channel listeners.
                 });
         }).catch((err) => {
-            console.error('ERROR', err);
+            console.error('ERROR2', err);
         });
     });
 });
