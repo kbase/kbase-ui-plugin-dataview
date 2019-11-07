@@ -41,7 +41,7 @@ define(['jquery', 'uuid', 'kb_lib/html', 'kb_lib/jsonRpc/dynamicServiceClient', 
         },
 
         renderLineageTable(lineage, taxonRef, scientificName) {
-            const taxonURL = `/#review/taxonomy/${taxonRef.ns}/${taxonRef.id}/${taxonRef.ts}`;
+            const taxonURL = `/#review/${taxonRef.ns}/${taxonRef.id}/${taxonRef.ts}`;
             this.$elem.empty().append(
                 table(
                     {
@@ -138,7 +138,7 @@ define(['jquery', 'uuid', 'kb_lib/html', 'kb_lib/jsonRpc/dynamicServiceClient', 
                     }
                 },
                 lineage.map((taxon) => {
-                    const url = `/#review/taxonomy/${taxon.ns}/${taxon.id}`;
+                    const url = `/#review/${taxon.ns}/${taxon.id}`;
                     return div(
                         a(
                             {
