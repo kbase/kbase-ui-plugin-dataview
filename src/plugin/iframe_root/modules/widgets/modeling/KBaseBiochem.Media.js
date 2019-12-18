@@ -35,19 +35,23 @@ define(['widgets/modeling/KBModeling'], function (KBModeling) {
                 cpdarray.push(cpd.id);
             }
 
-            return this.tabwidget.getBiochemCompounds(cpdarray).then(function (cpds) {
-                for (var i = 0; i < self.mediacompounds.length; i++) {
-                    var cpd = self.mediacompounds[i];
-                    if (cpds[i]) {
-                        cpd.name = cpds[i].name;
-                        cpd.formula = cpds[i].formula;
-                        cpd.charge = cpds[i].charge;
-                        cpd.deltaG = cpds[i].deltaG;
-                        cpd.deltaGErr = cpds[i].deltaGErr;
-                        cpd.abbrev = cpds[i].abbrev;
+            return this.tabwidget.getBiochemCompounds(cpdarray)
+                .then((cpds) => {
+                    for (var i = 0; i < self.mediacompounds.length; i++) {
+                        var cpd = self.mediacompounds[i];
+                        if (cpds[i]) {
+                            cpd.name = cpds[i].name;
+                            cpd.formula = cpds[i].formula;
+                            cpd.charge = cpds[i].charge;
+                            cpd.deltaG = cpds[i].deltaG;
+                            cpd.deltaGErr = cpds[i].deltaGErr;
+                            cpd.abbrev = cpds[i].abbrev;
+                        }
                     }
-                }
-            });
+                })
+                .catch((err) => {
+                    console.error('Error getting biochem compounds', err);
+                });
         };
 
         this.CompoundTab = function (info) {
