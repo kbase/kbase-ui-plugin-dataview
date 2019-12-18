@@ -71,8 +71,9 @@ define([
 
             // This area for the RE taxonomy widget
 
+            let $reTaxonomyInfo;
             if (this.runtime.featureEnabled('re-lineage')) {
-                const $reTaxonomyInfo = $('<div>');
+                $reTaxonomyInfo = $('<div>');
                 $taxonomyColumn.append($makeTitle('New Lineage'));
                 $taxonomyColumn.append($reTaxonomyInfo);
             }
