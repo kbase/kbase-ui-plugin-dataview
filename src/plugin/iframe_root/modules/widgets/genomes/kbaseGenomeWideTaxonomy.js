@@ -70,16 +70,19 @@ define([
             $row.append($taxonomyColumn);
 
             // This area for the RE taxonomy widget
-            // console.log('genome info?', this.genomeInfo);
-            var $reTaxonomyinfo = $('<div>');
-            $taxonomyColumn.append($makeTitle('New Lineage'));
-            $taxonomyColumn.append($reTaxonomyinfo);
 
+            if (this.runtime.featureEnabled('re-lineage')) {
+                const $reTaxonomyInfo = $('<div>');
+                $taxonomyColumn.append($makeTitle('New Lineage'));
+                $taxonomyColumn.append($reTaxonomyInfo);
+            }
 
             // This area for the taxonomy widget
-            const $taxonomyinfo = $('<div>');
-            $taxonomyColumn.append($makeTitle('Old Lineage'));
-            $taxonomyColumn.append($taxonomyinfo);
+            const $taxonomyInfo = $('<div>');
+            if (this.runtime.featureEnabled('re-lineage')) {
+                $taxonomyColumn.append($makeTitle('Old Lineage'));
+            }
+            $taxonomyColumn.append($taxonomyInfo);
 
 
             // This area for the tree display
@@ -230,17 +233,19 @@ define([
             // });
 
             // Render the taxonomy/lineage widget
-            $taxonomyinfo.KBaseGenomeLineage({
+            $taxonomyInfo.KBaseGenomeLineage({
                 genomeInfo: this.genomeInfo,
                 runtime: this.runtime
             });
 
-            $reTaxonomyinfo.KBaseGenomeRELineage({
-                genomeInfo: this.genomeInfo,
-                genomeRef: this.options.genomeRef,
-                timestamp: new Date(this.genomeInfo.created).getTime(),
-                runtime: this.runtime
-            });
+            if (this.runtime.featureEnabled('re-lineage')) {
+                $reTaxonomyInfo.KBaseGenomeRELineage({
+                    genomeInfo: this.genomeInfo,
+                    genomeRef: this.options.genomeRef,
+                    timestamp: new Date(this.genomeInfo.created).getTime(),
+                    runtime: this.runtime
+                });
+            }
 
             // Render the tree
             this.fetchTrees()

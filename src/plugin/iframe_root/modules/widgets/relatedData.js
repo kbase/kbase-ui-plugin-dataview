@@ -51,7 +51,7 @@ define(['kb_common/html', 'collapsiblePanel', 'kb_lib/jsonRpc/dynamicServiceClie
                 title: 'Similar Data',
                 content: this.dataLayout({ upa }),
                 icon: 'copy',
-                collapsed: false
+                collapsed: true
             });
             const iframeElm = this.container.querySelector('iframe');
             const config = {
@@ -82,7 +82,7 @@ define(['kb_common/html', 'collapsiblePanel', 'kb_lib/jsonRpc/dynamicServiceClie
             });
         }
 
-        stop() {}
+        stop() { }
 
         detach() {
             // Just in case the widget attach method failed, or was never called...

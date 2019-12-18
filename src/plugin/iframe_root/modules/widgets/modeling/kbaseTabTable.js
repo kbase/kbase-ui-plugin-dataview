@@ -279,14 +279,14 @@ define([
                 ids.unbind('click');
                 ids.click(function () {
                     var info = {
-                            id: $(this).data('id'),
-                            type: $(this).data('type'),
-                            method: $(this).data('method'),
-                            ref: $(this).data('ref'),
-                            name: $(this).data('name'),
-                            ws: $(this).data('ws'),
-                            action: $(this).data('action')
-                        },
+                        id: $(this).data('id'),
+                        type: $(this).data('type'),
+                        method: $(this).data('method'),
+                        ref: $(this).data('ref'),
+                        name: $(this).data('name'),
+                        ws: $(this).data('ws'),
+                        action: $(this).data('action')
+                    },
                         contentDiv = $('<div>');
 
                     tabs.addTab({
@@ -595,7 +595,7 @@ define([
                             compounds: ids
                         }
                     ])
-                    .spread(function (data) {
+                    .then(([data]) => {
                         return data;
                     });
             };
@@ -620,13 +620,13 @@ define([
                     panel.append(
                         '<div class="pull-left text-center">\
                                     <img src="' +
-                            img_url +
-                            '" width=150 ><br>\
+                        img_url +
+                        '" width=150 ><br>\
                                     <div class="cpd-id" data-cpd="' +
-                            cpd +
-                            '">' +
-                            cpd +
-                            '</div>\
+                        cpd +
+                        '">' +
+                        cpd +
+                        '</div>\
                                 </div>'
                     );
 
@@ -648,15 +648,15 @@ define([
                     panel.append(
                         '<div class="pull-left text-center">\
                                     <img src="' +
-                            img_url +
-                            '" data-cpd="' +
-                            cpd +
-                            '" width=150 ><br>\
+                        img_url +
+                        '" data-cpd="' +
+                        cpd +
+                        '" width=150 ><br>\
                                     <div class="cpd-id" data-cpd="' +
-                            cpd +
-                            '">' +
-                            cpd +
-                            '</div>\
+                        cpd +
+                        '">' +
+                        cpd +
+                        '</div>\
                                 </div>'
                     );
 
