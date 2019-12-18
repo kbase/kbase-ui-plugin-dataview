@@ -1,13 +1,27 @@
 {
     "media": {
-        "authorized": {
-            "objectId": "44618/2/8",
-            "overview": {
-                "objectName": "eapearson:narrative_1571489750429/Rsp-minimal"
-            },
-            "mediaCompounds": {
-                "row": 3,
-                "name": "Phosphate"
+        "ci": {
+            "authorized": {
+                "objectId": "44618/2/8",
+                "overview": {
+                    "objectName": "eapearson:narrative_1571489750429/Rsp-minimal"
+                },
+                "mediaCompounds": {
+                    "row": 3,
+                    "name": "Phosphate"
+                }
+            }
+        },
+        "next": {
+            "authorized": {
+                "objectId": "1117/2/1",
+                "overview": {
+                    "objectName": "eapearson:narrative_1576694750549/Rsp-minimal"
+                },
+                "mediaCompounds": {
+                    "row": 3,
+                    "name": "Phosphate"
+                }
             }
         }
     }
