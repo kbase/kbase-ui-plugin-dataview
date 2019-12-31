@@ -125,7 +125,7 @@ define(['bluebird', 'preact', 'kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'
                     //     error: err
                     // });
 
-                    preact.render(preact.h(ErrorComponent, {runtime, error}), container);
+                    preact.render(preact.h(ErrorComponent, { runtime, error }), container);
                 });
         }
 
