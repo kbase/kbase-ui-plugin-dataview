@@ -17,23 +17,17 @@ module.exports = function (grunt) {
             //     src: 'node_modules/dagre-d3/dist/dagre-d3.js',
             //     dest: '../src/plugin/iframe_root/js/vendor/dagre-d3'
             // },
-            'pure-uuid': {
-                expand: true,
-                flatten: true,
-                src: 'node_modules/pure-uuid/uuid.js',
-                dest: '../src/plugin/iframe_root/modules/vendor/pure-uuid'
-            },
+            // 'pure-uuid': {
+            //     expand: true,
+            //     flatten: true,
+            //     src: 'node_modules/pure-uuid/uuid.js',
+            //     dest: '../src/plugin/iframe_root/modules/vendor/pure-uuid'
+            // },
             preact: {
                 expand: true,
                 flatten: true,
                 src: 'node_modules/preact/dist/preact.umd.js',
                 dest: '../src/plugin/iframe_root/modules/vendor/preact'
-            },
-            dist: {
-                expand: true,
-                flatten: true,
-                src: '../src/plugin',
-                dest: '../dist/plugin'
             }
         },
         clean: {
@@ -48,10 +42,4 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-clean');
-
-    grunt.registerTask('copy:modules', () => {
-        grunt.task.run('copy:dagre');
-        grunt.task.run('copy:preact');
-        grunt.task.run('copy:pure-uuid');
-    });
 };

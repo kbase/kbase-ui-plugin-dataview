@@ -24,18 +24,22 @@ original:t,path:a,query:n}}findRoute(e){let r,a,o,n,i,s
 params:{},route:this.defaultRoute};t:for(let t=0;t<this.routes.length;t+=1){
 o=this.routes[t],n={};const h=o.captureExtraPath
 ;if(o.path.length>e.path.length){
-if(!e.path.slice(o.path.length).every(t=>t.optional)&&!h&&"rest"!==o.path[o.path.length-1].type)continue t
+const t=o.path.slice(e.path.length).every(t=>t.optional),r=h,a="rest"===o.path[o.path.length-1].type
+;if(!(t||r||a))continue t
 }else if(o.path.length<e.path.length&&!h&&"rest"!==o.path[o.path.length-1].type)continue t
-;for(a=0;a<e.path.length;a+=1){if(s=o.path[a],i=e.path[a],!s&&h){
+;e:for(a=0;a<e.path.length;a+=1){if(s=o.path[a],i=e.path[a],!s&&h){
 n.rest=e.path.slice(a-1);break}switch(s.type){case"literal":
 if(s.value!==i)continue t;break;case"options":if(!s.value.some(t=>{
 if(i===t)return!0}))continue t;break;case"param":n[s.name]=i;break;case"regexp":
 try{if(!new RegExp(s.regexp).test(i))continue t}catch(p){
 console.warn("invalid route with regexp element",p);continue t}break;case"rest":
-n[s.name||"rest"]=e.path.slice(a);break;default:
-console.warn("invalid route: type not recognized",s);continue t}}r={request:e,
-params:n,route:o};break t}if(!r)throw new t({request:e,params:n,route:null,
-original:e.original,path:e.path});{
+const t=s.name||"rest";if(a<o.path.length-1){
+console.warn("rest parameter used before final route element"),
+console.warn("  being treated as regular param"),n[t]=i;continue}
+s.joinWith?n[t]=e.path.slice(a).join(s.joinWith):n[t]=e.path.slice(a);break e
+;default:console.warn("invalid route: type not recognized",s);continue t}}r={
+request:e,params:n,route:o};break t}if(!r)throw new t({request:e,params:n,
+route:null,original:e.original,path:e.path});{
 const t=Object.keys(e.query),a=r.route.queryParams||{}
 ;Object.keys(a).forEach(o=>{const n=a[o]
 ;if(!0===n)r.params[o]=e.query[o];else if(n.literal)r.params[o]=n.literal;else{
