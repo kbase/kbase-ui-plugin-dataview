@@ -1,0 +1,1260 @@
+## YAML Template.
+---
+package:
+    author: Erik Pearson
+    name: dataview
+    description: Viewers for data object (aka Landing Pages)
+    date: August 6, 2015
+    version: 0.0.1
+source:
+    ## sources are relative to build/plugins/PACKAGE/source/javascript
+    ## NB: need to quote file names, otherwise 
+    modules:
+        -
+            module: kb_dataview_widget_panel
+            file: panelWidget
+        # -
+        #     module: kb_dataview_widget_genomes_genomeComparison
+        #     file: widgets/protcmp/kbaseGenomeComparisonViewer
+    styles:
+        - 
+            file: dataview
+        - 
+            file: sankeystyle
+install:
+    widgets:
+        -
+            module: kb_dataview_widget_panel
+            name: kb_dataview_panel
+            type: factory
+        -
+            module: provenancePanel
+            name: kb_dataview_provenancePanel
+            type: factory
+        -
+            module: provenancePanel2
+            name: kb_dataview_provenancePanel2
+            type: factory
+        -
+            module: widgets/OverviewWidget
+            name: kb_dataview_overview
+            type: factory
+        -
+            module: widgets/provenanceWidget
+            name: kb_dataview_provenance
+            type: factory
+        -
+            module: widgets/provenanceWidgetv2
+            name: kb_dataview_provenance_v2
+            type: factory
+        -
+            module: widgets/relatedData
+            name: kb_dataview_relatedData
+            type: factory
+        -
+            module: widgets/download/downloadWidget
+            name: kb_dataview_download
+            type: factory
+            css: true
+        -
+            module: widgets/copy/copyWidget
+            name: kb_dataview_copy
+            type: factory
+            css: true
+            
+        # JSON VIEW
+        -
+            module: jsonViewPanel
+            name: kb_dataview_jsonViewPanel
+            type: factory
+        -
+            module: widgets/jsonView
+            name: kb_dataview_jsonView
+            type: factory
+        -
+            module: widgets/jsonViewOverview
+            name: kb_dataview_jsonViewOverview
+            type: factory
+        
+            
+        # COMMUNITIES
+        -
+            module: widgets/dataObjectVisualizer
+            name: kb_dataview_dataObjectVisualizer
+            type: factory
+        -
+            module: widgets/communities/kbaseCollectionView
+            name: kb_dataview_communities_collection
+            type: kbwidget
+        # -
+        #     module: kb_dataview_widget_contigSet
+        #     name: kb_dataview_contigSet
+        #     type: factory
+        # MODELING
+        # TODO: convert first four to work like last two -- they depend on tab table,
+        # not the other way round.
+        -
+            module: widgets/modeling/kbaseTabTable
+            name: kb_dataview_biochem_media
+            type: kbwidget
+        -
+            module: widgets/modeling/kbaseTabTable
+            name: kb_dataview_fba
+            type: kbwidget
+        -
+            module: widgets/modeling/kbaseTabTable
+            name: kb_dataview_fbaModel
+            type: kbwidget
+        -
+            module: widgets/modeling/kbaseTabTable
+            name: kb_dataview_fbaModelSet
+            type: kbwidget
+        -
+            module: widgets/modeling/KBasePhenotypes.PhenotypeSet
+            name: kb_dataview_phenotypeSet
+            type: kbwidget
+        -
+            module: widgets/modeling/KBaseBiochem.CompoundSet
+            name: kb_dataview_compoundSet
+            type: kbwidget
+            
+        # SEARCH (but in modeling dir)
+        
+        -
+            module: widgets/modeling/KBaseSearch.GenomeSet
+            name: kb_dataview_search_genomeSet
+            type: kbwidget
+            
+            
+        # ASSEMBLY
+        -
+            module: widgets/assembly/kbaseAssemblyInput
+            name: kb_dataview_assemblyInput
+            type: kbwidget
+        -
+            module:  widgets/assembly/kbasePairedEndLibrary
+            name: kb_dataview_pairedEndLibrary
+            type: kbwidget
+        -
+            module: widgets/assembly/kbaseReferenceAssembly
+            name: kb_dataview_referenceAssembly
+            type: kbwidget
+        -
+            module: widgets/assembly/kbaseAssemblyView
+            name: kb_dataview_assemblyView
+            type: kbwidget
+            
+        # GENOMES
+        # -
+        #     module: kb_dataview_widget_genomes_genomeComparison
+        #     name: kb_dataview_genomeComparison
+        #     type: kbwidget
+            
+        # GENOME COMPARISON
+        -
+            module: widgets/protcmp/kbaseGenomeComparison
+            name: kb_dataview_proteomeComparison
+            type: kbwidget
+
+        # KBASE GENOME ANNOTATIONS
+        -
+            module: widgets/taxon/taxon
+            name: kb_dataview_taxon
+            type: factory
+        -
+            module: widgets/byType/assembly/assembly
+            name: kb_dataview_assembly
+            type: factory
+        -
+            module: widgets/byType/assemblyContigs/assemblyContigs
+            name: kb_dataview_assemblyContigs
+            type: factory
+
+            
+        # COMMUNINITIES
+        
+        -
+            module: widgets/communities/kbaseAbundanceDataView
+            name: kb_dataview_functionalMatrix
+            type: kbwidget
+        -
+            module: widgets/communities/kbaseMetagenomeView
+            name: kb_dataview_metagenome
+            type: kbwidget
+        -
+            module: widgets/communities/kbaseAbundanceDataView
+            name: kb_dataview_functionalProfile
+            type: kbwidget
+        -
+            module: widgets/communities/kbaseAbundanceDataHeatmap
+            name: kb_dataview_abundanceDataHeatmap
+            type: kbwidget
+            
+        # EXPRESSION
+        
+        -
+            module: widgets/expression/kbaseExpressionSeries
+            name: kb_dataview_expressionSeries
+            type: kbwidget
+            
+        # KBASE FILE
+        -
+            module: widgets/assembly/kbaseFilePairedEndLibrary
+            name: kb_dataview_file_pairedEndLibrary
+            type: kbwidget
+        
+        # KBASE GENOMES
+        -
+            module: widgets/genomes/kbaseGenomePage
+            name: kb_dataview_genomes_genome
+            type: kbwidget
+        -
+            module: widgets/genomes/kbaseGenomeWideOverview
+            name: kb_dataview_genomes_wideOverview
+            type: kbwidget
+        -
+            module: widgets/genomes/kbaseGenomeOverview
+            name: kb_dataview_genomes_overview
+            type: kbwidget
+            css: true
+        -
+            module: widgets/genomes/kbaseWikiDescription
+            name: kb_dataview_genomes_wikiDescription
+            type: kbwidget
+        -
+            module: widgets/genomes/kbaseLitWidget
+            name: kb_dataview_genomes_literature
+            type: kbwidget
+        -
+            module:  widgets/genomes/kbaseGenePage
+            name: kb_dataview_genomes_genePage
+            type: kbwidget
+        -
+            module: widgets/genomes/kbaseGenomeGeneTable
+            name: kb_dataview_genomes_geneTable
+            type: kbwidget
+        -
+            module: widgets/genomes/kbaseGeneInstanceInfo
+            name: kb_dataview_genomes_geneInstanceInfo
+            type: kbwidget
+        -
+            module: widgets/genomes/kbaseGeneSequence
+            name: kb_dataview_genomes_geneSequence
+            type: kbwidget
+        # -
+        #     module: widgets/genomes/kbaseGeneBiochemistry
+        #     name: kb_dataview_genomes_geneBiochemistry
+        #     type:   kbwidget        
+        # -
+        #     module: widgets/genomes/kbaseGenomeLineage
+        #     name: kb_dataview_genomes_lineage
+        #     type: kbwidget
+        # -
+        #     module: kb_dataview_genomes_wideTaxonomy
+        #     name: kb_dataview_genomes_wideTaxonomy
+        #     type: kbwidget
+        # -
+        #     module: kb_dataview_genomes_wideAssemblyAnnotation
+        #     name: kb_dataview_genomes_wideAssemblyAnnotation
+        #     type: kbwidget
+        # -
+        #     module: kb_dataview_genomes_multiContigBrowser
+        #     name: kb_dataview_genomes_multiContigBrowser
+        #     type: kbwidget
+        # -
+        #     module: kb_dataview_genomes_seedFunctions
+        #     name: kb_dataview_genomes_seedFunctions
+        #     type: kbwidget
+        -
+            module: widgets/genomes/kbasePanGenome
+            name: kb_dataview_genomes_pangenome
+            type: kbwidget
+        -
+            module: widgets/genomes/kbaseAnnotationSetTable
+            name: kb_dataview_genomes_annotationSetTable
+            type: kbwidget
+            
+            
+        -
+            module: widgets/contigset/kbaseContigSetView
+            name: kb_dataview_contigset_contigSetView
+            type: kbwidget
+
+        # METAGENOMES
+        -
+             module: widgets/metagenomes/annotatedMetagenomeAssembly
+             name: kb_dataview_metagenomes_annotatedMetagenomeAssembly
+             type: kbwidget
+            
+        # TREES
+        
+        -
+            module: widgets/trees/kbaseTree
+            name: kb_dataview_trees_tree
+            type: kbwidget
+            
+        # GENERIC
+        -
+            module:  widgets/genericDataObject
+            name: kb_dataview_genericObject
+            type: factory
+
+        # KBase Report
+        -
+            module: widgets/kbase-report/viewer
+            name: kb_dataview_kbaseReport
+            type: es6
+        # ONTOLOGY
+        - 
+            module: widgets/ontology/kbaseOntologyDictionary
+            # id: ontology_dictionary_panel
+            name: kb_dataview_ontologyDictionary
+            type: kbwidget
+        - 
+            module: widgets/ontology/kbaseOntologyTranslation
+            # id: ontology_translation_panel
+            name: kb_dataview_ontologyTranslation
+            type: kbwidget
+
+            
+    routes:
+        -
+            path: 
+                - 
+                    dataview
+                -
+                    name: workspaceId
+                -
+                    name: objectId
+                -
+                    name: objectVersion
+                    optional: true
+            queryParams:
+                sub: {}
+                subid: {}
+                viewer: {}
+            widget: kb_dataview_panel
+        -
+            path: 
+                - 
+                    [objgraphview, provenance]
+                - 
+                    name: workspaceId
+                -
+                    name: objectId
+                -
+                    name: objectVersion
+                    optional: true
+            widget: kb_dataview_provenancePanel
+        -
+            path: 
+                - 
+                    [objgraphview2, provenance2]
+                - 
+                    name: workspaceId
+                -
+                    name: objectId
+                -
+                    name: objectVersion
+                    optional: true
+            widget: kb_dataview_provenancePanel2
+        -
+            path:
+                -
+                    jsonview
+                -
+                    name: workspaceId
+                -
+                    name: objectId
+                -
+                    name: objectVersion
+                    optional: true
+            widget: kb_dataview_jsonViewPanel 
+            
+    panels:
+        -             
+            view: dataView
+            module: panelWidget
+            type: factory
+        -
+            view: jsonView
+            module: jsonViewPanel
+            type: factory
+        -
+            view: provenanceView
+            module: provenancePanel
+            type: factory
+        -
+            view: provenanceView2
+            module: provenancePanel2
+            type: factory
+    
+                    
+    types:
+        # COMMUNITIES
+        -
+            type: 
+                module: Communities
+                name:   Collection
+                version: any
+            icon: 
+                type: fontAwesome
+                classes: ['fa-list-ul']
+            viewers:
+                -
+                    # if set true, this will be set as the default vis widget for this type.
+                    default: true
+                    # This the title for the widget
+                    title: 'Data View'                
+                    # This is the widget id name as specified in the plugin
+                    # it should follow standard namespacing. It should also be 
+                    # defined above in the modules.
+                    # module: kb_widget_dataview_communities_collection
+                    # This is the registered widget id. The mapping of widget
+                    # to module is probably made above.
+                    widget: 
+                        name: kb_dataview_communities_collection
+                        config: 
+                            jqueryName: CollectionView
+
+                    jqueryWidget: CollectionView
+                    # If a bootstrap panel is requested to wrap this widget.
+                    panel: false
+                    # Mapping of standard options to the widget option properties.
+                    # By standard, I mean those defined in the GenericVisualizer widget.
+                    options:
+                        -
+                            from: workspaceId
+                            to: ws
+                        -
+                            from: objectId
+                            to: id
+        
+        -
+            type: 
+                module: Communities
+                name:   Heatmap
+                version: any
+            icon:   
+                type: fontAwesome
+                classes: ['fa-th']
+            viewers:
+                -
+                    name: Data View
+                    panel: true                    
+                    default: true
+                    widget: 
+                        name: kb_dataview_abundanceDataHeatmap
+                        config:
+                            jqueryName: AbundanceDataHeatmap
+                    options:
+                        -
+                            from: workspaceId
+                            to: ws
+                        -
+                            from: objectId
+                            to: id
+        -
+            type:
+                module: Communities
+                name: TaxonomicMatrix
+                version: any
+            icon:   
+                type: fontAwesome
+                classes: ['fa-table']
+                            
+        # GENOMES
+        
+                          
+        # TYPES DEFINED IN MODELING WIDGETS
+        -
+            type:
+                module: KBasePhenotypes
+                name: PhenotypeSet
+                version: any
+            icon:   
+                type: fontAwesome
+                classes: ['fa-list-ul']
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_phenotypeSet
+                        config:
+                            jqueryName: kbaseTabTable
+                    panel: true
+                    default: true
+                    options: 
+                        -
+                            from: workspaceName 
+                            to: ws
+                        -
+                            from: objectName 
+                            to: obj
+                        -
+                            from: objectType 
+                            to: type
+        -
+            type:
+                module: KBaseBiochem
+                name: CompoundSet
+                version: any
+            icon:
+                type: fontAwesome
+                classes: ['fa-list-ul']
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_compoundSet
+                        config:
+                            jqueryName: kbaseTabTable
+                    panel: true
+                    default: true
+                    options:
+                        -
+                            from: workspaceName
+                            to: ws
+                        -
+                            from: objectName
+                            to: obj
+                        -
+                            from: objectType
+                            to: type
+
+        -
+            type:
+                module: Communities
+                name: FunctionalMatrix
+                version: any
+            icon:   
+                type: fontAwesome
+                classes: ['fa-table']
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_functionalMatrix
+                        config:
+                            jqueryName: AbundanceDataView
+                    panel: true
+                    default: true
+                    options: 
+                        -
+                            from: workspaceId
+                            to: ws
+                        -
+                            from: objectId
+                            to: id  
+                            
+        -
+            type:
+                module: Communities
+                name: Metagenome
+                version: any 
+            icon:   
+                type: kbase
+                classes: ['icon-metagenome', 'kb-data-icon-dnudge']
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_metagenome
+                        config:
+                                jqueryName: MetagenomeView
+                    panel: true
+                    default: true
+                    options:
+                        -
+                            from: workspaceId
+                            to: ws
+                        -
+                            from: objectId
+                            to: id            
+        -
+            type:
+                module: Communities
+                name: FunctionalProfile
+                version: any
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_functionalProfile
+                        config:
+                            jqueryName: AbundanceDataView
+                    panel: true
+                    default: true
+                    options: 
+                        -
+                            from: workspaceId
+                            to: ws
+                        -
+                            from: objectId
+                            to: id                                    
+        # GENOME COMPARISON
+        - 
+            type:
+                module: GenomeComparison
+                name: ProteomeComparison
+                version: any
+            icon:   
+                type: fontAwesome
+                classes: ['fa-arrows-h']
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_proteomeComparison
+                        config:
+                            jqueryName: GenomeComparisonWidget
+                    panel: true
+                    default: true
+                    options:
+                        -
+                            from: workspaceId
+                            to: ws_name
+                        -
+                            from: objectId
+                            to: ws_id
+        # ASSEMBLY
+        -
+            type:
+                module: KBaseAssembly
+                name: AssemblyInput
+                version: any
+            icon: 
+                type: kbase
+                classes: ['icon-reads', 'kb-data-icon-dnudge']  
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_assemblyInput
+                        config:
+                            jqueryName: kbaseAssemblyInput
+                    panel: true
+                    default: true
+                    options:
+                        -
+                            from: workspaceId
+                            to: workspaceId
+                        - 
+                            from: objectId
+                            to: objId
+                        -
+                            from: objectVersion
+                            to: objVer
+                            optional: true
+        -
+            type:
+                module: KBaseAssembly
+                name: AssemblyReport
+                version: any
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_assemblyView
+                        config: 
+                            jqueryName: kbaseAssemblyView
+                    panel: true
+                    default: true
+                    options:
+                        -
+                            from: workspaceId
+                            to: ws_name
+                        -
+                            from: objectId
+                            to: ws_id
+        -
+            type:
+                module: KBaseAssembly
+                name: PairedEndLibrary
+                version: any
+            icon:   
+                type: kbase
+                classes: ['icon-reads', 'kb-data-icon-dnudge']
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_pairedEndLibrary
+                        config:
+                            jqueryName: kbasePairedEndLibrary
+                    panel: true
+                    default: true
+                    options:
+                        -
+                            from: workspaceId
+                            to: workspaceId
+                        -    
+                            from: objectId
+                            to: objId
+                        -    
+                            from: objectVersion
+                            to: objVer
+                            optional: true
+        -
+            type:
+                module: KBaseAssembly
+                name: SingleEndLibrary
+                version: any
+            icon:   
+                type: kbase
+                classes: ['icon-reads', 'kb-data-icon-dnudge']
+                color: '#795548'
+            viewers:
+                # -
+                #     title: Data View
+                #     widget:
+                #         name: kb_dataview_pairedEndLibrary
+                #         config:
+                #             jqueryName: kbasePairedEndLibrary
+                #     panel: true
+                #     default: true
+                #     options:
+                #         -
+                #             from: workspaceId
+                #             to: workspaceId
+                #         -    
+                #             from: objectId
+                #             to: objId
+                #         -    
+                #             from: objectVersion
+                #             to: objVer
+                #             optional: true                            
+        -
+            type:
+                module: KBaseAssembly
+                name: ReferenceAssembly
+                version: any
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_referenceAssembly
+                        config:
+                            jqueryName: kbaseReferenceAssembly
+                    panel: true
+                    default: true
+                    options:
+                        -
+                            from: workspaceId
+                            to: workspaceId
+                        -    
+                            from: objectId
+                            to: objId
+                        -    
+                            from: objectVersion
+                            to: objVer
+                            optional: true
+
+        -
+            type: 
+                module: KBaseGenomeAnnotations
+                name:   Taxon
+                version: any
+            icon: 
+                type: fontAwesome
+                classes: ['fa-list']
+            viewers:
+                -
+                    # if set true, this will be set as the default vis widget for this type.
+                    # note that we do not have a way of selecting one from amongst multiple widgets
+                    default: true
+                    # This the title for the widget if a wrapper panel is requested
+                    title: 'Data View'
+                    panel: false
+                    # This is the widget id name as specified in the plugin
+                    # it should follow standard namespacing. It should also be 
+                    # defined above in the modules.
+                    # module: kb_widget_dataview_communities_collection
+                    # This is the registered widget id. The mapping of widget
+                    # to module is probably made above.
+                    widget: 
+                        name: kb_dataview_taxon
+
+        -
+            type: 
+                module: KBaseGenomeAnnotations
+                name:   Assembly
+                version: any
+            icon: 
+                type: fontAwesome
+                classes: ['fa-list']
+            viewers:
+                -
+                    # if set true, this will be set as the default vis widget for this type.
+                    # note that we do not have a way of selecting one from amongst multiple widgets
+                    default: true
+                    # This the title for the widget if a wrapper panel is requested
+                    title: 'Data View'
+                    panel: false
+                    # This is the widget id name as specified in the plugin
+                    # it should follow standard namespacing. It should also be 
+                    # defined above in the modules.
+                    # module: kb_widget_dataview_communities_collection
+                    # This is the registered widget id. The mapping of widget
+                    # to module is probably made above.
+                    widget: 
+                        name: kb_dataview_assembly
+        -
+            type: 
+                module: KBaseGenomes
+                name:   ContigSet
+                version: any
+            icon: 
+                type: fontAwesome
+                classes: ['fa-list']
+            viewers:
+                -
+                    # If set, the id may be used to invoke a viewer directly. Otherwise
+                    # only the default viewer will be available, and there is only one
+                    # of those at a time.
+                    # invoked like #dataview/ws/obj/ver?viewer=id
+                    id: data-landing-pages
+                    # if set true, this will be set as the default vis widget for this type.
+                    # note that we do not have a way of selecting one from amongst multiple widgets
+                    default: false
+                    # This the title for the widget if a wrapper panel is requested
+                    title: 'Data View'
+                    panel: false
+                    # This is the widget id name as specified in the plugin
+                    # it should follow standard namespacing. It should also be 
+                    # defined above in the modules.
+                    # module: kb_widget_dataview_communities_collection
+                    # This is the registered widget id. The mapping of widget
+                    # to module is probably made above.
+                    widget: 
+                        name: kb_dataview_assemblyContigs
+
+        # BIOCHHEM
+        -
+            type:
+                module: KBaseBiochem
+                name: Media
+                version: any
+            icon:
+                type: fontAwesome
+                classes: ['fa-flask']
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_biochem_media
+                        config:
+                            jqueryName: kbaseTabTable
+                    panel: true
+                    default: true
+                    options:
+                        -
+                            from: workspaceName
+                            to: ws
+                        -
+                            from: objectName
+                            to: obj
+                        -
+                            from: objectType
+                            to: type
+        
+        # EXPRESSION
+        -
+            type:
+                module: KBaseExpression
+                name: ExpressionSeries
+                version: any
+            icon:  
+                type: fontAwesome
+                classes: ['fa-tachometer']
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_expressionSeries
+                        config:
+                            jqueryName: kbaseExpressionSeries
+                    panel: true
+                    default: true
+                    options: 
+                        -
+                            from: workspaceName 
+                            to: ws
+                        -
+                            from: objectName 
+                            to: name
+        # FBA
+        -
+            type: 
+                module: KBaseFBA
+                name: FBA
+                version: any
+            icon:  
+                type: kbase
+                classes: ['icon-metabolism', 'kb-data-icon-dnudge']
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_fba
+                        config:
+                            jqueryName: kbaseTabTable
+                    panel: true
+                    default: true
+                    options: 
+                        -
+                            from: workspaceName 
+                            to: ws
+                        -
+                            from: objectName 
+                            to: obj
+                        -
+                            from: objectType 
+                            to: type
+        -
+            type: 
+                module: KBaseFBA
+                name: FBAModel
+                version: any
+            icon:   
+                type: kbase
+                classes: ['icon-metabolism', 'kb-data-icon-dnudge']
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_fbaModel
+                        config:
+                            jqueryName: kbaseTabTable
+                    panel: true
+                    default: true
+                    options: 
+                        -
+                            from: workspaceName 
+                            to: ws
+                        -
+                            from: objectName 
+                            to: obj
+                        -
+                            from: objectType 
+                            to: type
+        -
+            type:
+                module: KBaseFBA
+                name: FBAModelSet
+                version: any
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_fbaModelSet
+                        config:
+                                jqueryName: kbaseTabTable
+                    panel: true
+                    default: true
+                    options: 
+                        -
+                            from: workspaceName 
+                            to: ws
+                        -
+                            from: objectName 
+                            to: obj
+                        -
+                            from: objectType 
+                            to: type
+        # SEARCH 
+        
+        -
+            type:
+                module: KBaseSearch
+                name: GenomeSet
+                version: any
+            icon:   
+                type: fontAwesome
+                classes: ['fa-list-ul']
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_search_genomeSet
+                        config:
+                            jqueryName: kbaseTabTable
+                    panel: true
+                    default: true
+                    options: 
+                        -
+                            from: workspaceName 
+                            to: ws
+                        -
+                            from: objectName 
+                            to: obj
+                        -
+                            from: objectType 
+                            to: type                            
+            
+        # KBASE FILE
+        -
+            type:
+                module: KBaseFile
+                name: PairedEndLibrary
+                version: any
+            icon:   
+                type: kbase
+                classes: ['icon-reads', 'kb-data-icon-dnudge']
+                color: '#795548'
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_file_pairedEndLibrary
+                        config:
+                            jqueryName:  kbaseFilePairedEndLibrary
+                    panel: true
+                    default: true
+                    options: 
+                        -
+                            from: workspaceId
+                            to: workspaceId
+                        -
+                            from: objectId
+                            to: objId
+                        -
+                            from: objectVersion
+                            to: objVer 
+                            optional: true
+        -
+            type:
+                module: KBaseFile
+                name: SingleEndLibrary
+                version: any
+            icon:   
+                type: kbase
+                classes: ['icon-reads', 'kb-data-icon-dnudge']
+                color: '#795548'
+            viewers:
+
+                            
+        -
+            type:
+                module: KBaseGeneFamilies
+                name: DomainAlignments
+                version: any
+            icon:  
+                type: fontAwesome
+                classes: ['fa-sliders']
+                
+        # KBASE GENOMES
+        
+        -
+            type:
+                module: KBaseGenomes
+                name: Genome
+                version: any
+            icon:   
+                type: kbase
+                classes: ['icon-genome', 'kb-data-icon-dnudge']
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_genomes_genome
+                        config:
+                            jqueryName: KBaseGenomePage
+                    panel: false
+                    default: true
+                    # Options object to build. Maps
+                    options: 
+                        -
+                            from: objectId 
+                            to: genomeID
+                        -
+                            from: workspaceId 
+                            to: workspaceID
+
+                    sub: 
+                        feature: 
+                            widget:
+                                name: kb_dataview_genomes_genePage
+                                config:
+                                    jqueryName: KBaseGenePage
+                            panel: false
+                            default: true
+                            options: 
+                                -
+                                    from: objectId 
+                                    to: genomeID
+                                -
+                                    from: workspaceId 
+                                    to: workspaceID
+                                -
+                                    from: featureID
+                                    to: featureID
+        -
+            type:
+                module: KBaseGenomes
+                name: Pangenome
+                version: any
+            icon:   
+                type: fontAwesome
+                classes: ['fa-bullseye']
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_genomes_pangenome
+                        config:
+                            jqueryName: kbasePanGenome
+                    panel: true
+                    default: true
+                    options: 
+                        -
+                            from: workspaceName 
+                            to: ws
+                        -
+                            from: objectName 
+                            to: name     
+        -
+            type:
+                module: KBaseGenomes
+                name: MetagenomeAnnotation
+                version: any
+            icon:
+                type: fontAwesome
+                classes: ['fa-comment-o']
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_genomes_annotationSetTable
+                        config:
+                            jqueryName: AnnotationSetTable
+                    panel: true
+                    default: true
+                    options: 
+                        -
+                            from: workspaceId
+                            to: ws
+                        -
+                            from: objectId
+                            to: id
+
+        # METAGENOMES       
+        -
+            type:
+                module: KBaseMetagenomes
+                name: AnnotatedMetagenomeAssembly
+                version: any
+            icon:
+                type: fontAwesome
+                classes: ['icon-metagenome', 'kb-data-icon-dnudge']
+            viewers:
+                -
+                    title: Data View
+                    widget:
+                        name: kb_dataview_metagenomes_annotatedMetagenomeAssembly
+                        config:
+                            jqueryName: AnnotatedMetagenomeAssembly
+                    panel: false
+                    default: true
+
+        # TREES
+        
+        -
+            type:
+                module: KBaseTrees
+                name: Tree
+                version: any
+            icon:   
+                type: kbase
+                classes: ['icon-tree', 'kb-data-icon-dnudge']
+            viewers:
+                -
+                    title: Data View
+                    default: true
+                    widget:
+                        name: kb_dataview_trees_tree
+                        config:
+                            jqueryName: kbaseTree
+                    panel: true
+                    options: 
+                        -
+                            from: workspaceId 
+                            to: workspaceID
+                        -
+                            from: objectId 
+                            to: treeID
+                        -
+                            from: objectVersion 
+                            to: treeObjVer
+
+        # KBASE REPORT
+        -
+            type:
+                module: KBaseReport
+                name: Report
+                version: any
+            icon:
+                type: fontAwesome
+                classes: [fa-file-text-o]
+            viewers:
+                -
+                    default: true
+                    title: 'KBase Report'
+                    widget:
+                        name: kb_dataview_kbaseReport
+                    panel: true
+        # ONTOLOGY
+        -
+            type:
+                module: KBaseOntology
+                name: OntologyDictionary
+                version: any
+            icon: 
+                type: fontAwesome
+                classes: ['fa-file']
+            viewers:
+                -
+                    title: Data View - Ontology Dictionary
+                    default: true
+                    panel: false  
+                    widget: 
+                        name: kb_dataview_ontologyDictionary
+                        config:
+                            jqueryName: KBaseOntologyDictionary
+        -
+            type:
+                module: KBaseOntology
+                name: OntologyTranslation
+                version: any
+            icon: 
+                type: fontAwesome
+                classes: ['fa-file']
+            viewers:
+                -
+                    title: Data View - Ontology Translation
+                    default: true
+                    panel: false  
+                    widget: 
+                        name: kb_dataview_ontologyTranslation
+                        config:
+                            jqueryName: KBaseOntologyTranslation
+
+views:
+    -
+        view: dataView
+        module: panelWidget
+        type: factory
+    -
+        view: jsonView
+        module: jsonViewPanel
+        type: factory
+    -
+        view: provenanceView
+        module: provenancePanel
+        type: factory
+    -
+        view: provenanceView2
+        module: provenancePanel2
+        type: factory
+    
+    
