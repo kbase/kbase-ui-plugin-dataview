@@ -1399,11 +1399,6 @@ punycode@^2.1.0:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
 
-pure-uuid@1.5.8:
-  version "1.5.8"
-  resolved "https://registry.yarnpkg.com/pure-uuid/-/pure-uuid-1.5.8.tgz#2a1aa3afb59720bb6dca9865adf3d55671504a31"
-  integrity sha512-8i/U1m4pBBxlVHF5VRzdWQjovwqreqGYQvEf/Z4/KQUEL8Sw3fxlRUd6K9qFiyqmdrMZvyjgKWjFGB81+7YkUg==
-
 read-pkg-up@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/read-pkg-up/-/read-pkg-up-1.0.1.tgz#9d63c13276c065918d57f002a57f40a1b643fb02"

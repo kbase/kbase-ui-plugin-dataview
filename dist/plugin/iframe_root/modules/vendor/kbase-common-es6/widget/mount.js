@@ -1,11 +1,10 @@
 define(["bluebird"],(function(t){"use strict";return{WidgetMount:class{
-constructor(t){
-if(!t.node)throw new Error('Cannot create widget mount without a parent node; pass it as "node"')
-;if(this.hostNode=t.node,
-!t.widgetManager)throw new Error('The widget mounter needs a widget manager; pass it as "widgetManager"')
-;this.widgetManager=t.widgetManager,
-this.container=this.hostNode,this.mountedWidget=null}mount(e,n){
-return this.mountedWidget={widget:null,container:null,promise:null
+constructor({node:t,widgetManager:e}){
+if(!t)throw new Error('Cannot create widget mount without a parent node; pass it as "node"')
+;if(this.hostNode=t,
+!e)throw new Error('The widget mounter needs a widget manager; pass it as "widgetManager"')
+;this.widgetManager=e,this.container=this.hostNode,this.mountedWidget=null}
+mount(e,n){return this.mountedWidget={widget:null,container:null,promise:null
 },this.mountedWidget.promise=t.try(()=>this.widgetManager.makeWidget(e,{})).then(n=>{
 if(!n)throw new Error("Widget could not be created: "+e)
 ;return this.mountedWidget.widget=n,t.all([n,n.init&&n.init()])
