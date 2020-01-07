@@ -1,98 +1,53 @@
 ---
 description: Accessing a media object while authenticated
 specs:
-  - description: should have main panel framing appear when hit the path
-    baseSelector: []
-    enable:
-      envs:
-        - ci
-    tasks:
-      - subtask: login
-      - action: navigate
-        path: dataview/${plugins.dataview.media.ci.authorized.objectId}
-      - subtask: plugin
-      - wait: forText
-        selector:
-          - type: plugin
-            value: dataview
-          - type: widget
-            value: dataObjectVisualizer
-          - type: tabpane
-            value: overview
-          - type: field
-            value: wsid
-        text: ${plugins.dataview.media.ci.authorized.overview.objectName}
-      - wait: forElement
-        selector:
-          - type: plugin
-            value: dataview
-          - type: widget
-            value: dataObjectVisualizer
-          - type: tab
-            value: mediacompounds
-      - action: click
-      - wait: forText
-        selector:
-          - type: plugin
-            value: dataview
-          - type: widget
-            value: dataObjectVisualizer
-          - type: tabpane
-            value: mediacompounds
-          - type: element
-            value: table
-          - type: raw
-            name: role
-            value: row
-            nth: ${plugins.dataview.media.ci.authorized.mediaCompounds.row}
-          - type: field
-            value: name
-        text: ${plugins.dataview.media.ci.authorized.mediaCompounds.name}
-
-  - description: should have main panel framing appear when hit the path
-    baseSelector: []
-    enable:
-      envs:
-        - next
-    tasks:
-      - subtask: login
-      - action: navigate
-        path: dataview/${plugins.dataview.media.next.authorized.objectId}
-      - subtask: plugin
-      - wait: forText
-        selector:
-          - type: plugin
-            value: dataview
-          - type: widget
-            value: dataObjectVisualizer
-          - type: tabpane
-            value: overview
-          - type: field
-            value: wsid
-        text: ${plugins.dataview.media.next.authorized.overview.objectName}
-      - wait: forElement
-        selector:
-          - type: plugin
-            value: dataview
-          - type: widget
-            value: dataObjectVisualizer
-          - type: tab
-            value: mediacompounds
-      - action: click
-      - wait: forText
-        selector:
-          - type: plugin
-            value: dataview
-          - type: widget
-            value: dataObjectVisualizer
-          - type: tabpane
-            value: mediacompounds
-          - type: element
-            value: table
-          - type: raw
-            name: role
-            value: row
-            nth: ${plugins.dataview.next.media.authorized.mediaCompounds.row}
-          - type: field
-            value: name
-        text: ${plugins.dataview.next.media.authorized.mediaCompounds.name}
+    - description: "case 1: media object should be displayed"
+      baseSelector: []
+      enable:
+          envs:
+              - ci
+              - next
+              - narrative-dev
+              - prod
+      tasks:
+          - subtask: login
+          - action: navigate
+            path: dataview/${plugins.dataview.media.case1.objectId}
+          - subtask: plugin
+          - wait: forText
+            selector:
+                - type: plugin
+                  value: dataview
+                - type: widget
+                  value: dataObjectVisualizer
+                - type: tabpane
+                  value: overview
+                - type: field
+                  value: wsid
+            text: ${plugins.dataview.media.case1.overview.objectName}
+          - wait: forElement
+            selector:
+                - type: plugin
+                  value: dataview
+                - type: widget
+                  value: dataObjectVisualizer
+                - type: tab
+                  value: mediacompounds
+          - action: click
+          - wait: forText
+            selector:
+                - type: plugin
+                  value: dataview
+                - type: widget
+                  value: dataObjectVisualizer
+                - type: tabpane
+                  value: mediacompounds
+                - type: element
+                  value: table
+                - type: raw
+                  name: role
+                  value: row
+                  nth: ${plugins.dataview.media.case1.mediaCompounds.row}
+                - type: field
+                  value: name
+            text: ${plugins.dataview.media.case1.mediaCompounds.name}

@@ -16,6 +16,12 @@ yarn remove-source-maps
 yarn install-dist
 ```
 
+or
+
+```zsh
+yarn clean && yarn install && yarn install-bower && yarn install-npm &&yarn remove-source-maps && yarn install-dist
+```
+
 > Only use yarn clean if you want to clean out the stuff installed in vendor, as well as the node and bower packages installed in build.
 
 ## Preparing for a new release
