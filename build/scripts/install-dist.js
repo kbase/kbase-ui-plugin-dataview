@@ -1,8 +1,12 @@
+/*eslint-env node */
+/*eslint strict: ["error", "global"] */
+'use strict';
 const bluebird = require('bluebird');
 const glob = bluebird.promisify(require('glob').Glob);
 const fs = bluebird.promisifyAll(require('fs-extra'));
 const Terser = require('terser');
 const path = require('path');
+const tar = require('tar');
 
 async function copyFiles(rootDir) {
     const root = rootDir.split('/');
@@ -11,7 +15,7 @@ async function copyFiles(rootDir) {
     try {
         await fs.removeAsync(dest);
     } catch (ex) {
-        console.warn(ex.message);
+        console.warn('WARNING removing dest', ex.message);
     }
     await fs.ensureDirAsync(dest);
     await fs.copyAsync(source, dest);
@@ -23,7 +27,7 @@ async function minify(rootDir) {
     // remove mapping from css files.
     const matches = await glob(
         root
-            .concat(['dist', 'plugin', 'iframe_root', 'modules', '**', '*.js'])
+            .concat(['dist', 'plugin', 'iframe_root', '**', '*.js'])
             .join('/'),
         {
             nodir: true
@@ -61,14 +65,35 @@ async function minify(rootDir) {
     );
 }
 
+async function taritup(rootDir) {
+    const dir = 'dist';
+    const dest = rootDir.concat(['dist.tgz']).join('/');
+    console.log('tarring from ' + dir + ', to ' + dest);
+    return tar.c({
+        gzip: true,
+        file: dest,
+        portable: true,
+        cwd: rootDir.join('/')
+    }, [
+        dir
+    ]);
+}
+
 async function main() {
     const cwd = process.cwd().split('/');
     cwd.push('..');
     const projectPath = path.normalize(cwd.join('/'));
+    console.log(`Project path: ${projectPath}`);
     console.log('Copying files to dist...');
     await copyFiles(projectPath);
     console.log('Minifying dist...');
     await minify(projectPath);
+    console.log('tar-ing dist...');
+    try {
+        await taritup(projectPath.split('/'));
+    } catch (ex) {
+        console.error('Error tarring up dist! ' + ex.message);
+    }
     console.log('done');
 }
 
