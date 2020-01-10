@@ -1,6 +1,5 @@
 {
-    "name": "kbase-ui-plugin-auth2-client-internal",
-    "description": "Just the internal iframe app",
+    "name": "kbase-ui-plugin-dataview",
     "keywords": [
         "kbase",
         "widget"
@@ -46,14 +45,14 @@
         }
     },
     "dependencies": {
-        "bluebird": "3.5.4",
+        "bluebird": "3.7.2",
         "bootstrap": "3.4.1",
         "d3": "3.5.17",
         "d3-plugins-sankey": "1.1.0",
         "file-saver": "1.3.4",
         "jquery": "^2.1.0",
-        "highlightjs": "9.12.0",
-        "handlebars": "4.1.2",
+        "highlightjs": "9.16.2",
+        "handlebars": "4.6.0",
         "kbase-service-clients-js": "^3.3.5",
         "requirejs": "2.3.6",
         "require-css": "0.1.10",
@@ -61,16 +60,16 @@
         "kbase-common-es6": "0.11.1",
         "kbase-common-ts": "0.19.0",
         "kbase-knockout-extensions-es6": "0.6.16",
-        "kbase-ui-widget": "1.3.0",
-        "knockout": "3.5.0",
+        "kbase-ui-widget": "1.3.1",
+        "knockout": "3.5.1",
         "knockout-arraytransforms": "2.1.1",
         "bower-knockout-mapping": "2.6.0",
         "knockout-projections": "eapearson/knockout-projections#1.1.1",
         "knockout-switch-case": "2.1.0",
-        "knockout-validation": "2.0.3",
+        "knockout-validation": "2.0.4",
         "jquery-ui": "1.12.1",
         "js-yaml": "3.13.1",
-        "marked": "0.6.3",
+        "marked": "0.8.0",
         "moment": "2.24.0",
         "numeral": "2.0.6",
         "pure-uuid": "1.5.8",
@@ -82,13 +81,14 @@
         "file-saver": "1.3.4",
         "datatables-bootstrap3-plugin": "eapearson/datatables-bootstrap3-plugin#1.0.1",
         "datatables": "1.10.19",
-        "underscore": "1.9.1"
+        "underscore": "1.9.2"
     },
     "resolutions": {
         "file-saver": "1.3.4",
         "datatables-bootstrap3-plugin": "1.0.1",
         "kbase-common-es6": "0.11.1",
-        "pure-uuid": "1.5.8"
+        "pure-uuid": "1.5.8",
+        "marked": "0.8.0"
     },
     "license": "SEE LICENSE IN ../LICENSE"
 }
