@@ -1,4 +1,4 @@
-define(['knockout', 'kb_lib/html', 'kb_knockout/registry'], function (ko, html, reg) {
+define(['knockout', 'kb_lib/html', 'kb_knockout/registry', 'kb_knockout/lib/generators'], function (ko, html, reg, gen) {
     'use strict';
 
     const t = html.tag,
@@ -45,8 +45,8 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry'], function (ko, html, 
                         formatted = value;
                     }
                     return {
-                        value: value,
-                        formatted: formatted,
+                        value,
+                        formatted,
                         style: col.style
                     };
                 })
@@ -147,39 +147,51 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry'], function (ko, html, 
             for (let i in searchColumns) {
                 const searchColumn = searchColumns[i];
                 if (row.row[searchColumn.pos].value.toLowerCase().indexOf(text) >= 0) {
+                    // console.log('filter!', row.row[searchColumn.pos].value.toLowerCase(), text);
                     return true;
                 }
             }
             return false;
         });
 
-        var len = ko.pureComputed(() => {
+        const len = ko.pureComputed(() => {
             return filteredTable().length;
         });
 
-        var pageStart = ko.observable(0);
-        var pageEnd = ko.pureComputed(function () {
+        const pageStart = ko.observable(0);
+        const pageEnd = ko.pureComputed(function () {
             return Math.min(pageStart() + pageSize(), len()) - 1;
         });
 
-        var searchSummary = ko.pureComputed(function () {
+        const searchSummary = ko.pureComputed(function () {
             if (filteredTable().length === total) {
                 return '';
             }
             return 'found ' + filteredTable().length + ' of ' + total;
         });
 
-        var tableToShow = filteredTable.filter((row) => {
-            if (row.naturalOrder >= pageStart() && row.naturalOrder <= pageEnd()) {
-                return true;
-            }
+        // NB: we need index, and index is now not available in the .filter() method
+        // made available by knockout-mapping.
+        const tableToShow = ko.pureComputed(() => {
+            const table = filteredTable();
+            return filteredTable().filter((row, index) => {
+                return (index >= pageStart() && index <= pageEnd());
+            });
         });
+
+
+        // const tableToShow = filteredTable.filter((row, index) => {
+        //     console.log('index?', index);
+        //     if (row.naturalOrder >= pageStart() && row.naturalOrder <= pageEnd()) {
+        //         return true;
+        //     }
+        // });
 
         // filteredNarratives.subscribe(function (newValue) {
         //     last(newValue.length);
         // });
 
-        var more = ko.pureComputed(() => {
+        const more = ko.pureComputed(() => {
             const left = len() - pageEnd() - 1;
             if (left === 0) {
                 return '';
@@ -382,35 +394,39 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry'], function (ko, html, 
                     {
                         style: {
                             maxHeight: '500px'
-                        },
-                        dataBind: {
-                            foreach: 'table'
                         }
+                        // },
+                        // dataBind: {
+                        //     foreach: 'table'
+                        // }
                     },
-                    tr(
-                        {
-                            // td({ dataBind: { text: '$index() + $component.pageStart() + 1' } }),
-                        },
-                        [
-                            td({
-                                dataBind: {
-                                    text: '$index() + $component.pageStart() + 1'
-                                },
-                                style: {
-                                    fontStyle: 'italic',
-                                    color: 'gray'
-                                }
-                            }),
-                            '<!-- ko foreach: $data.row -->',
-                            td({
-                                dataBind: {
-                                    text: '$data.formatted',
-                                    style: '$data.style'
-                                }
-                            }),
-                            '<!-- /ko -->'
-                        ]
-                    )
+                    gen.foreach('table', tr({
+                        // td({ dataBind: { text: '$index() + $component.pageStart() + 1' } }),
+                    }, [
+                        td({
+                            dataBind: {
+                                text: '$index() + $component.pageStart() + 1'
+                            },
+                            style: {
+                                fontStyle: 'italic',
+                                color: 'gray'
+                            }
+                        }),
+                        gen.foreach('row', td({
+                            dataBind: {
+                                text: 'formatted',
+                                style: 'style'
+                            }
+                        }))
+                        // '<!-- ko foreach: $data.row -->',
+                        // td({
+                        //     dataBind: {
+                        //         text: '$data.formatted',
+                        //         style: '$data.style'
+                        //     }
+                        // }),
+                        // '<!-- /ko -->'
+                    ]))
                 )
             ]
         );
@@ -612,6 +628,33 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry'], function (ko, html, 
             }
         });
     }
+
+    // function buildTest() {
+    //     return div(([
+    //         div([
+    //             'total rows: ',
+    //             span({
+    //                 dataBind: {
+    //                     text: '$component.filteredTable().length'
+    //                 }
+    //             })]
+    //         ),
+    //         div([
+    //             gen.foreach('filteredTable', div({
+    //                 dataBind: {
+    //                     text: 'JSON.stringify($data)'
+    //                 }
+    //             }))
+    //         ]),
+    //         div([
+    //             gen.foreach('table', div({
+    //                 dataBind: {
+    //                     text: 'JSON.stringify($data)'
+    //                 }
+    //             }))
+    //         ])
+    //     ]))
+    // }
 
     function template() {
         return div([
