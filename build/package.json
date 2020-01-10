@@ -24,7 +24,7 @@
         "ajv": "6.10.2",
         "bluebird": "3.7.2",
         "dagre": "0.8.5",
-        "preact": "10.1.1"
+        "preact": "10.2.1"
     },
     "devDependencies": {
         "bluebird": "3.7.2",
@@ -39,6 +39,6 @@
         "js-yaml": "3.13.1",
         "numeral": "2.0.6",
         "tar": "5.0.5",
-        "terser": "4.4.3"
+        "terser": "4.6.2"
     }
 }

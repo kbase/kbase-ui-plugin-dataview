@@ -1,7 +1,7 @@
 define(['knockout', 'kb_lib/html', 'kb_knockout/registry'], function (ko, html, reg) {
     'use strict';
 
-    var t = html.tag,
+    const t = html.tag,
         div = t('div'),
         span = t('span'),
         input = t('input'),
@@ -18,10 +18,10 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry'], function (ko, html, 
         td = t('td');
 
     function viewModel(params) {
-        var columns = params.table.columns;
-        var columnMap = {};
-        var searchColumns = [];
-        columns.forEach(function (column, index) {
+        const columns = params.table.columns;
+        const columnMap = {};
+        const searchColumns = [];
+        columns.forEach((column, index) => {
             column.pos = index;
             columnMap[column.name] = column;
             if (column.search) {
@@ -33,7 +33,7 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry'], function (ko, html, 
             }
         });
 
-        var rawTable = params.table.rows.map(function (row, rowIndex) {
+        const rawTable = params.table.rows.map((row, rowIndex) => {
             return {
                 naturalOrder: rowIndex,
                 row: row.map(function (value, index) {
@@ -53,21 +53,21 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry'], function (ko, html, 
             };
         });
 
-        var table = ko.observableArray(rawTable);
+        const table = ko.observableArray(rawTable);
 
-        var title = params.title;
+        const title = params.title;
 
-        var pageSizeInput = ko.observable('10');
-        var pageSize = ko.pureComputed(function () {
+        const pageSizeInput = ko.observable('10');
+        const pageSize = ko.pureComputed(function () {
             if (pageSizeInput().length === 0) {
                 return 10;
             }
             return parseInt(pageSizeInput());
         });
 
-        var total = table().length;
+        const total = table().length;
 
-        var search = ko.observable();
+        const search = ko.observable();
 
         search.subscribe(function (newValue) {
             if (newValue.length > 0) {
@@ -75,7 +75,7 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry'], function (ko, html, 
             }
         });
 
-        var searchText = ko.pureComputed(function () {
+        const searchText = ko.pureComputed(function () {
             if (!search()) {
                 return;
             }
@@ -88,37 +88,37 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry'], function (ko, html, 
         //         value: value
         //     };
         // });
-        var sortBy = ko.observable();
+        const sortBy = ko.observable();
 
-        var sortDirections = ['asc', 'desc'].map(function (value) {
+        const sortDirections = ['asc', 'desc'].map(function (value) {
             return {
                 label: value,
                 value: value
             };
         });
-        var sortDirection = ko.observable('desc');
+        const sortDirection = ko.observable('desc');
 
         function sortIt() {
             if (!sortBy()) {
                 return;
             }
             // var sortColumnName = sortBy();
-            var sortColumn = columnMap[sortBy()];
+            const sortColumn = columnMap[sortBy()];
             table.sort(function (a, b) {
-                var comparison;
-                var aValue = a.row[sortColumn.pos].value;
-                var bValue = b.row[sortColumn.pos].value;
+                let comparison;
+                const aValue = a.row[sortColumn.pos].value;
+                const bValue = b.row[sortColumn.pos].value;
                 switch (sortColumn.type) {
-                case 'string':
-                case 'date':
-                case 'number':
-                    if (aValue < bValue) {
-                        comparison = -1;
-                    } else if (aValue > bValue) {
-                        comparison = 1;
-                    } else {
-                        comparison = 0;
-                    }
+                    case 'string':
+                    case 'date':
+                    case 'number':
+                        if (aValue < bValue) {
+                            comparison = -1;
+                        } else if (aValue > bValue) {
+                            comparison = 1;
+                        } else {
+                            comparison = 0;
+                        }
                 }
                 if (sortDirection() === 'desc') {
                     return comparison * -1;
@@ -135,8 +135,8 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry'], function (ko, html, 
         });
         sortIt();
 
-        var filteredTable = table.filter(function (row) {
-            var text = searchText();
+        const filteredTable = table.filter((row) => {
+            const text = searchText();
             if (!text || text.length === 0) {
                 return true;
             }
@@ -144,8 +144,8 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry'], function (ko, html, 
                 return true;
             }
 
-            for (var i in searchColumns) {
-                var searchColumn = searchColumns[i];
+            for (let i in searchColumns) {
+                const searchColumn = searchColumns[i];
                 if (row.row[searchColumn.pos].value.toLowerCase().indexOf(text) >= 0) {
                     return true;
                 }
@@ -153,7 +153,7 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry'], function (ko, html, 
             return false;
         });
 
-        var len = ko.pureComputed(function () {
+        var len = ko.pureComputed(() => {
             return filteredTable().length;
         });
 
@@ -169,8 +169,8 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry'], function (ko, html, 
             return 'found ' + filteredTable().length + ' of ' + total;
         });
 
-        var tableToShow = filteredTable.filter(function (row, index) {
-            if (index() >= pageStart() && index() <= pageEnd()) {
+        var tableToShow = filteredTable.filter((row) => {
+            if (row.naturalOrder >= pageStart() && row.naturalOrder <= pageEnd()) {
                 return true;
             }
         });
@@ -179,8 +179,8 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry'], function (ko, html, 
         //     last(newValue.length);
         // });
 
-        var more = ko.pureComputed(function () {
-            var left = len() - pageEnd() - 1;
+        var more = ko.pureComputed(() => {
+            const left = len() - pageEnd() - 1;
             if (left === 0) {
                 return '';
             }

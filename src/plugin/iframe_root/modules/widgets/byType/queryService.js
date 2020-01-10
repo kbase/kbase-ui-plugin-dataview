@@ -1,4 +1,8 @@
-define(['bluebird', 'kb_lib/jsonRpc/genericClient', 'kb_lib/jsonRpc/dynamicServiceClient'], function (
+define([
+    'bluebird',
+    'kb_lib/jsonRpc/genericClient',
+    'kb_lib/jsonRpc/dynamicServiceClient'
+], function (
     Promise,
     GenericClient,
     DynamicServiceClient
@@ -173,10 +177,10 @@ define(['bluebird', 'kb_lib/jsonRpc/genericClient', 'kb_lib/jsonRpc/dynamicServi
 
         function runQuery(subject, args, output) {
             switch (subject) {
-            case 'workspace':
-                return queryWorkspace(args, output);
-            default:
-                return queryDynamicService(subject, args, output);
+                case 'workspace':
+                    return queryWorkspace(args, output);
+                default:
+                    return queryDynamicService(subject, args, output);
             }
         }
 

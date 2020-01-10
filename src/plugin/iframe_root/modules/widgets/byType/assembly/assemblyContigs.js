@@ -2,46 +2,60 @@ define([
     'bluebird',
     'numeral',
     'knockout',
-    // 'kb_common/jsonRpc/dynamicServiceClient',
     '../queryService',
-    'kb_common/html',
+    'kb_lib/html',
+    'kb_lib/htmlBuilders',
     'kb_lib/htmlBootstrapBuilders',
-    '../table',
-
-    'datatables_bootstrap'
+    '../table'
 ], function (
     Promise,
     numeral,
     ko,
-    //DynamicServiceClient,
     QueryService,
     html,
+    build,
     BS,
     TableComponent
 ) {
     'use strict';
-    var t = html.tag,
+    const t = html.tag,
         div = t('div');
 
     function factory(config) {
-        var runtime = config.runtime;
-        var container;
-        var queryService = QueryService({
+        const runtime = config.runtime;
+        let container;
+        const queryService = QueryService({
             runtime: runtime
         });
 
         //
         function fetchData(objectRef) {
-            var query = {
+
+            return queryService.query({
                 assembly: {
                     _args: {
                         ref: objectRef
                     },
-                    contig_lengths: {},
-                    contig_gc_content: {}
+                    contig_ids: {}
                 }
-            };
-            return queryService.query(query);
+
+            })
+                .then((result) => {
+                    const contig_id_list = result.assembly.contig_ids;
+                    var query = {
+                        assembly: {
+                            _args: {
+                                ref: objectRef,
+                                contig_id_list
+                            },
+                            contig_lengths: {},
+                            contig_gc_content: {}
+                        }
+                    };
+                    return queryService.query(query);
+                });
+
+
 
             // var AssemblyClient = new DynamicServiceClient({
             //     url: runtime.config('services.service_wizard.url'),
@@ -67,13 +81,14 @@ define([
         }
 
         function makeContigTable(data) {
-            var rows = Object.keys(data.assembly.contig_lengths).map(function (id) {
-                var contigLength = data.assembly.contig_lengths[id];
-                var gc = data.assembly.contig_gc_content[id];
-                // TODO: form the contig length to a number with commas
+            const rows = Object.keys(data.assembly.contig_lengths)
+                .map((id) => {
+                    const contigLength = data.assembly.contig_lengths[id];
+                    const gc = data.assembly.contig_gc_content[id];
+                    // TODO: form the contig length to a number with commas
 
-                return [id, contigLength, gc];
-            });
+                    return [id, contigLength, gc];
+                });
             return {
                 rows: rows,
                 columns: [
@@ -168,7 +183,7 @@ define([
                                     textAlign: 'center'
                                 }
                             },
-                            html.loading()
+                            build.loading()
                         )
                     ),
                     div({
