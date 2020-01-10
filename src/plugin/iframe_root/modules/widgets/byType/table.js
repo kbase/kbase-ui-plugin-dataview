@@ -162,6 +162,13 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry', 'kb_knockout/lib/gene
         const pageEnd = ko.pureComputed(function () {
             return Math.min(pageStart() + pageSize(), len()) - 1;
         });
+        const canGoBackward = ko.pureComputed(() => {
+            return (pageStart() > 0);
+        });
+
+        const canGoForward = ko.pureComputed(() => {
+            return (pageEnd() < len() - 1);
+        });
 
         const searchSummary = ko.pureComputed(function () {
             if (filteredTable().length === total) {
@@ -271,33 +278,35 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry', 'kb_knockout/lib/gene
 
         return {
             table: tableToShow,
-            columns: columns,
-            title: title,
-            filteredTable: filteredTable,
-            pageStart: pageStart,
-            pageEnd: pageEnd,
-            len: len,
-            total: total,
-            doPrev: doPrev,
-            doNext: doNext,
-            doFirst: doFirst,
-            doLast: doLast,
-            doPrevPage: doPrevPage,
-            doNextPage: doNextPage,
-            search: search,
-            searchSummary: searchSummary,
-            pageSizeInput: pageSizeInput,
-            pageSizes: pageSizes,
+            columns,
+            title,
+            filteredTable,
+            pageStart,
+            pageEnd,
+            len,
+            total,
+            doPrev,
+            doNext,
+            doFirst,
+            doLast,
+            doPrevPage,
+            doNextPage,
+            search,
+            searchSummary,
+            pageSizeInput,
+            pageSizes,
             // sortColumns: sortColumns,
-            doSortByColumn: doSortByColumn,
-            sortBy: sortBy,
-            more: more,
-            sortDirections: sortDirections,
-            sortDirection: sortDirection,
-            getColor: getColor,
+            doSortByColumn,
+            sortBy,
+            more,
+            sortDirections,
+            sortDirection,
+            getColor,
             username: params.username,
             currentUsername: params.currentUsername,
-            doCancelSort: doCancelSort
+            doCancelSort,
+            canGoBackward,
+            canGoForward
         };
     }
 
@@ -438,11 +447,14 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry', 'kb_knockout/lib/gene
         });
     }
 
-    function buildButton(iconClass, func) {
+    function buildButton(iconClass, isDisabledTest, func) {
         return button(
             {
                 dataBind: {
-                    click: func
+                    click: func,
+                    attr: {
+                        disabled: isDisabledTest
+                    }
                 },
                 class: 'btn btn-default'
             },
@@ -467,12 +479,12 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry', 'kb_knockout/lib/gene
                         }
                     },
                     [
-                        buildButton('step-backward', 'doFirst'),
-                        buildButton('backward', 'doPrevPage'),
-                        buildButton('chevron-left', 'doPrev'),
-                        buildButton('chevron-right', 'doNext'),
-                        buildButton('forward', 'doNextPage'),
-                        buildButton('step-forward', 'doLast'),
+                        buildButton('step-backward', '!canGoBackward()', 'doFirst'),
+                        buildButton('backward', '!canGoBackward()', 'doPrevPage'),
+                        buildButton('chevron-left', '!canGoBackward()', 'doPrev'),
+                        buildButton('chevron-right', '!canGoForward()', 'doNext'),
+                        buildButton('forward', '!canGoForward()', 'doNextPage'),
+                        buildButton('step-forward', '!canGoForward()', 'doLast'),
                         span(
                             {
                                 style: {
