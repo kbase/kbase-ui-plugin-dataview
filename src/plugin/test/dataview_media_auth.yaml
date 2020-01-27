@@ -12,7 +12,7 @@ specs:
       tasks:
           - subtask: login
           - action: navigate
-            path: dataview/${plugins.dataview.media.case1.objectId}
+            path: dataview/{{plugins.dataview.media.case1.objectId}}
           - subtask: plugin
           - wait: forText
             selector:
@@ -24,7 +24,7 @@ specs:
                   value: overview
                 - type: field
                   value: wsid
-            text: ${plugins.dataview.media.case1.overview.objectName}
+            text: "{{plugins.dataview.media.case1.overview.objectName}}"
           - wait: forElement
             selector:
                 - type: plugin
@@ -47,7 +47,7 @@ specs:
                 - type: raw
                   name: role
                   value: row
-                  nth: ${plugins.dataview.media.case1.mediaCompounds.row}
+                  nth: "{{plugins.dataview.media.case1.mediaCompounds.row}}"
                 - type: field
                   value: name
-            text: ${plugins.dataview.media.case1.mediaCompounds.name}
+            text: "{{plugins.dataview.media.case1.mediaCompounds.name}}"
