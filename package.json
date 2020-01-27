@@ -4,7 +4,7 @@
     "description": "This is a sample readme for a plugin. Please use this space to splain it.",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "build-plugin": "bash scripts/build-plugin.bash"
     },
     "repository": {
         "type": "git",
