@@ -1,12 +1,13 @@
 define([
     'bluebird',
+    'jquery',
     'kb_service/utils',
     'kb_common/utils',
     'kb_common/html',
     'kb_common/dom',
     'kb_service/client/workspace',
     'kb_common/state'
-], function (Promise, APIUtils, Utils, html, dom, Workspace, stateFactory) {
+], function (Promise, $, APIUtils, Utils, html, dom, Workspace, stateFactory) {
     'use strict';
 
     const t = html.tag,
@@ -462,7 +463,10 @@ define([
 
         function renderCopyButton() {
             return button({
-                class: 'btn btn-primary',
+                class: 'btn btn-default',
+                dataToggle: 'tooltip',
+                dataPlacement: 'bottom',
+                title: 'Opens (and closes) a panel with which you can copy this data object to a Narrative',
                 id: copyButtonID
             }, 'Copy');
         }
@@ -788,7 +792,9 @@ define([
                 ]),
                 div({ class: 'col-sm-6' }, [
                     div({
-                        class: 'well'
+                        style: {
+                            marginBottom: '10px'
+                        }
                     }, [
                         renderCopyButton()
                     ]),
@@ -839,6 +845,15 @@ define([
                     document.getElementById(copyButtonID).addEventListener('click', () => {
                         runtime.send('copyWidget', 'toggle');
                     });
+
+                    $(function () {
+                        $('[data-toggle="tooltip"]').tooltip({
+                            delay: {
+                                show: 500,
+                                hide: 100
+                            }
+                        })
+                    })
                 })
                 .catch(function (err) {
                     console.error(err);
