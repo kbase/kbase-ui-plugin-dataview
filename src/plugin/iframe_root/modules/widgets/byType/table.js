@@ -147,7 +147,6 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry', 'kb_knockout/lib/gene
             for (let i in searchColumns) {
                 const searchColumn = searchColumns[i];
                 if (row.row[searchColumn.pos].value.toLowerCase().indexOf(text) >= 0) {
-                    // console.log('filter!', row.row[searchColumn.pos].value.toLowerCase(), text);
                     return true;
                 }
             }
@@ -185,18 +184,6 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry', 'kb_knockout/lib/gene
                 return (index >= pageStart() && index <= pageEnd());
             });
         });
-
-
-        // const tableToShow = filteredTable.filter((row, index) => {
-        //     console.log('index?', index);
-        //     if (row.naturalOrder >= pageStart() && row.naturalOrder <= pageEnd()) {
-        //         return true;
-        //     }
-        // });
-
-        // filteredNarratives.subscribe(function (newValue) {
-        //     last(newValue.length);
-        // });
 
         const more = ko.pureComputed(() => {
             const left = len() - pageEnd() - 1;

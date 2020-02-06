@@ -74,7 +74,7 @@
 
  callAfterInit(func) -   a semi magic function to use as a callback after the object is fully initialized. Use it to do work after callbacks may have been
  required during initalization. Call this from within your init, if you need it.
- dbg(text)           -   wrapper around console.log, that checks for its existence. Thanks, IE!
+ dbg(text)           -   wrapper around console.warn, that checks for its existence. Thanks, IE!
  appendUI            -   a default implementation to create the UI of the object. Used to pull in and initialize a handlebars template, if one
  was handed in as an option
  templateSuccess(string) - callback if the template is successfully loaded
@@ -420,7 +420,7 @@ define(['jquery', 'handlebars', 'd3'], function ($, Handlebars, d3) {
     }
 
     function subclass(constructor, superConstructor) {
-        function surrogateConstructor() {}
+        function surrogateConstructor() { }
 
         surrogateConstructor.prototype = superConstructor.prototype;
 
@@ -729,7 +729,7 @@ define(['jquery', 'handlebars', 'd3'], function ($, Handlebars, d3) {
         dbg: function (txt) {
             if (window.console) {
                 // eslint-disable-next-line no-console
-                console.log(txt);
+                console.warn(txt);
             }
         },
         callAfterInit: function (func) {
