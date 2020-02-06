@@ -8,7 +8,10 @@
         "install-bower": "bower-installer",
         "install-npm": "grunt copy",
         "remove-source-maps": "node scripts/remove-source-maps.js",
-        "install-dist": "node scripts/install-dist.js"
+        "install-dist": "node scripts/install-dist.js",
+        "install-dev": "node scripts/install-dev.js",
+        "build": "bash scripts/build.sh",
+        "update": "node scripts/install-dev.js"
     },
     "repository": {
         "type": "git",

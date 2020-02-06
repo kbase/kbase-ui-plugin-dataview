@@ -1,6 +1,13 @@
 /*global define,alert*/
 /*jslint white:true,browser:true */
-define(['knockout', 'kb_common/html', 'kb_service/client/workspace', 'kb_service/utils'], function (
+define([
+    'bluebird',
+    'knockout',
+    'kb_common/html',
+    'kb_service/client/workspace',
+    'kb_service/utils'
+], function (
+    Promise,
     ko,
     html,
     WorkspaceClient,
@@ -42,14 +49,14 @@ define(['knockout', 'kb_common/html', 'kb_service/client/workspace', 'kb_service
 
         function toggle() {
             switch (toggleState) {
-            case 'hidden':
-                show();
-                toggleState = 'showing';
-                break;
-            case 'showing':
-                hide();
-                toggleState = 'hidden';
-                break;
+                case 'hidden':
+                    show();
+                    toggleState = 'showing';
+                    break;
+                case 'showing':
+                    hide();
+                    toggleState = 'hidden';
+                    break;
             }
         }
 
@@ -97,17 +104,21 @@ define(['knockout', 'kb_common/html', 'kb_service/client/workspace', 'kb_service
                     var copiedObjectInfo = apiUtils.objectInfoToObject(copied),
                         narrativeUrl = makeNarrativeUrl(
                             '/narrative/' +
-                                apiUtils.makeWorkspaceObjectId(
-                                    narrativeInfo.workspaceInfo.id,
-                                    narrativeInfo.workspaceInfo.metadata.narrative
-                                )
+                            apiUtils.makeWorkspaceObjectId(
+                                narrativeInfo.workspaceInfo.id,
+                                narrativeInfo.workspaceInfo.metadata.narrative
+                            )
                         ),
                         message = div([
                             'Successfully copied this data object to the Narrative ',
                             narrativeInfo.workspaceInfo.metadata.narrative_nice_name,
                             span({ style: { fontStyle: 'italic' } }, [
                                 a(
-                                    { href: narrativeUrl, class: 'btn btn-default', target: '_blank' },
+                                    {
+                                        href: narrativeUrl,
+                                        class: 'btn btn-default',
+                                        target: '_blank'
+                                    },
                                     'Open this Narrative'
                                 )
                             ])
@@ -128,7 +139,7 @@ define(['knockout', 'kb_common/html', 'kb_service/client/workspace', 'kb_service
 
         function makeUrl(path, params) {
             var query = paramsToQuery(params),
-                url = '#' + path + '?' + query;
+                url = '/#' + path + '?' + query;
 
             return url;
         }
@@ -140,13 +151,6 @@ define(['knockout', 'kb_common/html', 'kb_service/client/workspace', 'kb_service
                 },
                 url = makeUrl(path, redirectParams);
             window.open(url, 'window_' + html.genId());
-            // TODO: This should be done via the router, but that
-            // frankly needs a touch of love.
-            //            runtime.send('app', 'navigate', {
-            //                path: path,
-            //                params: params,
-            //                newWindow: 'newnarrative'
-            //            });
         }
 
         function getNarrative(objectReference) {
@@ -307,9 +311,9 @@ define(['knockout', 'kb_common/html', 'kb_service/client/workspace', 'kb_service
             this.copyMethod.subscribe(
                 function (newValue) {
                     switch (newValue) {
-                    case 'new':
-                        this.selectedNarrative([undefined]);
-                        break;
+                        case 'new':
+                            this.selectedNarrative([undefined]);
+                            break;
                     }
                 }.bind(this)
             );
@@ -338,28 +342,30 @@ define(['knockout', 'kb_common/html', 'kb_service/client/workspace', 'kb_service
             this.handleCopy = function () {
                 this.errorMessage('');
                 switch (this.copyMethod()) {
-                case 'new':
-                    doCopyIntoNewNarrative(params);
-                    break;
-                case 'existing':
-                    if (this.selectedNarrative()[0]) {
-                        doCopyIntoExistingNarrative(params, this.selectedNarrativeObject());
-                    } else {
-                        this.errorMessage('You must select a narrative before copying the data object into it.');
-                    }
-                    break;
+                    case 'new':
+                        doCopyIntoNewNarrative(params);
+                        break;
+                    case 'existing':
+                        if (this.selectedNarrative()[0]) {
+                            doCopyIntoExistingNarrative(params, this.selectedNarrativeObject());
+                        } else {
+                            this.errorMessage('You must select a narrative before copying the data object into it.');
+                        }
+                        break;
                 }
             };
         }
 
         // API
 
-        function init(config) {}
+        function init(config) { }
 
         function attach(node) {
-            parent = node;
-            container = node.appendChild(document.createElement('div'));
-            container.innerHTML = renderComponent();
+            return Promise.try(() => {
+                parent = node;
+                container = node.appendChild(document.createElement('div'));
+                container.innerHTML = renderComponent();
+            });
         }
 
         function start(params) {
