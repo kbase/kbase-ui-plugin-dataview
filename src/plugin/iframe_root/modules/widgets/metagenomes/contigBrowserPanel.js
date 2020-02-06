@@ -1,16 +1,16 @@
-define (
+define(
     [
         'bootstrap',
         'jquery',
         'd3',
         'widgets/metagenomes/kbaseContigBrowserButton',
-    ], function(
+    ], function (
         bootstrap,
         $,
         d3,
         KBaseContigBrowserButtons
     ) {
-    return function() {
+    return function () {
         this.data = {
             name: "ContigBrowserPanel",
 
@@ -47,11 +47,11 @@ define (
             operonFeatures: [],
             $messagePane: null,
 
-            init: function() {
+            init: function () {
 
                 this.$messagePane = $("<div/>")
-                                    .addClass("kbwidget-message-pane")
-                                    .addClass("kbwidget-hide-message");
+                    .addClass("kbwidget-message-pane")
+                    .addClass("kbwidget-hide-message");
                 this.$elem.append(this.$messagePane);
 
                 //this.cdmiClient = new CDMI_API(this.cdmiURL);
@@ -75,41 +75,41 @@ define (
             /**
              *
              */
-            render: function() {
+            render: function () {
                 this.loading(false);
 
                 // tooltip inspired from
                 // https://gist.github.com/1016860
                 this.tooltip = d3.select("body")
-                                 .append("div")
-                                 .classed("kbcb-tooltip", true)
-                                 .style('position', 'absolute');
+                    .append("div")
+                    .classed("kbcb-tooltip", true)
+                    .style('position', 'absolute');
 
                 // Init the SVG container to be the right size.
                 this.svg = d3.select(this.$elem[0])
-                             .append("svg")
-                             .attr("width", this.options.svgWidth)
-                             .attr("height", this.options.svgHeight)
-                             .classed("kbcb-widget", true);
+                    .append("svg")
+                    .attr("width", this.options.svgWidth)
+                    .attr("height", this.options.svgHeight)
+                    .classed("kbcb-widget", true);
 
                 this.trackContainer = this.svg.append("g");
 
                 this.xScale = d3.scale.linear()
-                                .domain([this.options.start, this.options.start + this.options.length])
-                                .range([0, this.options.svgWidth]);
+                    .domain([this.options.start, this.options.start + this.options.length])
+                    .range([0, this.options.svgWidth]);
 
                 this.xAxis = d3.svg.axis()
-                               .scale(this.xScale)
-                               .orient("top")
-                               .tickFormat(d3.format(",.0f"));
+                    .scale(this.xScale)
+                    .orient("top")
+                    .tickFormat(d3.format(",.0f"));
 
                 this.axisSvg = this.svg.append("g")
-                                   .attr("class", "kbcb-axis")
-                                   .attr("transform", "translate(0, " + this.options.topMargin + ")")
-                                   .call(this.xAxis);
+                    .attr("class", "kbcb-axis")
+                    .attr("transform", "translate(0, " + this.options.topMargin + ")")
+                    .call(this.xAxis);
 
                 var self = this;
-                $(window).on("resize", function() {
+                $(window).on("resize", function () {
                     self.resize();
                 });
 
@@ -129,7 +129,7 @@ define (
              *
              * This is only used internally to shuffle the features and avoid visual overlapping.
              */
-            track: function() {
+            track: function () {
                 var that = {};
 
                 that.regions = [];
@@ -137,13 +137,13 @@ define (
                 that.max = -Infinity;
                 that.numRegions = 0;
 
-                that.addRegion = function(feature_location) {
-                    for (var i=0; i<feature_location.length; i++) {
+                that.addRegion = function (feature_location) {
+                    for (var i = 0; i < feature_location.length; i++) {
 
                         var start = Number(feature_location[i][1]);
                         var length = Number(feature_location[i][3]);
                         var end = (feature_location[i][2] === "+" ? start + length - 1
-                                                                  : start - length + 1);
+                            : start - length + 1);
                         if (start > end) {
                             var x = end;
                             end = start;
@@ -159,12 +159,12 @@ define (
                     }
                 };
 
-                that.hasOverlap = function(feature_location) {
-                    for (var i=0; i<feature_location.length; i++) {
+                that.hasOverlap = function (feature_location) {
+                    for (var i = 0; i < feature_location.length; i++) {
                         var start = Number(feature_location[i][1]);
                         var length = Number(feature_location[i][3]);
                         var end = (feature_location[i][2] === "+" ? start + length - 1 :
-                                                                    start - length + 1);
+                            start - length + 1);
 
                         // double check the orientation
                         if (start > end) {
@@ -180,11 +180,11 @@ define (
                          * less simple:
                          *  look over all regions
                          */
-                        for (var ii=0; ii<this.regions.length; ii++) {
+                        for (var ii = 0; ii < this.regions.length; ii++) {
                             var region = this.regions[ii];
                             // region = [start,end] pair
-                            if (! ( (start <= region[0] && end <= region[0]) ||
-                                     start >= region[1] && end >= region[1]))
+                            if (!((start <= region[0] && end <= region[0]) ||
+                                start >= region[1] && end >= region[1]))
                                 return true;
 
                             // if ((start >= region[0] && start <= region[1]) ||
@@ -204,13 +204,13 @@ define (
             /**
              * Updates the internal representation of a contig to match what should be displayed.
              */
-            setContig : function() {
+            setContig: function () {
                 var self = this;
                 self.contigLength = self.options.contig.length;
-                if(!self.options.start)
+                if (!self.options.start)
                     self.options.start = 0;
                 if (self.options.length + self.options.start > self.contigLength)
-                    self.options.length = self.contigLength-self.options.start;
+                    self.options.length = self.contigLength - self.options.start;
 
                 if (this.options.centerFeature) {
                     this.setCenterFeature();
@@ -220,28 +220,28 @@ define (
                 }
             },
 
-            setCenterFeature : function(centerFeature) {
+            setCenterFeature: function (centerFeature) {
                 // if we're getting a new center feature, make sure to update the operon features, too.
                 if (centerFeature)
                     this.options.centerFeature = centerFeature;
                 this.update();
 
-               /* var self = this;
-                this.proteinInfoClient.fids_to_operons([this.options.centerFeature],
-                    // on success
-                    function(operonGenes) {
-                        self.operonFeatures = operonGenes[self.options.centerFeature];
-                        self.update();
-                    },
-                    // on error
-                    function(error) {
-                        console.error(error);
-                        self.throwError(error);
-                    }
-                );*/
+                /* var self = this;
+                 this.proteinInfoClient.fids_to_operons([this.options.centerFeature],
+                     // on success
+                     function(operonGenes) {
+                         self.operonFeatures = operonGenes[self.options.centerFeature];
+                         self.update();
+                     },
+                     // on error
+                     function(error) {
+                         console.error(error);
+                         self.throwError(error);
+                     }
+                 );*/
             },
 
-            setRange : function(start, length) {
+            setRange: function (start, length) {
                 // set range and re-render
                 this.options.start = start;
                 this.options.length = length;
@@ -251,7 +251,7 @@ define (
             /*
              * Figures out which track each feature should be on, based on starting point and length.
              */
-            processFeatures : function(features) {
+            processFeatures: function (features) {
                 var tracks = [];
                 tracks[0] = this.track(); //init with one track.
 
@@ -267,13 +267,13 @@ define (
                 features = feature_arr;
 
                 // First, sort the features by their start location (first pass = features[fid].feature_location[0][1], later include strand)
-                features.sort(function(a, b) {
+                features.sort(function (a, b) {
                     return a.feature_location[0][1] - b.feature_location[0][1];
                 });
 
 
                 // Foreach feature...
-                for (var j=0; j<features.length; j++) {
+                for (var j = 0; j < features.length; j++) {
                     var feature = features[j];
 
                     // Look for an open spot in each track, fill it in the first one we get to, and label that feature with the track.
@@ -281,7 +281,7 @@ define (
                     // var length = Number(feature.feature_location[0][3]);
                     // var end;
 
-                    for (var i=0; i<tracks.length; i++) {
+                    for (var i = 0; i < tracks.length; i++) {
                         if (!(tracks[i].hasOverlap(feature.feature_location))) {
                             tracks[i].addRegion(feature.feature_location);
                             feature.track = i;
@@ -303,7 +303,7 @@ define (
                 return features;
             },
 
-            update : function(useCenter) {
+            update: function (useCenter) {
 
                 // exposes 'this' to callbacks through closure.
                 // otherwise 'this' refers to the state within the closure.
@@ -311,10 +311,10 @@ define (
                 // Either way, this is the deepest chain of callbacks in here, so it should be okay.
                 var self = this;
 
-                var renderFromCenter = function(feature) {
+                var renderFromCenter = function (feature) {
                     if (feature) {
                         feature = feature[self.options.centerFeature];
-                        self.options.start = Math.max(0, Math.floor(parseInt(feature.feature_location[0][1]) + (parseInt(feature.feature_location[0][3])/2) - (self.options.length/2)));
+                        self.options.start = Math.max(0, Math.floor(parseInt(feature.feature_location[0][1]) + (parseInt(feature.feature_location[0][3]) / 2) - (self.options.length / 2)));
                     }
                     else {
                         window.alert("Error: fid '" + self.options.centerFeature + "' not found! Continuing with original range...");
@@ -322,8 +322,8 @@ define (
                     self.cdmiClient.region_to_fids([self.options.contig, self.options.start, '+', self.options.length], getFeatureData);
                 };
 
-                var getOperonData = function(features) {
-                    if(self.options.centerFeature) {
+                var getOperonData = function (features) {
+                    if (self.options.centerFeature) {
                         for (var j in features) {
                             for (var i in self.operonFeatures) {
                                 if (features[j].feature_id === self.operonFeatures[i])
@@ -342,7 +342,7 @@ define (
                     self.region_to_fids([self.options.contig, self.options.start, '+', self.options.length], getFeatureData);
             },
 
-            region_to_fids : function(input, callback) {
+            region_to_fids: function (input, callback) {
                 var minStop = input[1];
                 var maxStart = input[1] + input[3];
                 var features = [];
@@ -355,26 +355,27 @@ define (
                     } else {
                         stop = stop + gene.location[0][3];
                     }
-                    //console.log('gene: start=' + start + ', stop=' + stop + ', maxStart=' + maxStart + ", minStop=" + minStop);
                     if (start < maxStart && stop > minStop) {
-                        features.push({original_data: gene, feature_id : gene.id, feature_location: gene.location,
-                            isInOperon: 0, feature_function: gene['function']});
+                        features.push({
+                            original_data: gene, feature_id: gene.id, feature_location: gene.location,
+                            isInOperon: 0, feature_function: gene['function']
+                        });
                     }
                 }
                 callback(features);
             },
 
-            adjustHeight : function() {
+            adjustHeight: function () {
                 var neededHeight = this.numTracks *
-                                   (this.options.trackThickness + this.options.trackMargin) +
-                                   this.options.topMargin + this.options.trackMargin;
+                    (this.options.trackThickness + this.options.trackMargin) +
+                    this.options.topMargin + this.options.trackMargin;
 
                 if (neededHeight > this.svg.attr("height")) {
                     this.svg.attr("height", neededHeight);
                 }
             },
 
-            renderFromRange : function(features) {
+            renderFromRange: function (features) {
                 features = this.processFeatures(features);
 
                 // expose 'this' to d3 anonymous functions through closure
@@ -384,60 +385,60 @@ define (
                     this.adjustHeight();
 
                 var trackSet = this.trackContainer.selectAll("path")
-                                                  .data(features, function(d) { return d.feature_id; });
+                    .data(features, function (d) { return d.feature_id; });
 
                 trackSet.enter()
-                        .append("path")
-                             .classed("kbcb-feature", true)  // incl feature_type later (needs call to get_entity_Feature?)
-                             .classed("kbcb-operon", function(d) { return self.isOperonFeature(d); })
-                             .classed("kbcb-center", function(d) { return self.isCenterFeature(d); })
-                             .attr("id", function(d) { return d.feature_id; })
-                             .attr("fill", d3.color('#19b2ff'))
-                             .on("mouseover",
-                                    function(d) {
-                                        d3.select(this).style("fill", d3.rgb(d3.select(this).style("fill")).darker());
-                                        d3.select(this).style("cursor", "pointer")
-                                        self.tooltip = self.tooltip.text(d.feature_id + ": " + d.feature_function);
-                                        return self.tooltip.style("visibility", "visible");
-                                    }
-                                )
-                             .on("mouseout",
-                                    function() {
-                                        d3.select(this).style("fill", d3.rgb(d3.select(this).style("fill")).brighter());
-                                        d3.select(this).style("cursor", "default")
-                                        return self.tooltip.style("visibility", "hidden");
-                                    }
-                                )
-                             .on("mousemove",
-                                    function() {
-                                        return self.tooltip.style("top", (d3.event.pageY+15) + "px").style("left", (d3.event.pageX-10)+"px");
-                                    }
-                                )
-                             .on("click",
-                                    function(d) {
-                                        if (self.options.onClickFunction) {
-                                            self.options.onClickFunction(this, d);
-                                        }
-                                        else {
-                                            self.highlight(this, d);
-                                        }
-                                    }
-                                );
+                    .append("path")
+                    .classed("kbcb-feature", true)  // incl feature_type later (needs call to get_entity_Feature?)
+                    .classed("kbcb-operon", function (d) { return self.isOperonFeature(d); })
+                    .classed("kbcb-center", function (d) { return self.isCenterFeature(d); })
+                    .attr("id", function (d) { return d.feature_id; })
+                    .attr("fill", d3.color('#19b2ff'))
+                    .on("mouseover",
+                        function (d) {
+                            d3.select(this).style("fill", d3.rgb(d3.select(this).style("fill")).darker());
+                            d3.select(this).style("cursor", "pointer")
+                            self.tooltip = self.tooltip.text(d.feature_id + ": " + d.feature_function);
+                            return self.tooltip.style("visibility", "visible");
+                        }
+                    )
+                    .on("mouseout",
+                        function () {
+                            d3.select(this).style("fill", d3.rgb(d3.select(this).style("fill")).brighter());
+                            d3.select(this).style("cursor", "default")
+                            return self.tooltip.style("visibility", "hidden");
+                        }
+                    )
+                    .on("mousemove",
+                        function () {
+                            return self.tooltip.style("top", (d3.event.pageY + 15) + "px").style("left", (d3.event.pageX - 10) + "px");
+                        }
+                    )
+                    .on("click",
+                        function (d) {
+                            if (self.options.onClickFunction) {
+                                self.options.onClickFunction(this, d);
+                            }
+                            else {
+                                self.highlight(this, d);
+                            }
+                        }
+                    );
 
                 trackSet.exit()
-                        .remove();
+                    .remove();
 
-                trackSet.attr("d", function(d) { return self.featurePath(d); });
+                trackSet.attr("d", function (d) { return self.featurePath(d); });
 
 
 
                 self.xScale = self.xScale
-                                  .domain([self.options.start, self.options.start + self.options.length]);
+                    .domain([self.options.start, self.options.start + self.options.length]);
 
 
 
                 self.xAxis = self.xAxis
-                                 .scale(self.xScale);
+                    .scale(self.xScale);
 
                 self.axisSvg.call(self.xAxis);
 
@@ -445,13 +446,13 @@ define (
                 this.loading(true);
             },
 
-            featurePath : function(feature) {
+            featurePath: function (feature) {
                 var path = "";
 
                 var coords = [];
 
                 // draw an arrow for each location.
-                for (var i=0; i<feature.feature_location.length; i++) {
+                for (var i = 0; i < feature.feature_location.length; i++) {
                     var location = feature.feature_location[i];
 
                     var left = this.calcXCoord(location);
@@ -459,7 +460,7 @@ define (
                     var height = this.calcHeight(location);
                     var width = this.calcWidth(location);
 
-                    coords.push([left, left+width]);
+                    coords.push([left, left + width]);
 
                     if (location[2] === '+')
                         path += this.featurePathRight(left, top, height, width) + " ";
@@ -470,68 +471,68 @@ define (
                 // if there's more than one path, connect the arrows with line segments
                 if (feature.feature_location.length > 1) {
                     // sort them
-                    coords.sort(function(a, b) {
+                    coords.sort(function (a, b) {
                         return a[0] - b[0];
                     });
 
                     var mid = this.calcYCoord(feature.feature_location[0], feature.track) +
-                              this.calcHeight(feature.feature_location[0])/2;
+                        this.calcHeight(feature.feature_location[0]) / 2;
 
-                    for (var i=0; i<coords.length-1; i++) {
-                        path += "M" + coords[i][1] + " " + mid + " L" + coords[i+1][0] + " " + mid + " Z ";
+                    for (var i = 0; i < coords.length - 1; i++) {
+                        path += "M" + coords[i][1] + " " + mid + " L" + coords[i + 1][0] + " " + mid + " Z ";
                     }
                     // connect the dots
                 }
                 return path;
             },
 
-            featurePathRight : function(left, top, height, width) {
+            featurePathRight: function (left, top, height, width) {
                 // top left
                 var path = "M" + left + " " + top;
 
                 if (width > this.options.arrowSize) {
                     // line to arrow top-back
-                    path += " L" + (left+(width-this.options.arrowSize)) + " " + top +
-                    // line to arrow tip
-                            " L" + (left+width) + " " + (top+height/2) +
-                    // line to arrow bottom-back
-                            " L" + (left+(width-this.options.arrowSize)) + " " + (top+height) +
-                    // line to bottom-left edge
-                            " L" + left + " " + (top+height) + " Z";
+                    path += " L" + (left + (width - this.options.arrowSize)) + " " + top +
+                        // line to arrow tip
+                        " L" + (left + width) + " " + (top + height / 2) +
+                        // line to arrow bottom-back
+                        " L" + (left + (width - this.options.arrowSize)) + " " + (top + height) +
+                        // line to bottom-left edge
+                        " L" + left + " " + (top + height) + " Z";
                 }
                 else {
                     // line to arrow tip
-                    path += " L" + (left+width) + " " + (top+height/2) +
-                    // line to arrow bottom
-                            " L" + left + " " + (top+height) + " Z";
+                    path += " L" + (left + width) + " " + (top + height / 2) +
+                        // line to arrow bottom
+                        " L" + left + " " + (top + height) + " Z";
                 }
                 return path;
             },
 
-            featurePathLeft : function(left, top, height, width) {
+            featurePathLeft: function (left, top, height, width) {
                 // top right
-                var path = "M" + (left+width) + " " + top;
+                var path = "M" + (left + width) + " " + top;
 
                 if (width > this.options.arrowSize) {
                     // line to arrow top-back
-                    path += " L" + (left+this.options.arrowSize) + " " + top +
-                    // line to arrow tip
-                            " L" + left + " " + (top+height/2) +
-                    // line to arrow bottom-back
-                            " L" + (left+this.options.arrowSize) + " " + (top+height) +
-                    // line to bottom-right edge
-                            " L" + (left+width) + " " + (top+height) + " Z";
+                    path += " L" + (left + this.options.arrowSize) + " " + top +
+                        // line to arrow tip
+                        " L" + left + " " + (top + height / 2) +
+                        // line to arrow bottom-back
+                        " L" + (left + this.options.arrowSize) + " " + (top + height) +
+                        // line to bottom-right edge
+                        " L" + (left + width) + " " + (top + height) + " Z";
                 }
                 else {
                     // line to arrow tip
-                    path += " L" + left + " " + (top+height/2) +
-                    // line to arrow bottom
-                            " L" + (left+width) + " " + (top+height) + " Z";
+                    path += " L" + left + " " + (top + height / 2) +
+                        // line to arrow bottom
+                        " L" + (left + width) + " " + (top + height) + " Z";
                 }
                 return path;
             },
 
-            calcXCoord : function(location) {
+            calcXCoord: function (location) {
                 var x = location[1];
                 if (location[2] === "-")
                     x = location[1] - location[3] + 1;
@@ -539,27 +540,27 @@ define (
                 return (x - this.options.start) / this.options.length * this.options.svgWidth; // + this.options.leftMargin;
             },
 
-            calcYCoord : function(location, track) {
+            calcYCoord: function (location, track) {
                 return this.options.topMargin + this.options.trackMargin + (this.options.trackMargin * track) + (this.options.trackThickness * track);
             },
 
-            calcWidth : function(location) {
-                return Math.floor((location[3]-1) / this.options.length * this.options.svgWidth);
+            calcWidth: function (location) {
+                return Math.floor((location[3] - 1) / this.options.length * this.options.svgWidth);
             },
 
-            calcHeight : function(location) {
+            calcHeight: function (location) {
                 return this.options.trackThickness;
             },
 
-            isCenterFeature : function(feature) {
+            isCenterFeature: function (feature) {
                 return feature.feature_id === this.options.centerFeature;
             },
 
-            isOperonFeature : function(feature) {
+            isOperonFeature: function (feature) {
                 return feature.isInOperon;
             },
 
-            calcFillColor : function(feature) {
+            calcFillColor: function (feature) {
                 if (feature.feature_id === this.options.centerFeature)
                     return "#00F";
                 if (feature.isInOperon === 1)
@@ -568,7 +569,7 @@ define (
                 // should return color based on feature type e.g. CDS vs. PEG vs. RNA vs. ...
             },
 
-            highlight : function(element, feature) {
+            highlight: function (element, feature) {
                 // unhighlight others - only highlight one at a time.
                 // if ours is highlighted, recenter on it.
 
@@ -591,7 +592,7 @@ define (
                 // }
             },
 
-            recenter : function(feature) {
+            recenter: function (feature) {
                 centerFeature = feature.feature_id;
                 if (this.options.onClickUrl)
                     this.options.onClickUrl(feature.feature_id);
@@ -599,37 +600,37 @@ define (
                     this.update(true);
             },
 
-            resize : function() {
+            resize: function () {
                 var newWidth = Math.min(this.$elem.parent().width(), this.options.svgWidth);
                 this.svg.attr("width", newWidth);
             },
 
-            moveLeftEnd : function() {
+            moveLeftEnd: function () {
                 this.options.start = 0;
                 this.update();
             },
 
-            moveLeftStep : function() {
-                this.options.start = Math.max(0, this.options.start - Math.ceil(this.options.length/2));
+            moveLeftStep: function () {
+                this.options.start = Math.max(0, this.options.start - Math.ceil(this.options.length / 2));
                 this.update();
             },
 
-            zoomIn : function() {
-                this.options.start = Math.min(this.contigLength-Math.ceil(this.options.length/2), this.options.start + Math.ceil(this.options.length/4));
-                this.options.length = Math.max(1, Math.ceil(this.options.length/2));
+            zoomIn: function () {
+                this.options.start = Math.min(this.contigLength - Math.ceil(this.options.length / 2), this.options.start + Math.ceil(this.options.length / 4));
+                this.options.length = Math.max(1, Math.ceil(this.options.length / 2));
                 this.update();
             },
 
-            zoomOut : function() {
-                this.options.length = Math.min(this.contigLength, this.options.length*2);
-                this.options.start = Math.max(0, this.options.start - Math.ceil(this.options.length/4));
+            zoomOut: function () {
+                this.options.length = Math.min(this.contigLength, this.options.length * 2);
+                this.options.start = Math.max(0, this.options.start - Math.ceil(this.options.length / 4));
                 if (this.options.start + this.options.length > this.contigLength)
                     this.options.start = this.contigLength - this.options.length;
                 this.update();
             },
 
-            moveRightStep : function() {
-                this.options.start = Math.min(this.options.start + Math.ceil(this.options.length/2), this.contigLength - this.options.length);
+            moveRightStep: function () {
+                this.options.start = Math.min(this.options.start + Math.ceil(this.options.length / 2), this.contigLength - this.options.length);
                 this.update();
             },
 
@@ -638,31 +639,31 @@ define (
              * current view window size.
              * @method
              */
-            moveRightEnd : function() {
+            moveRightEnd: function () {
                 this.options.start = this.contigLength - this.options.length;
                 this.update();
             },
 
-            loading: function(doneLoading) {
+            loading: function (doneLoading) {
                 /*if (doneLoading)
                     this.hideMessage();
                 else
                     this.showMessage("<img src='" + this.options.loadingImage + "'/>");*/
             },
 
-            showMessage: function(message) {
+            showMessage: function (message) {
                 var span = $("<span/>").append(message);
 
                 this.$messagePane.append(span);
                 this.$messagePane.removeClass("kbwidget-hide-message");
             },
 
-            hideMessage: function() {
+            hideMessage: function () {
                 this.$messagePane.addClass("kbwidget-hide-message");
                 this.$messagePane.empty();
             },
 
-            getData: function() {
+            getData: function () {
                 return {
                     type: "Contig",
                     id: this.options.contig,

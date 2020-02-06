@@ -65,7 +65,7 @@ require(['loader'], function () {
                         dispatcher.dispatch({ view, path, params })
                             .catch((ex) => {
                                 // TODO: this should trigger an error display
-                                console.log('Dispatch Error', ex.message);
+                                console.error('Dispatch Error', ex.message);
                             });
                     });
                     integration.started();
