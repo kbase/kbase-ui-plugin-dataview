@@ -9,7 +9,7 @@ define([
 ], function (Promise, APIUtils, Utils, html, dom, Workspace, stateFactory) {
     'use strict';
 
-    var t = html.tag,
+    const t = html.tag,
         div = t('div'),
         h3 = t('h3'),
         h4 = t('h4'),
@@ -18,7 +18,8 @@ define([
         table = t('table'),
         tr = t('tr'),
         th = t('th'),
-        td = t('td');
+        td = t('td'),
+        button = t('button');
 
     function factory(config) {
         var mount,
@@ -33,6 +34,8 @@ define([
             workspaceClient = new Workspace(runtime.getConfig('services.workspace.url'), {
                 token: runtime.getService('session').getAuthToken()
             });
+
+        const copyButtonID = html.genId();
 
         function dateFormat(dateString) {
             var monthLookup = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -196,12 +199,6 @@ define([
         }
 
         function fetchData() {
-            // return Promise.try() {
-            // return new Promise(function (resolve, reject, notify) {
-            //if (this.getParam('sub')) {
-            //    state.set('sub', this.getParam('sub'));
-            //}
-
             return workspaceClient
                 .get_object_info_new({
                     objects: [
@@ -236,6 +233,13 @@ define([
                             state.set('workspace', APIUtils.workspace_metadata_to_object(data));
                         });
                 })
+                // .all([
+                //     fetchVersions(),
+                //     checkRefCount(),
+                //     fetchReferences(),
+                //     fetchOutgoingReferences(),
+                //     fetchObjectInfo(refs)
+                // ])
                 .then(function () {
                     return fetchVersions();
                 })
@@ -445,10 +449,22 @@ define([
                         )
                     ])
                 ]),
-                div({ id: bodyId, class: 'panel-collapse collapse', role: 'tabpanel', ariaLabelledby: headingId }, [
+                div({
+                    id: bodyId,
+                    class: 'panel-collapse collapse',
+                    role: 'tabpanel',
+                    ariaLabelledby: headingId
+                }, [
                     div({ class: 'panel-body' }, [content.body])
                 ])
             ]);
+        }
+
+        function renderCopyButton() {
+            return button({
+                class: 'btn btn-primary',
+                id: copyButtonID
+            }, 'Copy');
         }
 
         function renderMetadataPanel(parent) {
@@ -771,6 +787,11 @@ define([
                     )
                 ]),
                 div({ class: 'col-sm-6' }, [
+                    div({
+                        class: 'well'
+                    }, [
+                        renderCopyButton()
+                    ]),
                     div({ class: 'panel-group', id: 'accordion', role: 'tablist', ariaMultiselectable: 'true' }, [
                         renderMetadataPanel('accordion'),
                         renderVersionsPanel('accordion'),
@@ -814,6 +835,10 @@ define([
                     if (content) {
                         content.innerHTML = render();
                     }
+                    // stupid hack for now.
+                    document.getElementById(copyButtonID).addEventListener('click', () => {
+                        runtime.send('copyWidget', 'toggle');
+                    });
                 })
                 .catch(function (err) {
                     console.error(err);
