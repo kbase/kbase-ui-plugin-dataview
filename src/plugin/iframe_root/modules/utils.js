@@ -28,12 +28,13 @@ define(['bluebird', 'kb_service/utils', 'kb_service/client/workspace', 'kb_lib/j
                 token: runtime.service('session').getAuthToken()
             });
 
-            return workspace.callFunc('get_object_info_new', [{
+            return workspace.callFunc('get_object_info3', [{
                 objects: [{ ref: objectRef }],
+                includeMetadata: 1,
                 ignoreErrors: 0
             }])
-                .then(([objectList]) => {
-                    return apiUtils.object_info_to_object(objectList[0]);
+                .then(([result]) => {
+                    return apiUtils.object_info_to_object(result.infos[0]);
                 })
                 .catch((err) => {
                     if (/Anonymous users may not read workspace/.test(err.message)) {
@@ -65,9 +66,60 @@ define(['bluebird', 'kb_service/utils', 'kb_service/client/workspace', 'kb_lib/j
                 });
         });
     }
-    function getObject(runtime, params) {
+    function getWorkspaceInfo(runtime, params) {
         return Promise.try(function () {
-            var workspaceId = params.workspaceId,
+            const workspaceId = params.workspaceId;
+
+            if (workspaceId === undefined) {
+                throw new Error('Workspace id or name is required');
+            }
+            const workspace = new GenericClient({
+                module: 'Workspace',
+                url: runtime.config('services.Workspace.url'),
+                token: runtime.service('session').getAuthToken()
+            });
+
+            return workspace.callFunc('get_workspace_info', [{
+                id: workspaceId
+            }])
+                .then(([info]) => {
+                    // return apiUtils.workspace_info_to_object(info);
+                    return info;
+                })
+                .catch((err) => {
+                    if (/Anonymous users may not read workspace/.test(err.message)) {
+                        throw new UIError({
+                            message: 'Private object without authorization ',
+                            code: 'private-object-no-authorization',
+                            data: {
+                                workspaceID: workspaceId
+                            }
+                        });
+                    } else if (/User .+ may not read workspace/.test(err.message)) {
+                        throw new UIError({
+                            message: 'Access denied to this workspace with id ' + workspaceId,
+                            code: 'private-object-inadequate-authorization',
+                            data: {
+                                workspaceID: workspaceId,
+                            }
+                        });
+                    } else {
+                        console.error('ERROR', err);
+                        throw new UIError({
+                            message: 'An unknown error occurred while accessing workspace with id ' + workspaceId,
+                            code: 'unknown-error',
+                            data: {
+                                originalError: err
+                            }
+                        });
+                    }
+
+                });
+        });
+    }
+    function getObject(runtime, params) {
+        return Promise.try(() => {
+            const workspaceId = params.workspaceId,
                 objectId = params.objectId,
                 objectVersion = params.objectVersion;
 
@@ -78,7 +130,7 @@ define(['bluebird', 'kb_service/utils', 'kb_service/client/workspace', 'kb_lib/j
                 throw new Error('Object id or name is required');
             }
 
-            var objectRef = apiUtils.makeWorkspaceObjectRef(workspaceId, objectId, objectVersion),
+            const objectRef = apiUtils.makeWorkspaceObjectRef(workspaceId, objectId, objectVersion),
                 workspaceClient = new Workspace(runtime.config('services.workspace.url'), {
                     token: runtime.service('session').getAuthToken()
                 });
@@ -99,7 +151,8 @@ define(['bluebird', 'kb_service/utils', 'kb_service/client/workspace', 'kb_lib/j
     }
 
     return {
-        getObjectInfo: getObjectInfo,
-        getObject: getObject
+        getObjectInfo,
+        getObject,
+        getWorkspaceInfo
     };
 });

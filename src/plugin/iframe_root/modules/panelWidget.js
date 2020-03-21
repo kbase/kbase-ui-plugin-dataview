@@ -77,12 +77,12 @@ define(['bluebird', 'preact', 'kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'
         }
 
         function start(params) {
-            return utils
-                .getObjectInfo(runtime, params)
-                .then((objectInfo) => {
+            return Promise.all([utils.getObjectInfo(runtime, params),
+                utils.getWorkspaceInfo(runtime, params)])
+                .then(([objectInfo, workspaceInfo]) => {
                     runtime.send('ui', 'setTitle', 'Data View for ' + objectInfo.name);
-
                     params.objectInfo = objectInfo;
+                    params.workspaceInfo = workspaceInfo;
                     return Promise.all([objectInfo, widgetSet.start(params)]);
                 })
                 .spread((objectInfo) => {
