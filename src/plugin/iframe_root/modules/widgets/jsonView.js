@@ -101,16 +101,16 @@ define([
                         role: 'presentation',
                         class:'active'
                     }, a({
-                        href: '#wsinfoRaw',
-                        ariaControls: 'wsinfoRaw',
+                        href: '#objinfoRaw',
+                        ariaControls: 'objinfoRaw',
                         role: 'tab',
                         dataToggle: 'tab'
                     }, 'Raw')),
                     li({
                         role: 'presentation'
                     }, a({
-                        href: '#wsinfoTable',
-                        ariaControls: 'wsinfoTable',
+                        href: '#objinfoTable',
+                        ariaControls: 'objinfoTable',
                         role: 'tab',
                         dataToggle: 'tab'
                     }, 'Table'))
@@ -121,12 +121,12 @@ define([
                     div({
                         role: 'tabpanel',
                         class: 'tab-pane active',
-                        id: 'wsinfoRaw'
+                        id: 'objinfoRaw'
                     }, renderJSONRaw(data)),
                     div({
                         role: 'tabpanel',
                         class: 'tab-pane',
-                        id: 'wsinfoTable'
+                        id: 'objinfoTable'
                     }, renderObjectInfoTable(data))
                 ])
             ]);
@@ -140,7 +140,11 @@ define([
                 class: 'table table-striped'
             }, tbody(Array.from(Object.entries(metadata)).map(([k,v]) => {
                 return tr([
-                    th(k),
+                    th({
+                        style: {
+                            width: '11em'
+                        }
+                    }, k),
                     td(v)
                 ]);
             })));
