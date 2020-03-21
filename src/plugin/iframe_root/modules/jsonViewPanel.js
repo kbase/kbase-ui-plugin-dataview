@@ -40,9 +40,12 @@ define(['kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'], function (html, Wid
         }
 
         function start(params) {
-            return utils.getObject(runtime, params).then(function (object) {
-                return widgetSet.start({ object: object });
-            });
+            return Promise.all([
+                utils.getObject(runtime, params),
+                utils.getWorkspaceInfo(runtime, params)])
+                .then(([object, workspaceInfo]) => {
+                    return widgetSet.start({ object, workspaceInfo });
+                });
         }
 
         function stop() {

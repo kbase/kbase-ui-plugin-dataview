@@ -1,20 +1,30 @@
-/*global define*/
-/*jslint white:true,browser:true*/
 define([
     'kb_common/html',
     'kb_common/domEvent',
     'highlight',
-    'numeral'
+    'numeral',
+    'bootstrap'
 ], function (html, domEvent, highlight, numeral) {
     'use strict';
 
-    function factory(config) {
-        var runtime = config.runtime, container,
-            theObject, showLargeObject = false,
-            events = domEvent.make(),
-            t = html.tag,
-            div = t('div'), button = t('button'),
-            p = t('p'), pre = t('pre'), code = t('code'), div = t('div');
+    const t = html.tag,
+        table = t('table'),
+        tbody = t('tbody'),
+        tr = t('tr'),
+        th = t('th'),
+        td = t('td'),
+        ul = t('ul'),
+        li = t('li'),
+        a = t('a'),
+        div = t('div'),
+        button = t('button'),
+        p = t('p'), pre = t('pre'), code = t('code');
+
+    function factory() {
+        var container,
+            workspaceInfo, theObject, showLargeObject = false,
+            events = domEvent.make();
+
 
         function toggleLargeObject() {
             if (showLargeObject) {
@@ -22,25 +32,226 @@ define([
             } else {
                 showLargeObject = true;
             }
-            render();            
+            render();
         }
-        
-        function renderOverview(data) {
-            var jsString = JSON.stringify(data, true, 4), comment, formatOutput = true;
+        function renderObjectInfoTable(objectInfo) {
+            const [id, name, ws_type, saved_date, version, saved_by,
+                wsid, wsname, checksum, size, metadata] = objectInfo;
+
+            return table({
+                class: 'table table-striped'
+            }, tbody([
+                tr([
+                    th({
+                        style: {
+                            width: '11em'
+                        }
+                    }, 'Id'),
+                    td(id)
+                ]),
+                tr([
+                    th('name'),
+                    td(name)
+                ]),
+                tr([
+                    th('Type'),
+                    td(ws_type)
+                ]),
+                tr([
+                    th('Saved date'),
+                    td(saved_date)
+                ]),
+                tr([
+                    th('Version'),
+                    td(version)
+                ]),
+                tr([
+                    th('Saved by'),
+                    td(saved_by)
+                ]),
+                tr([
+                    th('Workspace Id'),
+                    td(wsid)
+                ]),
+                tr([
+                    th('Workspace name'),
+                    td(wsname)
+                ]),
+                tr([
+                    th('Checksum'),
+                    td(checksum)
+                ]),
+                tr([
+                    th('Size'),
+                    td(size)
+                ]),
+                tr([
+                    th('Metadata'),
+                    td(renderMetadata(metadata))
+                ])
+            ]));
+        }
+        function renderObjectInfo(data) {
+            return div([
+                ul({
+                    class: 'nav nav-tabs',
+                    role: 'tablist'
+                }, [
+                    li({
+                        role: 'presentation',
+                        class:'active'
+                    }, a({
+                        href: '#wsinfoRaw',
+                        ariaControls: 'wsinfoRaw',
+                        role: 'tab',
+                        dataToggle: 'tab'
+                    }, 'Raw')),
+                    li({
+                        role: 'presentation'
+                    }, a({
+                        href: '#wsinfoTable',
+                        ariaControls: 'wsinfoTable',
+                        role: 'tab',
+                        dataToggle: 'tab'
+                    }, 'Table'))
+                ]),
+                div({
+                    class: 'tab-content'
+                }, [
+                    div({
+                        role: 'tabpanel',
+                        class: 'tab-pane active',
+                        id: 'wsinfoRaw'
+                    }, renderJSONRaw(data)),
+                    div({
+                        role: 'tabpanel',
+                        class: 'tab-pane',
+                        id: 'wsinfoTable'
+                    }, renderObjectInfoTable(data))
+                ])
+            ]);
+        }
+
+        function renderMetadata(metadata) {
+            if (!metadata) {
+                return;
+            }
+            return table({
+                class: 'table table-striped'
+            }, tbody(Array.from(Object.entries(metadata)).map(([k,v]) => {
+                return tr([
+                    th(k),
+                    td(v)
+                ]);
+            })));
+        }
+
+        function renderWorkspaceInfoTable(workspaceInfo) {
+            const [id, name, owner, moddate,
+                max_objid, user_permission, global_permission,
+                lockstat, metadata] = workspaceInfo;
+
+            return table({
+                class: 'table table-striped'
+            }, tbody([
+                tr([
+                    th({
+                        style: {
+                            width: '11em'
+                        }
+                    }, 'Id'),
+                    td(id)
+                ]),
+                tr([
+                    th('Name'),
+                    td(name)
+                ]),
+                tr([
+                    th('Owner'),
+                    td(owner)
+                ]),
+                tr([
+                    th('Modification date'),
+                    td(moddate)
+                ]),
+                tr([
+                    th('Max Obj Id'),
+                    td(max_objid)
+                ]),
+                tr([
+                    th('User permission'),
+                    td(user_permission)
+                ]),
+                tr([
+                    th('Global permission'),
+                    td(global_permission)
+                ]),
+                tr([
+                    th('Lock status'),
+                    td(lockstat)
+                ]),
+                tr([
+                    th('Metadata'),
+                    td(renderMetadata(metadata))
+                ])
+            ]));
+        }
+        function renderJSONRaw(data) {
+            var jsString = JSON.stringify(data, true, 4);
             return pre(code(highlight.highlight('json', jsString).value));
         }
-        
+        function renderWorkspaceInfo(data) {
+            return div([
+                ul({
+                    class: 'nav nav-tabs',
+                    role: 'tablist'
+                }, [
+                    li({
+                        role: 'presentation',
+                        class:'active'
+                    }, a({
+                        href: '#wsinfoRaw',
+                        ariaControls: 'wsinfoRaw',
+                        role: 'tab',
+                        dataToggle: 'tab'
+                    }, 'Raw')),
+                    li({
+                        role: 'presentation'
+                    }, a({
+                        href: '#wsinfoTable',
+                        ariaControls: 'wsinfoTable',
+                        role: 'tab',
+                        dataToggle: 'tab'
+                    }, 'Table'))
+                ]),
+                div({
+                    class: 'tab-content'
+                }, [
+                    div({
+                        role: 'tabpanel',
+                        class: 'tab-pane active',
+                        id: 'wsinfoRaw'
+                    }, renderJSONRaw(data)),
+                    div({
+                        role: 'tabpanel',
+                        class: 'tab-pane',
+                        id: 'wsinfoTable'
+                    }, renderWorkspaceInfoTable(data))
+                ])
+            ]);
+        }
+
         function renderProvenance(data) {
-            var jsString = JSON.stringify(data, true, 4), comment, formatOutput = true;
+            var jsString = JSON.stringify(data, true, 4);
             return pre(code(highlight.highlight('json', jsString).value));
         }
-        
+
         function renderObject(data) {
             var jsString = JSON.stringify(data, true, 4), comment, formatOutput = true;
 
             if (jsString.length > 10000) {
                 if (showLargeObject) {
-                     comment = div([
+                    comment = div([
                         p(['Object is very large (', numeral(jsString.length).format('0.0b'), '), but being displayed anyway.']),
                         p(['If the browser is misbehaving, refresh it or ',
                             button({
@@ -64,8 +275,8 @@ define([
                 }
             }
             return div([
-                comment,                 
-                pre(code( formatOutput ? highlight.highlight('json', jsString).value : jsString))
+                comment,
+                pre(code(formatOutput ? highlight.highlight('json', jsString).value : jsString))
             ]);
         }
 
@@ -75,8 +286,12 @@ define([
                 div({class: 'row'}, [
                     div({class: 'col-md-12'}, [
                         html.makePanel({
-                            title: 'info',
-                            content: renderOverview(theObject.info)
+                            title: 'object info',
+                            content: renderObjectInfo(theObject.info)
+                        }),
+                        html.makePanel({
+                            title: 'workspace info',
+                            content: renderWorkspaceInfo(workspaceInfo)
                         }),
                         html.makePanel({
                             title: 'provenance',
@@ -99,10 +314,11 @@ define([
                     div({class: 'col-md-12'}, div({class: 'well'}, html.loading('Loading object...')))
                 ])
             ]);
-            
+
         }
         function start(params) {
             theObject = params.object;
+            workspaceInfo = params.workspaceInfo;
             render();
         }
 
