@@ -1,4 +1,12 @@
-define(['bluebird', 'preact', 'kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils', 'collapsiblePanel', 'components/error'], function (
+define([
+    'bluebird',
+    'preact',
+    'kb_lib/html',
+    'kbaseUI/widget/widgetSet',
+    'utils',
+    'collapsiblePanel',
+    'components/error'
+], function (
     Promise,
     preact,
     html,
@@ -9,15 +17,15 @@ define(['bluebird', 'preact', 'kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'
 ) {
     'use strict';
 
-    var t = html.tag,
+    const t = html.tag,
         div = t('div');
 
-    function widget(config) {
-        var mount,
-            container,
-            runtime = config.runtime,
-            layout,
-            widgetSet = runtime.service('widget').newWidgetSet();
+    function widget({runtime}) {
+        let mount = null;
+        let container = null;
+        let layout = null;
+
+        const  widgetSet = runtime.service('widget').newWidgetSet();
 
         function renderPanel() {
             return div(
@@ -37,22 +45,22 @@ define(['bluebird', 'preact', 'kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'
                                 icon: 'sitemap',
                                 content: div({ id: widgetSet.addWidget('kb_dataview_provenance') })
                             }),
-                            (function () {
-                                if (runtime.featureEnabled('new_provenance_widget')) {
-                                    return collapsiblePanel({
-                                        title: 'Data Provenance and Reference Network ... in Progress',
-                                        icon: 'sitemap',
-                                        content: div({ id: widgetSet.addWidget('kb_dataview_provenance_v2') })
-                                    });
-                                } else {
-                                    return null;
-                                }
-                            })(),
-                            (function () {
-                                if (runtime.featureEnabled('similar_genomes')) {
-                                    return div({ id: widgetSet.addWidget('kb_dataview_relatedData') });
-                                }
-                            })(),
+                            // (function () {
+                            //     if (runtime.featureEnabled('new_provenance_widget')) {
+                            //         return collapsiblePanel({
+                            //             title: 'Data Provenance and Reference Network ... in Progress',
+                            //             icon: 'sitemap',
+                            //             content: div({ id: widgetSet.addWidget('kb_dataview_provenance_v2') })
+                            //         });
+                            //     } else {
+                            //         return null;
+                            //     }
+                            // })(),
+                            // (function () {
+                            //     if (runtime.featureEnabled('similar_genomes')) {
+                            //         return div({ id: widgetSet.addWidget('kb_dataview_relatedData') });
+                            //     }
+                            // })(),
                             div({
                                 id: widgetSet.addWidget('kb_dataview_dataObjectVisualizer'),
                                 dataKBTesthookWidget: 'dataObjectVisualizer'
@@ -77,8 +85,10 @@ define(['bluebird', 'preact', 'kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'
         }
 
         function start(params) {
-            return Promise.all([utils.getObjectInfo(runtime, params),
-                utils.getWorkspaceInfo(runtime, params)])
+            return Promise.all([
+                utils.getObjectInfo(runtime, params),
+                utils.getWorkspaceInfo(runtime, params)
+            ])
                 .then(([objectInfo, workspaceInfo]) => {
                     runtime.send('ui', 'setTitle', 'Data View for ' + objectInfo.name);
                     params.objectInfo = objectInfo;
@@ -118,13 +128,7 @@ define(['bluebird', 'preact', 'kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'
                     });
                 })
                 .catch((error) => {
-                    // const errorWidget = new ErrorWidget({runtime});
                     container.innerHTML = '';
-                    // console.error('GOT IT', errorWidget, err);
-                    // return errorWidget.attach(container).start({
-                    //     error: err
-                    // });
-
                     preact.render(preact.h(ErrorComponent, { runtime, error }), container);
                 });
         }
@@ -146,14 +150,14 @@ define(['bluebird', 'preact', 'kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'
             });
         }
 
-        return {
-            init: init,
-            attach: attach,
-            start: start,
-            run: run,
-            stop: stop,
-            detach: detach
-        };
+        return Object.freeze({
+            init,
+            attach,
+            start,
+            run,
+            stop,
+            detach
+        });
     }
 
     return {

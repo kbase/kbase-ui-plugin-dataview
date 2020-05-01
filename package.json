@@ -4,7 +4,8 @@
     "description": "This is a sample readme for a plugin. Please use this space to splain it.",
     "main": "index.js",
     "scripts": {
-        "build": "bash scripts/build-plugin.bash"
+        "build": "bash scripts/build-plugin.bash",
+        "build-dev": "bash scripts/build-plugin-dev.bash"
     },
     "repository": {
         "type": "git",
