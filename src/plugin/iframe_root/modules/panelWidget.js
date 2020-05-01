@@ -56,11 +56,11 @@ define([
                             //         return null;
                             //     }
                             // })(),
-                            // (function () {
-                            //     if (runtime.featureEnabled('similar_genomes')) {
-                            //         return div({ id: widgetSet.addWidget('kb_dataview_relatedData') });
-                            //     }
-                            // })(),
+                            (function () {
+                                if (runtime.featureEnabled('similar_genomes')) {
+                                    return div({ id: widgetSet.addWidget('kb_dataview_relatedData') });
+                                }
+                            })(),
                             div({
                                 id: widgetSet.addWidget('kb_dataview_dataObjectVisualizer'),
                                 dataKBTesthookWidget: 'dataObjectVisualizer'
