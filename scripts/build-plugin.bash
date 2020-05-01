@@ -3,7 +3,7 @@ yarn install && \
 yarn clean && \
 yarn install && \
 yarn install-bower && \
-yarn install-npm &&\
+yarn install-npm && \
 yarn remove-source-maps && \
-yarn install-dev
+yarn install-dist
 cd ..
