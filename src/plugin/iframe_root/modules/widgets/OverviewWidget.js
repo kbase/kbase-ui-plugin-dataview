@@ -6,8 +6,19 @@ define([
     'kb_common/html',
     'kb_common/dom',
     'kb_service/client/workspace',
-    'kb_common/state'
-], function (Promise, $, APIUtils, Utils, html, dom, Workspace, stateFactory) {
+    'kb_common/state',
+    '../collapsiblePanel'
+], function (
+    Promise,
+    $,
+    APIUtils,
+    Utils,
+    html,
+    dom,
+    Workspace,
+    stateFactory,
+    collapsiblePanel
+) {
     'use strict';
 
     const t = html.tag,
@@ -28,9 +39,7 @@ define([
             runtime = config.runtime,
             workspaceId,
             objectId,
-            objectVersion,
             objectRef,
-            subObject = config.sub,
             state = stateFactory.make(),
             workspaceClient = new Workspace(runtime.getConfig('services.workspace.url'), {
                 token: runtime.getService('session').getAuthToken()
@@ -136,24 +145,6 @@ define([
                 });
         }
 
-        function setError(type, error) {
-            state.set('status', 'error');
-            var err = error.error;
-            console.error(err);
-            var message;
-            if (typeof err === 'string') {
-                message = err;
-            } else {
-                message = err.message;
-            }
-            state.set('error', {
-                type: type,
-                code: 'error',
-                shortMessage: 'An unexpected error occured',
-                originalMessage: message
-            });
-        }
-
         function fetchReferences() {
             return workspaceClient
                 .list_referencing_objects([
@@ -178,7 +169,7 @@ define([
                 });
         }
 
-        function createDataIcon(object_info) {
+        function createDataIcon(object_info, size) {
             try {
                 var typeId = object_info[2],
                     type = runtime.service('type').parseTypeId(typeId),
@@ -187,7 +178,18 @@ define([
                     span = html.tag('span'),
                     i = html.tag('i');
 
-                return div([
+                let fontSize;
+                if (size) {
+                    fontSize = `${size}%`;
+                } else {
+                    fontSize = '100%';
+                }
+
+                return div({
+                    style: {
+                        fontSize: fontSize
+                    }
+                }, [
                     span({ class: 'fa-stack fa-2x' }, [
                         i({ class: 'fa fa-circle fa-stack-2x', style: { color: icon.color } }),
                         i({ class: 'fa-inverse fa-stack-1x ' + icon.classes.join(' ') })
@@ -288,8 +290,9 @@ define([
 
         function renderLayout() {
             var div = html.tag('div');
-            return html.makePanel({
-                title: 'Data Overview',
+            return collapsiblePanel({
+                collapsed: false,
+                title: 'Overview',
                 content: div({ dataWidget: 'dataview-overview' }, [
                     div({ dataPlaceholder: 'alert' }),
                     div({ dataPlaceholder: 'content' })
@@ -302,7 +305,8 @@ define([
                 {
                     style: {
                         display: 'flex',
-                        flexDirection: 'row'
+                        flexDirection: 'row',
+                        alignItems: 'center'
                     }
                 },
                 [
@@ -312,29 +316,21 @@ define([
                         },
                         state.get('dataicon')
                     ),
-                    div(
+                    h3(
                         {
                             style: {
-                                flex: '1 1 0px',
-                                marginRight: '4px',
-                                minWidth: '0'
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                margin: '0'
                             }
                         },
-                        h3(
-                            {
-                                style: {
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap'
-                                }
-                            },
-                            (function () {
-                                if (state.get('sub.id')) {
-                                    return state.get('sub.subid');
-                                }
-                                return state.get('object.name');
-                            })()
-                        )
+                        (function () {
+                            if (state.get('sub.id')) {
+                                return state.get('sub.subid');
+                            }
+                            return state.get('object.name');
+                        })()
                     )
                 ]
             );
@@ -382,6 +378,27 @@ define([
             ];
         }
 
+        function renderTypeNameRow() {
+            return [
+                tr([
+                    th('Type'),
+                    td({ dataElement: 'module' }, [
+                        (function () {
+                            if (state.get('sub.sub')) {
+                                return state.get('sub.sub') + ' in ';
+                            } else {
+                                return '';
+                            }
+                        })(),
+                        a(
+                            { href: '/#spec/type/' + state.get('object.type'), target: '_blank' },
+                            state.get('object.typeName')
+                        )
+                    ])
+                ])
+            ];
+        }
+
         function renderNarrativeRow() {
             if (state.get('workspace.metadata.narrative_nice_name')) {
                 return tr([
@@ -414,7 +431,7 @@ define([
         }
 
         function renderPermalinkRow() {
-            var permalink = getScheme() + '//' + getHost() + '/#dataview/' + objectRef;
+            let permalink = getScheme() + '//' + getHost() + '/#dataview/' + objectRef;
             if (state.get('sub.subid')) {
                 permalink += '?' + state.get('sub.sub') + '&' + state.get('sub.subid');
             }
@@ -424,13 +441,24 @@ define([
             ]);
         }
 
+        function renderButtonRow() {
+            return tr([
+                th(''),
+                td({ dataElement: 'copy' }, [
+                    renderCopyButton(),
+                    ' ',
+                    renderJSONViewButton()
+                ])
+            ]);
+        }
+
         function renderVersionRow() {
-            var version = state.get('object.version') || 'Latest';
+            const version = state.get('object.version') || 'Latest';
             return tr([th('Object Version'), td({ dataElement: 'version' }, version)]);
         }
 
         function panel(content) {
-            var id = html.genId(),
+            const id = html.genId(),
                 headingId = 'heading_' + id,
                 bodyId = 'body_' + id;
             return div({ class: 'panel panel-default' }, [
@@ -469,6 +497,23 @@ define([
                 title: 'Opens (and closes) a panel with which you can copy this data object to a Narrative',
                 id: copyButtonID
             }, 'Copy');
+        }
+
+        function renderJSONViewButton() {
+            const roles = runtime.service('session').getRoles();
+            if (roles.indexOf('DevToken') === -1) {
+                return;
+            }
+            const {ref} = state.get('object');
+            return a({
+                class: 'btn btn-default',
+                dataToggle: 'tooltip',
+                dataPlacement: 'bottom',
+                title: 'Opens (and closes) a panel with which you can copy this data object to a Narrative',
+                id: copyButtonID,
+                href: `/#jsonview/${ref}`,
+                target: '_parent'
+            }, 'JSON View');
         }
 
         function renderMetadataPanel(parent) {
@@ -511,7 +556,40 @@ define([
                 body = 'no metadata for this object';
             }
             return panel({
-                title: 'Raw Metadata',
+                title: 'Metadata',
+                body: body,
+                parent: parent
+            });
+        }
+
+        function renderObjectInfo(parent) {
+            const body = table(
+                {
+                    class: 'table'
+                },
+                [
+                    renderVersionRow(),
+                    renderTypeRow(),
+                    renderNarrativeRow(),
+                    tr([
+                        th('Last Updatedx'),
+                        td({ dataElement: 'last-updated' }, [
+                            dateFormat(state.get('object.save_date')),
+                            ' by ',
+                            a(
+                                {
+                                    href: ['/#people', state.get('object.saved_by')].join('/'),
+                                    target: '_parent'
+                                },
+                                state.get('object.saved_by')
+                            )
+                        ])
+                    ]),
+                    renderPermalinkRow()
+                ]
+            );
+            return panel({
+                title: 'Object Info',
                 body: body,
                 parent: parent
             });
@@ -769,8 +847,7 @@ define([
                             class: 'table'
                         },
                         [
-                            renderVersionRow(),
-                            renderTypeRow(),
+                            renderTypeNameRow(),
                             renderNarrativeRow(),
                             tr([
                                 th('Last Updated'),
@@ -786,19 +863,14 @@ define([
                                     )
                                 ])
                             ]),
-                            renderPermalinkRow()
+                            renderPermalinkRow(),
+                            renderButtonRow()
                         ]
                     )
                 ]),
                 div({ class: 'col-sm-6' }, [
-                    div({
-                        style: {
-                            marginBottom: '10px'
-                        }
-                    }, [
-                        renderCopyButton()
-                    ]),
                     div({ class: 'panel-group', id: 'accordion', role: 'tablist', ariaMultiselectable: 'true' }, [
+                        renderObjectInfo('accordion'),
                         renderMetadataPanel('accordion'),
                         renderVersionsPanel('accordion'),
                         renderReferencedByPanel('accordion'),
@@ -821,7 +893,6 @@ define([
         function start(params) {
             workspaceId = params.workspaceId;
             objectId = params.objectId;
-            objectVersion = params.objectVersion;
             objectRef = APIUtils.makeWorkspaceObjectRef(
                 params.objectInfo.wsid,
                 params.objectInfo.id,
@@ -835,9 +906,9 @@ define([
                 throw 'Object ID is required';
             }
             return fetchData()
-                .then(function () {
+                .then(() => {
                     container.innerHTML = renderLayout();
-                    var content = container.querySelector('[data-placeholder="content"]');
+                    const content = container.querySelector('[data-placeholder="content"]');
                     if (content) {
                         content.innerHTML = render();
                     }
@@ -852,8 +923,8 @@ define([
                                 show: 500,
                                 hide: 100
                             }
-                        })
-                    })
+                        });
+                    });
                 })
                 .catch(function (err) {
                     console.error(err);

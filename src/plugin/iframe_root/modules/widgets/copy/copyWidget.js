@@ -49,14 +49,14 @@ define([
 
         function toggle() {
             switch (toggleState) {
-                case 'hidden':
-                    show();
-                    toggleState = 'showing';
-                    break;
-                case 'showing':
-                    hide();
-                    toggleState = 'hidden';
-                    break;
+            case 'hidden':
+                show();
+                toggleState = 'showing';
+                break;
+            case 'showing':
+                hide();
+                toggleState = 'hidden';
+                break;
             }
         }
 
@@ -238,14 +238,25 @@ define([
                                             td([
                                                 div({ class: 'btn-toolbar', role: 'toolbar' }, [
                                                     div(
-                                                        { class: 'btn-group', role: 'group' },
-                                                        button(
-                                                            {
-                                                                class: 'btn btn-primary',
-                                                                dataBind: 'click: handleCopy'
-                                                            },
-                                                            'Copy and Open Narrative'
-                                                        )
+                                                        [
+                                                            button(
+                                                                {
+                                                                    class: 'btn btn-primary',
+                                                                    dataBind: 'click: handleCopy'
+                                                                },
+                                                                'Copy and Open Narrative'
+                                                            ),
+                                                            button(
+                                                                {
+                                                                    class: 'btn btn-default',
+                                                                    dataBind: 'click: handleClose',
+                                                                    style: {
+                                                                        marginLeft: '10px'
+                                                                    }
+                                                                },
+                                                                'Close'
+                                                            )
+                                                        ]
                                                     )
                                                 ])
                                             ])
@@ -311,9 +322,9 @@ define([
             this.copyMethod.subscribe(
                 function (newValue) {
                     switch (newValue) {
-                        case 'new':
-                            this.selectedNarrative([undefined]);
-                            break;
+                    case 'new':
+                        this.selectedNarrative([undefined]);
+                        break;
                     }
                 }.bind(this)
             );
@@ -342,17 +353,20 @@ define([
             this.handleCopy = function () {
                 this.errorMessage('');
                 switch (this.copyMethod()) {
-                    case 'new':
-                        doCopyIntoNewNarrative(params);
-                        break;
-                    case 'existing':
-                        if (this.selectedNarrative()[0]) {
-                            doCopyIntoExistingNarrative(params, this.selectedNarrativeObject());
-                        } else {
-                            this.errorMessage('You must select a narrative before copying the data object into it.');
-                        }
-                        break;
+                case 'new':
+                    doCopyIntoNewNarrative(params);
+                    break;
+                case 'existing':
+                    if (this.selectedNarrative()[0]) {
+                        doCopyIntoExistingNarrative(params, this.selectedNarrativeObject());
+                    } else {
+                        this.errorMessage('You must select a narrative before copying the data object into it.');
+                    }
+                    break;
                 }
+            };
+            this.handleClose = function () {
+                runtime.send('copyWidget', 'toggle');
             };
         }
 

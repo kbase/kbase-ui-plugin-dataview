@@ -23,6 +23,25 @@ define(['kb_common/html'], function (html) {
             h4 = html.tag('h4'),
             span = html.tag('span');
 
+        let iconElement = '';
+
+        const rotate = false;
+
+        if (icon) {
+            let rotateStyle;
+            if (rotate) {
+                rotateStyle = 'fa-rotate-90';
+            } else {
+                rotateStyle = '';
+            }
+            iconElement = span({
+                'class': 'fa fa-' + icon + ' ' + rotateStyle,
+                style: {'margin-left': '10px', 'margin-right': '10px'}
+            });
+        } else {
+            iconElement = span({style: {'margin-left': '10px'}});
+        }
+
         return div({
             'class': 'panel-group kb-widget',
             id: panelId,
@@ -45,10 +64,7 @@ define(['kb_common/html'], function (html) {
                             'class': (collapsed === false ? '' : 'collapsed'),
                             style: {cursor: 'pointer'}
                         }, [
-                            span({
-                                'class': 'fa fa-' + icon + ' fa-rotate-90',
-                                style: {'margin-left': '10px', 'margin-right': '10px'}
-                            }),
+                            iconElement,
                             title
                         ])
                     ])
