@@ -10,7 +10,8 @@ define([
     'use strict';
 
     class Runtime {
-        constructor({ token, username, config, pluginConfigDB }) {
+        constructor({ authorization, token, username, config, pluginConfigDB }) {
+            this.authorization = authorization;
             this.token = token;
             this.username = username;
 

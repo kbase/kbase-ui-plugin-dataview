@@ -11,7 +11,8 @@ define([
     'dagre',
 
     'bootstrap',
-    'd3_sankey'
+    'd3_sankey',
+    './provenanceWidgetv2.css'
 ], function (Promise, $, d3, html, dom, Workspace, GenericClient, dagre) {
     'use strict';
     function widget(config) {

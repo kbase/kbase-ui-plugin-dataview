@@ -146,9 +146,10 @@ define(['./windowChannel', './runtime'], (WindowChannel, Runtime) => {
                 // the iframe app to start running.
                 this.channel.on('start', (payload) => {
                     const {
-                        authorization: { token, username, realname },
+                        authorization,
                         config
                     } = payload;
+                    const { token, username, realname } = authorization;
                     if (token) {
                         this.authorization = { token, username, realname };
                     } else {
@@ -160,6 +161,7 @@ define(['./windowChannel', './runtime'], (WindowChannel, Runtime) => {
                     this.authorized = token ? true : false;
 
                     this.runtime = new Runtime({
+                        authorization,
                         config,
                         token,
                         username,
