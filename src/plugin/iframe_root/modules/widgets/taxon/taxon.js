@@ -38,32 +38,32 @@ define([
             div = html.tag('div'),
             templates = {
                 overview:
-                    '<div class=\'row\'>' +
-                    '    <div class=\'col-md-6\'>' +
-                    '        <table class=\'table table-bordered\'>' +
-                    '            <tr><td><b>NCBI taxonomic ID</b></td><td data-element=\'ncbi-id\'></td></tr>' +
-                    '            <tr><td><b>Scientific name</b></td><td data-element=\'scientific-name\'></td></tr>' +
+                    '<div class="row">' +
+                    '    <div class="col-md-6">' +
+                    '        <table class="table table-bordered">' +
+                    '            <tr><td><b>NCBI taxonomic ID</b></td><td data-element="ncbi-id"></td></tr>' +
+                    '            <tr><td><b>Scientific name</b></td><td data-element="scientific-name"></td></tr>' +
                     /* KINGDOM IS ALWAYS MISSING IN DATA!! + "            <tr><td><b>Kingdom</b></td><td data-element='kingdom'></td></tr>" */
-                    '            <tr><td><b>Domain</b></td><td data-element=\'domain\'></td></tr>' +
-                    '            <tr><td><b>Genetic Code</b></td><td data-element=\'genetic-code\'></td></tr>' +
+                    '            <tr><td><b>Domain</b></td><td data-element="domain"></td></tr>' +
+                    '            <tr><td><b>Genetic Code</b></td><td data-element="genetic-code"></td></tr>' +
                     '        </table>' +
                     '        <div>' +
                     '            <div><span><b>Aliases</b></span></div>' +
-                    '            <div data-element=\'aliases\'></div>' +
+                    '            <div data-element="aliases"></div>' +
                     '        </div>' +
                     '    </div>' +
-                    '    <div class=\'col-md-6\' data-element=\'lineage\'>' +
+                    '    <div class="col-md-6" data-element="lineage">' +
                     '    </div>' +
                     '</div>',
                 additionalInfo:
-                    '<div class=\'row\'>' +
-                    '    <div class=\'media col-md-12\'>' +
-                    '        <div class=\'media-body\'>' +
-                    '            <h4 class=\'media-heading\' data-element=\'wiki_url\'></h4>' +
-                    '            <div data-element=\'wikipedia_text\'></div>' +
+                    '<div class="row">' +
+                    '    <div class="media col-md-12">' +
+                    '        <div class="media-body">' +
+                    '            <h4 class="media-heading" data-element="wiki_url"></h4>' +
+                    '            <div data-element="wikipedia_text"></div>' +
                     '        </div>' +
-                    '        <div class=\'media-right media-middle\'>' +
-                    '            <div data-element=\'wikipedia_image\'></div>' +
+                    '        <div class="media-right media-middle">' +
+                    '            <div data-element="wikipedia_image"></div>' +
                     '        </div>' +
                     '    </div>' +
                     '</div>'
@@ -93,7 +93,7 @@ define([
 
         function setDataElementHTML(element, value) {
             try {
-                container.querySelector('[data-element=\'' + element + '\']').innerHTML = value;
+                container.querySelector('[data-element="' + element + '"]').innerHTML = value;
             } catch (err) {
                 console.error('while setting data element "' + element + '":', err);
                 throw err;
@@ -107,17 +107,17 @@ define([
 
             for (i = 0; i < len; i += 1) {
                 list_o_links.push(
-                    '<div style=\'padding-left: ' +
+                    '<div style="padding-left: ' +
                         String(i * 10) +
-                        'px\'>' +
-                        '<a href=\'#dataview/' +
+                        'px">' +
+                        '<a href="/#dataview/' +
                         decorated_lineage[i]['ref'] +
-                        '\'>' +
+                        '" target="_parent>' +
                         decorated_lineage[i]['scientific_name'] +
                         '</a></div>'
                 );
             }
-            list_o_links.push('<div style=\'padding-left: ' + String(len * 10) + 'px\'>' + my_scientific_name + '</div>');
+            list_o_links.push('<div style="padding-left: ' + String(len * 10) + 'px">' + my_scientific_name + '</div>');
 
             setDataElementHTML('lineage', div([div('<h5><strong>Lineage</strong></h5>'), div(list_o_links)]));
         }
@@ -128,7 +128,7 @@ define([
                 len = aliases.length;
 
             for (i = 0; i < len; i += 1) {
-                alias_divs.push('<div class=\'col-sm-offset-1\'>' + aliases[i] + '</div>');
+                alias_divs.push('<div class="col-sm-offset-1">' + aliases[i] + '</div>');
             }
             if (len > 0) {
                 setDataElementHTML('aliases', alias_divs.join(''));
@@ -147,9 +147,9 @@ define([
 
             for (i = 0; i < len; i += 1) {
                 list_o_links.push(
-                    '<div><a href=\'#dataview/' +
+                    '<div><a href="/#dataview/' +
                         sorted_children[i]['ref'] +
-                        '\'>' +
+                        '" target="_parent">' +
                         sorted_children[i]['scientific_name'] +
                         '</a></div>'
                 );
@@ -165,10 +165,10 @@ define([
         function renderNCBILink(taxid) {
             setDataElementHTML(
                 'ncbi-id',
-                '<a target=\'_blank\' href=\'http://www.ncbi.nlm.nih.gov/Taxonomy/' +
+                '<a target="_blank" href="http://www.ncbi.nlm.nih.gov/Taxonomy/' +
                     'Browser/wwwtax.cgi?mode=info&id=' +
                     taxid +
-                    '\'>' +
+                    '">' +
                     taxid +
                     '</a>'
             );
@@ -180,7 +180,7 @@ define([
             } else {
                 setDataElementHTML(
                     'wiki_url',
-                    '<a target=\'_blank\' href=\'' + wikiInfo.link + '\'>Wikipedia entry for this Taxon</a>'
+                    '<a target="_blank" href="' + wikiInfo.link + '">Wikipedia entry for this Taxon</a>'
                 );
             }
 
@@ -195,7 +195,7 @@ define([
             if (imageURL === null) {
                 setDataElementHTML('wikipedia_image', 'No image found');
             } else {
-                setDataElementHTML('wikipedia_image', '<img class=\'media-object\' src=\'' + imageURL + '\'></img>');
+                setDataElementHTML('wikipedia_image', '<img class="media-object" src="' + imageURL + '"></img>');
             }
         }
 
