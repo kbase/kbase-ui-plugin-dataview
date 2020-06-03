@@ -112,7 +112,7 @@ define([
                         'px">' +
                         '<a href="/#dataview/' +
                         decorated_lineage[i]['ref'] +
-                        '" target="_parent>' +
+                        '" target="_parent">' +
                         decorated_lineage[i]['scientific_name'] +
                         '</a></div>'
                 );
@@ -445,7 +445,6 @@ define([
                     })
                     .spread(function (lineage) {
                         renderLineage(lineage.decorated_scientific_lineage, scientificName);
-
                         return fetchWikipediaEntry(scientificName);
                     })
                     .then(function (wiki_content) {
