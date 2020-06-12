@@ -1,59 +1,48 @@
 ## Plugin Configuration
 ---
 package:
-    author: KBase Developer
-    name: dataview
-    description: The data landing pages
-    type: legacy
-source:
-    ## sources are relative to build/plugins/PACKAGE/source/javascript
-    ## NB: need to quote file names, otherwise
-    modules:
-    styles:
-        # - file: styles.css
+  name: dataview
+  description: The data landing pages
+  type: legacy
 install:
-    routes:
-        - path:
-              - dataview
-              - name: workspaceId
-              - name: objectId
-              - name: objectVersion
-                optional: true
-          queryParams:
-              sub: {}
-              subid: {}
-              viewer: {}
-          params:
-              view: dataView
-              plugin: dataview
-          widget: kb_iframe_loader
-        - path:
-              - jsonview
-              - name: workspaceId
-              - name: objectId
-              - name: objectVersion
-                optional: true
-          params:
-              view: jsonView
-              plugin: dataview
-          widget: kb_iframe_loader
-        - path:
-              - [objgraphview, provenance]
-              - name: workspaceId
-              - name: objectId
-              - name: objectVersion
-                optional: true
-          params:
-              view: provenanceView
-              plugin: dataview
-          widget: kb_iframe_loader
-        - path:
-              - [objgraphview2, provenance2]
-              - name: workspaceId
-              - name: objectId
-              - name: objectVersion
-                optional: true
-          params:
-              view: provenanceView2
-              plugin: dataview
-          widget: kb_iframe_loader
+  routes:
+    - path:
+        - dataview
+        - name: workspaceId
+        - name: objectId
+        - name: objectVersion
+          optional: true
+      queryParams:
+        sub: {}
+        subid: {}
+        viewer: {}
+      params:
+        view: dataView
+        plugin: dataview
+    - path:
+        - jsonview
+        - name: workspaceId
+        - name: objectId
+        - name: objectVersion
+          optional: true
+      params:
+        view: jsonView
+        plugin: dataview
+    - path:
+        - [objgraphview, provenance]
+        - name: workspaceId
+        - name: objectId
+        - name: objectVersion
+          optional: true
+      params:
+        view: provenanceView
+        plugin: dataview
+    - path:
+        - [objgraphview2, provenance2]
+        - name: workspaceId
+        - name: objectId
+        - name: objectVersion
+          optional: true
+      params:
+        view: provenanceView2
+        plugin: dataview
