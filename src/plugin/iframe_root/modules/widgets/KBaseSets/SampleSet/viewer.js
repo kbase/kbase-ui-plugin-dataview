@@ -40,7 +40,7 @@ define([
                     h('tbody', null, this.props.sampleSet.samples.map((sample) => {
                         return h('tr', null, [
                             h('td', null, h('a', {
-                                href: `/#sampleview/${sample.id}`,
+                                href: `/#sampleview/${sample.id}/${sample.version}`,
                                 target: '_parent'
                             }, sample.name)),
                             h('td', null, sample.id),
