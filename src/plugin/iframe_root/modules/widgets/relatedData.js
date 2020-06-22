@@ -1,4 +1,8 @@
-define(['kb_common/html', 'collapsiblePanel', 'kb_lib/jsonRpc/dynamicServiceClient'], function (
+define([
+    'kb_lib/html',
+    'collapsiblePanel',
+    'kb_lib/jsonRpc/dynamicServiceClient'],
+function (
     html,
     collapsiblePanel,
     DynamicServiceClient
