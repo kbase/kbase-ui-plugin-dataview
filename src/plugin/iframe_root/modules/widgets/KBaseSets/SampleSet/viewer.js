@@ -13,9 +13,33 @@ define([
 
     const {h, Component} = preact;
 
+    function formattedDate(time) {
+        return Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: 'numeric',
+            hour12: true
+        }).format(time);
+    }
+
+    function formattedInteger(value) {
+        return Intl.NumberFormat('en-US', {
+            useGrouping: true
+        }).format(value);
+    }
+
     class Loading extends Component {
         render() {
-            return h('div', null, 'Loading...');
+            return h('div', null, [
+                h('span', {
+                    className: 'fa fa-spinner fa-pulse fa-2x fa-fw',
+                    style: {
+                        color: 'gray'
+                    }
+                })
+            ]);
         }
     }
 
@@ -33,8 +57,11 @@ define([
                     h('thead', null, [
                         h('tr', null, [
                             h('th', null, 'Name'),
-                            h('th', null, 'ID'),
-                            h('th', null, 'Version')
+                            h('th', {style: {width: '15em'}}, 'ID'),
+                            h('th', {style: {width: '11em'}}, '# Linked Objects'),
+                            h('th', {style: {width: '11em'}}, 'Saved At'),
+                            h('th', {style: {width: '8em'}}, 'Saved By'),
+                            h('th', {style: {width: '5em'}}, 'Version')
                         ])
                     ]),
                     h('tbody', null, this.props.sampleSet.samples.map((sample) => {
@@ -43,8 +70,14 @@ define([
                                 href: `/#sampleview/${sample.id}/${sample.version}`,
                                 target: '_parent'
                             }, sample.name)),
-                            h('td', null, sample.id),
-                            h('td', null, sample.version)
+                            h('td', null, sample.sample.node_tree[0].id),
+                            h('td', {style: {textAlign: 'right', paddingRight: '3em'}}, formattedInteger(sample.linkedDataCount)),
+                            h('td', null, formattedDate(sample.sample.save_date)),
+                            h('td', null, h('a', {
+                                href: `/#user/${sample.sample.user}`,
+                                target: '_parent'
+                            }, sample.sample.user)),
+                            h('td', {style: {textAlign: 'right', paddingRight: '1em'}}, sample.version)
                         ]);
                     }))
                 ])
@@ -60,7 +93,6 @@ define([
             this.objectVersion = config.objectVersion;
             this.createdObjects = null;
         }
-
 
         // LIFECYCLE
 
@@ -97,7 +129,21 @@ define([
             return this.model
                 .getObject()
                 .then((sampleSet) => {
-                    preact.render(preact.h(SampleSet, {sampleSet}), this.node);
+                    return this.model.getSamples(sampleSet.samples)
+                        .then((samples) => {
+                            const samplesMap = samples.reduce((samplesMap, {sample, linkedData}) => {
+                                samplesMap[sample.id] = {
+                                    sample,
+                                    linkedDataCount: linkedData.links.length
+                                };
+                                return samplesMap;
+                            }, {});
+                            sampleSet.samples.forEach((sampleSetItem) => {
+                                sampleSetItem.sample = samplesMap[sampleSetItem.id].sample;
+                                sampleSetItem.linkedDataCount = samplesMap[sampleSetItem.id].linkedDataCount;
+                            });
+                            preact.render(preact.h(SampleSet, {sampleSet}), this.node);
+                        });
                 });
         }
 
