@@ -1,6 +1,6 @@
 define(['kb_lib/html'], function (html) {
     'use strict';
-    function factory(config) {
+    function factory() {
         var places = {},
             div = html.tag('div');
 
@@ -32,7 +32,7 @@ define(['kb_lib/html'], function (html) {
                 place.node = document.getElementById(place.id);
             }
             if (!place.node) {
-                throw new Error('Place does not exist in the DOM: ' + place + ' : ' + place.id);
+                throw new Error(`Place does not exist in the DOM: ${name}, ${place.id}`);
             }
             return place.node;
         }

@@ -259,6 +259,9 @@ install:
     - module: widgets/KBaseSets/SampleSet/viewer
       name: kb_dataview_sampleSet
       type: es6
+    - module: widgets/LinkedSamples/viewer
+      name: kb_dataview_linkedSamples
+      type: es6
 
   routes:
     - path:

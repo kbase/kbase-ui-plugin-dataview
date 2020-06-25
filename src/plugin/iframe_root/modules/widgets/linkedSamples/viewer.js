@@ -35,24 +35,23 @@ define([
         return defaultValue;
     }
 
-
-    class SampleSet extends Component {
+    class LinkedSamples extends Component {
         constructor(props) {
             super(props);
         }
 
-        renderSamples() {
-            const rows = this.props.sampleSet.samples.map((sample) => {
+        renderLinkedSamples() {
+            const rows = this.props.linkedSamples.map(({link, sample}) => {
                 return html`
-                    <tr>
-                        <td><a href=${`/#sampleview/${sample.id}/${sample.version}`} target="_parent">${sample.name}</a></td>
-                        <td>${getMetadataValue(sample.sample, 'material', '-')}</td>
-                        <td>${sample.sample.node_tree[0].id}</td>
-                        <td>${fmt.formattedDate(sample.sample.save_date)}</td>
-                        <td><a href=${`/#user/${sample.sample.user}`} target="_blank">${sample.sample.user}</a></td>
-                        <td style=${{textAlign: 'right', paddingRight: '2em'}}>${sample.sample.version}</td>
-                        <td style=${{textAlign: 'right', paddingRight: '2em'}}>${fmt.formattedInteger(sample.linkedDataCount)}</td>
-                    </tr>
+                <tr>
+                    <td><a href="/#sampleview/${link.id}/${link.version}">${sample.sample.name}</a></td>
+                    <td>${getMetadataValue(sample.sample, 'material', '-')}</td>
+                    <td>${sample.sample.node_tree[0].id}</td>
+                    <td>${fmt.formattedDate(sample.sample.save_date)}</td>
+                    <td><a href="/#people/${sample.sample.user}" target="_blank">${sample.sample.user}</a></td>
+                    <td style=${{textAlign: 'right', paddingRight: '2em'}}>${sample.sample.version}</td>
+                    <td style=${{textAlign: 'right', paddingRight: '2em'}}>${fmt.formattedInteger(sample.linkedData.links.length)}</td>
+                </tr>
                 `;
             });
 
@@ -65,7 +64,7 @@ define([
                         <th style=${{width: '10em'}}>Source Id</th>
                         <th style=${{width: '12em'}}>Saved</th>
                         <th style=${{width: '8em'}}>By</th>
-                        <th style=${{width: '5em'}}>Version </th>
+                        <th style=${{width: '5em'}}>Version</th>
                         <th style=${{width: '8em'}}># Linked objs</th>
                     </tr>
                 </thead>
@@ -76,14 +75,22 @@ define([
             `;
         }
 
-        render() {
+        renderNoLinkedSamples() {
             return html`
-                <div>
-                    <h4>Description</h4>
-                    <div>${this.props.sampleSet.description}</div>
-                    <h4>Samples</h4>
-                    ${this.renderSamples()}
-                </div>
+            <div class="alert alert-info">
+            No samples linked to this object.
+            </div>
+            `;
+        }
+
+        render() {
+            if (this.props.linkedSamples.length === 0) {
+                return this.renderNoLinkedSamples();
+            }
+            return html`
+                <div className="LinkedSamples">
+                ${this.renderLinkedSamples()}
+                </table>
             `;
         }
     }
@@ -105,21 +112,21 @@ define([
 
         start(params) {
             // Check params
-            const p = new widgetUtils.Params(params);
-            this.workspaceId = p.check('workspaceId', 'number', {
+            const p = new Params(params);
+            this.workspaceId = p.check('workspaceId', 'integer', {
                 required: true
             });
-            this.objectId = p.check('objectId', 'number', {
+            this.objectId = p.check('objectId', 'integer', {
                 required: true
             });
-            this.objectVersion = p.check('objectVersion', 'number', {
+            this.objectVersion = p.check('objectVersion', 'integer', {
                 required: true
             });
 
             // Display loading spinner...
             preact.render(preact.h(Loading, { }), this.node);
 
-            // Get the object form the model.
+            // // Get the object form the model.
             this.model = new Model({
                 runtime: this.runtime,
                 workspaceId: this.workspaceId,
@@ -127,26 +134,12 @@ define([
                 objectVersion: this.objectVersion
             });
 
-            // Display the object!
+            // // Display the object!
 
             return this.model
-                .getObject()
-                .then((sampleSet) => {
-                    return this.model.getSamples(sampleSet.samples)
-                        .then((samples) => {
-                            const samplesMap = samples.reduce((samplesMap, {sample, linkedData}) => {
-                                samplesMap[sample.id] = {
-                                    sample,
-                                    linkedDataCount: linkedData.links.length
-                                };
-                                return samplesMap;
-                            }, {});
-                            sampleSet.samples.forEach((sampleSetItem) => {
-                                sampleSetItem.sample = samplesMap[sampleSetItem.id].sample;
-                                sampleSetItem.linkedDataCount = samplesMap[sampleSetItem.id].linkedDataCount;
-                            });
-                            preact.render(preact.h(SampleSet, {sampleSet}), this.node);
-                        });
+                .getLinkedSamples()
+                .then((linkedSamples) => {
+                    preact.render(preact.h(LinkedSamples, {linkedSamples}), this.node);
                 });
         }
 

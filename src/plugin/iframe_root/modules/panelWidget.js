@@ -37,7 +37,7 @@ define([
                 [
                     div({ class: 'row' }, [
                         div({ class: 'col-sm-12' }, [
-                            div({ id: widgetSet.addWidget('kb_dataview_download') }),
+                            // div({ id: widgetSet.addWidget('kb_dataview_download') }),
                             div({ id: widgetSet.addWidget('kb_dataview_copy') }),
                             div({ id: widgetSet.addWidget('kb_dataview_overview') }),
                             collapsiblePanel({
@@ -59,6 +59,16 @@ define([
                             (function () {
                                 if (runtime.featureEnabled('similar_genomes')) {
                                     return div({ id: widgetSet.addWidget('kb_dataview_relatedData') });
+                                }
+                            })(),
+                            (function () {
+                                if (runtime.featureEnabled('linked-samples')) {
+                                    return collapsiblePanel({
+                                        title: 'Linked Samples',
+                                        icon: 'link',
+                                        content: div({ id: widgetSet.addWidget('kb_dataview_linkedSamples') })
+                                    });
+                                    // return div({ id: widgetSet.addWidget('kb_dataview_linkedSamples') });
                                 }
                             })(),
                             div({
@@ -95,40 +105,41 @@ define([
                     params.workspaceInfo = workspaceInfo;
                     return Promise.all([objectInfo, widgetSet.start(params)]);
                 })
-                .spread((objectInfo) => {
-                    // TODO: re-enable object download.
-                    // Disable download button for the time being.
-                    // Will re-enable when we have time to deal with it.
-                    //     runtime.send('ui', 'addButton', {
-                    //         name: 'downloadObject',
-                    //         label: 'Download',
-                    //         style: 'default',
-                    //         icon: 'download',
-                    //         toggle: true,
-                    //         params: {
-                    //             ref: objectInfo.ref
-                    //         },
-                    //         callback: function () {
-                    //             runtime.send('downloadWidget', 'toggle');
-                    //         }
-                    //     });
+                // .spread((objectInfo) => {
+                //     // TODO: re-enable object download.
+                //     // Disable download button for the time being.
+                //     // Will re-enable when we have time to deal with it.
+                //     //     runtime.send('ui', 'addButton', {
+                //     //         name: 'downloadObject',
+                //     //         label: 'Download',
+                //     //         style: 'default',
+                //     //         icon: 'download',
+                //     //         toggle: true,
+                //     //         params: {
+                //     //             ref: objectInfo.ref
+                //     //         },
+                //     //         callback: function () {
+                //     //             runtime.send('downloadWidget', 'toggle');
+                //     //         }
+                //     //     });
 
-                    runtime.send('ui', 'addButton', {
-                        name: 'copyObject',
-                        label: 'Copy',
-                        style: 'default',
-                        icon: 'copy',
-                        toggle: true,
-                        params: {
-                            ref: objectInfo.ref
-                        },
-                        callback: function () {
-                            runtime.send('copyWidget', 'toggle');
-                        }
-                    });
-                })
+                //     // runtime.send('ui', 'addButton', {
+                //     //     name: 'copyObject',
+                //     //     label: 'Copy',
+                //     //     style: 'default',
+                //     //     icon: 'copy',
+                //     //     toggle: true,
+                //     //     params: {
+                //     //         ref: objectInfo.ref
+                //     //     },
+                //     //     callback: function () {
+                //     //         runtime.send('copyWidget', 'toggle');
+                //     //     }
+                //     // });
+                // })
                 .catch((error) => {
                     container.innerHTML = '';
+                    console.error('ERROR', error);
                     preact.render(preact.h(ErrorComponent, { runtime, error }), container);
                 });
         }

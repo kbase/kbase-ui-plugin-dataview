@@ -40,6 +40,7 @@ define([], function () {
             moment: 'vendor/moment/moment',
             numeral: 'vendor/numeral/numeral',
             preact: 'vendor/preact/preact.umd',
+            htm: 'vendor/htm/htm.umd',
             text: 'vendor/requirejs-text/text',
             underscore: 'vendor/underscore/underscore',
             uuid: 'vendor/pure-uuid/uuid',
