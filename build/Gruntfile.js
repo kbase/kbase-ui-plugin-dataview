@@ -28,6 +28,12 @@ module.exports = function (grunt) {
                 flatten: true,
                 src: 'node_modules/preact/dist/preact.umd.js',
                 dest: '../src/plugin/iframe_root/modules/vendor/preact'
+            },
+            htm: {
+                expand: true,
+                flatten: true,
+                src: 'node_modules/htm/dist/htm.umd.js',
+                dest: '../src/plugin/iframe_root/modules/vendor/htm'
             }
         },
         clean: {

@@ -3,13 +3,6 @@
  * stay intact for legal use Visit http://www.dynamicdrive.com/ for full
  * source code.
  */
-/*global
- define, console
- */
-/*jslint
- browser: true,
- white: true
- */
 define([], function () {
     'use strict';
     /*
@@ -40,7 +33,7 @@ define([], function () {
     var popmenu = function () {
         var ie = document.all && !window.opera;
         var timeout, pmo = null, timeBeg;
-        var w3c_contains = function (a, b) { // Determines if 1 element in contained in another- by Brainjar.com	
+        var w3c_contains = function (a, b) { // Determines if 1 element in contained in another- by Brainjar.com
             while (b.parentNode) {
                 b = b.parentNode;
                 if (b === a) {
@@ -53,8 +46,8 @@ define([], function () {
             //pmo = $('<div id="popdiv" style="position: absolute; background-color: #fcfcfc; border: 1px solid #ccc; z-index: 100; visibility: hidden; font-size: 12px;"></div>');
             //pmo.on('mouseover', popmenu.clear);
             //pmo.on('mouseout', popmenu.autoHide);
-            pmo = document.createElement("div");
-            pmo.setAttribute("id", "popdiv");
+            pmo = document.createElement('div');
+            pmo.setAttribute('id', 'popdiv');
             pmo.style.position = 'absolute';
             pmo.style.backgroundColor = '#fcfcfc';
             pmo.style.border = '1px solid #ccc';
@@ -74,7 +67,7 @@ define([], function () {
         };
         this.hide = function () {
             if (pmo) {
-                pmo.style.visibility = "hidden";
+                pmo.style.visibility = 'hidden';
             }
         };
         this.delayedHide = function () {
@@ -97,14 +90,14 @@ define([], function () {
             }
         };
         this.show = function (e, which, optWidth, clickHandler) {
-            var ieo = (document.compatMode && document.compatMode.indexOf("CSS") !== -1) ?
+            var ieo = (document.compatMode && document.compatMode.indexOf('CSS') !== -1) ?
                 document.documentElement : document.body;
             this.clear();
             if (pmo === null) {
                 this.createMenu(clickHandler);
             }
             pmo.innerHTML = which;
-            pmo.style.width = (optWidth === undefined) ? optWidth : "150px";
+            pmo.style.width = (optWidth === undefined) ? optWidth : '150px';
             var eventX = ie ? event.clientX : e.clientX;
             var eventY = ie ? event.clientY : e.clientY;
             // Find out how close the mouse is to the corner of the window
@@ -112,17 +105,17 @@ define([], function () {
             var bottomedge = ie ? ieo.clientHeight - eventY : window.innerHeight - eventY;
             // if the horizontal distance isn't enough to accomodate the width of the context menu
             if (rightedge < pmo.offsetWidth) { // then move the horizontal position of the menu to the left by it's width
-                pmo.style.left = (ie ? ieo.scrollLeft : window.pageXOffset) + eventX - pmo.offsetWidth + "px";
+                pmo.style.left = (ie ? ieo.scrollLeft : window.pageXOffset) + eventX - pmo.offsetWidth + 'px';
             } else { // then position the horizontal position of the menu where the mouse was clicked
-                pmo.style.left = (ie ? ieo.scrollLeft : window.pageXOffset) + eventX + "px";
+                pmo.style.left = (ie ? ieo.scrollLeft : window.pageXOffset) + eventX + 'px';
             }
             //same concept with the vertical position
             if (bottomedge < pmo.offsetHeight) {
-                pmo.style.top = (ie ? ieo.scrollTop : window.pageYOffset) + eventY - pmo.offsetHeight + "px";
+                pmo.style.top = (ie ? ieo.scrollTop : window.pageYOffset) + eventY - pmo.offsetHeight + 'px';
             } else {
-                pmo.style.top = (ie ? ieo.scrollTop : window.pageYOffset) + eventY + "px";
+                pmo.style.top = (ie ? ieo.scrollTop : window.pageYOffset) + eventY + 'px';
             }
-            pmo.style.visibility = "visible";
+            pmo.style.visibility = 'visible';
             timeBeg = new Date().getTime();
         };
     };
