@@ -356,7 +356,7 @@ install:
         classes: ["fa-th"]
       viewers:
         - name: Data View
-          panel: true
+          panel: false
           default: true
           widget:
             name: kb_dataview_abundanceDataHeatmap
@@ -391,7 +391,7 @@ install:
             name: kb_dataview_phenotypeSet
             config:
               jqueryName: kbaseTabTable
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceName
@@ -413,7 +413,7 @@ install:
             name: kb_dataview_compoundSet
             config:
               jqueryName: kbaseTabTable
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceName
@@ -436,7 +436,7 @@ install:
             name: kb_dataview_functionalMatrix
             config:
               jqueryName: AbundanceDataView
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceId
@@ -457,7 +457,7 @@ install:
             name: kb_dataview_metagenome
             config:
               jqueryName: MetagenomeView
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceId
@@ -474,7 +474,7 @@ install:
             name: kb_dataview_functionalProfile
             config:
               jqueryName: AbundanceDataView
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceId
@@ -495,7 +495,7 @@ install:
             name: kb_dataview_proteomeComparison
             config:
               jqueryName: GenomeComparisonWidget
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceId
@@ -516,7 +516,7 @@ install:
             name: kb_dataview_assemblyInput
             config:
               jqueryName: kbaseAssemblyInput
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceId
@@ -536,7 +536,7 @@ install:
             name: kb_dataview_assemblyView
             config:
               jqueryName: kbaseAssemblyView
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceId
@@ -556,7 +556,7 @@ install:
             name: kb_dataview_pairedEndLibrary
             config:
               jqueryName: kbasePairedEndLibrary
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceId
@@ -581,7 +581,7 @@ install:
         #         name: kb_dataview_pairedEndLibrary
         #         config:
         #             jqueryName: kbasePairedEndLibrary
-        #     panel: true
+        #     panel: false
         #     default: true
         #     options:
         #         -
@@ -604,7 +604,7 @@ install:
             name: kb_dataview_referenceAssembly
             config:
               jqueryName: kbaseReferenceAssembly
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceId
@@ -702,7 +702,7 @@ install:
             name: kb_dataview_biochem_media
             config:
               jqueryName: kbaseTabTable
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceName
@@ -726,7 +726,7 @@ install:
             name: kb_dataview_expressionSeries
             config:
               jqueryName: kbaseExpressionSeries
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceName
@@ -747,7 +747,7 @@ install:
             name: kb_dataview_fba
             config:
               jqueryName: kbaseTabTable
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceName
@@ -769,7 +769,7 @@ install:
             name: kb_dataview_fbaModel
             config:
               jqueryName: kbaseTabTable
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceName
@@ -788,7 +788,7 @@ install:
             name: kb_dataview_fbaModelSet
             config:
               jqueryName: kbaseTabTable
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceName
@@ -812,7 +812,7 @@ install:
             name: kb_dataview_search_genomeSet
             config:
               jqueryName: kbaseTabTable
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceName
@@ -837,7 +837,7 @@ install:
             name: kb_dataview_file_pairedEndLibrary
             config:
               jqueryName: kbaseFilePairedEndLibrary
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceId
@@ -917,7 +917,7 @@ install:
             name: kb_dataview_genomes_pangenome
             config:
               jqueryName: kbasePanGenome
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceName
@@ -937,7 +937,7 @@ install:
             name: kb_dataview_genomes_annotationSetTable
             config:
               jqueryName: AnnotationSetTable
-          panel: true
+          panel: false
           default: true
           options:
             - from: workspaceId
@@ -978,7 +978,7 @@ install:
             name: kb_dataview_trees_tree
             config:
               jqueryName: kbaseTree
-          panel: true
+          panel: false
           options:
             - from: workspaceId
               to: workspaceID
@@ -1000,7 +1000,7 @@ install:
           title: KBase Report
           widget:
             name: kb_dataview_kbaseReport
-          panel: true
+          panel: false
     # ONTOLOGY
     - type:
         module: KBaseOntology
@@ -1042,7 +1042,7 @@ install:
       viewers:
         - title: Sample Set
           default: true
-          panel: true
+          panel: false
           widget:
             name: kb_dataview_sampleSet
 

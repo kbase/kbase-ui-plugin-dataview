@@ -108,22 +108,23 @@ define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
                 }
 
                 // add content pane
-                var c = $(
+                const contentPane = $(
                     div({
                         class: 'tab-pane ' + (p.active ? 'active' : ''),
                         dataId: p.name,
                         dataKBTesthookTabpane: p.key
                     })
                 );
-                c.append(p.content || '');
-                tab_contents.append(c);
+                contentPane.append(p.content || '');
+                tab_contents.append(contentPane);
 
                 tab.click(function (e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    var id = $(this)
+                    const id = $(this)
                         .find('a')
                         .data('id');
+
                     self.showTab(id);
                 });
 
