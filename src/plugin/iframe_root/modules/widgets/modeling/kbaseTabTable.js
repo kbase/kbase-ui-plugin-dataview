@@ -6,6 +6,9 @@ define([
     'kb_service/client/workspace',
     'kb_service/client/fba',
     'widgets/modeling/KBModeling',
+    'content',
+
+    // for effect
     'kbaseUI/widget/legacy/tabs',
     'kbaseUI/widget/legacy/authenticatedWidget',
     'widgets/modeling/KBaseBiochem.Media',
@@ -17,7 +20,16 @@ define([
     //'kb_dataview_widget_modeling_genomeSet',
     'kbaseUI/widget/legacy/helpers',
     'datatables_bootstrap'
-], function ($, Promise, html, DynamicServiceClient, Workspace, FBA, KBModeling) {
+], function (
+    $,
+    Promise,
+    html,
+    DynamicServiceClient,
+    Workspace,
+    FBA,
+    KBModeling,
+    content
+) {
     'use strict';
 
     const t = html.tag,
@@ -43,7 +55,7 @@ define([
             var tabs;
 
             // base class for workspace object classes
-            var kbModeling = new KBModeling({
+            const kbModeling = new KBModeling({
                 runtime: this.runtime
             });
 
@@ -51,24 +63,28 @@ define([
             // 1) Use type (periods replaced with underscores) to instantiate object
             //
 
-            var className = type.split(/-/)[0].replace(/\./g, '_');
-            var ClassObject = kbModeling[className];
+            const className = type.split(/-/)[0].replace(/\./g, '_');
+            const ClassObject = kbModeling[className];
             this.obj = new ClassObject(self);
 
             //
             // 2) add the tabs (at page load)
             //
-            var tabList = this.obj.tabList;
+            const tabList = this.obj.tabList;
 
-            var uiTabs = [];
-            for (var i = 0; i < tabList.length; i++) {
-                var tab = tabList[i];
+            const uiTabs = [];
+            for (let i = 0; i < tabList.length; i++) {
+                const tab = tabList[i];
 
                 // add loading status
-                var placeholder = $('<div>');
+                const placeholder = $('<div>');
                 placeholder.loading();
 
-                uiTabs.push({ name: tabList[i].name, key: tabList[i].key, content: placeholder });
+                uiTabs.push({
+                    name: tab.name,
+                    key: tab.key,
+                    content: placeholder
+                });
             }
 
             uiTabs[0].active = true;
@@ -77,7 +93,7 @@ define([
             //
             // 3) get meta data, add any metadata tables
             //
-            var param;
+            let param;
             if (isNaN(input.ws) && isNaN(input.obj)) {
                 param = {
                     workspace: input.ws,
@@ -96,26 +112,29 @@ define([
             });
 
             this.workspaceClient
-                .get_object_info_new({ objects: [param], includeMetadata: 1 })
-                .then(function (res) {
+                .get_object_info_new({
+                    objects: [param],
+                    includeMetadata: 1
+                })
+                .then((res) => {
                     self.obj.setMetadata(res[0]);
 
-                    for (var i = 0; i < tabList.length; i++) {
-                        var spec = tabList[i];
+                    for (let i = 0; i < tabList.length; i++) {
+                        const spec = tabList[i];
 
                         if (spec.type === 'verticaltbl') {
-                            var key = spec.key,
+                            const key = spec.key,
                                 data = self.obj[key],
                                 tabPane = tabs.tabContent(spec.name);
 
-                            var table = self.verticalTable({ rows: spec.rows, data: data });
+                            const table = self.verticalTable({ rows: spec.rows, data: data });
                             tabPane.rmLoading();
                             tabPane.append(table);
                         }
                     }
                     return null;
                 })
-                .catch(function (err) {
+                .catch((err) => {
                     console.error('ERROR getting object info (new)');
                     console.error(err);
                 });
@@ -138,13 +157,16 @@ define([
             function preProcessDataTable(tabSpec, tabPane) {
                 return Promise.try(function () {
                     // get refs
-                    var refs = [],
+                    const refs = [],
                         cols = tabSpec.columns;
+
                     cols.forEach(function (col) {
                         if ((col.type === 'tabLink' || col.type === 'wstype') && col.linkformat === 'dispWSRef') {
-                            self.obj[tabSpec.key].forEach(function (item) {
+                            self.obj[tabSpec.key].forEach((item) => {
                                 if (refs.indexOf(item[col.key]) === -1) {
-                                    refs.push({ ref: item[col.key] });
+                                    refs.push({
+                                        ref: item[col.key]
+                                    });
                                 }
                             });
                         }
@@ -155,19 +177,23 @@ define([
                     }
 
                     // get human readable info from workspaces
-                    return self.workspaceClient.get_object_info_new({ objects: refs }).then(function (data) {
-                        refs.forEach(function (ref, i) {
-                            // if (ref in referenceLookup) return
-                            refLookup[ref.ref] = {
-                                name: data[i][1],
-                                ws: data[i][7],
-                                type: data[i][2].split('-')[0],
-                                //link: data[i][2].split('-')[0]+'/'+data[i][7]+'/'+data[i][1]
-                                link: data[i][7] + '/' + data[i][1]
-                            };
+                    return self.workspaceClient.get_object_info_new({ objects: refs })
+                        .then((data) => {
+                            refs.forEach(function (ref, i) {
+                                const objectInfo = data[i];
+                                refLookup[ref.ref] = {
+                                    id: objectInfo[0],
+                                    name: objectInfo[1],
+                                    wsid: objectInfo[6],
+                                    ws: objectInfo[7],
+                                    type: objectInfo[2].split('-')[0],
+                                    version: objectInfo[4],
+                                    ref: objectInfo[6] + '/' + objectInfo[0] + '/' + objectInfo[4],
+                                    link: objectInfo[7] + '/' + objectInfo[1]
+                                };
+                            });
+                            return null;
                         });
-                        return null;
-                    });
                 });
             }
 
@@ -188,6 +214,7 @@ define([
                                 try {
                                     tabPane[tabSpec.widget](tabSpec.getParams());
                                 } catch (ex) {
+                                    console.error('Error invoking tab pane', tabSpec, ex);
                                     createErrorMessage(tabPane, ex.message);
                                 } finally {
                                     return;
@@ -202,6 +229,7 @@ define([
                                     return null;
                                 })
                                 .catch(function (err) {
+                                    console.error('Error in preProcessDataTable', err);
                                     createErrorMessage(tabPane, err.message || err.error.message);
                                     return null;
                                 });
@@ -223,7 +251,7 @@ define([
 
             // creates a datatable on a tabPane
             function createDataTable(tabSpec, tabPane) {
-                var settings = self.getTableSettings(tabSpec, self.obj.data);
+                const settings = self.getTableSettings(tabSpec, self.obj.data);
                 tabPane.rmLoading();
 
                 // note: must add table first
@@ -248,9 +276,8 @@ define([
 
             // takes table spec and prepared data, returns datatables settings object
             this.getTableSettings = function (tab, data) {
-                var tableColumns = getColSettings(tab);
-
-                var settings = {
+                const tableColumns = getColSettings(tab);
+                const settings = {
                     dom: '<"top"lf>rt<"bottom"ip><"clear">',
                     aaData: self.obj[tab.key],
                     aoColumns: tableColumns,
@@ -262,9 +289,7 @@ define([
                 };
 
                 // add any events
-                for (var i = 0; i < tab.columns.length; i++) {
-                    var col = tab.columns[i];
-
+                for (let i = 0; i < tab.columns.length; i++) {
                     settings.fnDrawCallback = function () {
                         newTabEvents(tab.name);
                     };
@@ -279,14 +304,14 @@ define([
                 ids.unbind('click');
                 ids.click(function () {
                     var info = {
-                        id: $(this).data('id'),
-                        type: $(this).data('type'),
-                        method: $(this).data('method'),
-                        ref: $(this).data('ref'),
-                        name: $(this).data('name'),
-                        ws: $(this).data('ws'),
-                        action: $(this).data('action')
-                    },
+                            id: $(this).data('id'),
+                            type: $(this).data('type'),
+                            method: $(this).data('method'),
+                            ref: $(this).data('ref'),
+                            name: $(this).data('name'),
+                            ws: $(this).data('ws'),
+                            action: $(this).data('action')
+                        },
                         contentDiv = $('<div>');
 
                     tabs.addTab({
@@ -332,25 +357,27 @@ define([
 
             // takes table spec, returns datatables column settings
             function getColSettings(tab) {
-                var settings = [];
+                const settings = [];
 
-                var cols = tab.columns;
+                const cols = tab.columns;
 
-                for (var i = 0; i < cols.length; i++) {
-                    var col = cols[i];
-                    var key = col.key,
+                for (let i = 0; i < cols.length; i++) {
+                    const col = cols[i];
+                    const key = col.key,
                         type = col.type,
                         format = col.linkformat,
                         method = col.method,
                         action = col.action;
 
-                    var config = {
+                    const config = {
                         sTitle: col.label,
                         sDefaultContent: '-',
-                        mData: ref(key, type, format, method, action)
+                        mData: ref(key, type, format, method, action, content.na())
                     };
 
-                    if (col.width) config.sWidth = col.width;
+                    if (col.width) {
+                        config.sWidth = col.width;
+                    }
 
                     settings.push(config);
                 }
@@ -358,7 +385,7 @@ define([
                 return settings;
             }
 
-            function ref(key, type, format, method) {
+            function ref(key, type, format, method, action, defaultContent) {
                 return function (d) {
                     if (type === 'tabLink' && format === 'dispIDCompart') {
                         var dispid = d[key];
@@ -388,11 +415,11 @@ define([
                     } else if (type === 'wstype' && format === 'dispWSRef') {
                         var ref = refLookup[d[key]];
                         // TODO: add testhook field here
-                        if (ref && ref.link) {
+                        if (ref && ref.ref) {
                             return (
                                 '<a href="' +
                                 DATAVIEW_URL +
-                                ref.link +
+                                ref.ref +
                                 '" target="_blank" ' +
                                 '" class="id-click"' +
                                 '" data-ws="' +
@@ -420,6 +447,7 @@ define([
                     var value = d[key];
 
                     if ($.isArray(value)) {
+                        
                         if (type === 'tabLinkArray') {
                             return span(
                                 {
@@ -436,35 +464,39 @@ define([
                         );
                     }
 
+                    const displayValue = (() => {
+                        if (defaultContent) {
+                            return value || defaultContent;
+                        }
+                        return value;
+                    })();
+
                     return span(
                         {
                             dataKBTesthookField: key
                         },
-                        value
+                        displayValue
                     );
                 };
             }
 
-            function tabLinkArray(a, method) {
-                var links = [];
-                a.forEach(function (d) {
-                    var dispid = d.id;
-                    if ('dispid' in d) {
-                        dispid = d.dispid;
-                    }
-                    links.push(
-                        a(
-                            {
-                                class: 'id-click',
-                                dataId: d.id,
-                                dataMethod: method
-                            },
-                            dispid
-                        )
-                        // '<a class="id-click" data-id="' + d.id + '" data-method="' + method + '">' + dispid + '</a>'
+            function tabLinkArray(tabArray, method) {
+                return tabArray.map(function (d) {
+                    const dispid = d.dispid || d.id;
+                    return a(
+                        {
+                            class: 'id-click',
+                            dataId: d.id,
+                            dataMethod: method,
+                            style: {
+                                cursor: 'pointer'
+                            }
+                        },
+                        dispid
                     );
-                });
-                return links.join(', ');
+                    // '<a class="id-click" data-id="' + d.id + '" data-method="' + method + '">' + dispid + '</a>'
+                })
+                    .join(', ');
             }
 
             this.verticalTable = function (p) {
@@ -516,27 +548,26 @@ define([
                         r.append('<td>' + value + '</td>');
                     } else if ('key' in row) {
                         if (row.type === 'wstype') {
-                            var ref = data[row.key];
+                            const ref = data[row.key];
 
-                            var cell = $('<td data-ref="' + ref + '">loading...</td>');
+                            const cell = $('<td data-ref="' + ref + '">loading...</td>');
                             r.append(cell);
 
                             getLink(ref)
-                                .then(function (info) {
-                                    var name = info.url.split('/')[1];
-                                    var ref = info.ref;
+                                .then(function ({ref, name}) {
                                     table
                                         .find('[data-ref=\'' + ref + '\']')
                                         .html(
-                                            '<a href="' + DATAVIEW_URL + info.url + '" target="_blank">' + name + '</a>'
+                                            '<a href="' + DATAVIEW_URL + ref + '" target="_blank">' + name + '</a>'
                                         );
                                     return null;
                                 })
-                                .catch(function (err) {
+                                .catch((err) => {
                                     console.error(err);
                                     return null;
                                 });
                         } else {
+                            // Plain column
                             r.append('<td data-k-b-testhook-field="' + row.key + '">' + data[row.key] + '</td>');
                         }
                     } else if (row.type === 'pictureEquation') {
@@ -610,12 +641,12 @@ define([
 
             var imageURL = 'http://bioseed.mcs.anl.gov/~chenry/jpeg/';
             this.pictureEquation = function (eq) {
-                var cpds = get_cpds(eq);
-                var panel = $('<div></div>');
+                const cpds = get_cpds(eq);
+                const panel = $('<div></div>');
 
-                for (var i = 0; i < cpds.left.length; i++) {
-                    var cpd = cpds.left[i];
-                    var img_url = imageURL + cpd + '.jpeg';
+                for (let i = 0; i < cpds.left.length; i++) {
+                    const cpd = cpds.left[i];
+                    const img_url = imageURL + cpd + '.jpeg';
                     /* TODO: this is going to fail ... there is no panel node around unless it is set globally in some dependency ... */
                     panel.append(
                         '<div class="pull-left text-center">\
@@ -630,7 +661,7 @@ define([
                                 </div>'
                     );
 
-                    var plus = $('<div class="pull-left text-center">+</div>');
+                    const plus = $('<div class="pull-left text-center">+</div>');
                     plus.css('margin', '30px 0 0 0');
 
                     if (i < cpds.left.length - 1) {
@@ -642,9 +673,9 @@ define([
                 direction.css('margin', '25px 0 0 0');
                 panel.append(direction);
 
-                for (var i = 0; i < cpds.right.length; i++) {
-                    var cpd = cpds.right[i];
-                    var img_url = imageURL + cpd + '.jpeg';
+                for (let i = 0; i < cpds.right.length; i++) {
+                    const cpd = cpds.right[i];
+                    const img_url = imageURL + cpd + '.jpeg';
                     panel.append(
                         '<div class="pull-left text-center">\
                                     <img src="' +
@@ -698,13 +729,16 @@ define([
             }
 
             function getLink(ref) {
-                return self.workspaceClient.get_object_info_new({ objects: [{ ref: ref }] }).then(function (data) {
-                    var a = data[0];
-                    return {
-                        url: a[7] + '/' + a[1],
-                        ref: a[6] + '/' + a[0] + '/' + a[4]
-                    };
-                });
+                return self.workspaceClient.get_object_info_new({
+                    objects: [{ ref }]
+                })
+                    .then(([objectInfo]) => {
+                        return {
+                            url: objectInfo[7] + '/' + objectInfo[1],
+                            ref: objectInfo[6] + '/' + objectInfo[0] + '/' + objectInfo[4],
+                            name: objectInfo[1]
+                        };
+                    });
             }
 
             return this;

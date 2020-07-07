@@ -1,7 +1,8 @@
 define([
     'kb_lib/html',
     'collapsiblePanel',
-    'kb_lib/jsonRpc/dynamicServiceClient'],
+    'kb_lib/jsonRpc/dynamicServiceClient'
+],
 function (
     html,
     collapsiblePanel,
@@ -51,12 +52,13 @@ function (
         start({ workspaceId, objectId, objectVersion, objectInfo }) {
             // In the relation engine, we use ':' as the delimiter
             const upa = [workspaceId, objectId, objectVersion || '1'].join(':');
-            this.container.innerHTML = collapsiblePanel({
-                title: 'Similar Data',
-                content: this.dataLayout({ upa }),
-                icon: 'copy',
-                collapsed: true
-            });
+            // this.container.innerHTML = collapsiblePanel({
+            //     title: 'Similar Data',
+            //     content: this.dataLayout({ upa }),
+            //     icon: 'copy',
+            //     collapsed: true
+            // });
+            this.container.innerHTML = this.dataLayout();
             const iframeElm = this.container.querySelector('iframe');
             const config = {
                 upa,

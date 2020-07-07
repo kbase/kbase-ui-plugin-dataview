@@ -3,40 +3,49 @@ define([
     'bluebird',
     'kb_service/client/workspace',
     'widgets/modeling/modelSeedPathway',
+    'content',
+
+    // for effect
     'kbaseUI/widget/legacy/widget',
     'kbaseUI/widget/legacy/tabs'
-], function ($, Promise, Workspace, ModelSeedPathway) {
+], function (
+    $,
+    Promise,
+    Workspace,
+    ModelSeedPathway,
+    content
+) {
     'use strict';
     $.KBWidget({
         name: 'kbasePathways',
         version: '1.0.0',
         init: function (options) {
-            var self = this;
-            var imageWorkspace = 'nconrad:kegg',
+            const self = this;
+            const imageWorkspace = 'nconrad:kegg',
                 mapWorkspace = 'nconrad:pathwaysjson',
                 container = this.$elem;
-            var models = options.models,
+            const models = options.models,
                 fbas = options.fbas;
             // add tabs
-            var selectionTable = $('<table class="table table-bordered table-striped">');
-            var tabs = container.kbTabs({
+            const selectionTable = $('<table class="table table-bordered table-striped">');
+            const tabs = container.kbTabs({
                 tabs: [{ name: 'Selection', content: selectionTable, active: true }]
             });
             this.runtime = options.runtime;
             this.workspaceClient = new Workspace(this.runtime.config('services.workspace.url'), {
                 token: this.runtime.service('session').getAuthToken()
             });
-            this.load_map_list = function () {
+            this.load_map_list = () => {
                 // load table for maps
                 container.loading();
-                return self.workspaceClient
+                return this.workspaceClient
                     .list_objects({
                         workspaces: [mapWorkspace],
                         includeMetadata: 1
                     })
-                    .then(function (data) {
+                    .then((data) => {
                         container.rmLoading();
-                        var tableSettings = {
+                        const tableSettings = {
                             aaData: data,
                             fnDrawCallback: events,
                             aaSorting: [[1, 'asc']],
@@ -59,10 +68,11 @@ define([
                                     sTitle: 'Rxn Count',
                                     sWidth: '10%',
                                     mData: function (data) {
-                                        if ('reaction_ids' in data[10]) {
-                                            return data[10].reaction_ids.split(',').length;
+                                        const metadata = data[10];
+                                        if ('Number reactions' in metadata) {
+                                            return parseInt(metadata['Number reactions']);
                                         } else {
-                                            return 'N/A';
+                                            return content.na();
                                         }
                                     }
                                 },
@@ -70,10 +80,11 @@ define([
                                     sTitle: 'Cpd Count',
                                     sWidth: '10%',
                                     mData: function (data) {
-                                        if ('compound_ids' in data[10]) {
-                                            return data[10].compound_ids.split(',').length;
+                                        const metadata = data[10];
+                                        if ('Number compounds' in metadata) {
+                                            return parseInt(metadata['Number compounds']);
                                         } else {
-                                            return 'N/A';
+                                            return content.na();
                                         }
                                     }
                                 },

@@ -1,15 +1,21 @@
 define([
     'bluebird',
+    'jquery',
     'preact',
     'kb_lib/html',
+    'kb_lib/htmlBootstrapBuilders',
     'kbaseUI/widget/widgetSet',
     'utils',
     'collapsiblePanel',
-    'components/error'
+    'components/error',
+
+    'bootstrap'
 ], function (
     Promise,
+    $,
     preact,
     html,
+    BS,
     WidgetSet,
     utils,
     collapsiblePanel,
@@ -28,61 +34,73 @@ define([
         const  widgetSet = runtime.service('widget').newWidgetSet();
 
         function renderPanel() {
-            return div(
+            const tabs = [
                 {
-                    class: 'kbase-view kbase-dataview-view container-fluid',
-                    dataKbaseView: 'dataview',
-                    dataKBTesthookPlugin: 'dataview'
-                },
-                [
-                    div({ class: 'row' }, [
-                        div({ class: 'col-sm-12' }, [
-                            // div({ id: widgetSet.addWidget('kb_dataview_download') }),
-                            div({ id: widgetSet.addWidget('kb_dataview_copy') }),
-                            div({ id: widgetSet.addWidget('kb_dataview_overview') }),
-                            collapsiblePanel({
-                                title: 'Data Provenance and Reference Network',
-                                icon: 'sitemap',
-                                content: div({ id: widgetSet.addWidget('kb_dataview_provenance') })
-                            }),
-                            // (function () {
-                            //     if (runtime.featureEnabled('new_provenance_widget')) {
-                            //         return collapsiblePanel({
-                            //             title: 'Data Provenance and Reference Network ... in Progress',
-                            //             icon: 'sitemap',
-                            //             content: div({ id: widgetSet.addWidget('kb_dataview_provenance_v2') })
-                            //         });
-                            //     } else {
-                            //         return null;
-                            //     }
-                            // })(),
-                            (function () {
-                                if (runtime.featureEnabled('similar_genomes')) {
-                                    return div({ id: widgetSet.addWidget('kb_dataview_relatedData') });
-                                }
-                            })(),
-                            (function () {
-                                if (runtime.featureEnabled('linked-samples')) {
-                                    return collapsiblePanel({
-                                        title: 'Linked Samples',
-                                        icon: 'link',
-                                        content: div({ id: widgetSet.addWidget('kb_dataview_linkedSamples') })
-                                    });
-                                    // return div({ id: widgetSet.addWidget('kb_dataview_linkedSamples') });
-                                }
-                            })(),
-                            div({
-                                id: widgetSet.addWidget('kb_dataview_dataObjectVisualizer'),
-                                dataKBTesthookWidget: 'dataObjectVisualizer'
-                            })
-                        ])
+                    name: 'main',
+                    title: 'Data View',
+                    content: div({
+                        id: widgetSet.addWidget('kb_dataview_dataObjectVisualizer'),
+                        dataKBTesthookWidget: 'dataObjectVisualizer'
+                    })
+                }, {
+                    name: 'provenance',
+                    title: 'Provenance',
+                    content: div({
+                        id: widgetSet.addWidget('kb_dataview_provenance')
+                    })
+                }
+            ];
+
+            if (runtime.featureEnabled('similar_genomes')) {
+                tabs.push({
+                    name: 'relatedData',
+                    title: 'Related Data',
+                    content: div({
+                        id: widgetSet.addWidget('kb_dataview_relatedData')
+                    })
+                });
+            }
+
+            if (runtime.featureEnabled('linked-samples')) {
+                tabs.push({
+                    name: 'linkedSamples',
+                    title: 'Linked Samples',
+                    content: div({
+                        id: widgetSet.addWidget('kb_dataview_linkedSamples')
+                    })
+                });
+            }
+
+            return div({
+                class: 'kbase-view kbase-dataview-view container-fluid',
+                dataKbaseView: 'dataview',
+                dataKBTesthookPlugin: 'dataview'
+            }, [
+                div({
+                    class: 'row',
+                    style: {
+                        marginTop: '10px'
+                    }
+                }, [
+                    div({ class: 'col-sm-12' }, [
+                        // div({ id: widgetSet.addWidget('kb_dataview_download') }),
+                        div({ id: widgetSet.addWidget('kb_dataview_copy') }),
+                        div({ id: widgetSet.addWidget('kb_dataview_overview') }),
+                        BS.buildTabs({
+                            tabs,
+                            id: 'mainTabs'
+                        }).content
                     ])
-                ]
-            );
+                ])
+            ]);
         }
 
         function init(config) {
             layout = renderPanel();
+            $('#mainTabs a').click(function (e) {
+                e.preventDefault();
+                $(this).tab('show');
+            });
             return widgetSet.init(config);
         }
 

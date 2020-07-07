@@ -1,55 +1,19 @@
-/*
-
- var dataset = [];
-
- var points = 200;
-
- var randomColor = function() {
- var colors = ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow', 'orange', 'black'];
- return colors[Math.floor(Math.random() * colors.length)];
- }
-
- var randomShape = function() {
- //return 'circle';
- var shapes = ['circle', 'circle', 'circle', 'circle', 'circle', 'circle', 'square', 'triangle-up', 'triangle-down', 'diamond', 'cross'];
- return shapes[Math.floor(Math.random() * shapes.length)];
- }
-
- for (var idx = 0; idx < points; idx++) {
- dataset.push(
- {
- x : Math.random() * 500,
- y : Math.random() * 500,
- weight : Math.random() * 225,
- color : randomColor(),
- label : 'Data point ' + idx,
- shape : randomShape(),
- }
- );
- }
-
- var $scatter = $('#scatterplot').css({width : '800px', height : '500px'}).kbaseScatterplot(
- {
- scaleAxes   : true,
-
- //xLabel      : 'Some useful experiment',
- //yLabel      : 'Meaningful data',
-
- dataset : dataset,
-
- }
- );
-
- */
 define([
     'jquery',
     'd3',
     'bluebird',
     'kb_service/client/workspace',
+
+    // for effect
     '../kbaseBarchart',
     '../../legacy/authenticatedWidget',
     'bootstrap'
-], function ($, d3, Promise, Workspace) {
+], function (
+    $,
+    d3,
+    Promise,
+    Workspace
+) {
     'use strict';
 
     $.KBWidget({
@@ -113,7 +77,7 @@ define([
                                             .append('&nbsp;')
                                     )
                                     .append(group)
-                                    .on('click', function (e) {
+                                    .on('click', function () {
                                         /*var isOpen = $(this).parent().hasClass('open');
                                      $pmi.data('formElem').find('.btn-group').removeClass('open');
                                      if (! isOpen) {
@@ -184,8 +148,8 @@ define([
                                     .attr('type', 'button')
                                     .addClass('btn btn-sm btn-default dropdown-toggle')
                                     .append($.jqElem('span').addClass('fa fa-caret-up'))
-                                    .on('click', function (e) {
-                                        var isOpen = $(this)
+                                    .on('click', function () {
+                                        const isOpen = $(this)
                                             .parent()
                                             .hasClass('open');
                                         $pmi.data('formElem')
@@ -258,7 +222,7 @@ define([
                                         .attr('type', 'checkbox')
                                         .attr('value', func)
                                         .addClass('subsystem-checkbox')
-                                        .on('change', function (e) {
+                                        .on('change', function () {
                                             return;
                                             // var $check = $(this).closest('.btn-group').find('.check');
                                             // if (this.checked) {
@@ -306,7 +270,7 @@ define([
             this.setValueForKey('dataset', newDataset);
 
             if (this.data('barchart') && this.options.selected_subsystems) {
-                //this.displaySubsystems(this.options.selected_subsystems);
+                this.displaySubsystems(this.options.selected_subsystems);
             }
         },
         setBarchartDataset: function setBarchartDataset(newDataset, legend) {
@@ -597,29 +561,26 @@ define([
                 })
             );
 
-            var $barchart = this.data('barchart');
+            const $barchart = this.data('barchart');
             $barchart.superYDomain = $barchart.defaultYDomain;
             $barchart.defaultYDomain = function () {
-                var domain = $barchart.superYDomain();
-
-                var max = Math.max(Math.abs(domain[0]), Math.abs(domain[1]));
-
+                const domain = $barchart.superYDomain();
+                const max = Math.max(Math.abs(domain[0]), Math.abs(domain[1]));
                 return [-max, max];
             };
 
             $barchart.superRenderChart = $barchart.renderChart;
             $barchart.renderChart = function () {
                 $barchart.superRenderChart();
-
                 this.D3svg()
                     .selectAll('.xAxis .tick text')
-                    .data(this.dataset())
+                    .data(this.dataset() || [])
                     .on('mouseover', function (L, i) {
                         $barchart.showToolTip({
                             label: $barchart.dataset()[i].tooltip[0]
                         });
                     })
-                    .on('mouseout', function (d) {
+                    .on('mouseout', function () {
                         $barchart.hideToolTip();
                     });
             };

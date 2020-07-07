@@ -4,7 +4,11 @@ define([
     'widgets/modeling/KBModeling',
     'widgets/modeling/kbasePathways',
     'kbaseUI/widget/visWidgets/plants/pmiBarchart'
-], function ($, Workspace, KBModeling) {
+], function (
+    $,
+    Workspace,
+    KBModeling
+) {
     'use strict';
 
     function KBaseFBA_FBA(modeltabs) {
@@ -403,13 +407,13 @@ define([
             if (self.data.maximizeObjective === 1) {
                 this.usermeta.objectivefunction = 'Maximize{';
             }
-            for (var key in self.data.compoundflux_objterms) {
+            for (const key in self.data.compoundflux_objterms) {
                 this.usermeta.objectivefunction += ' (' + self.data.compoundflux_objterms[key] + ') ' + key;
             }
-            for (var key in self.data.reactionflux_objterms) {
+            for (const key in self.data.reactionflux_objterms) {
                 this.usermeta.objectivefunction += ' (' + self.data.reactionflux_objterms[key] + ') ' + key;
             }
-            for (var key in self.data.biomassflux_objterms) {
+            for (const key in self.data.biomassflux_objterms) {
                 this.usermeta.objectivefunction += ' (' + self.data.biomassflux_objterms[key] + ') ' + key;
             }
             this.usermeta.objectivefunction += '}';
@@ -428,35 +432,35 @@ define([
                 self.data.FBAReactionVariables[i].ko = 0;
                 this.rxnhash[rxnid] = self.data.FBAReactionVariables[i];
             }
-            for (var i = 0; i < self.data.reactionKO_refs.length; i++) {
-                var rxnid = self.data.reactionKO_refs[i].split('/').pop();
+            for (let i = 0; i < self.data.reactionKO_refs.length; i++) {
+                const rxnid = self.data.reactionKO_refs[i].split('/').pop();
                 this.rxnhash[rxnid].ko = 1;
             }
             this.cpdhash = {};
-            for (var i = 0; i < self.data.FBACompoundVariables.length; i++) {
-                var cpdid = self.data.FBACompoundVariables[i].modelcompound_ref.split('/').pop();
+            for (let i = 0; i < self.data.FBACompoundVariables.length; i++) {
+                const cpdid = self.data.FBACompoundVariables[i].modelcompound_ref.split('/').pop();
                 self.data.FBACompoundVariables[i].additionalcpd = 0;
                 this.cpdhash[cpdid] = self.data.FBACompoundVariables[i];
             }
-            for (var i = 0; i < self.data.additionalCpd_refs.length; i++) {
-                var cpdid = self.data.additionalCpd_refs[i].split('/').pop();
+            for (let i = 0; i < self.data.additionalCpd_refs.length; i++) {
+                const cpdid = self.data.additionalCpd_refs[i].split('/').pop();
                 this.cpdhash[cpdid].additionalcpd = 1;
             }
             this.biohash = {};
-            for (var i = 0; i < self.data.FBABiomassVariables.length; i++) {
-                var bioid = self.data.FBABiomassVariables[i].biomass_ref.split('/').pop();
+            for (let i = 0; i < self.data.FBABiomassVariables.length; i++) {
+                const bioid = self.data.FBABiomassVariables[i].biomass_ref.split('/').pop();
                 this.biohash[bioid] = self.data.FBABiomassVariables[i];
             }
             this.maxpod = 0;
             this.metprodhash = {};
-            for (var i = 0; i < this.FBAMetaboliteProductionResults.length; i++) {
+            for (let i = 0; i < this.FBAMetaboliteProductionResults.length; i++) {
                 this.tabList[4].columns[5].visible = 1;
-                var metprod = self.data.FBAMetaboliteProductionResults[i];
-                var cpdid = metprod.modelcompound_ref.split('/').pop();
+                const metprod = self.data.FBAMetaboliteProductionResults[i];
+                const cpdid = metprod.modelcompound_ref.split('/').pop();
                 this.metprodhash[cpdid] = metprod;
             }
             this.genehash = {};
-            for (var i = 0; i < this.modelgenes.length; i++) {
+            for (let i = 0; i < this.modelgenes.length; i++) {
                 this.genehash[this.modelgenes[i].id] = this.modelgenes[i];
                 this.genehash[this.modelgenes[i].id].ko = 0;
             }
@@ -466,22 +470,22 @@ define([
              this.genehash[geneid].ko = 1;
              }*/
             this.delhash = {};
-            for (var i = 0; i < self.data.FBADeletionResults.length; i++) {
-                var geneid = self.data.FBADeletionResults[i].feature_refs[0].split('/').pop();
+            for (let i = 0; i < self.data.FBADeletionResults.length; i++) {
+                const geneid = self.data.FBADeletionResults[i].feature_refs[0].split('/').pop();
                 this.delhash[geneid] = self.data.FBADeletionResults[i];
             }
             this.cpdboundhash = {};
-            for (var i = 0; i < self.data.FBACompoundBounds.length; i++) {
-                var cpdid = self.data.FBACompoundBounds[i].modelcompound_ref.split('/').pop();
+            for (let i = 0; i < self.data.FBACompoundBounds.length; i++) {
+                const cpdid = self.data.FBACompoundBounds[i].modelcompound_ref.split('/').pop();
                 this.cpdboundhash[cpdid] = self.data.FBACompoundBounds[i];
             }
             this.rxnboundhash = {};
-            for (var i = 0; i < self.data.FBAReactionBounds.length; i++) {
-                var rxnid = self.data.FBAReactionBounds[i].modelreaction_ref.split('/').pop();
+            for (let i = 0; i < self.data.FBAReactionBounds.length; i++) {
+                const rxnid = self.data.FBAReactionBounds[i].modelreaction_ref.split('/').pop();
                 this.rxnboundhash[rxnid] = self.data.FBAReactionBounds[i];
             }
-            for (var i = 0; i < this.modelgenes.length; i++) {
-                var mdlgene = this.modelgenes[i];
+            for (let i = 0; i < this.modelgenes.length; i++) {
+                const mdlgene = this.modelgenes[i];
                 if (this.genehash[mdlgene.id]) {
                     mdlgene.ko = this.genehash[mdlgene.id].ko;
                 }
@@ -489,10 +493,10 @@ define([
                     mdlgene.growthFraction = this.delhash[mdlgene.id].growthFraction;
                 }
             }
-            var exp_state = 0;
-            var exp_value = 0;
-            for (var i = 0; i < this.modelreactions.length; i++) {
-                var mdlrxn = this.modelreactions[i];
+            let exp_state = 0;
+            let exp_value = 0;
+            for (let i = 0; i < this.modelreactions.length; i++) {
+                const mdlrxn = this.modelreactions[i];
                 if (this.rxnhash[mdlrxn.id]) {
                     if ('exp_state' in this.rxnhash[mdlrxn.id]) {
                         mdlrxn.exp_state = this.rxnhash[mdlrxn.id].exp_state;
@@ -540,8 +544,8 @@ define([
             }
             this.compoundFluxes = [];
             this.cpdfluxhash = {};
-            for (var i = 0; i < this.modelcompounds.length; i++) {
-                var mdlcpd = this.modelcompounds[i];
+            for (let i = 0; i < this.modelcompounds.length; i++) {
+                const mdlcpd = this.modelcompounds[i];
                 if (this.cpdhash[mdlcpd.id]) {
                     mdlcpd.exchangerxn = ' => ' + mdlcpd.name + '[e]';
                     mdlcpd.upperFluxBound = this.cpdhash[mdlcpd.id].upperBound;
@@ -569,8 +573,8 @@ define([
                     }
                 }
             }
-            for (var i = 0; i < this.biomasses.length; i++) {
-                var bio = this.biomasses[i];
+            for (let i = 0; i < this.biomasses.length; i++) {
+                const bio = this.biomasses[i];
                 if (this.biohash[bio.id]) {
                     bio.upperFluxBound = this.biohash[bio.id].upperBound;
                     bio.lowerFluxBound = this.biohash[bio.id].lowerBound;
@@ -592,8 +596,8 @@ define([
                 bio.disp_low_flux = bio.fluxMin + '<br>(' + bio.lowerFluxBound + ')';
                 bio.disp_high_flux = bio.fluxMax + '<br>(' + bio.upperFluxBound + ')';
             }
-            for (var i = 0; i < this.biomasscpds.length; i++) {
-                var biocpd = this.biomasscpds[i];
+            for (let i = 0; i < this.biomasscpds.length; i++) {
+                const biocpd = this.biomasscpds[i];
                 if (this.biohash[biocpd.biomass]) {
                     biocpd.bioflux = this.biohash[biocpd.biomass].flux;
                 }
@@ -613,16 +617,12 @@ define([
                 //otherwise, do nothing. Assume we'll attempt this if we've been given tabs.
                 if (tabs !== undefined) {
                     self.workspaceClient
-                        .get_objects([{ ref: self.model.template_ref }])
+                        .get_objects([{
+                            ref: self.model.template_ref
+                        }])
                         .then(function (data) {
-                            var $usePlantModel = 0;
-
-                            if (data[0].info[1] === 'PlantModelTemplate') {
-                                $usePlantModel = 1;
-                                //tabs.$elem.find('[data-id=Pathways]').hide();
-                            }
-
-                            var $barchartElem = $.jqElem('div');
+                            const $usePlantModel = data[0].info[1] === 'PlantModelTemplate' ? 1 : 0;
+                            const $barchartElem = $.jqElem('div');
                             $barchartElem.kbasePMIBarchart({
                                 runtime: self.runtime,
                                 fba_workspace: self.workspace,
@@ -731,9 +731,9 @@ define([
         };
 
         this.GeneTab = function (info) {
-            var output = self.model.GeneTab(info);
+            const output = self.model.GeneTab(info);
             if (output && 'done' in output) {
-                return output.then(function (data) {
+                return output.then((data) => {
                     return self.ExtendGeneTab(info, data);
                 });
             }
@@ -741,9 +741,9 @@ define([
         };
 
         this.ExtendGeneTab = function (info, data) {
-            var gene = self.genehash[info.id];
+            const gene = self.genehash[info.id];
             data.push({
-                label: 'Gene knocked out',
+                label: 'Gene knocked OUT',
                 data: gene.ko
             });
             data.push({

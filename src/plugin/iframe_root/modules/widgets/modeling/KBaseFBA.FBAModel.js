@@ -420,7 +420,7 @@ define([
         };
 
         this.CompoundTab = function (info) {
-            var cpd = self.cpdhash[info.id];
+            const cpd = self.cpdhash[info.id];
             var output = [
                 {
                     label: 'Compound',
@@ -604,8 +604,8 @@ define([
             this.gfhash = {};
             this.biochemws = 'kbase';
             this.biochem = 'default';
-            var gfobjects = [];
-            for (var i = 0; i < this.gapfillings.length; i++) {
+            const gfobjects = [];
+            for (let i = 0; i < this.gapfillings.length; i++) {
                 this.gapfillings[i].simpid = 'gf.' + (i + 1);
                 if ('fba_ref' in this.gapfillings[i] && this.gapfillings[i].fba_ref.length > 0) {
                     gfobjects.push({ ref: this.gapfillings[i].fba_ref });
@@ -614,8 +614,8 @@ define([
                 }
                 this.gfhash[this.gapfillings[i].simpid] = this.gapfillings[i];
             }
-            for (var i = 0; i < this.modelcompartments.length; i++) {
-                var cmp = this.modelcompartments[i];
+            for (let i = 0; i < this.modelcompartments.length; i++) {
+                const cmp = this.modelcompartments[i];
                 cmp.cmpkbid = cmp.compartment_ref.split('/').pop();
                 if (cmp.cmpkbid === 'd') {
                     this.biochem = 'plantdefault';
@@ -623,9 +623,9 @@ define([
                 cmp.name = self.cmpnamehash[cmp.cmpkbid];
                 this.cmphash[cmp.id] = cmp;
             }
-            for (var i = 0; i < this.modelcompounds.length; i++) {
-                var cpd = this.modelcompounds[i];
-                var idarray = cpd.id.split('_');
+            for (let i = 0; i < this.modelcompounds.length; i++) {
+                const cpd = this.modelcompounds[i];
+                const idarray = cpd.id.split('_');
                 cpd.dispid = idarray[0] + '[' + idarray[1] + ']';
                 cpd.cmpkbid = cpd.modelcompartment_ref.split('/').pop();
                 cpd.cpdkbid = cpd.compound_ref.split('/').pop();
@@ -635,23 +635,23 @@ define([
                 cpd.name = cpd.name.replace(/_[a-zA-z]\d+$/, '');
                 this.cpdhash[cpd.id] = cpd;
                 if (cpd.cpdkbid !== 'cpd00000') {
-                    var array = cpd.compound_ref.split('/');
+                    // const array = cpd.compound_ref.split('/');
                     this.cpdhash[cpd.cpdkbid + '_' + cpd.cmpkbid] = cpd;
                     if (idarray[0] !== cpd.cpdkbid) {
                         cpd.dispid += '<br>(' + cpd.cpdkbid + ')';
                     }
                 }
             }
-            for (var i = 0; i < this.biomasses.length; i++) {
+            for (let i = 0; i < this.biomasses.length; i++) {
                 var biomass = this.biomasses[i];
                 this.biohash[biomass.id] = biomass;
                 biomass.dispid = biomass.id;
                 var reactants = '';
                 var products = '';
                 for (var j = 0; j < biomass.biomasscompounds.length; j++) {
-                    var biocpd = biomass.biomasscompounds[j];
+                    const biocpd = biomass.biomasscompounds[j];
                     biocpd.id = biocpd.modelcompound_ref.split('/').pop();
-                    var idarray = biocpd.id.split('_');
+                    const idarray = biocpd.id.split('_');
                     biocpd.dispid = idarray[0] + '[' + idarray[1] + ']';
                     biocpd.name = this.cpdhash[biocpd.id].name;
                     biocpd.formula = this.cpdhash[biocpd.id].formula;
@@ -671,33 +671,33 @@ define([
                             '<a class="id-click" data-id="' +
                             biocpd.cpdkbid +
                             '" data-method="CompoundTab">' +
-                            this.cpdhash[biocpd.cpdkbid].name +
+                            this.cpdhash[biocpd.id].name +
                             '[' +
-                            this.cpdhash[biocpd.cpdkbid].cmpkbid +
+                            this.cpdhash[biocpd.id].cmpkbid +
                             ']</a>';
                     } else {
                         if (products.length > 0) {
                             products += ' + ';
                         }
                         if (biocpd.coefficient !== 1) {
-                            var abscoef = Math.round(100 * biocpd.coefficient) / 100;
+                            const abscoef = Math.round(100 * biocpd.coefficient) / 100;
                             products += '(' + abscoef + ') ';
                         }
                         products +=
                             '<a class="id-click" data-id="' +
                             biocpd.cpdkbid +
                             '" data-method="CompoundTab">' +
-                            this.cpdhash[biocpd.cpdkbid].name +
+                            this.cpdhash[biocpd.id].name +
                             '[' +
-                            this.cpdhash[biocpd.cpdkbid].cmpkbid +
+                            this.cpdhash[biocpd.id].cmpkbid +
                             ']</a>';
                     }
                 }
                 biomass.equation = reactants + ' => ' + products;
             }
-            for (var i = 0; i < this.modelreactions.length; i++) {
+            for (let i = 0; i < this.modelreactions.length; i++) {
                 var rxn = this.modelreactions[i];
-                var idarray = rxn.id.split('_');
+                const idarray = rxn.id.split('_');
                 rxn.dispid = idarray[0] + '[' + idarray[1] + ']';
                 rxn.rxnkbid = rxn.reaction_ref.split('/').pop();
                 rxn.rxnkbid = rxn.rxnkbid.replace(/_[a-zA-z]/, '');
@@ -714,9 +714,9 @@ define([
                         rxn.dispid += '<br>(' + rxn.rxnkbid + ')';
                     }
                 }
-                var reactants = '';
-                var products = '';
-                var sign = '<=>';
+                let reactants = '';
+                let products = '';
+                let sign = '<=>';
                 if (rxn.direction === '>') {
                     sign = '=>';
                 } else if (rxn.direction === '<') {
@@ -725,15 +725,15 @@ define([
                 if (rxn.modelReactionProteins > 0) {
                     rxn.gpr = '';
                 }
-                for (var j = 0; j < rxn.modelReactionReagents.length; j++) {
-                    var rgt = rxn.modelReactionReagents[j];
+                for (let j = 0; j < rxn.modelReactionReagents.length; j++) {
+                    const rgt = rxn.modelReactionReagents[j];
                     rgt.cpdkbid = rgt.modelcompound_ref.split('/').pop();
                     if (rgt.coefficient < 0) {
                         if (reactants.length > 0) {
                             reactants += ' + ';
                         }
                         if (rgt.coefficient !== -1) {
-                            var abscoef = Math.round(-1 * 100 * rgt.coefficient) / 100;
+                            const abscoef = Math.round(-1 * 100 * rgt.coefficient) / 100;
                             reactants += '(' + abscoef + ') ';
                         }
                         reactants += this.cpdhash[rgt.cpdkbid].name + '[' + this.cpdhash[rgt.cpdkbid].cmpkbid + ']';
@@ -742,21 +742,21 @@ define([
                             products += ' + ';
                         }
                         if (rgt.coefficient !== 1) {
-                            var abscoef = Math.round(100 * rgt.coefficient) / 100;
+                            const abscoef = Math.round(100 * rgt.coefficient) / 100;
                             products += '(' + abscoef + ') ';
                         }
                         products += this.cpdhash[rgt.cpdkbid].name + '[' + this.cpdhash[rgt.cpdkbid].cmpkbid + ']';
                     }
                 }
                 rxn.ftrhash = {};
-                for (var j = 0; j < rxn.modelReactionProteins.length; j++) {
-                    var prot = rxn.modelReactionProteins[j];
+                for (let j = 0; j < rxn.modelReactionProteins.length; j++) {
+                    const prot = rxn.modelReactionProteins[j];
                     if (j > 0) {
                         rxn.gpr += ' or ';
                     }
                     rxn.gpr += '(';
-                    for (var k = 0; k < prot.modelReactionProteinSubunits.length; k++) {
-                        var subunit = prot.modelReactionProteinSubunits[k];
+                    for (let k = 0; k < prot.modelReactionProteinSubunits.length; k++) {
+                        const subunit = prot.modelReactionProteinSubunits[k];
                         if (k > 0) {
                             rxn.gpr += ' and ';
                         }
@@ -764,8 +764,8 @@ define([
                         if (subunit.feature_refs.length === 0) {
                             rxn.gpr += 'Unknown';
                         }
-                        for (var m = 0; m < subunit.feature_refs.length; m++) {
-                            var ftrid = subunit.feature_refs[m].split('/').pop();
+                        for (let m = 0; m < subunit.feature_refs.length; m++) {
+                            const ftrid = subunit.feature_refs[m].split('/').pop();
                             rxn.ftrhash[ftrid] = 1;
                             if (m > 0) {
                                 rxn.gpr += ' or ';
