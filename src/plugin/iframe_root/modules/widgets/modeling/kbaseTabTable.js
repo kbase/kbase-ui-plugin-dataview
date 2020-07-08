@@ -49,7 +49,7 @@ define([
             var self = this;
 
             // root url path for landing pages
-            var DATAVIEW_URL = '/#dataview/';
+            var DATAVIEW_URL = '/#dataview';
 
             var type = input.type;
 
@@ -418,6 +418,7 @@ define([
                             return (
                                 '<a href="' +
                                 DATAVIEW_URL +
+                                '/' +
                                 ref.ref +
                                 '" target="_blank" ' +
                                 '" class="id-click"' +
@@ -446,13 +447,12 @@ define([
                     var value = d[key];
 
                     if ($.isArray(value)) {
-                        
                         if (type === 'tabLinkArray') {
                             return span(
                                 {
                                     dataKBTesthookField: key
                                 },
-                                tabLinkArray(value, method)
+                                tabLinkArray(value, method) || defaultContent
                             );
                         }
                         return span(
@@ -464,10 +464,7 @@ define([
                     }
 
                     const displayValue = (() => {
-                        if (defaultContent) {
-                            return value || defaultContent;
-                        }
-                        return value;
+                        return value || defaultContent;
                     })();
 
                     return span(
@@ -486,15 +483,10 @@ define([
                         {
                             class: 'id-click',
                             dataId: d.id,
-                            dataHmm: 'hrm',
-                            dataMethod: method,
-                            style: {
-                                cursor: 'pointer'
-                            }
+                            dataMethod: method
                         },
                         dispid
                     );
-                    // '<a class="id-click" data-id="' + d.id + '" data-method="' + method + '">' + dispid + '</a>'
                 })
                     .join(', ');
             }
@@ -522,29 +514,22 @@ define([
 
                     // if the data is in the row definition, use it
                     if ('data' in row) {
-                        var value;
-                        if (type === 'tabLinkArray') {
-                            value = tabLinkArray(row.data, row.method);
-                        } else if (type === 'tabLink') {
-                            value = a(
-                                {
-                                    class: 'id-click',
-                                    dataId: row.data,
-                                    dataMethod: row.method
-                                },
-                                row.dispid
-                            );
-                            // value =
-                            //     '<a class="id-click" data-id="' +
-                            //     row.data +
-                            //     '" data-method="' +
-                            //     row.method +
-                            //     '">' +
-                            //     row.dispid +
-                            //     '</a>';
-                        } else {
-                            value = row.data;
-                        }
+                        const value = (() => {
+                            if (type === 'tabLinkArray') {
+                                return tabLinkArray(row.data, row.method);
+                            } else if (type === 'tabLink') {
+                                return a(
+                                    {
+                                        class: 'id-click',
+                                        dataId: row.data,
+                                        dataMethod: row.method
+                                    },
+                                    row.dispid
+                                );
+                            } else {
+                                return row.data;
+                            }
+                        })() || content.na();
                         r.append('<td>' + value + '</td>');
                     } else if ('key' in row) {
                         if (row.type === 'wstype') {
@@ -556,14 +541,15 @@ define([
                             getLink(ref)
                                 .then(function ({ref, name}) {
                                     table
-                                        .find('[data-ref=\'' + ref + '\']')
-                                        .html(
-                                            '<a href="' + DATAVIEW_URL + ref + '" target="_blank">' + name + '</a>'
-                                        );
+                                        .find(`[data-ref="${ref}"]`)
+                                        .html(`<a href="${DATAVIEW_URL}/${ref}" target="_blank">${name || content.na()}</a>`);
                                     return null;
                                 })
                                 .catch((err) => {
                                     console.error(err);
+                                    table
+                                        .find(`[data-ref="${ref}"]`)
+                                        .html(`<span title="${err.message || err.error && err.error.message}" style="cursor: help">error fetching</span>`);
                                     return null;
                                 });
                         } else {
