@@ -34,3 +34,7 @@ table.kb-overview-table td {
     overflow-x: auto;
     text-overflow: ellipsis;
 }
+
+.id-click {
+    cursor: pointer;
+}
