@@ -2,6 +2,8 @@ define([
     'jquery',
     'kb_service/client/workspace',
     'widgets/modeling/KBModeling',
+
+    // For effect
     'widgets/modeling/kbasePathways',
     'kbaseUI/widget/visWidgets/plants/pmiBarchart'
 ], function (
@@ -334,42 +336,53 @@ define([
         ];
 
         this.setMetadata = function (indata) {
-            this.workspace = indata[7];
-            this.objName = indata[1];
+            /*
+            <obj_id objid, obj_name name, type_string type,
+		timestamp save_date, int version, username saved_by,
+		ws_id wsid, ws_name workspace, string chsum, int size, usermeta meta
+            */
+            const [
+                objectId, objectName, workspaceType,
+                saveDate, version, savedBy, workspaceId,
+                workspaceName, checksum, size, metadata
+             ] = indata;
+
+            this.workspace = workspaceName;
+            this.objName = objectName;
             this.overview = {
-                wsid: indata[7] + '/' + indata[1],
-                ws: indata[7],
-                obj_name: indata[1],
-                objecttype: indata[2],
-                owner: indata[5],
-                instance: indata[4],
-                moddate: indata[3]
+                wsid: workspaceName + '/' + objectName, // TODO: terrible mixup of wsid, which usually means the workspace id!!!!
+                ws: workspaceName,
+                obj_name: objectName,
+                objecttype: workspaceType,
+                owner: savedBy, // TODO: not really owner
+                instance: version, // TODO sb called "version"!
+                moddate: saveDate
             };
 
             this.usermeta = {};
             // if there is user metadata, add it
-            if ('Model' in indata[10]) {
+            if ('Model' in metadata) {
                 this.usermeta = {
-                    objective: indata[10]['Objective'],
-                    model: indata[10]['Model'],
-                    media: indata[10]['Media'],
-                    singleko: indata[10]['Combination deletions'],
-                    numreactions: indata[10]['Number reaction variables'],
-                    numcompounds: indata[10]['Number compound variables'],
-                    numgeneko: indata[10]['Number gene KO'],
-                    numrxnko: indata[10]['Number reaction KO'],
-                    numcpdbounds: indata[10]['Number compound bounds'],
-                    numconstraints: indata[10]['Number constraints'],
-                    numaddnlcpds: indata[10]['Number additional compounds']
+                    objective: metadata['Objective'],
+                    model: metadata['Model'],
+                    media: metadata['Media'],
+                    singleko: metadata['Combination deletions'],
+                    numreactions: metadata['Number reaction variables'],
+                    numcompounds: metadata['Number compound variables'],
+                    numgeneko: metadata['Number gene KO'],
+                    numrxnko: metadata['Number reaction KO'],
+                    numcpdbounds: metadata['Number compound bounds'],
+                    numconstraints: metadata['Number constraints'],
+                    numaddnlcpds: metadata['Number additional compounds']
                 };
-                if ('ExpressionMatrix' in indata[10]) {
-                    this.usermeta['expression'] = indata[10]['ExpressionMatrix'];
+                if ('ExpressionMatrix' in metadata) {
+                    this.usermeta['expression'] = metadata['ExpressionMatrix'];
                 }
-                if ('PromConstraint' in indata[10]) {
-                    this.usermeta['promconstraint'] = indata[10]['PromConstraint'];
+                if ('PromConstraint' in metadata) {
+                    this.usermeta['promconstraint'] = metadata['PromConstraint'];
                 }
-                if ('ExpressionMatrixColumn' in indata[10]) {
-                    this.usermeta['expressioncolumn'] = indata[10]['ExpressionMatrixColumn'];
+                if ('ExpressionMatrixColumn' in metadata) {
+                    this.usermeta['expressioncolumn'] = metadata['ExpressionMatrixColumn'];
                 }
                 $.extend(this.overview, this.usermeta);
             }
@@ -397,12 +410,14 @@ define([
             this.usermeta.defaultmindrain = self.data.defaultMinDrainFlux;
             this.usermeta.phenotypesimulationset = self.data.phenotypesimulationset_ref;
             this.usermeta.uptakelimits = '';
+
             for (var key in self.data.uptakelimits) {
                 if (this.usermeta.uptakelimits.length > 0) {
                     this.usermeta.uptakelimits += '<br>';
                 }
                 this.usermeta.uptakelimits += key + ':' + this.uptakelimits[key];
             }
+
             this.usermeta.objectivefunction = 'Minimize{';
             if (self.data.maximizeObjective === 1) {
                 this.usermeta.objectivefunction = 'Maximize{';
@@ -417,6 +432,7 @@ define([
                 this.usermeta.objectivefunction += ' (' + self.data.biomassflux_objterms[key] + ') ' + key;
             }
             this.usermeta.objectivefunction += '}';
+
             this.modelreactions = this.model.modelreactions;
             this.modelcompounds = this.model.modelcompounds;
             this.biomasses = this.model.biomasses;
@@ -426,9 +442,10 @@ define([
             this.FBAMinimalMediaResults = self.data.FBAMinimalMediaResults;
             this.FBAMinimalReactionsResults = self.data.FBAMinimalReactionsResults;
             this.FBAMetaboliteProductionResults = self.data.FBAMetaboliteProductionResults;
+
             this.rxnhash = {};
-            for (var i = 0; i < self.data.FBAReactionVariables.length; i++) {
-                var rxnid = self.data.FBAReactionVariables[i].modelreaction_ref.split('/').pop();
+            for (let i = 0; i < self.data.FBAReactionVariables.length; i++) {
+                const rxnid = self.data.FBAReactionVariables[i].modelreaction_ref.split('/').pop();
                 self.data.FBAReactionVariables[i].ko = 0;
                 this.rxnhash[rxnid] = self.data.FBAReactionVariables[i];
             }
@@ -436,6 +453,7 @@ define([
                 const rxnid = self.data.reactionKO_refs[i].split('/').pop();
                 this.rxnhash[rxnid].ko = 1;
             }
+
             this.cpdhash = {};
             for (let i = 0; i < self.data.FBACompoundVariables.length; i++) {
                 const cpdid = self.data.FBACompoundVariables[i].modelcompound_ref.split('/').pop();
@@ -446,11 +464,13 @@ define([
                 const cpdid = self.data.additionalCpd_refs[i].split('/').pop();
                 this.cpdhash[cpdid].additionalcpd = 1;
             }
+
             this.biohash = {};
             for (let i = 0; i < self.data.FBABiomassVariables.length; i++) {
                 const bioid = self.data.FBABiomassVariables[i].biomass_ref.split('/').pop();
                 this.biohash[bioid] = self.data.FBABiomassVariables[i];
             }
+
             this.maxpod = 0;
             this.metprodhash = {};
             for (let i = 0; i < this.FBAMetaboliteProductionResults.length; i++) {
@@ -459,11 +479,13 @@ define([
                 const cpdid = metprod.modelcompound_ref.split('/').pop();
                 this.metprodhash[cpdid] = metprod;
             }
+
             this.genehash = {};
             for (let i = 0; i < this.modelgenes.length; i++) {
                 this.genehash[this.modelgenes[i].id] = this.modelgenes[i];
                 this.genehash[this.modelgenes[i].id].ko = 0;
             }
+
             /*
              for (var i=0; i < self.data.geneKO_refs.length; i++) {
              var geneid = self.data.geneKO_refs[i].split("/").pop();
@@ -474,16 +496,19 @@ define([
                 const geneid = self.data.FBADeletionResults[i].feature_refs[0].split('/').pop();
                 this.delhash[geneid] = self.data.FBADeletionResults[i];
             }
+
             this.cpdboundhash = {};
             for (let i = 0; i < self.data.FBACompoundBounds.length; i++) {
                 const cpdid = self.data.FBACompoundBounds[i].modelcompound_ref.split('/').pop();
                 this.cpdboundhash[cpdid] = self.data.FBACompoundBounds[i];
             }
+
             this.rxnboundhash = {};
             for (let i = 0; i < self.data.FBAReactionBounds.length; i++) {
                 const rxnid = self.data.FBAReactionBounds[i].modelreaction_ref.split('/').pop();
                 this.rxnboundhash[rxnid] = self.data.FBAReactionBounds[i];
             }
+
             for (let i = 0; i < this.modelgenes.length; i++) {
                 const mdlgene = this.modelgenes[i];
                 if (this.genehash[mdlgene.id]) {
@@ -493,6 +518,7 @@ define([
                     mdlgene.growthFraction = this.delhash[mdlgene.id].growthFraction;
                 }
             }
+
             let exp_state = 0;
             let exp_value = 0;
             for (let i = 0; i < this.modelreactions.length; i++) {
@@ -530,12 +556,14 @@ define([
                     mdlrxn.exp_value = mdlrxn.scaled_exp + '<br>(' + mdlrxn.expression + ')';
                 }
             }
+
             if (exp_value === 1) {
                 this.tabList[1].columns.splice(2, 0, {
                     label: 'Scaled expression (unscaled value)',
                     key: 'exp_value'
                 });
             }
+
             if (exp_state === 1) {
                 this.tabList[1].columns.splice(2, 0, {
                     label: 'Expression state',
@@ -610,51 +638,60 @@ define([
         this.setData = function (indata, tabs) {
             // this is a mess
             self.data = indata;
-            return self.workspaceClient.get_objects([{ ref: indata.fbamodel_ref }]).then(function (data) {
-                self.model = data[0].data;
 
-                //this is a godawful hack. When we setData, lookup the PlantModelTemplate, and if it's there, then add a barchart
-                //otherwise, do nothing. Assume we'll attempt this if we've been given tabs.
-                if (tabs !== undefined) {
-                    self.workspaceClient
-                        .get_objects([{
-                            ref: self.model.template_ref
-                        }])
-                        .then(function (data) {
-                            const $usePlantModel = data[0].info[1] === 'PlantModelTemplate' ? 1 : 0;
-                            const $barchartElem = $.jqElem('div');
-                            $barchartElem.kbasePMIBarchart({
-                                runtime: self.runtime,
-                                fba_workspace: self.workspace,
-                                fba_object: self.objName,
-                                subsystem_annotation_object: $usePlantModel
-                                    ? 'PlantSEED_Subsystems'
-                                    : 'default-kegg-subsystems',
-                                subsystem_annotation_workspace: $usePlantModel ? 'PlantSEED' : 'kbase',
-                                selected_subsystems: $usePlantModel
-                                    ? ['Central Carbon: Glycolysis_and_Gluconeogenesis_in_plants']
-                                    : ['Carbohydrate metabolism: Glycolysis / Gluconeogenesis']
+            // here we set an fba model on this object. We do this by
+            // fetching the referenced model, then instantiating an
+            // fba model object, then manually setting the metadata and data
+            // on it.
+            return self.workspaceClient.get_objects([{ ref: indata.fbamodel_ref }])
+                .then(([result]) => {
+                    const model = result.data;
+
+                    //this is a godawful hack. When we setData, lookup the PlantModelTemplate, and if it's there, then add a barchart
+                    //otherwise, do nothing. Assume we'll attempt this if we've been given tabs.
+                    if (tabs !== undefined) {
+                        self.workspaceClient
+                            .get_objects([{
+                                ref: model.template_ref
+                            }])
+                            .then(function (data) {
+                                const $usePlantModel = result.info[1] === 'PlantModelTemplate' ? 1 : 0;
+                                const $barchartElem = $.jqElem('div');
+                                $barchartElem.kbasePMIBarchart({
+                                    runtime: self.runtime,
+                                    fba_workspace: self.workspace,
+                                    fba_object: self.objName,
+                                    subsystem_annotation_object: $usePlantModel
+                                        ? 'PlantSEED_Subsystems'
+                                        : 'default-kegg-subsystems',
+                                    subsystem_annotation_workspace: $usePlantModel ? 'PlantSEED' : 'kbase',
+                                    selected_subsystems: $usePlantModel
+                                        ? ['Central Carbon: Glycolysis_and_Gluconeogenesis_in_plants']
+                                        : ['Carbohydrate metabolism: Glycolysis / Gluconeogenesis']
+                                });
+
+                                tabs.addTab({
+                                    name: 'Bar charts',
+                                    content: $barchartElem
+                                });
+                                return null;
+                            })
+                            .catch(function (err) {
+                                console.error(err);
                             });
+                    }
 
-                            tabs.addTab({
-                                name: 'Bar charts',
-                                content: $barchartElem
-                            });
-                            return null;
-                        })
-                        .catch(function (err) {
-                            console.error(err);
-                        });
-                }
+                    // Note that the "kbModeling" is the blank object
+                    // that is populated with all the fba widgets when
+                    // they their respective modules are loaded.
+                    var kbModeling = new KBModeling(); // this is a mess
+                    self.model = new kbModeling.KBaseFBA_FBAModel(self.modeltabs);
 
-                var kbModeling = new KBModeling(); // this is a mess
-                self.model = new kbModeling['KBaseFBA_FBAModel'](self.modeltabs);
-
-                self.model.setMetadata(data[0].info);
-                self.model.setData(data[0].data);
-                self.formatObject();
-                return null;
-            });
+                    self.model.setMetadata(result.info);
+                    self.model.setData(result.data);
+                    self.formatObject();
+                    return null;
+                });
         };
 
         this.ReactionTab = function (info) {
@@ -696,7 +733,7 @@ define([
         };
 
         this.CompoundTab = function (info) {
-            var output = self.model.CompoundTab(info);
+            const output = self.model.CompoundTab(info);
             if (output && 'done' in output) {
                 return output.then(function (data) {
                     return self.ExtendCompoundTab(info, data);
@@ -705,29 +742,40 @@ define([
             return self.ExtendCompoundTab(info, output);
         };
 
-        this.ExtendCompoundTab = function (info, data) {
-            var cpd = self.cpdhash[info.id];
-            data.push({
+        this.ExtendCompoundTab = (info, table) => {
+            const cpd = this.cpdhash[info.id];
+
+            // TODO: should we really show this, or just 
+            // bail here?
+            if (!cpd) {
+                table.push({
+                    label: 'Not Found',
+                    data: `Compound not found in FBA: ${info.id}`
+                });
+                return table;
+            }
+
+            table.push({
                 label: 'Exchange reaction',
                 data: cpd.exchangerxn
             });
-            data.push({
+            table.push({
                 label: 'Exchange flux',
                 data: cpd.uptake
             });
-            data.push({
+            table.push({
                 label: 'Min flux<br>(Lower bound)',
                 data: cpd.disp_low_flux
             });
-            data.push({
+            table.push({
                 label: 'Max flux<br>(Upper bound)',
                 data: cpd.disp_high_flux
             });
-            data.push({
+            table.push({
                 label: 'Class',
                 data: cpd.fluxclass
             });
-            return data;
+            return table;
         };
 
         this.GeneTab = function (info) {

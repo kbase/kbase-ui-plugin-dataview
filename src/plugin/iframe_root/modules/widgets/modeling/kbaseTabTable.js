@@ -32,6 +32,8 @@ define([
 ) {
     'use strict';
 
+    const IMAGE_URL = 'http://bioseed.mcs.anl.gov/~chenry/jpeg/';
+
     const t = html.tag,
         a = t('a'),
         span = t('span'),
@@ -116,18 +118,18 @@ define([
                     objects: [param],
                     includeMetadata: 1
                 })
-                .then((res) => {
-                    self.obj.setMetadata(res[0]);
+                .then(([result]) => {
+                    self.obj.setMetadata(result);
 
                     for (let i = 0; i < tabList.length; i++) {
-                        const spec = tabList[i];
+                        const tab = tabList[i];
 
-                        if (spec.type === 'verticaltbl') {
-                            const key = spec.key,
-                                data = self.obj[key],
-                                tabPane = tabs.tabContent(spec.name);
-
-                            const table = self.verticalTable({ rows: spec.rows, data: data });
+                        if (tab.type === 'verticaltbl') {
+                            const tabPane = tabs.tabContent(tab.name);
+                            const table = self.verticalTable({ 
+                                rows: tab.rows, 
+                                data: self.obj[tab.key] 
+                            });
                             tabPane.rmLoading();
                             tabPane.append(table);
                         }
@@ -141,14 +143,14 @@ define([
 
             this.workspaceClient
                 .get_objects([param])
-                .then(function (data) {
-                    return Promise.try(function () {
-                        return self.obj.setData(data[0].data, tabs);
-                    }).then(function () {
+                .then((data) => {
+                    return Promise.try(() => {
+                        return this.obj.setData(data[0].data, tabs);
+                    }).then(() => {
                         return buildContent();
                     });
                 })
-                .catch(function (err) {
+                .catch((err) => {
                     console.error('ERROR getting objects', err);
                 });
 
@@ -197,7 +199,7 @@ define([
                 });
             }
 
-            function buildContent(data) {
+            function buildContent() {
                 //5) Iterates over the entries in the spec and instantiate things
                 return Promise.all(
                     tabList.map(function (tabSpec) {
@@ -388,10 +390,7 @@ define([
             function ref(key, type, format, method, action, defaultContent) {
                 return function (d) {
                     if (type === 'tabLink' && format === 'dispIDCompart') {
-                        var dispid = d[key];
-                        if ('dispid' in d) {
-                            dispid = d.dispid;
-                        }
+                        const dispid = d.dispid || d[key];
                         return a(
                             {
                                 class: 'id-click',
@@ -402,7 +401,7 @@ define([
                             dispid
                         );
                     } else if (type === 'tabLink' && format === 'dispID') {
-                        var id = d[key];
+                        const id = d[key];
                         return a(
                             {
                                 class: 'id-click',
@@ -487,6 +486,7 @@ define([
                         {
                             class: 'id-click',
                             dataId: d.id,
+                            dataHmm: 'hrm',
                             dataMethod: method,
                             style: {
                                 cursor: 'pointer'
@@ -639,14 +639,14 @@ define([
                 );
             };
 
-            var imageURL = 'http://bioseed.mcs.anl.gov/~chenry/jpeg/';
+            
             this.pictureEquation = function (eq) {
                 const cpds = get_cpds(eq);
                 const panel = $('<div></div>');
 
                 for (let i = 0; i < cpds.left.length; i++) {
                     const cpd = cpds.left[i];
-                    const img_url = imageURL + cpd + '.jpeg';
+                    const img_url = IMAGE_URL + cpd + '.jpeg';
                     /* TODO: this is going to fail ... there is no panel node around unless it is set globally in some dependency ... */
                     panel.append(
                         '<div class="pull-left text-center">\
@@ -675,7 +675,7 @@ define([
 
                 for (let i = 0; i < cpds.right.length; i++) {
                     const cpd = cpds.right[i];
-                    const img_url = imageURL + cpd + '.jpeg';
+                    const img_url = IMAGE_URL + cpd + '.jpeg';
                     panel.append(
                         '<div class="pull-left text-center">\
                                     <img src="' +
@@ -720,8 +720,8 @@ define([
             };
 
             function get_cpds(equation) {
-                var cpds = {};
-                var sides = equation.split('=');
+                const cpds = {};
+                const sides = equation.split('=');
                 cpds.left = sides[0].match(/cpd\d*/g);
                 cpds.right = sides[1].match(/cpd\d*/g);
 
