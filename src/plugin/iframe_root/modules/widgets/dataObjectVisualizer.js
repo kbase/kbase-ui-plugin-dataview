@@ -46,7 +46,7 @@ define([
                     widget: {
                         name: 'kb_dataview_genericObject'
                     },
-                    panel: true,
+                    panel: false,
                     options: []
                 };
             }
