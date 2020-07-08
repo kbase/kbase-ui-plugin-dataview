@@ -45,7 +45,7 @@ define([
             const rows = this.props.sampleSet.samples.map((sample) => {
                 return html`
                     <tr>
-                        <td><a href=${`/#sampleview/${sample.id}/${sample.version}`} target="_parent">${sample.name}</a></td>
+                        <td><a href=${`/#samples/view/${sample.id}/${sample.version}`} target="_parent">${sample.name}</a></td>
                         <td>${getMetadataValue(sample.sample, 'material', '-')}</td>
                         <td>${sample.sample.node_tree[0].id}</td>
                         <td>${fmt.formattedDate(sample.sample.save_date)}</td>

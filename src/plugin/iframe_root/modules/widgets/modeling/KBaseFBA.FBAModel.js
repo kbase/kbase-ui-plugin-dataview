@@ -4,9 +4,19 @@ define([
     'kb_service/client/fba',
     'kb_common/jsonRpc/dynamicServiceClient',
     'widgets/modeling/KBModeling',
+
+    // For effect
     'widgets/modeling/kbasePathways'
-], function ($, Workspace, FBA, DynamicServiceClient, KBModeling) {
+], function (
+    $, 
+    Workspace, 
+    FBA, 
+    DynamicServiceClient, 
+    KBModeling
+) {
     'use strict';
+
+    const COMPOUND_IMAGE_URL_BASE = 'https://minedatabase.mcs.anl.gov/compound_images/ModelSEED/';
 
     function KBaseFBA_FBAModel(modeltabs) {
         var self = this;
@@ -17,33 +27,40 @@ define([
             token: this.runtime.service('session').getAuthToken()
         });
 
-        this.setMetadata = function (data) {
-            this.workspace = data[7];
-            this.objName = data[1];
+        this.setMetadata = function (indata) {
+            const [
+                objectId, objectName, workspaceType,
+                saveDate, version, savedBy, workspaceId,
+                workspaceName, checksum, size, metadata
+             ] = indata;
+            this.workspace = workspaceName;
+            this.objName = objectName;
             this.overview = {
-                wsid: data[7] + '/' + data[1],
-                ws: data[7],
-                obj_name: data[1],
-                objecttype: data[2],
-                owner: data[5],
-                instance: data[4],
-                moddate: data[3]
+                wsid: workspaceName + '/' + objectName, // TODO: terrible mixup of wsid, which usually means the workspace id!!!!
+                ws: workspaceName,
+                obj_name: objectName,
+                objecttype: workspaceType,
+                owner: savedBy, // TODO: not really owner
+                instance: version, // TODO sb called "version"!
+                moddate: saveDate
             };
 
             // if there is user metadata, add it
-            if ('Name' in data[10]) {
+            if ('Name' in metadata) {
                 this.usermeta = {
-                    name: data[10]['Name'],
-                    source: data[10]['Source'] + '/' + data[10]['Source ID'],
-                    genome: data[10]['Genome'],
-                    modeltype: data[10]['Type'],
-                    numreactions: data[10]['Number reactions'],
-                    numcompounds: data[10]['Number compounds'],
-                    numcompartments: data[10]['Number compartments'],
-                    numbiomass: data[10]['Number biomasses'],
-                    numgapfills: data[10]['Number gapfills']
+                    name: metadata['Name'],
+                    source: metadata['Source'] + '/' + metadata['Source ID'],
+                    genome: metadata['Genome'],
+                    modeltype: metadata['Type'],
+                    numreactions: metadata['Number reactions'],
+                    numcompounds: metadata['Number compounds'],
+                    numcompartments: metadata['Number compartments'],
+                    numbiomass: metadata['Number biomasses'],
+                    numgapfills: metadata['Number gapfills']
                 };
                 $.extend(this.overview, this.usermeta);
+            } else {
+                this.usermeta = {};
             }
         };
 
@@ -421,6 +438,7 @@ define([
 
         this.CompoundTab = function (info) {
             const cpd = self.cpdhash[info.id];
+            const compoundId = cpd.id.split('_')[0];
             var output = [
                 {
                     label: 'Compound',
@@ -428,10 +446,7 @@ define([
                 },
                 {
                     label: 'Image',
-                    data:
-                        '<img src=http://minedatabase.mcs.anl.gov/compound_images/ModelSEED/' +
-                        cpd.id.split('_')[0] +
-                        '.png style=\'height:300px !important;\'>'
+                    data: `<img src="${COMPOUND_IMAGE_URL_BASE}/${compoundId}.png" style="height:300px !important;">`
                 },
                 {
                     label: 'Name',
@@ -587,24 +602,18 @@ define([
             return output;
         };
 
-        this.setData = function (indata) {
-            this.data = indata;
-            this.modelreactions = this.data.modelreactions;
-            this.modelcompounds = this.data.modelcompounds;
-            this.modelgenes = [];
-            this.modelcompartments = this.data.modelcompartments;
-            this.biomasses = this.data.biomasses;
-            this.biomasscpds = [];
-            this.gapfillings = this.data.gapfillings;
-            this.cpdhash = {};
-            this.biohash = {};
-            this.rxnhash = {};
-            this.cmphash = {};
-            this.genehash = {};
-            this.gfhash = {};
+        this.setData = function (fbaModel) {
+            this.data = fbaModel;
+            this.modelreactions = fbaModel.modelreactions;
+            this.modelcompounds = fbaModel.modelcompounds;
+            this.modelcompartments = fbaModel.modelcompartments;
+            this.biomasses = fbaModel.biomasses;
+            this.gapfillings = fbaModel.gapfillings;
             this.biochemws = 'kbase';
             this.biochem = 'default';
+
             const gfobjects = [];
+            this.gfhash = {};
             for (let i = 0; i < this.gapfillings.length; i++) {
                 this.gapfillings[i].simpid = 'gf.' + (i + 1);
                 if ('fba_ref' in this.gapfillings[i] && this.gapfillings[i].fba_ref.length > 0) {
@@ -614,6 +623,8 @@ define([
                 }
                 this.gfhash[this.gapfillings[i].simpid] = this.gapfillings[i];
             }
+
+            this.cmphash = {};
             for (let i = 0; i < this.modelcompartments.length; i++) {
                 const cmp = this.modelcompartments[i];
                 cmp.cmpkbid = cmp.compartment_ref.split('/').pop();
@@ -623,6 +634,8 @@ define([
                 cmp.name = self.cmpnamehash[cmp.cmpkbid];
                 this.cmphash[cmp.id] = cmp;
             }
+
+            this.cpdhash = {};
             for (let i = 0; i < this.modelcompounds.length; i++) {
                 const cpd = this.modelcompounds[i];
                 const idarray = cpd.id.split('_');
@@ -642,21 +655,27 @@ define([
                     }
                 }
             }
+
+            this.biomasscpds = [];
+            this.biohash = {};
             for (let i = 0; i < this.biomasses.length; i++) {
-                var biomass = this.biomasses[i];
+                const biomass = this.biomasses[i];
                 this.biohash[biomass.id] = biomass;
                 biomass.dispid = biomass.id;
-                var reactants = '';
-                var products = '';
+                let reactants = '';
+                let products = '';
                 for (var j = 0; j < biomass.biomasscompounds.length; j++) {
                     const biocpd = biomass.biomasscompounds[j];
                     biocpd.id = biocpd.modelcompound_ref.split('/').pop();
+
                     const idarray = biocpd.id.split('_');
                     biocpd.dispid = idarray[0] + '[' + idarray[1] + ']';
-                    biocpd.name = this.cpdhash[biocpd.id].name;
-                    biocpd.formula = this.cpdhash[biocpd.id].formula;
-                    biocpd.charge = this.cpdhash[biocpd.id].charge;
-                    biocpd.cmpkbid = this.cpdhash[biocpd.id].cmpkbid;
+
+                    const CPD = this.cpdhash[biocpd.id];
+                    biocpd.name = CPD.name;
+                    biocpd.formula = CPD.formula;
+                    biocpd.charge = CPD.charge;
+                    biocpd.cmpkbid = CPD.cmpkbid;
                     biocpd.biomass = biomass.id;
                     this.biomasscpds.push(biocpd);
                     if (biocpd.coefficient < 0) {
@@ -664,17 +683,16 @@ define([
                             reactants += ' + ';
                         }
                         if (biocpd.coefficient !== -1) {
-                            var abscoef = Math.round(-1 * 100 * biocpd.coefficient) / 100;
+                            const abscoef = Math.round(-1 * 100 * biocpd.coefficient) / 100;
                             reactants += '(' + abscoef + ') ';
                         }
-                        reactants +=
-                            '<a class="id-click" data-id="' +
-                            biocpd.cpdkbid +
-                            '" data-method="CompoundTab">' +
-                            this.cpdhash[biocpd.id].name +
-                            '[' +
-                            this.cpdhash[biocpd.id].cmpkbid +
-                            ']</a>';
+
+                        reactants += `<a 
+                            class="id-click" 
+                            data-id="${CPD.id}"
+                            data-method="CompoundTab">
+                            ${CPD.name}[${CPD.cmpkbid}]
+                        </a>`;
                     } else {
                         if (products.length > 0) {
                             products += ' + ';
@@ -683,18 +701,19 @@ define([
                             const abscoef = Math.round(100 * biocpd.coefficient) / 100;
                             products += '(' + abscoef + ') ';
                         }
-                        products +=
-                            '<a class="id-click" data-id="' +
-                            biocpd.cpdkbid +
-                            '" data-method="CompoundTab">' +
-                            this.cpdhash[biocpd.id].name +
-                            '[' +
-                            this.cpdhash[biocpd.id].cmpkbid +
-                            ']</a>';
+                        products +=`<a 
+                            class="id-click" 
+                            data-id="${CPD.id}"
+                            data-method="CompoundTab">
+                            ${CPD.name}[${CPD.cmpkbid}]
+                        </a>`;
                     }
                 }
-                biomass.equation = reactants + ' => ' + products;
+                biomass.equation = reactants + '<div style="font-weight: bold;">=></div>' + products;
             }
+
+            this.modelgenes = [];
+            this.rxnhash = {};
             for (let i = 0; i < this.modelreactions.length; i++) {
                 var rxn = this.modelreactions[i];
                 const idarray = rxn.id.split('_');
@@ -714,8 +733,7 @@ define([
                         rxn.dispid += '<br>(' + rxn.rxnkbid + ')';
                     }
                 }
-                let reactants = '';
-                let products = '';
+               
                 let sign = '<=>';
                 if (rxn.direction === '>') {
                     sign = '=>';
@@ -725,9 +743,13 @@ define([
                 if (rxn.modelReactionProteins > 0) {
                     rxn.gpr = '';
                 }
+
+                let reactants = '';
+                let products = '';
                 for (let j = 0; j < rxn.modelReactionReagents.length; j++) {
                     const rgt = rxn.modelReactionReagents[j];
                     rgt.cpdkbid = rgt.modelcompound_ref.split('/').pop();
+                    const CPD = this.cpdhash[rgt.cpdkbid];
                     if (rgt.coefficient < 0) {
                         if (reactants.length > 0) {
                             reactants += ' + ';
@@ -736,7 +758,13 @@ define([
                             const abscoef = Math.round(-1 * 100 * rgt.coefficient) / 100;
                             reactants += '(' + abscoef + ') ';
                         }
-                        reactants += this.cpdhash[rgt.cpdkbid].name + '[' + this.cpdhash[rgt.cpdkbid].cmpkbid + ']';
+                        // reactants += this.cpdhash[rgt.cpdkbid].name + '[' + this.cpdhash[rgt.cpdkbid].cmpkbid + ']';
+                        reactants += `<a 
+                            class="id-click" 
+                            data-id="${CPD.id}"
+                            data-method="CompoundTab">
+                            ${CPD.name}[${CPD.cmpkbid}]
+                        </a>`;
                     } else {
                         if (products.length > 0) {
                             products += ' + ';
@@ -745,9 +773,16 @@ define([
                             const abscoef = Math.round(100 * rgt.coefficient) / 100;
                             products += '(' + abscoef + ') ';
                         }
-                        products += this.cpdhash[rgt.cpdkbid].name + '[' + this.cpdhash[rgt.cpdkbid].cmpkbid + ']';
+                        // products += this.cpdhash[rgt.cpdkbid].name + '[' + this.cpdhash[rgt.cpdkbid].cmpkbid + ']';
+                        products += `<a 
+                            class="id-click" 
+                            data-id="${CPD.id}"
+                            data-method="CompoundTab">
+                            ${CPD.name}[${CPD.cmpkbid}]
+                        </a>`;
                     }
                 }
+
                 rxn.ftrhash = {};
                 for (let j = 0; j < rxn.modelReactionProteins.length; j++) {
                     const prot = rxn.modelReactionProteins[j];
@@ -802,7 +837,7 @@ define([
                     else this.modelgenes[genes.indexOf(gene)].reactions.push({ id: rxn.id, dispid: rxn.dispid });
                 }
 
-                rxn.equation = reactants + ' ' + sign + ' ' + products;
+                rxn.equation = reactants + '<div style="font-weight: bold;">' + sign + '</div>' + products;
             }
             if (gfobjects.length > 0) {
                 this.workspaceClient

@@ -34,7 +34,7 @@ define([
             const rows = this.props.linkedSamples.map(({link, sample}) => {
                 return html`
                 <tr>
-                    <td><a href="/#sampleview/${link.id}/${link.version}">${sample.sample.name}</a></td>
+                    <td><a href="/#samples/view/${link.id}/${link.version}">${sample.sample.name}</a></td>
                     <td>${getMetadataValue(sample.sample, 'material', '-')}</td>
                     <td>${sample.sample.node_tree[0].id}</td>
                     <td>${fmt.formattedDate(sample.sample.save_date)}</td>

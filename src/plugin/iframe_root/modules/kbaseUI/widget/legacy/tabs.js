@@ -64,6 +64,8 @@ define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
                 tab_contents = $('<div class="tab-content">');
             container.append(tabs, tab_contents);
 
+            this.tabHistory = [];
+
             // adds a single tab and content
             this.addTab = function (p) {
                 // if tab exists, don't add
@@ -71,7 +73,7 @@ define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
                     return;
                 }
 
-                var tab = $('<li class="' + (p.active ? 'active' : '') + '">'),
+                const tab = $('<li class="' + (p.active ? 'active' : '') + '">'),
                     tab_link = $(
                         a(
                             {
@@ -133,18 +135,21 @@ define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
 
             // remove tab and tab content
             this.rmTab = function (name) {
-                var tab = tabs.find('a[data-id="' + name + '"]').parent('li'),
-                    tab_content = tab_contents.children('[data-id="' + name + '"]'),
-                    id;
+                const tab = tabs.find('a[data-id="' + name + '"]').parent('li');
+                const tab_content = tab_contents.children('[data-id="' + name + '"]');
 
                 // get previous or next tab
-                if (tab.next().length > 0) {
-                    id = tab
+                let nextTabId;
+                this.tabHistory.pop();
+                if (this.tabHistory.length) {
+                    nextTabId = this.tabHistory[this.tabHistory.length - 1];
+                } else if (tab.next().length > 0) {
+                    nextTabId = tab
                         .next()
                         .children('a')
                         .data('id');
                 } else {
-                    id = tab
+                    nextTabId = tab
                         .prev()
                         .children('a')
                         .data('id');
@@ -155,7 +160,7 @@ define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
                 tab_content.remove();
 
                 // show prev or next tab
-                self.showTab(id);
+                self.showTab(nextTabId);
             };
 
             // returns tab
@@ -184,7 +189,8 @@ define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
             };
 
             // highlights tab and shows content
-            this.showTab = function (id) {
+            this.showTab = (id) => {
+                this.tabHistory.push(id);
                 tabs.children('li').removeClass('active');
                 tab_contents.children('.tab-pane').removeClass('active');
                 tabs.find('a[data-id="' + id + '"]')
@@ -198,7 +204,7 @@ define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
             };
 
             // if tabs are supplied, add them
-            // don't animate intial tabs
+            // don't animate initial tabs
             if (options.tabs) {
                 options.tabs.forEach(
                     function (tab) {
