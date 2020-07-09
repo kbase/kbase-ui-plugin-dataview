@@ -1,3 +1,4 @@
+TODO: started updating this, but not sure (surely not) worth fixing. just revert to plain service calls!
 define([
     'bluebird',
     'kb_lib/jsonRpc/genericClient',
@@ -11,71 +12,82 @@ define([
     function QueryService(config) {
         var runtime = config.runtime;
 
-        function queryDynamicService(subject, args, output) {
-            var subjects = {
-                assembly: {
-                    module: 'AssemblyAPI',
-                    fields: {
-                        stats: {
-                            method: 'get_stats',
-                            args: ['ref']
-                        },
-                        contig_ids: {
-                            method: 'get_contig_ids',
-                            args: ['ref']
-                        },
-                        contig_lengths: {
-                            method: 'get_contig_lengths',
-                            args: ['ref', 'contig_id_list']
-                        },
-                        contig_gc_content: {
-                            method: 'get_contig_gc_content',
-                            args: ['ref', 'contig_id_list']
-                        }
+        const subjects = {
+            assembly: {
+                module: 'AssemblyAPI',
+                fields: {
+                    stats: {
+                        method: 'get_stats',
+                        args: ['ref']
+                    },
+                    contig_ids: {
+                        method: 'get_contig_ids',
+                        args: ['ref']
+                    },
+                    contig_lengths: {
+                        method: 'get_contig_lengths',
+                        args: ['ref', 'contig_id_list']
+                    },
+                    contig_gc_content: {
+                        method: 'get_contig_gc_content',
+                        args: ['ref', 'contig_id_list']
+                    },
+                    search_contigs: {
+                        method: 'search_contigs',
+                        args: ['ref', 'query', 'sort_by', 'start', 'limit', 'num_found']
                     }
                 }
-            };
+            }
+        };
+
+        function queryDynamicService(subject, {defaultArgs, methods}) {
+
 
             // Get the primary api via the top level field, or subject.
-            var apiSpec = subjects[subject];
+            const apiSpec = subjects[subject];
             if (!apiSpec) {
                 throw new Error('Could not map subject ' + subject + ' to module');
             }
 
             // Next we must map each output field to the associated api call.
-            var methods = Object.keys(output).map(function (outputKey) {
-                var method = apiSpec.fields[outputKey];
-                if (!method) {
-                    throw new Error('No method mapping for output property ' + outputKey);
-                }
-                // for now we just take the top level args, but we need to merge the top
-                // level with the field args.
-                // we don't know how this will shake out with other dynamic services, though.
-                // i have a feeling the data api is special.
-                var positionalArgs = method.args.map(function (argKey) {
-                    // NB arguments not provided default to null.
-                    return args[argKey] || null;
+            const methods2 = Object.keys(output)
+                .map(function (outputKey) {
+                    var method = apiSpec.fields[outputKey];
+                    if (!method) {
+                        throw new Error('No method mapping for output property ' + outputKey);
+                    }
+                    // for now we just take the top level args, but we need to merge the top
+                    // level with the field args.
+                    // we don't know how this will shake out with other dynamic services, though.
+                    // i have a feeling the data api is special.
+
+                    const args = Object.assign({}, queryArgs, method.args);
+
+                    // const args = method.args
+                    //     .map((argKey) => {
+                    //         // NB arguments not provided default to null.
+                    //         return queryArgs[argKey];
+                    //     });
+
+                    // We also require that subfields be specified as well. This should be recursive,
+                    // that is support objects, for the the moment only the top level property.
+                    var outputFields = output[outputKey];
+                    return {
+                        outputKey,
+                        method: method.method,
+                        args,
+                        outputFields
+                    };
                 });
 
-                // We also require that subfields be specified as well. This should be recursive,
-                // that is supoprt objects, for the the moment only the top level property.
-                var outputFields = output[outputKey];
-                return {
-                    outputKey: outputKey,
-                    method: method.method,
-                    args: positionalArgs,
-                    outputFields: outputFields
-                };
-            });
-
-            var client = new DynamicServiceClient({
+            const client = new DynamicServiceClient({
                 url: runtime.config('services.service_wizard.url'),
                 token: runtime.service('session').getAuthToken(),
                 module: apiSpec.module
             });
 
             return Promise.all(
-                methods.map(function (method) {
+                methods2.map(function (method) {
                     return client
                         .callFunc(method.method, method.args)
                         .then(function (results) {
@@ -111,7 +123,7 @@ define([
                             }
                         })
                         .catch(function (err) {
-                            console.error('Error running dynamic service query', subject, args, output, err);
+                            console.error('Error running dynamic service query', subject, queryArgs, output, err);
                             throw new Error('Error running dynamic service query for ' + subject + ': ' + err.message);
                         });
                 })
@@ -124,16 +136,17 @@ define([
             });
         }
 
-        function queryWorkspace(args, output) {
+        function queryWorkspace(subjectQuery) {
             // Determine the method to use, based on the arguments provided
             // Also determine the method based on the output required.
             // May need multiple calls to handle this
             var arg;
             var method;
             var formatter;
+            const args = subjectQuery.defaultArgs;
             if (args.ref) {
                 // we will be getting a single object
-                if (output.data) {
+                if (subjectQuery.data) {
                     // we will be getting a subset of data -- there is only one way to do this.
                     method = 'get_object_subset';
                     // nb the get_object_subset allows multiple queries to be packed together,
@@ -141,7 +154,7 @@ define([
                     arg = [
                         {
                             ref: args.ref,
-                            included: Object.keys(output.data)
+                            included: Object.keys(subjectQuery.data)
                         }
                     ];
                     formatter = function (result) {
@@ -151,7 +164,7 @@ define([
             }
 
             if (!method) {
-                console.error('workspace query', args, output);
+                console.error('workspace query', args, subjectQuery);
                 throw new Error('There is no way to satisfy this workspace query');
             }
 
@@ -170,42 +183,40 @@ define([
                 .callFunc(method, [arg])
                 .spread(formatter)
                 .catch(function (err) {
-                    console.error('Error running workspace query', args, output, err);
+                    console.error('Error running workspace query', args, subjectQuery, err);
                     throw new Error('Error running workspace query');
                 });
         }
 
-        function runQuery(subject, args, output) {
+        function runQuery(subject, subjectQuery) {
             switch (subject) {
             case 'workspace':
-                return queryWorkspace(args, output);
+                return queryWorkspace(subjectQuery);
             default:
-                return queryDynamicService(subject, args, output);
+                return queryDynamicService(subject, subjectQuery);
             }
         }
 
         function query(spec) {
             // Supports multiple query subjects
-            var queryKeys = Object.keys(spec);
+            var serviceKeys = Object.keys(spec);
             return Promise.all(
-                queryKeys.map(function (key) {
-                    var oneSpec = spec[key];
-                    var args = oneSpec._args;
-                    delete oneSpec._args;
-                    return runQuery(key, args, oneSpec);
+                serviceKeys.map((serviceKey) => {
+                    return runQuery(serviceKey, spec[serviceKey]);
                 })
-            ).then(function (results) {
-                var queryResult = {};
-                results.forEach(function (result, index) {
-                    var queryKey = queryKeys[index];
-                    queryResult[queryKey] = result;
+            )
+                .then(function (results) {
+                    const queryResult = {};
+                    results.forEach(function (result, index) {
+                        const queryKey = serviceKeys[index];
+                        queryResult[queryKey] = result;
+                    });
+                    return queryResult;
                 });
-                return queryResult;
-            });
         }
 
         return {
-            query: query
+            query
         };
     }
     return QueryService;

@@ -109,16 +109,16 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry', 'kb_knockout/lib/gene
                 const aValue = a.row[sortColumn.pos].value;
                 const bValue = b.row[sortColumn.pos].value;
                 switch (sortColumn.type) {
-                    case 'string':
-                    case 'date':
-                    case 'number':
-                        if (aValue < bValue) {
-                            comparison = -1;
-                        } else if (aValue > bValue) {
-                            comparison = 1;
-                        } else {
-                            comparison = 0;
-                        }
+                case 'string':
+                case 'date':
+                case 'number':
+                    if (aValue < bValue) {
+                        comparison = -1;
+                    } else if (aValue > bValue) {
+                        comparison = 1;
+                    } else {
+                        comparison = 0;
+                    }
                 }
                 if (sortDirection() === 'desc') {
                     return comparison * -1;
@@ -144,7 +144,7 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry', 'kb_knockout/lib/gene
                 return true;
             }
 
-            for (let i in searchColumns) {
+            for (const i in searchColumns) {
                 const searchColumn = searchColumns[i];
                 if (row.row[searchColumn.pos].value.toLowerCase().indexOf(text) >= 0) {
                     return true;
@@ -410,7 +410,7 @@ define(['knockout', 'kb_lib/html', 'kb_knockout/registry', 'kb_knockout/lib/gene
                         }),
                         gen.foreach('row', td({
                             dataBind: {
-                                text: 'formatted',
+                                html: 'formatted',
                                 style: 'style'
                             }
                         }))

@@ -8,10 +8,10 @@ define([
     // For effect
     'widgets/modeling/kbasePathways'
 ], function (
-    $, 
-    Workspace, 
-    FBA, 
-    DynamicServiceClient, 
+    $,
+    Workspace,
+    FBA,
+    DynamicServiceClient,
     KBModeling
 ) {
     'use strict';
@@ -31,12 +31,13 @@ define([
             const [
                 objectId, objectName, workspaceType,
                 saveDate, version, savedBy, workspaceId,
-                workspaceName, checksum, size, metadata
-             ] = indata;
+                workspaceName, , , metadata
+            ] = indata;
             this.workspace = workspaceName;
             this.objName = objectName;
             this.overview = {
                 wsid: workspaceName + '/' + objectName, // TODO: terrible mixup of wsid, which usually means the workspace id!!!!
+                ref: [workspaceId, objectId, version].join('/'),
                 ws: workspaceName,
                 obj_name: objectName,
                 objecttype: workspaceType,
@@ -733,7 +734,7 @@ define([
                         rxn.dispid += '<br>(' + rxn.rxnkbid + ')';
                     }
                 }
-               
+
                 let sign = '<=>';
                 if (rxn.direction === '>') {
                     sign = '=>';

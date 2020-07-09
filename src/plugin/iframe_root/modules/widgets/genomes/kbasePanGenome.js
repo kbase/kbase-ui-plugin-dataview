@@ -12,7 +12,12 @@ define([
     'kbaseUI/widget/legacy/authenticatedWidget',
     'kbaseUI/widget/legacy/tabs',
     'datatables_bootstrap'
-], function ($, Uuid, html, Workspace) {
+], function (
+    $,
+    Uuid,
+    html,
+    Workspace
+) {
     'use strict';
 
     var t = html.tag,

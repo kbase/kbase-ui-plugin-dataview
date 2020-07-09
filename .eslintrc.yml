@@ -2,8 +2,6 @@ env:
   browser: true
   amd: true
   es6: true
-parser-options:
-  ecma-version: 8
 extends: "eslint:recommended"
 rules:
   strict:
@@ -48,4 +46,6 @@ rules:
     - error
     - commentPattern: fallthrough
   prefer-const:
+    - error
+  arrow-parens:
     - error

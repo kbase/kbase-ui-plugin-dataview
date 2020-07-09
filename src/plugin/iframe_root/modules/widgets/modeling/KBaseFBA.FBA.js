@@ -344,13 +344,14 @@ define([
             const [
                 objectId, objectName, workspaceType,
                 saveDate, version, savedBy, workspaceId,
-                workspaceName, checksum, size, metadata
-             ] = indata;
+                workspaceName, , , metadata
+            ] = indata;
 
             this.workspace = workspaceName;
             this.objName = objectName;
             this.overview = {
                 wsid: workspaceName + '/' + objectName, // TODO: terrible mixup of wsid, which usually means the workspace id!!!!
+                ref: [workspaceId, objectId, version].join('/'),
                 ws: workspaceName,
                 obj_name: objectName,
                 objecttype: workspaceType,
@@ -654,7 +655,7 @@ define([
                             .get_objects([{
                                 ref: model.template_ref
                             }])
-                            .then(function (data) {
+                            .then(function ([result]) {
                                 const $usePlantModel = result.info[1] === 'PlantModelTemplate' ? 1 : 0;
                                 const $barchartElem = $.jqElem('div');
                                 $barchartElem.kbasePMIBarchart({
@@ -745,7 +746,7 @@ define([
         this.ExtendCompoundTab = (info, table) => {
             const cpd = this.cpdhash[info.id];
 
-            // TODO: should we really show this, or just 
+            // TODO: should we really show this, or just
             // bail here?
             if (!cpd) {
                 table.push({

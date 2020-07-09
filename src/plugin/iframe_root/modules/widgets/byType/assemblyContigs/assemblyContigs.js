@@ -2,19 +2,27 @@ define([
     'bluebird',
     'numeral',
     'knockout',
-    '../queryService',
-    'kb_common/html',
-
+    // '../queryService2',
+    'kb_lib/jsonRpc/dynamicServiceClient',
+    'kb_lib/html',
+    'kb_lib/htmlBuilders',
+    'kb_lib/htmlBootstrapBuilders',
     '../table',
+    'content',
+
+    // for effect
     'datatables_bootstrap'
 ], function (
     Promise,
     numeral,
     ko,
-    //DynamicServiceClient,
-    QueryService,
+    DynamicServiceClient,
+    // QueryService,
     html,
-    TableComponent
+    build,
+    BS,
+    TableComponent,
+    content
 ) {
     'use strict';
     var t = html.tag,
@@ -23,56 +31,80 @@ define([
     function factory(config) {
         var runtime = config.runtime;
         var container;
-        var queryService = QueryService({
-            runtime: runtime
-        });
+        // var queryService = QueryService({
+        //     runtime: runtime
+        // });
 
         //
         function fetchData(objectRef) {
-            var query = {
-                assembly: {
-                    _args: {
-                        ref: objectRef
-                    },
-                    contig_lengths: {},
-                    contig_gc_content: {}
-                }
-            };
-            return queryService.query(query);
+            // var query = {
+            //     assembly: {
+            //         defaultArgs: {
+            //             ref: objectRef
+            //         },
+            //         methods: {
+            //             // contig_lengths: {},
+            //             // contig_gc_content: {}
+            //             search_contigs: {
+            //                 args: {
+            //                     start: 0,
+            //                     sort_by: []
+            //                 }
+            //             }
+            //         }
+            //     }
+            // };
+            // return queryService.query(query);
 
-            // var AssemblyClient = new DynamicServiceClient({
-            //     url: runtime.config('services.service_wizard.url'),
-            //     token: runtime.service('session').getAuthToken(),
-            //     module: 'AssemblyAPI'
-            // });
+            var AssemblyClient = new DynamicServiceClient({
+                url: runtime.config('services.service_wizard.url'),
+                token: runtime.service('session').getAuthToken(),
+                module: 'AssemblyAPI'
+            });
 
-            // var dataCalls = [
-            //     AssemblyClient.callFunc('get_contig_lengths', [objectRef, null]).then(function (result) {
-            //         return result[0];
-            //     }),
-            //     AssemblyClient.callFunc('get_contig_gc_content', [objectRef, null]).then(function (result) {
-            //         return result[0];
-            //     })
-            // ];
-            // return Promise.all(dataCalls)
-            //     .spread(function (contigLengths, contigGc) {
-            //         return {
-            //             contigLengths: contigLengths,
-            //             contigGc: contigGc
-            //         };
-            //     });
+            var dataCalls = [
+                // AssemblyClient.callFunc('get_contig_lengths', [objectRef, null]).then(function (result) {
+                //     return result[0];
+                // }),
+                // AssemblyClient.callFunc('get_contig_gc_content', [objectRef, null]).then(function (result) {
+                //     return result[0];
+                // }),
+                AssemblyClient.callFunc('search_contigs', [{
+                    ref: objectRef,
+                    sort_by: [],
+                    start: 0
+                }])
+                    .then(([result]) => {
+                        return result;
+                    })
+            ];
+            return Promise.all(dataCalls)
+                .then(([result]) => {
+                    // return {
+                    //     contigLengths: contigLengths,
+                    //     contigGc: contigGc
+                    // };
+                    const {contigs, /* num_found */} = result;
+                    return contigs;
+                });
         }
 
         function makeContigTable(data) {
-            var rows = Object.keys(data.assembly.contig_lengths).map(function (id) {
-                var contigLength = data.assembly.contig_lengths[id];
-                var gc = data.assembly.contig_gc_content[id];
-                // TODO: form the contig length to a number with commas
-
-                return [id, contigLength, gc];
+            // const rows = Object.keys(data.assembly.contig_lengths)
+            //     .map(function (id) {
+            //         const contigLength = data.assembly.contig_lengths[id];
+            //         const gc = data.assembly.contig_gc_content[id];
+            //         return [id, contigLength, gc];
+            //     });
+            const rows = data.map((contig) => {
+                return [
+                    contig.contig_id,
+                    contig.length,
+                    contig.gc
+                ];
             });
             return {
-                rows: rows,
+                rows,
                 columns: [
                     //     {
                     //     name: 'row_id',
@@ -88,7 +120,7 @@ define([
                     //     }
                     // },
                     {
-                        name: 'id',
+                        name: 'contig_id',
                         label: 'Id',
                         type: 'string',
                         width: '30%',
@@ -98,7 +130,7 @@ define([
                         }
                     },
                     {
-                        name: 'contigLength',
+                        name: 'length',
                         label: 'Contig Length (bp)',
                         type: 'number',
                         width: '35%',
@@ -119,6 +151,9 @@ define([
                         type: 'number',
                         width: '30%',
                         format: function (value) {
+                            if (value === null) {
+                                return content.na();
+                            }
                             return (value * 100).toFixed(2);
                         },
                         style: {
@@ -133,8 +168,8 @@ define([
             };
         }
 
-        function renderTable(tableData) {
-            var node = container.querySelector('[data-element="summary"]');
+        function renderTable(table) {
+            const node = container.querySelector('[data-element="summary"]');
             node.innerHTML = div({
                 dataBind: {
                     component: {
@@ -148,7 +183,7 @@ define([
             });
             ko.applyBindings(
                 {
-                    table: tableData
+                    table
                 },
                 node
             );
@@ -170,7 +205,7 @@ define([
                                     textAlign: 'center'
                                 }
                             },
-                            html.loading()
+                            build.loading()
                         )
                     ),
                     div({
@@ -180,11 +215,24 @@ define([
             });
         }
 
-        function start(params) {
-            return fetchData(params.objectRef).then(function (data) {
-                var table = makeContigTable(data);
-                renderTable(table);
+        function renderError(err) {
+            container.innerHTML = BS.buildPanel({
+                type: 'danger',
+                title: 'Error',
+                body: err.message || err.error.message
             });
+        }
+
+        function start({workspaceId, objectId, objectVersion}) {
+            const ref = [workspaceId, objectId, objectVersion].join('/');
+            return fetchData(ref)
+                .then(function (data) {
+                    const table = makeContigTable(data);
+                    renderTable(table);
+                })
+                .catch((err) => {
+                    renderError(err);
+                });
         }
 
         function stop() {

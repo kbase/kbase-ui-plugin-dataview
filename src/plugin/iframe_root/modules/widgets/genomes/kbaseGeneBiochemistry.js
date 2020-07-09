@@ -60,7 +60,7 @@ define(['jquery', 'kb_lib/htmlBuilders', 'kb_service/client/workspace', 'kbaseUI
                 self.ready(this.options.genomeInfo);
             } else {
                 var obj = this.buildObjectIdentity(this.options.workspaceID, this.options.genomeID);
-                var workspace = new Workspace(this.runtime.getConfig('service.workspace.url'), {
+                var workspace = new Workspace(this.runtime.config('services.workspace.url'), {
                     token: this.runtime.service('session').getAuthToken()
                 });
                 workspace
