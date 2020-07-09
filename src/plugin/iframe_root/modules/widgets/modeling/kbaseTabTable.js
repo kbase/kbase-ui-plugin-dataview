@@ -126,9 +126,9 @@ define([
 
                         if (tab.type === 'verticaltbl') {
                             const tabPane = tabs.tabContent(tab.name);
-                            const table = self.verticalTable({ 
-                                rows: tab.rows, 
-                                data: self.obj[tab.key] 
+                            const table = self.verticalTable({
+                                rows: tab.rows,
+                                data: self.obj[tab.key]
                             });
                             tabPane.rmLoading();
                             tabPane.append(table);
@@ -156,7 +156,7 @@ define([
 
             var refLookup = {};
 
-            function preProcessDataTable(tabSpec, tabPane) {
+            function preProcessDataTable(tabSpec) {
                 return Promise.try(function () {
                     // get refs
                     const refs = [],
@@ -218,8 +218,6 @@ define([
                                 } catch (ex) {
                                     console.error('Error invoking tab pane', tabSpec, ex);
                                     createErrorMessage(tabPane, ex.message);
-                                } finally {
-                                    return;
                                 }
                             }
 
@@ -277,7 +275,7 @@ define([
             }
 
             // takes table spec and prepared data, returns datatables settings object
-            this.getTableSettings = function (tab, data) {
+            this.getTableSettings = function (tab) {
                 const tableColumns = getColSettings(tab);
                 const settings = {
                     dom: '<"top"lf>rt<"bottom"ip><"clear">',
@@ -625,7 +623,6 @@ define([
                 );
             };
 
-            
             this.pictureEquation = function (eq) {
                 const cpds = get_cpds(eq);
                 const panel = $('<div></div>');

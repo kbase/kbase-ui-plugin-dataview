@@ -7,11 +7,18 @@ define([
     'jquery',
     'kb_common/html',
     'kb_service/client/workspace',
+    'uuid',
 
+    // for effect
     'kbaseUI/widget/legacy/authenticatedWidget',
     'kbaseUI/widget/legacy/tabs',
     'datatables_bootstrap'
-], function ($, html, Workspace) {
+], function (
+    $,
+    html,
+    Workspace,
+    Uuid
+) {
     'use strict';
     $.KBWidget({
         name: 'kbaseGenomeComparisonViewer',
@@ -27,7 +34,7 @@ define([
         },
         init: function (options) {
             this._super(options);
-            this.pref = this.genUUID();
+            this.pref = new Uuid(4).format(),
             this.ws = options.ws;
             this.id = options.id;
             this.render();
@@ -94,14 +101,14 @@ define([
                             'genome-table"/>'
                     );
                     tabGenomes.append(tableGenomes);
-                    var headings = ['Genome', 'Legend'];
-                    for (var i in genomes) {
+                    const headings = ['Genome', 'Legend'];
+                    for (const i in genomes) {
                         headings.push('G' + i);
                     }
                     tableGenomes.append('<tr><th><b>' + headings.join('</b></th><th><b>') + '</b></th></tr>');
-                    for (var i in genomes) {
-                        var genome = genomes[i];
-                        var row = ['<b>G' + i + '</b>-' + genome.name, '# of families:<br># of functions:'];
+                    for (const i in genomes) {
+                        const genome = genomes[i];
+                        const row = ['<b>G' + i + '</b>-' + genome.name, '# of families:<br># of functions:'];
                         for (var j in genomes) {
                             var compgenome = genomes[j];
                             if (genome.genome_similarity[compgenome.genome_ref]) {
@@ -158,21 +165,19 @@ define([
                     for (var i in families) {
                         var fam = families[i];
                         var gcount = 0;
-                        for (var j in genomes) {
-                            var compgenome = genomes[j];
+                        for (const j in genomes) {
+                            const compgenome = genomes[j];
                             if (fam.genome_features[compgenome.genome_ref]) {
                                 var genes = fam.genome_features[compgenome.genome_ref];
-                                for (var k in genes) {
-                                    gcount++;
-                                }
+                                gcount += genes.length;
                             }
                         }
                         fam.numgenes = gcount;
                     }
-                    for (var i in functions) {
-                        var func = functions[i];
+                    for (const i in functions) {
+                        const func = functions[i];
                         func.subsystem = func.subsystem.replace(/_/g, ' ');
-                        var funcdata = {
+                        const funcdata = {
                             id:
                                 '<a class="show-function' +
                                 self.pref +
@@ -185,17 +190,17 @@ define([
                             primclass: func.primclass,
                             subclass: func.subclass
                         };
-                        var funcindecies = {};
-                        var funcgenomes = {};
-                        var gcount = 0;
-                        for (var j in genomes) {
-                            var compgenome = genomes[j];
+                        const funcindecies = {};
+                        const funcgenomes = {};
+                        let gcount = 0;
+                        for (const j in genomes) {
+                            const compgenome = genomes[j];
                             if (func.genome_features[compgenome.genome_ref]) {
-                                var genomefams = {};
-                                var genes = func.genome_features[compgenome.genome_ref];
-                                for (var k in genes) {
+                                const genomefams = {};
+                                const genes = func.genome_features[compgenome.genome_ref];
+                                for (const k in genes) {
                                     gcount++;
-                                    gene = genes[k];
+                                    const gene = genes[k];
                                     genomefams[gene[1]] = 1;
                                     if (funcindecies[gene[1]] === undefined) {
                                         funcindecies[gene[1]] = 0;
@@ -222,7 +227,7 @@ define([
                         funcdata.families = '';
                         funcdata.famgenes = '';
                         funcdata.famgenomes = '';
-                        for (var j in sortedfams) {
+                        for (const j in sortedfams) {
                             if (funcdata.families.length > 0) {
                                 funcdata.families += '<br>';
                                 funcdata.famgenes += '<br>';
@@ -301,21 +306,21 @@ define([
                         },
                         fnDrawCallback: events
                     };
-                    for (var i in families) {
-                        var fam = families[i];
-                        var famdata = {
+                    for (const i in families) {
+                        const fam = families[i];
+                        const famdata = {
                             id: '<a class="show-family' + self.pref + '" data-id="' + fam.id + '">' + fam.id + '</a>'
                         };
-                        var famindecies = {};
-                        var famgenomes = {};
-                        var gcount = 0;
-                        var gene;
-                        for (var j in genomes) {
-                            var compgenome = genomes[j];
+                        const famindecies = {};
+                        const famgenomes = {};
+                        let gcount = 0;
+                        let gene;
+                        for (const j in genomes) {
+                            const compgenome = genomes[j];
                             if (fam.genome_features[compgenome.genome_ref]) {
-                                var genomefams = {};
-                                var genes = fam.genome_features[compgenome.genome_ref];
-                                for (var k in genes) {
+                                const genomefams = {};
+                                const genes = fam.genome_features[compgenome.genome_ref];
+                                for (const k in genes) {
                                     gcount++;
                                     gene = genes[k];
                                     var array = gene[1];
@@ -327,7 +332,7 @@ define([
                                         famindecies[array[m]]++;
                                     }
                                 }
-                                for (var genfam in genomefams) {
+                                for (const genfam in genomefams) {
                                     if (famgenomes[genfam] === undefined) {
                                         famgenomes[genfam] = 0;
                                     }
@@ -349,8 +354,8 @@ define([
                         famdata.subclass = '';
                         famdata.funcgenes = '';
                         famdata.funcgenomes = '';
-                        var count = 1;
-                        for (var j in sortedfuncs) {
+                        let count = 1;
+                        for (const j in sortedfuncs) {
                             if (famdata.functions.length > 0) {
                                 famdata.functions += '<br>';
                                 famdata.subsystem += '<br>';
@@ -439,8 +444,8 @@ define([
                                 'Secondary class'
                             ];
                             tableFamGen.append('<tr><th><b>' + headings.join('</b></th><th><b>') + '</b></th></tr>');
-                            for (var i in genomes) {
-                                var genome = genomes[i];
+                            for (const i in genomes) {
+                                const genome = genomes[i];
                                 var genes = '';
                                 var scores = '';
                                 var funcs = '';
@@ -509,15 +514,15 @@ define([
                             tabContent.append(tableFuncGen);
                             var headings = ['Genome', 'Genes', 'Scores', 'Families'];
                             tableFuncGen.append('<tr><th><b>' + headings.join('</b></th><th><b>') + '</b></th></tr>');
-                            for (var i in genomes) {
+                            for (const i in genomes) {
                                 var genome = genomes[i];
                                 var genes = '';
                                 var scores = '';
                                 // var functions = "";
                                 var fams = '';
-                                var sss = '';
-                                var primclass = '';
-                                var subclass = '';
+                                // var sss = '';
+                                // var primclass = '';
+                                // var subclass = '';
                                 if (func.genome_features[genome.genome_ref] === undefined) {
                                     genes = 'none';
                                     scores = 'none';
@@ -558,22 +563,15 @@ define([
             );
             return this;
         },
-        loggedInCallback: function (event, auth) {
+        loggedInCallback: function () {
             //this.token = auth.token;
             this.render();
             return this;
         },
-        loggedOutCallback: function (event, auth) {
+        loggedOutCallback: function () {
             //this.token = null;
             this.render();
             return this;
-        },
-        genUUID: function () {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                var r = (Math.random() * 16) | 0,
-                    v = c === 'x' ? r : (r & 0x3) | 0x8;
-                return v.toString(16);
-            });
         }
     });
 });

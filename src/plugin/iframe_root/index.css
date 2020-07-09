@@ -9,6 +9,7 @@
     flex-direction: column;
     min-height: 0;
     overflow-y: auto;
+    position: relative;
 }
 
 
@@ -37,4 +38,17 @@ table.kb-overview-table td {
 
 .id-click {
     cursor: pointer;
+}
+
+/*
+for proteome tooltip
+*/
+.ipython_tooltip {
+    background-color: white;
+}
+
+.genome-comparison-tooltip {
+    background-color: white;
+    color: black;
+    border: 1px solid red;
 }

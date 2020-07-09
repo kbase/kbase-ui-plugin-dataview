@@ -8,10 +8,18 @@ define([
     'bluebird',
     'kb_service/client/workspace',
     'kb_common/html',
+    'uuid',
 
+    // for effect
     'datatables_bootstrap',
     'kbaseUI/widget/legacy/authenticatedWidget'
-], function ($, Promise, Workspace, html) {
+], function (
+    $,
+    Promise,
+    Workspace,
+    html,
+    Uuid
+) {
     'use strict';
     $.KBWidget({
         name: 'kbaseContigSetView',
@@ -48,7 +56,7 @@ define([
         },
         render: function () {
             var self = this;
-            var pref = this.uuid();
+            var pref = new Uuid(4).format();
 
             var container = this.$elem;
 
@@ -58,7 +66,7 @@ define([
 
                 // var p = kb.req('ws', 'get_object_subset', [{ref: self.ws_name + "/" + self.ws_id, included: ['contigs/[*]/id', 'contigs/[*]/length', 'id', 'name', 'source', 'source_id', 'type']}]);
 
-                Promise.resolve(
+                Promise.try(
                     self.ws_service.get_object_subset([
                         {
                             ref: self.ws_name + '/' + self.ws_id,
@@ -133,13 +141,13 @@ define([
                                 'class="table table-bordered table-striped" style="width: 100%; margin-left: 0px; margin-right: 0px;"/>'
                         );
 
-                        var contigsData = cs.contigs.map(function (contig) {
+                        const contigsData = cs.contigs.map(function (contig) {
                             return {
                                 name: contig.id,
                                 length: contig.length
                             };
                         });
-                        var contigsSettings = {
+                        const contigsSettings = {
                             sPaginationType: 'full_numbers',
                             iDisplayLength: 10,
                             aoColumns: [
@@ -152,7 +160,7 @@ define([
                                 sEmptyTable: 'No contigs found.'
                             }
                         };
-                        var contigsTable = $('#' + pref + 'contigs-table').dataTable(contigsSettings);
+                        $('#' + pref + 'contigs-table').dataTable(contigsSettings);
                     })
                     .catch(function (data) {
                         container.empty();
@@ -185,17 +193,10 @@ define([
             //this.render();
             return this;
         },
-        loggedOutCallback: function (event, auth) {
+        loggedOutCallback: function () {
             this.token = null;
             //this.render();
             return this;
-        },
-        uuid: function () {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                var r = (Math.random() * 16) | 0,
-                    v = c === 'x' ? r : (r & 0x3) | 0x8;
-                return v.toString(16);
-            });
         }
     });
 });

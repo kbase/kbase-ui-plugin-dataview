@@ -1,10 +1,3 @@
-/*global
- define
- */
-/*jslint
- browser: true,
- white: true
- */
 /*
  Plot Renderer
 
@@ -98,7 +91,16 @@
  function to be called for drag select. This function will get passed an array of the selected points.
 
  */
-define(['jquery', 'uuid', 'widgets/communities/jquery.svg  '], function ($, Uuid) {
+define([
+    'jquery',
+    'uuid',
+
+    // For effect
+    'widgets/communities/jquery.svg'
+], function (
+    $,
+    Uuid
+) {
     // 'jquery-svg-graph', 'jquery-svg-plot'],
     'use strict';
     var plot = {
@@ -367,14 +369,14 @@ define(['jquery', 'uuid', 'widgets/communities/jquery.svg  '], function ($, Uuid
                 [0.2, 0.9, 0.8, 0.995]
             ];
 
-            var colors = [
-                '#BD362F', // red
-                '#0044CC', // blue
-                '#51A351', // green
-                '#F89406', // yellow
-                '#2F96B4', // lightblue
-                '#bd2fa6' // purple
-            ];
+            // var colors = [
+            //     '#BD362F', // red
+            //     '#0044CC', // blue
+            //     '#51A351', // green
+            //     '#F89406', // yellow
+            //     '#2F96B4', // lightblue
+            //     '#bd2fa6' // purple
+            // ];
 
             if (this.settings.x_min === undefined) {
                 var x_min = undefined;
@@ -414,9 +416,10 @@ define(['jquery', 'uuid', 'widgets/communities/jquery.svg  '], function ($, Uuid
                     this.settings.title_color,
                     this.settings.title_settings
                 );
-            for (i = 0; i < this.settings.data.length; i++) {
-                var d = this.settings.data[i];
-            }
+
+            // for (i = 0; i < this.settings.data.length; i++) {
+            //     var d = this.settings.data[i];
+            // }
 
             svg.plot.plotPoints = this.settings.data.points;
             svg.plot.connected = this.settings.connected;
