@@ -46,6 +46,37 @@ define([
             }));
         }
 
+        getSamplesSerial(samples) {
+            const sampleService = new DynamicServiceClient({
+                module: 'SampleService',
+                url: this.runtime.config('services.ServiceWizard.url'),
+                token: this.runtime.service('session').getAuthToken()
+            });
+
+            return Promise.mapSeries(samples, (sample) => {
+                return Promise.all([
+                    sampleService
+                        .callFunc('get_sample', [{
+                            id: sample.id,
+                            version: sample.version
+                        }]),
+
+                    sampleService
+                        .callFunc('get_data_links_from_sample', [{
+                            id: sample.id,
+                            version: sample.version
+                        }])
+                ])
+                    .then(([[sample], [linkedData]]) => {
+                        return {sample, linkedData};
+                    });
+            })
+                .then((result) => {
+                    return result;
+                });
+
+        }
+
         getObject() {
             const workspace = new GenericClient({
                 module: 'Workspace',
