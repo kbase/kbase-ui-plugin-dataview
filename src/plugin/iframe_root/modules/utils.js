@@ -1,4 +1,14 @@
-define(['bluebird', 'kb_service/utils', 'kb_service/client/workspace', 'kb_lib/jsonRpc/genericClient'], function (Promise, apiUtils, Workspace, GenericClient) {
+define([
+    'bluebird',
+    'kb_service/utils',
+    'kb_service/client/workspace',
+    'kb_lib/jsonRpc/genericClient'
+], function (
+    Promise,
+    apiUtils,
+    Workspace,
+    GenericClient
+) {
     'use strict';
     class UIError extends Error {
         constructor({message, code, data}) {
@@ -79,9 +89,14 @@ define(['bluebird', 'kb_service/utils', 'kb_service/client/workspace', 'kb_lib/j
                 token: runtime.service('session').getAuthToken()
             });
 
-            return workspace.callFunc('get_workspace_info', [{
-                id: workspaceId
-            }])
+            const getWorkspaceInfoParams = {};
+            if (workspaceId.match(/^\d+$/)) {
+                getWorkspaceInfoParams.id = workspaceId;
+            } else {
+                getWorkspaceInfoParams.workspace = workspaceId;
+            }
+
+            return workspace.callFunc('get_workspace_info', [getWorkspaceInfoParams])
                 .then(([info]) => {
                     // return apiUtils.workspace_info_to_object(info);
                     return info;

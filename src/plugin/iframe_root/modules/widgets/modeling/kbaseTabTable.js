@@ -159,9 +159,12 @@ define([
             function preProcessDataTable(tabSpec) {
                 return Promise.try(function () {
                     // get refs
-                    const refs = [],
-                        cols = tabSpec.columns;
+                    const refs = [];
+                    const cols = tabSpec.columns;
 
+                    if (!cols) {
+                        return;
+                    }
                     cols.forEach(function (col) {
                         if ((col.type === 'tabLink' || col.type === 'wstype') && col.linkformat === 'dispWSRef') {
                             self.obj[tabSpec.key].forEach((item) => {
@@ -174,24 +177,33 @@ define([
                         }
                     });
 
-                    if (!refs.length) {
+                    if (refs.length === 0) {
                         return null;
                     }
 
                     // get human readable info from workspaces
                     return self.workspaceClient.get_object_info_new({ objects: refs })
                         .then((data) => {
+                            // note we are iterating over the refs fed into the ws call.
+                            // that call returns object info for each ref passed in, in the same
+                            // order.
                             refs.forEach(function (ref, i) {
-                                const objectInfo = data[i];
+                                const [
+                                    id, name, workspaceType,
+                                    , version, , workspaceId,
+                                    workspaceName, , , /* metadata */
+                                ] = data[i];
                                 refLookup[ref.ref] = {
-                                    id: objectInfo[0],
-                                    name: objectInfo[1],
-                                    wsid: objectInfo[6],
-                                    ws: objectInfo[7],
-                                    type: objectInfo[2].split('-')[0],
-                                    version: objectInfo[4],
-                                    ref: objectInfo[6] + '/' + objectInfo[0] + '/' + objectInfo[4],
-                                    link: objectInfo[7] + '/' + objectInfo[1]
+                                    id,
+                                    name,
+                                    wsid: workspaceId,
+                                    ws: workspaceName,
+                                    type: workspaceType.split('-')[0],
+                                    version,
+                                    ref: workspaceId + '/' + id + '/' + version,
+                                    // note that the following (name based refs) is
+                                    // deprecated and should no longer be used
+                                    link: workspaceName + '/' + name
                                 };
                             });
                             return null;
@@ -202,9 +214,9 @@ define([
             function buildContent() {
                 //5) Iterates over the entries in the spec and instantiate things
                 return Promise.all(
-                    tabList.map(function (tabSpec) {
-                        Promise.try(function () {
-                            var tabPane = tabs.tabContent(tabSpec.name);
+                    tabList.map((tabSpec) => {
+                        Promise.try(() => {
+                            const tabPane = tabs.tabContent(tabSpec.name);
 
                             // skip any vertical tables for now
                             if (tabSpec.type === 'verticaltbl') {
@@ -215,6 +227,7 @@ define([
                             if (tabSpec.widget) {
                                 try {
                                     tabPane[tabSpec.widget](tabSpec.getParams());
+                                    return;
                                 } catch (ex) {
                                     console.error('Error invoking tab pane', tabSpec, ex);
                                     createErrorMessage(tabPane, ex.message);
@@ -358,7 +371,6 @@ define([
             // takes table spec, returns datatables column settings
             function getColSettings(tab) {
                 const settings = [];
-
                 const cols = tab.columns;
 
                 for (let i = 0; i < cols.length; i++) {

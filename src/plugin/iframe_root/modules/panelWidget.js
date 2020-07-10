@@ -121,6 +121,13 @@ define([
                     runtime.send('ui', 'setTitle', 'Data View for ' + objectInfo.name);
                     params.objectInfo = objectInfo;
                     params.workspaceInfo = workspaceInfo;
+
+                    // Ensures that these params are set, even if the landing page was invoked
+                    // with names rather than ids.
+                    params.workspaceId = objectInfo.wsid;
+                    params.objectId = objectInfo.id;
+                    params.objectVersion = objectInfo.version;
+
                     return Promise.all([objectInfo, widgetSet.start(params)]);
                 })
                 // .spread((objectInfo) => {
