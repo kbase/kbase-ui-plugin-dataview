@@ -6,7 +6,7 @@ define([
     'lib/formatters',
     'components/Loading',
     './components/LinkedSamples',
-    './components/Error',
+    'components/SimpleError',
     './model'
 ], function (
     Promise,
@@ -16,7 +16,7 @@ define([
     fmt,
     Loading,
     LinkedSamples,
-    Error,
+    SimpleError,
     Model
 ) {
     'use strict';
@@ -68,7 +68,7 @@ define([
                     preact.render(preact.h(LinkedSamples, {linkedSamples}), this.node);
                 })
                 .catch((error) => {
-                    preact.render(preact.h(Error, {message: error.message}), this.node);
+                    preact.render(preact.h(SimpleError, {message: error.message}), this.node);
                 });
         }
 
