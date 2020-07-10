@@ -43,12 +43,16 @@ table.kb-overview-table td {
 /*
 for proteome tooltip
 */
-.ipython_tooltip {
-    background-color: white;
-}
 
-.genome-comparison-tooltip {
+.dataview-tooltip {
+    padding: 4px;
     background-color: white;
     color: black;
-    border: 1px solid red;
+    border: 1px solid silver;
+    box-shadow: 0 0 4px 4px gray;
+    min-height: 25px;
+    position: absolute;
+    display: none;
 }
+
+/* background-color: white; padding: 4px; border: 1px solid red; display:none; min-height: 25px; position: absolute; */

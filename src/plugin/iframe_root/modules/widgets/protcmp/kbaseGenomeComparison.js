@@ -123,7 +123,7 @@ define([
                         const genome2id = genomes[1].data.scientific_name;
                         container.empty();
                         const $nc = $('#root');
-                        $nc.append('<div id=\'widget-tooltip'+self.pref+'\' style=\'background-color: white; padding: 4px; border: 1px solid red; display:none; min-height: 25px; position: absolute;\'>Test message</div>');
+                        $nc.append(`<div id="widget-tooltip_${self.pref}" class="dataview-tooltip">Test message</div>`);
                         const table = $('<table/>')
                             .addClass('table table-bordered')
                             .css({'margin-left': 'auto', 'margin-right': 'auto'});
@@ -292,15 +292,15 @@ define([
                         $('#'+self.pref+'_img')
                             .hover(
                                 function () {
-                                    $('#widget-tooltip'+self.pref).show();
+                                    $('#widget-tooltip_'+self.pref).show();
                                 },
                                 function () {
-                                    $('#widget-tooltip'+self.pref).hide();
+                                    $('#widget-tooltip_'+self.pref).hide();
                                 }
                             )
                             .mousemove(function (e) {
                                 const hit = hitSearch(e);
-                                const tip = $('#widget-tooltip' + self.pref);
+                                const tip = $('#widget-tooltip_' + self.pref);
                                 if (Number(hit.bestDist) >= 0) {
                                     const msg = 'X-axis: ' + self.cmp.proteome1names[Number(hit.bestI)] +
                             ', Y-axis: ' + self.cmp.proteome2names[Number(hit.bestJ)] +
@@ -515,12 +515,10 @@ define([
             svgTd
                 .hover(
                     function () {
-
-
-                        $('#widget-tooltip'+self.pref).show();
+                        $('#widget-tooltip_'+self.pref).show();
                     },
                     function () {
-                        $('#widget-tooltip'+self.pref).hide();
+                        $('#widget-tooltip_'+self.pref).hide();
                     }
                 )
                 .mousemove(function (e) {
@@ -553,7 +551,7 @@ define([
                             bestLine = l;
                         }
                     }
-                    var tip = $('#widget-tooltip'+self.pref);
+                    var tip = $('#widget-tooltip_'+self.pref);
                     if (minDist && minDist <= 2) {
                         var msg = 'Gene1: ' + bestLine.gene1 + '<br>Gene2: ' + bestLine.gene2 + '<br>' +
                         'Bit-score: ' + bestLine.bit_score + '<br>Percent of related BBH bit-score: ' + bestLine.percent_of_bbh + '%';
