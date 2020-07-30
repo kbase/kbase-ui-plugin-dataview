@@ -32,7 +32,14 @@
 
  */
 
-define(['jquery', './widget', 'bootstrap'], function ($) {
+define([
+    'jquery',
+
+    './widget',
+    'bootstrap'
+], function (
+    $
+) {
     'use strict';
     $.KBWidget({
         name: 'kbaseTabs',
@@ -90,8 +97,13 @@ define(['jquery', './widget', 'bootstrap'], function ($) {
             }
 
             var $tab = $('<div></div>')
-                .addClass('tab-pane')
-                .append(tab.content);
+                .addClass('tab-pane');
+
+            if (tab.content) {
+                $tab.append(tab.content);
+            } else if (tab.showContentCallback) {
+                $tab.append(tab.showContentCallback());
+            }
 
             if (this.options.border) {
                 $tab.css('border', 'solid ' + this.options.borderColor);
@@ -99,7 +111,7 @@ define(['jquery', './widget', 'bootstrap'], function ($) {
                 $tab.css('padding', '3px');
             }
 
-            var $that = this; //thanks bootstrap! You suck!
+            var $that = this;
 
             var $nav = $('<li></li>')
                 .css('white-space', 'nowrap')
@@ -143,8 +155,6 @@ define(['jquery', './widget', 'bootstrap'], function ($) {
                                 .css('width', '22px')
                                 .css('height', '22px')
                                 .css('margin-left', '10px')
-                                .attr('title', this.deleteTabToolTip(tab.tab))
-                                .tooltip()
                                 .bind(
                                     'click',
                                     $.proxy(function (e) {
@@ -178,9 +188,6 @@ define(['jquery', './widget', 'bootstrap'], function ($) {
         },
         closeIcon: function () {
             return 'fa fa-close';
-        },
-        deleteTabToolTip: function (tabName) {
-            return 'Remove ' + tabName;
         },
         hasTab: function (tabName) {
             return this.data('tabs')[tabName];

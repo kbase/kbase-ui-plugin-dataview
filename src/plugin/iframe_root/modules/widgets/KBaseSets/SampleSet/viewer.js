@@ -8,7 +8,7 @@ define([
     'components/Loading',
     './model',
     'components/SimpleError',
-    './components/SampleSet'
+    './components/Main'
 ], function (
     Promise,
     preact,
@@ -19,7 +19,7 @@ define([
     Loading,
     Model,
     SimpleError,
-    SampleSet
+    Main
 ) {
     'use strict';
 
@@ -73,7 +73,7 @@ define([
                 .then((sampleSet) => {
                     // TODO: TODO: TODO: remove when sample service supports multiple samples w/paging
                     const totalCount = sampleSet.samples.length;
-                    sampleSet.samples = sampleSet.samples.slice(0, 10);
+                    sampleSet.samples = sampleSet.samples.slice(0, 30);
                     return model.getSamples(sampleSet.samples)
                         .then((samples) => {
                             const samplesMap = samples.reduce((samplesMap, {sample, linkedData}) => {
@@ -87,7 +87,7 @@ define([
                                 sampleSetItem.sample = samplesMap[sampleSetItem.id].sample;
                                 sampleSetItem.linkedDataCount = samplesMap[sampleSetItem.id].linkedDataCount;
                             });
-                            preact.render(preact.h(SampleSet, {sampleSet, totalCount}), this.node);
+                            preact.render(preact.h(Main, {sampleSet, totalCount}), this.node);
                             // preact.render(preact.h(SimpleError, {message: 'whaaat?'}), this.node);
 
                         })

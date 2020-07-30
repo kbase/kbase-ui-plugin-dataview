@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
-        "target": "ES5"
+        "module": "amd",
+        "target": "es2017"
     },
     "exclude": [
         "node_modules"

@@ -1,4 +1,4 @@
 {
     "editor.detectIndentation": false,
-    "javascript.validate.enable": false
+    "javascript.validate.enable": true
 }

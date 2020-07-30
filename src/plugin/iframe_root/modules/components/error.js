@@ -51,7 +51,7 @@ define([
                 );
             default:
                 // The original error should be included as data.originalError
-                if (error.data.originalError) {
+                if (error.data && error.data.originalError) {
                     return h('div', null, h('p', null, [
                         'The original error message is: ',
                         error.data.originalError.message

@@ -47,6 +47,7 @@ define([
                         name: 'kb_dataview_genericObject'
                     },
                     panel: false,
+                    scrolling: true,
                     options: []
                 };
             }
@@ -100,6 +101,7 @@ define([
                         var wsobject = APIUtils.objectInfoToObject(objectInfos[0]);
                         var type = APIUtils.parseTypeId(wsobject.type),
                             mapping = findMapping(type, params);
+                        // console.log('widget mapping', mapping);
                         if (!mapping) {
                             throw new Error('Sorry, cannot find widget for ' + type.module + '.' + type.name);
                         }
@@ -137,7 +139,7 @@ define([
                                 return {
                                     widget: result,
                                     params: widgetParams,
-                                    mapping: mapping
+                                    mapping
                                 };
                             });
                     });
@@ -168,6 +170,10 @@ define([
             return Promise.try(function () {
                 mount = node;
                 container = document.createElement('div');
+                container.style.display = 'flex';
+                container.style['flex-direction'] = 'column';
+                container.style['flex'] = '1 1 0px';
+                container.style['min-height'] = '0px';
                 mount.appendChild(container);
             });
         }
@@ -181,6 +187,7 @@ define([
                     if (result.mapping.panel) {
                         var temp = container.appendChild(document.createElement('div')),
                             widgetParentId = html.genId();
+
                         temp.innerHTML = BS.buildPanel({
                             name: 'data-view',
                             type: 'default',
@@ -189,6 +196,15 @@ define([
                         });
                         // These are global.
                         widgetContainer = document.getElementById(widgetParentId);
+                    } else if (result.mapping.scrolling) {
+                        widgetContainer = container.appendChild(document.createElement('div')),
+                        widgetContainer.style.flex = '1 1 0px';
+                        widgetContainer.style.display = 'flex';
+                        widgetContainer.style['flex-direction'] = 'column';
+                        widgetContainer.style['min-height'] = '0';
+                        widgetContainer.style['overflow-y'] = 'auto';
+                        widgetContainer.setAttribute('data-k-b-testhook-element', 'scrolling-wrapper');
+                        widgetParentId = html.genId();
                     } else {
                         widgetContainer = container;
                     }

@@ -4,45 +4,14 @@ package:
   name: dataview
   description: The data landing pages
   type: legacy
-install:
-  routes:
-    - path:
-        - dataview
-        - name: workspaceId
-        - name: objectId
-        - name: objectVersion
-          optional: true
-      queryParams:
-        sub: {}
-        subid: {}
-        viewer: {}
-      params:
+services:
+  route:
+    routes:
+      - path: dataview/:workspaceId/:objectId/:-objectVersion?sub=:-sub&subid=:-subid&viewer=:-viewer
         view: dataView
-        plugin: dataview
-    - path:
-        - jsonview
-        - name: workspaceId
-        - name: objectId
-        - name: objectVersion
-          optional: true
-      params:
+      - path: jsonview/:workspaceId/:objectId/:-objectVersion
         view: jsonView
-        plugin: dataview
-    - path:
-        - [objgraphview, provenance]
-        - name: workspaceId
-        - name: objectId
-        - name: objectVersion
-          optional: true
-      params:
+      - path: objgraphview/provenance/:workspaceId/:objectId/:-objectVersion
         view: provenanceView
-        plugin: dataview
-    - path:
-        - [objgraphview2, provenance2]
-        - name: workspaceId
-        - name: objectId
-        - name: objectVersion
-          optional: true
-      params:
+      - path: objgraphview2/provenance2/:workspaceId/:objectId/:-objectVersion
         view: provenanceView2
-        plugin: dataview

@@ -8,6 +8,7 @@ define([
     'utils',
     'collapsiblePanel',
     'components/error',
+    'components/Tabs',
 
     'bootstrap'
 ], function (
@@ -19,7 +20,8 @@ define([
     WidgetSet,
     utils,
     collapsiblePanel,
-    ErrorComponent
+    ErrorComponent,
+    Tabs
 ) {
     'use strict';
 

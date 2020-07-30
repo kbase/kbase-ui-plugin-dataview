@@ -16,7 +16,11 @@ define([
         }, '∅');
     }
 
+    function niceNumber(value) {
+        return Intl.NumberFormat('en-US', {useGrouping: true}).format(value);
+    }
+
     return {
-        na
+        na, niceNumber
     };
 });

@@ -7,7 +7,9 @@ define([
     'kb_common/dom',
     'kb_service/client/workspace',
     'kb_common/state',
-    '../collapsiblePanel'
+    '../collapsiblePanel',
+
+    'bootstrap'
 ], function (
     Promise,
     $,
@@ -46,6 +48,7 @@ define([
             });
 
         const copyButtonID = html.genId();
+        const jsonViewButtonID = html.genId();
 
         function dateFormat(dateString) {
             var monthLookup = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -510,7 +513,7 @@ define([
                 dataToggle: 'tooltip',
                 dataPlacement: 'bottom',
                 title: 'Opens (and closes) a panel with which you can copy this data object to a Narrative',
-                id: copyButtonID,
+                id: jsonViewButtonID,
                 href: `/#jsonview/${ref}`,
                 target: '_parent'
             }, 'JSON View');
@@ -572,7 +575,7 @@ define([
                     renderTypeRow(),
                     renderNarrativeRow(),
                     tr([
-                        th('Last Updatedx'),
+                        th('Last Updated'),
                         td({ dataElement: 'last-updated' }, [
                             dateFormat(state.get('object.save_date')),
                             ' by ',
@@ -917,7 +920,7 @@ define([
                         runtime.send('copyWidget', 'toggle');
                     });
 
-                    $(function () {
+                    $(document).ready(() => {
                         $('[data-toggle="tooltip"]').tooltip({
                             delay: {
                                 show: 500,
