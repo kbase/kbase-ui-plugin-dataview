@@ -10,7 +10,7 @@ define([
     '../Panel',
 
     'bootstrap',
-    'css!./Overview.css'
+    'css!./style.css'
 ], function (
     preact,
     htm,
