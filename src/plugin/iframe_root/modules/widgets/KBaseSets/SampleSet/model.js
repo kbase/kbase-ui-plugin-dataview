@@ -1,13 +1,25 @@
 define([
     'bluebird',
     'kb_lib/jsonRpc/genericClient',
-    'kb_lib/jsonRpc/dynamicServiceClient'
+    'kb_lib/jsonRpc/dynamicServiceClient',
+    'yaml!./data/templateDefinitions.yml'
 ], function (
     Promise,
     GenericClient,
-    DynamicServiceClient
+    DynamicServiceClient,
+    templateDefinitions
 ) {
     'use strict';
+
+    function intersect(arr1, arr2) {
+        for (const item1 of arr1) {
+            for (const item2 of arr2) {
+                if (item1 === item2) {
+                    return true;
+                }
+            }
+        }
+    }
 
     class Model {
         constructor(config) {
@@ -15,6 +27,34 @@ define([
             this.workspaceId = config.workspaceId;
             this.objectId = config.objectId;
             this.objectVersion = config.objectVersion;
+        }
+
+        augmentSample(sample) {
+            const metadataKeys = Object.keys(sample.node_tree[0].meta_controlled);
+            let dataSourceDefinition;
+            loop:
+            for (const def of templateDefinitions.templates) {
+                if (def.signalFields.includes) {
+                    if (intersect(def.signalFields.includes, metadataKeys)) {
+                        dataSourceDefinition = def;
+                        break loop;
+                    }
+                }
+                if (def.signalFields.does_not_include) {
+                    if (!intersect(def.signalFields.does_not_include, metadataKeys)) {
+                        dataSourceDefinition = def;
+                        break loop;
+                    }
+                }
+            }
+
+            if (!dataSourceDefinition) {
+                console.error('Cannot determine source!', sample.node_tree[0].meta_controlled);
+                throw new Error('Cannot determine source!');
+            }
+
+            sample.dataSourceDefinition = dataSourceDefinition;
+            return sample;
         }
 
         getSamples(samples) {
@@ -39,7 +79,7 @@ define([
                 ])
                     .then(([[sample], [linkedData]]) => {
                         return {
-                            sample,
+                            sample: this.augmentSample(sample),
                             linkedData
                         };
                     });
@@ -68,7 +108,7 @@ define([
                         }])
                 ])
                     .then(([[sample], [linkedData]]) => {
-                        return {sample, linkedData};
+                        return {sample: this.augmentSample(sample), linkedData};
                     });
             })
                 .then((result) => {

@@ -10,19 +10,19 @@ source:
   ## sources are relative to build/plugins/PACKAGE/source/javascript
   ## NB: need to quote file names, otherwise
   modules:
-    - module: kb_dataview_widget_panel
-      file: panelWidget
-    # -
-    #     module: kb_dataview_widget_genomes_genomeComparison
-    #     file: widgets/protcmp/kbaseGenomeComparisonViewer
+  # - module: kb_dataview_widget_panel
+  #   file: panelWidget
+  # -
+  #     module: kb_dataview_widget_genomes_genomeComparison
+  #     file: widgets/protcmp/kbaseGenomeComparisonViewer
   styles:
     - file: dataview
     - file: sankeystyle
 install:
   widgets:
-    - module: kb_dataview_widget_panel
-      name: kb_dataview_panel
-      type: factory
+    # - module: kb_dataview_widget_panel
+    #   name: kb_dataview_panel
+    #   type: factory
     - module: provenancePanel
       name: kb_dataview_provenancePanel
       type: factory
@@ -339,6 +339,7 @@ install:
           jqueryWidget: CollectionView
           # If a bootstrap panel is requested to wrap this widget.
           panel: false
+          scrolling: true
           # Mapping of standard options to the widget option properties.
           # By standard, I mean those defined in the GenericVisualizer widget.
           options:
@@ -357,6 +358,7 @@ install:
       viewers:
         - name: Data View
           panel: false
+          scrolling: true
           default: true
           widget:
             name: kb_dataview_abundanceDataHeatmap
@@ -392,6 +394,7 @@ install:
             config:
               jqueryName: kbaseTabTable
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceName
@@ -414,6 +417,7 @@ install:
             config:
               jqueryName: kbaseTabTable
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceName
@@ -437,6 +441,7 @@ install:
             config:
               jqueryName: AbundanceDataView
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceId
@@ -458,6 +463,7 @@ install:
             config:
               jqueryName: MetagenomeView
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceId
@@ -475,6 +481,7 @@ install:
             config:
               jqueryName: AbundanceDataView
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceId
@@ -496,6 +503,7 @@ install:
             config:
               jqueryName: GenomeComparisonWidget
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceId
@@ -517,6 +525,7 @@ install:
             config:
               jqueryName: kbaseAssemblyInput
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceId
@@ -537,6 +546,7 @@ install:
             config:
               jqueryName: kbaseAssemblyView
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceId
@@ -557,6 +567,7 @@ install:
             config:
               jqueryName: kbasePairedEndLibrary
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceId
@@ -582,6 +593,7 @@ install:
         #         config:
         #             jqueryName: kbasePairedEndLibrary
         #     panel: false
+        #     scrolling: true
         #     default: true
         #     options:
         #         -
@@ -605,6 +617,7 @@ install:
             config:
               jqueryName: kbaseReferenceAssembly
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceId
@@ -629,6 +642,7 @@ install:
           # This the title for the widget if a wrapper panel is requested
           title: "Data View"
           panel: false
+          scrolling: true
           # This is the widget id name as specified in the plugin
           # it should follow standard namespacing. It should also be
           # defined above in the modules.
@@ -652,6 +666,7 @@ install:
           # This the title for the widget if a wrapper panel is requested
           title: "Data View"
           panel: false
+          scrolling: true
           # This is the widget id name as specified in the plugin
           # it should follow standard namespacing. It should also be
           # defined above in the modules.
@@ -679,6 +694,7 @@ install:
           # This the title for the widget if a wrapper panel is requested
           title: "Data View"
           panel: false
+          scrolling: true
           # This is the widget id name as specified in the plugin
           # it should follow standard namespacing. It should also be
           # defined above in the modules.
@@ -703,6 +719,7 @@ install:
             config:
               jqueryName: kbaseTabTable
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceName
@@ -727,6 +744,7 @@ install:
             config:
               jqueryName: kbaseExpressionSeries
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceName
@@ -748,6 +766,7 @@ install:
             config:
               jqueryName: kbaseTabTable
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceName
@@ -770,6 +789,7 @@ install:
             config:
               jqueryName: kbaseTabTable
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceName
@@ -789,6 +809,7 @@ install:
             config:
               jqueryName: kbaseTabTable
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceName
@@ -813,6 +834,7 @@ install:
             config:
               jqueryName: kbaseTabTable
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceName
@@ -838,6 +860,7 @@ install:
             config:
               jqueryName: kbaseFilePairedEndLibrary
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceId
@@ -881,6 +904,7 @@ install:
             config:
               jqueryName: KBaseGenomePage
           panel: false
+          scrolling: true
           default: true
           # Options object to build. Maps
           options:
@@ -888,7 +912,6 @@ install:
               to: genomeID
             - from: workspaceId
               to: workspaceID
-
           sub:
             feature:
               widget:
@@ -896,6 +919,7 @@ install:
                 config:
                   jqueryName: KBaseGenePage
               panel: false
+              scrolling: true
               default: true
               options:
                 - from: objectId
@@ -918,6 +942,7 @@ install:
             config:
               jqueryName: kbasePanGenome
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceName
@@ -938,6 +963,7 @@ install:
             config:
               jqueryName: AnnotationSetTable
           panel: false
+          scrolling: true
           default: true
           options:
             - from: workspaceId
@@ -960,6 +986,7 @@ install:
             config:
               jqueryName: AnnotatedMetagenomeAssembly
           panel: false
+          scrolling: true
           default: true
 
     # TREES
@@ -979,6 +1006,7 @@ install:
             config:
               jqueryName: kbaseTree
           panel: false
+          scrolling: true
           options:
             - from: workspaceId
               to: workspaceID
@@ -1001,6 +1029,7 @@ install:
           widget:
             name: kb_dataview_kbaseReport
           panel: false
+          scrolling: true
     # ONTOLOGY
     - type:
         module: KBaseOntology
@@ -1013,6 +1042,7 @@ install:
         - title: Data View - Ontology Dictionary
           default: true
           panel: false
+          scrolling: true
           widget:
             name: kb_dataview_ontologyDictionary
             config:
@@ -1028,6 +1058,7 @@ install:
         - title: Data View - Ontology Translation
           default: true
           panel: false
+          scrolling: true
           widget:
             name: kb_dataview_ontologyTranslation
             config:
@@ -1043,12 +1074,13 @@ install:
         - title: Sample Set
           default: true
           panel: false
+          scrolling: true
           widget:
             name: kb_dataview_sampleSet
 
 views:
   - view: dataView
-    module: panelWidget
+    module: objectViewWidget
     type: factory
   - view: jsonView
     module: jsonViewPanel

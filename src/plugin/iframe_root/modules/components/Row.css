@@ -1,0 +1,6 @@
+.Row {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: row;
+    min-height: 0;
+}

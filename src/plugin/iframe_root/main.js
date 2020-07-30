@@ -54,15 +54,9 @@ require(['loader'], function () {
                     return dispatcher.start();
                 })
                 .then((dispatcher) => {
-                    integration.onNavigate(({ path, params }) => {
-                        // TODO: ever
-                        let view;
-                        if (params.view) {
-                            view = params.view;
-                        } else {
-                            view = path[0];
-                        }
-                        dispatcher.dispatch({ view, path, params })
+                    integration.onNavigate(({ view, params }) => {
+                       
+                        dispatcher.dispatch({ view, params })
                             .catch((ex) => {
                                 // TODO: this should trigger an error display
                                 console.error('Dispatch Error', ex.message);

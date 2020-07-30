@@ -34,6 +34,17 @@ module.exports = function (grunt) {
                 flatten: true,
                 src: 'node_modules/htm/dist/htm.umd.js',
                 dest: '../src/plugin/iframe_root/modules/vendor/htm'
+            },
+            leaflet: {
+                expand: true,
+                flatten: false,
+                cwd: 'node_modules/leaflet/dist',
+                src: [
+                    'leaflet-src.js',
+                    'leaflet.css',
+                    'images/*',
+                ],
+                dest: '../src/plugin/iframe_root/modules/vendor/leaflet'
             }
         },
         clean: {

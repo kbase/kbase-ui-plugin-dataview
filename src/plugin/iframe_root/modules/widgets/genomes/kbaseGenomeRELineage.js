@@ -40,8 +40,8 @@ define(['jquery', 'uuid', 'kb_lib/html', 'kb_lib/jsonRpc/dynamicServiceClient', 
             return this;
         },
 
-        renderLineageTable(lineage, taxonRef, scientificName) {
-            const taxonURL = `/#review/${taxonRef.ns}/${taxonRef.id}/${taxonRef.ts}`;
+        renderLineageTable({lineage, taxonRef, scientificName}) {
+            const taxonURL = `/#taxonomy/taxon/${taxonRef.ns}/${taxonRef.id}/${taxonRef.ts}`;
             this.$elem.empty().append(
                 table(
                     {
@@ -104,7 +104,8 @@ define(['jquery', 'uuid', 'kb_lib/html', 'kb_lib/jsonRpc/dynamicServiceClient', 
             }])
                 .then(([result]) => {
                     if (result.results.length === 0) {
-                        throw new Error('No taxon found for this object');
+                        // throw new Error('No taxon found for this object');
+                        return null;
                     }
                     const [taxon] = result.results;
                     const taxonRef = {
@@ -116,12 +117,14 @@ define(['jquery', 'uuid', 'kb_lib/html', 'kb_lib/jsonRpc/dynamicServiceClient', 
                         taxonomyAPI.callFunc('get_lineage', [taxonRef]),
                         taxonomyAPI.callFunc('get_taxon', [taxonRef])
                     ])
-                        .then(([[{results: lineageResults}], [{results: [taxon]}]]) => {
+                        .then(([[{results: lineage}], [{results: [taxon]}]]) => {
                             if (!taxon) {
-                                throw new Error('Taxon not found');
+                                return null
+                                // throw new Error('Taxon not found');
                             }
                             const {scientific_name: scientificName} = taxon;
-                            this.renderLineageTable(lineageResults, taxonRef, scientificName);
+                            return {lineage, taxonRef, scientificName};
+
                         });
                 });
 
@@ -200,11 +203,26 @@ define(['jquery', 'uuid', 'kb_lib/html', 'kb_lib/jsonRpc/dynamicServiceClient', 
             this.$elem.append(errorAlert);
         },
 
+        renderNoLineage: function() {
+            this.$elem.empty().append(
+                div({class: 'alert alert-info'}, 
+                    'No lineage found'
+                )
+            );
+        },
+
         render: function () {
             const {ws, id, ver} = this.options.genomeRef;
             const genomeRef = [ws, id, ver].join('/');
             this.renderLoading();
             this.fetchRELineage(genomeRef)
+                .then((result) => {
+                    if (!result) {
+                        this.renderNoLineage();
+                    } else {
+                        this.renderLineageTable(result);
+                    }
+                })
                 .catch((err) => {
                     console.error('ERROR', err);
                     this.renderError('Error fetching lineage: ' + err.message);

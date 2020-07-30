@@ -1,0 +1,33 @@
+.Table-sort-button {
+    flex: 0 0 auto;
+    margin-left: 4px;
+    cursor: pointer;
+}
+
+.Table-sort-button-label {}
+
+.Table-sort-button-icon {
+    color: silver;
+}
+
+.Table-sort-button-icon:hover {
+    color: black;
+}
+
+.Table-sort-button-icon-active {
+    color: black;
+}
+
+.Table-header-cell-wrapper {
+    display: flex;
+    flex-direction: row;
+    min-width: 0;
+}
+
+.Table-header-cell-label {
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    flex: 1 1 0px;
+    min-width: 0px;
+}

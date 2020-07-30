@@ -1,0 +1,13 @@
+.Map {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    margin-top: 10px;
+}
+
+.Map-container {
+    /* width: 500px;
+    height: 500px; */
+    height: 100%;
+}

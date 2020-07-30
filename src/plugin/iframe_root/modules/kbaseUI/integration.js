@@ -34,38 +34,6 @@ define(['./windowChannel', './runtime'], (WindowChannel, Runtime) => {
             return JSON.parse(decodeURIComponent(this.rootWindow.frameElement.getAttribute('data-params')));
         }
 
-        // render(ko) {
-        //     this.rootViewModel = new RootViewModel({
-        //         runtime: this.runtime,
-        //         hostChannel: this.hostChannel,
-        //         authorized: this.authorized,
-        //         authorization: this.authorization,
-        //         pluginParams: this.pluginParams
-        //     });
-        //     this.container.innerHTML = div(
-        //         {
-        //             style: {
-        //                 flex: '1 1 0px',
-        //                 display: 'flex',
-        //                 flexDirection: 'column'
-        //             }
-        //         },
-        //         gen.if(
-        //             'ready',
-        //             gen.component({
-        //                 name: MainComponent.name(),
-        //                 params: {
-        //                     runtime: 'runtime',
-        //                     bus: 'bus',
-        //                     authorization: 'authorization',
-        //                     pluginParams: 'pluginParams'
-        //                 }
-        //             })
-        //         )
-        //     );
-        //     ko.applyBindings(this.rootViewModel, this.container);
-        // }
-
         showHelp() {
             this.rootViewModel.bus.send('help');
         }
@@ -75,36 +43,42 @@ define(['./windowChannel', './runtime'], (WindowChannel, Runtime) => {
             if (this.navigationListeners.length === 1) {
                 const queue = this.navigationQueue;
                 this.navigationQueue = [];
-                queue.forEach(({ path, params }) => {
+                queue.forEach(({ view, params }) => {
                     this.navigationListeners.forEach((listener) => {
-                        listener({ path, params });
+                        listener({ view, params });
                     });
                 });
             }
         }
 
-        handleNavigation({ path, params }) {
+        handleNavigation({ view, params }) {
             // If no listeners yet, queue up the navigation.
             if (this.navigationListeners.length === 0) {
-                this.navigationQueue.push({ path, params });
+                this.navigationQueue.push({ view, params });
             } else {
                 this.navigationListeners.forEach((listener) => {
-                    listener({ path, params });
+                    listener({ view, params });
                 });
             }
         }
 
+        setupDOMListeners() {
+            window.document.addEventListener('click', () => {
+                this.channel.send('clicked', {});
+            });
+        }
+
         setupListeners() {
             this.channel.on('navigate', (message) => {
-                const { path, params } = message;
+                const { view, params } = message;
 
                 // TODO: proper routing to error page
-                if ((!path || path.length === 0) && !params.view) {
-                    alert('no view provided...');
-                    return;
-                }
+                // if ((!path || path.length === 0) && !params.view) {
+                //     alert('no view provided...');
+                //     return;
+                // }
 
-                this.handleNavigation({ path, params });
+                this.handleNavigation({ view, params });
             });
         }
 
@@ -185,24 +159,27 @@ define(['./windowChannel', './runtime'], (WindowChannel, Runtime) => {
                     // this.rootViewModel.bus.on('set-plugin-params', ({ pluginParams }) => {
                     //     this.hostChannel.send('set-plugin-params', { pluginParams });
                     // });
-
+ 
                     // this.channel.on('show-help', () => {
                     //     this.showHelp();
                     // });
 
-                    // this.channel.on('loggedin', ({ token, username, realname, email }) => {
-                    //     this.runtime.auth({ token, username, realname, email });
-                    //     this.rootViewModel.authorized(true);
-                    //     this.rootViewModel.authorization({ token, username, realname, email });
-                    //     // really faked for now.
-                    //     // this.runtime.service('session').
-                    // });
+                    this.channel.on('loggedin', ({ token, username, realname, email }) => {
+                        // console.log('loggedin', token, username, realname, email);
+                        this.runtime.send('session', 'loggedin');
+                        // this.runtime.auth({ token, username, realname, email });
+                        // this.rootViewModel.authorized(true);
+                        // this.rootViewModel.authorization({ token, username, realname, email });
+                        // really faked for now.
+                        // this.runtime.service('session').
+                    });
 
-                    // this.channel.on('loggedout', () => {
-                    //     this.runtime.unauth();
-                    //     this.rootViewModel.authorized(false);
-                    //     this.rootViewModel.authorization(null);
-                    // });
+                    this.channel.on('loggedout', () => {
+                        this.runtime.send('session', 'loggedout');
+                        // this.runtime.unauth();
+                        // this.rootViewModel.authorized(false);
+                        // this.rootViewModel.authorization(null);
+                    });
 
                     // this.rootViewModel.bus.on('instrumentation', (payload) => {
                     //     this.hostChannel.send('send-instrumentation', payload);

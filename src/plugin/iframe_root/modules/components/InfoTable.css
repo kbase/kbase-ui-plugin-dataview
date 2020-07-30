@@ -1,0 +1,23 @@
+.InfoTable {
+    display: flex;
+    flex-direction: column;
+}
+
+.InfoTable-row {
+    display: flex;
+    flex-direction: row;
+    padding: 4px;
+}
+
+.InfoTable-labelCol {
+    flex: 0 0 auto;
+    font-weight: bold;
+    color: rgba(150, 150, 150, 1);
+}
+
+.InfoTable-dataCol {
+    flex: 1 1 0px;
+    text-align: left;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+}

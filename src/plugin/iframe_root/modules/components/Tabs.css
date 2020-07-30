@@ -1,0 +1,58 @@
+.Tabs {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.Tabs-tabs {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+    border-bottom: 1px solid #ddd;
+}
+
+.Tabs-tab {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    border: 1px solid transparent;
+    border-radius: 4px 4px 0 0;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    margin-bottom: -1px;
+    margin-right: 2px;
+    color: #337ab7
+}
+
+.Tabs-tab:hover {
+    background-color: #eeeeee;
+}
+
+.Tabs-active {
+    border: 1px solid #ddd;
+    border-bottom: 1px solid white;
+    color: #555555;
+}
+
+.Tabs-active.Tabs-tab:hover {
+    background-color: white;
+}
+
+.Tabs-pane {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.Tabs-pane-default-content {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+}

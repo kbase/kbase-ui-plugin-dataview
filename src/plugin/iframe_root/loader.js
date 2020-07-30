@@ -44,7 +44,9 @@ define([], function () {
             text: 'vendor/requirejs-text/text',
             underscore: 'vendor/underscore/underscore',
             uuid: 'vendor/pure-uuid/uuid',
-            yaml: 'vendor/requirejs-yaml/yaml'
+            yaml: 'vendor/requirejs-yaml/yaml',
+            leaflet: 'vendor/leaflet/leaflet-src',
+            leaflet_css: 'vendor/leaflet/leaflet'
         },
         shim: {
             bootstrap: {
@@ -55,6 +57,9 @@ define([], function () {
             },
             d3_sankey: {
                 deps: ['d3', 'css!d3_sankey_css']
+            },
+            leaflet: {
+                deps: ['css!leaflet_css']
             }
         }
     });
