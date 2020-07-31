@@ -1129,6 +1129,9 @@ validators:
     key_metadata:
       description: pH of sample
       display_name: Ph
+    format:
+      type: numeric
+      decimalPlaces: 3
     validators:
       - callable_builder: number
         module: SampleService.core.validator.builtin
