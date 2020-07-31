@@ -25,6 +25,8 @@ define([
 
     // const html = htm.bind(preact.h);
 
+    const MAX_SAMPLES = 100;
+
     class Viewer {
         constructor(config) {
             this.runtime = config.runtime;
@@ -73,7 +75,7 @@ define([
                 .then((sampleSet) => {
                     // TODO: TODO: TODO: remove when sample service supports multiple samples w/paging
                     const totalCount = sampleSet.samples.length;
-                    sampleSet.samples = sampleSet.samples.slice(0, 30);
+                    sampleSet.samples = sampleSet.samples.slice(0, MAX_SAMPLES);
                     return model.getSamples(sampleSet.samples)
                         .then((samples) => {
                             const samplesMap = samples.reduce((samplesMap, {sample, linkedData}) => {

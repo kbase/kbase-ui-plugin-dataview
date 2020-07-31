@@ -19,6 +19,8 @@ define([
 ) {
     'use strict';
 
+    const MAX_CELL_WIDTH = 200;
+
     const {Component } = preact;
     const html = htm.bind(preact.h);
 
@@ -30,6 +32,12 @@ define([
     class Spreadsheet extends Component {
         constructor(props) {
             super(props);
+
+            this.bodyRef = preact.createRef();
+            this.headerRef = preact.createRef();
+        }
+
+        componentDidMount() {
         }
 
         extractSources(sampleSet) {
@@ -68,8 +76,16 @@ define([
             }
         }
 
-        renderSpreadsheet() {
+        handleBodyScroll(e) {
+            // console.log(e.target.scrollLeft);
+            if (!this.headerRef.current) {
+                return ;
+            }
+            this.headerRef.current.scrollLeft = e.target.scrollLeft;
+            // console.log
+        }
 
+        renderSpreadsheet() {
             const sources = this.extractSources(this.props.sampleSet);
             if (sources.length === 0) {
                 throw new Error('No source could be determined');
@@ -200,11 +216,7 @@ define([
                 });
             });
 
-
             testNode.classList = ['Spreadsheet-cell'];
-
-            let start = new Date().getTime();
-
             const measures = {};
 
             // Here, in a nested loop (columnDefs, samples)
@@ -234,13 +246,28 @@ define([
                             }
                             break;
                         case 'metadata':
-                            var controlledField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
-                            // Set the max width for the first of controlled or user instance
-                            // of this field.
-                            if (controlledField) {
-                                return `${controlledField.value}<i style="margin-left: 1em">${controlledField.units}</i>`;
-                            }
-                            break;
+                            return (() => {
+                                const controlledField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
+                                if (!controlledField) {
+                                    return common.na();
+                                }
+                                let units;
+                                if (controlledField.units) {
+                                    units = html`<i style=${{marginLeft: '1em'}}>${controlledField.units}</i>`;
+                                } else {
+                                    units = '';
+                                }
+                                const content = html`<span>${this.formatValue(controlledField.value, columnDef.format)}${units}</span>`;
+                                return content;
+                                // const tooltip = `${this.formatValue(controlledField.value, columnDef.format)} ${controlledField.units || ''}`;
+                                // return html`
+                                //     <div className="Spreadsheet-cell Spreadsheet-controlled-field" title=${tooltip}>
+                                //         <div className="Spreadsheet-cell-content">
+                                //             ${content}
+                                //         </div>
+                                //     </div>
+                                // `;
+                            })();
                         case 'user':
                             var userField = sample.sample.node_tree[0].meta_user[columnDef.key];
                             if (userField) {
@@ -256,24 +283,24 @@ define([
                         }
                     })();
 
-                    if (measures[content]) {
-                        width = measures[content];
-                    } else {
+                    const thisWidth = (() => {
+                        if (measures[content]) {
+                            return measures[content];
+                        }
                         testNode.innerHTML = content;
-                        width = Math.max(width, outerWidth(testNode));
-                        measures[content] = width;
-                    }
+                        const w = outerWidth(testNode);
+                        measures[content] = w;
+                        return w;
+                    })();
+
+                    width = Math.max(width, thisWidth);
                 });
 
-                width = Math.max(headerWidth, Math.min(width, 200));
 
-                columnDef.width = `${Math.ceil(width)}px`;
+                const maxWidth = Math.max(headerWidth, Math.min(width, MAX_CELL_WIDTH));
+
+                columnDef.width = `${Math.ceil(maxWidth)}px`;
             });
-
-            let elapsed = (new Date().getTime()) - start;
-
-            // create column headers.
-            start = new Date().getTime();
 
             const headerCells = columnDefs.map((columnDef) => {
                 const classes = ['Spreadsheet-header-cell Spreadsheet-cell'];
@@ -328,8 +355,10 @@ define([
                             `;
                         }
                         return html`
-                            <div className="Spreadsheet-cell Spreadsheet-sample-field" style=${style}>
-                                ${sampleField}
+                            <div className="Spreadsheet-cell Spreadsheet-sample-field" style=${style}title=${sampleField}>
+                                <div className="Spreadsheet-cell-content" >
+                                    ${sampleField}
+                                </div>
                             </div>
                         `;
                     case 'node':
@@ -342,42 +371,56 @@ define([
                             `;
                         }
                         return html`
-                            <div className="Spreadsheet-cell Spreadsheet-sample-field" style=${style}>
-                                ${nodeField}
+                            <div className="Spreadsheet-cell Spreadsheet-sample-field" style=${style} title=${nodeField}>
+                                <div className="Spreadsheet-cell-content">
+                                    ${nodeField}
+                                </div>
                             </div>
                         `;
                     case 'metadata':
-                        var units;
-                        var controlledField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
-                        if (!controlledField) {
+                        return (() => {
+                            const controlledField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
+                            if (!controlledField) {
+                                return html`
+                                    <div className="Spreadsheet-cell Spreadsheet-controlled-field" style=${style}>
+                                        ${common.na()}
+                                    </div>
+                                `;
+                            }
+                            let units;
+                            if (controlledField.units) {
+                                units = html`<i style=${{marginLeft: '1em'}}>${controlledField.units}</i>`;
+                            } else {
+                                units = '';
+                            }
+                            const content = html`<span>${this.formatValue(controlledField.value, columnDef.format)}${units}</span>`;
+                            const tooltip = `${this.formatValue(controlledField.value, columnDef.format)} ${controlledField.units || ''}`;
                             return html`
-                                <div className="Spreadsheet-cell Spreadsheet-controlled-field" style=${style}>
-                                    ${common.na()}
+                                <div className="Spreadsheet-cell Spreadsheet-controlled-field" style=${style} title=${tooltip}>
+                                    <div className="Spreadsheet-cell-content">
+                                        ${content}
+                                    </div>
                                 </div>
                             `;
-                        }
-                        if (controlledField.units) {
-                            units = html`<i style=${{marginLeft: '1em'}}>${controlledField.units}</i>`;
-                        }
-                        return html`
-                            <div className="Spreadsheet-cell Spreadsheet-controlled-field" style=${style}>
-                                ${this.formatValue(controlledField.value, columnDef.format)}${units}
-                            </div>
-                        `;
+                        })();
                     case 'user':
-                        var userField = sample.sample.node_tree[0].meta_user[columnDef.key];
-                        if (!userField) {
-                            return html`
+                        return (() => {
+                            const userField = sample.sample.node_tree[0].meta_user[columnDef.key];
+                            if (!userField) {
+                                return html`
                                 <div className="Spreadsheet-cell Spreadsheet-user-field" style=${style}>
                                     ${common.na()}
                                 </div>
                             `;
-                        }
-                        return html`
-                            <div className="Spreadsheet-cell Spreadsheet-user-field" style=${style}>
-                                ${userField.value}
+                            }
+                            return html`
+                            <div className="Spreadsheet-cell Spreadsheet-user-field" style=${style} title=${userField.value}>
+                                <div className="Spreadsheet-cell-content">
+                                    ${userField.value}
+                                </div>
                             </div>
                         `;
+                        })();
                     case 'unknown':
                         var unknownField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
                         if (!unknownField) {
@@ -389,7 +432,9 @@ define([
                         }
                         return html`
                             <div className="Spreadsheet-cell Spreadsheet-unknown-field" style=${style}>
-                                ${unknownField.value}
+                                <div className="Spreadsheet-cell-content">
+                                    ${unknownField.value}
+                                </div>
                             </div>
                         `;
                     default:
@@ -399,7 +444,6 @@ define([
                             </div>
                         `;
                     }
-
                 });
                 rows.push(html`
                     <div className="Spreadsheet-row">
@@ -408,24 +452,20 @@ define([
                 `);
             });
 
-            elapsed = (new Date().getTime()) - start;
-
-            start = new Date().getTime();
-
             const body = rows;
-
             const result = html`
                 <div className="Spreadsheet-container">
-                    <div className="Spreadsheet-header">
-                        ${headerCells}
-                </div>
-                    <div className="Spreadsheet-body">
+                    <div className="Spreadsheet-header" ref=${this.headerRef}>
+                        <div className="Spreadsheet-header-container">
+                            ${headerCells}
+                        </div>
+                    </div>
+                    <div className="Spreadsheet-body" ref=${this.bodyRef} onScroll=${this.handleBodyScroll.bind(this)}>
                         ${body}
                     </div>
                 </div>
             `;
 
-            elapsed = (new Date().getTime()) - start;
             return result;
         }
 

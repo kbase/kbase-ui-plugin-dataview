@@ -20,6 +20,8 @@ define([
     const {Component, Fragment} = preact;
     const html = htm.bind(preact.h);
 
+    const MAX_SAMPLES = 100;
+
     class Main extends Component {
         constructor(props) {
             super(props);
@@ -27,8 +29,8 @@ define([
 
         renderSampleSet() {
             let truncatedMessage = '';
-            if (this.props.totalCount > 50) {
-                truncatedMessage = html`<div className="alert alert-warning">The total number of results has been truncated; only the first 50 are displayed during this testing period.</div>`;
+            if (this.props.totalCount > MAX_SAMPLES) {
+                truncatedMessage = html`<div className="alert alert-warning">The total number of results has been truncated; only the first ${MAX_SAMPLES} are displayed during this testing period.</div>`;
             }
             // const totalCount = Intl.NumberFormat('en-US', {
             //     useGrouping: true
@@ -37,7 +39,6 @@ define([
             //         <h4>Samples</h4>
             return html`
                 <${Fragment}>
-                    
                     <${SampleSet} sampleSet=${this.props.sampleSet} totalCount=${this.props.totalCount} />
                     ${truncatedMessage}
                 <//>
