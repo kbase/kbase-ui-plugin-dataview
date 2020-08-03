@@ -23,9 +23,9 @@ define([
 ) {
     'use strict';
 
-    // const html = htm.bind(preact.h);
+    const html = htm.bind(preact.h);
 
-    const MAX_SAMPLES = 100;
+    const MAX_SAMPLES = 10000;
 
     class Viewer {
         constructor(config) {
@@ -42,6 +42,28 @@ define([
             this.node = node;
         }
 
+        onProgress(current, total) {
+            const progress = Math.round(100 * current/total);
+            // console.log('progress?', current, total, width);
+            // return;
+            preact.render(preact.h(Loading, {
+                message: html`Loading samples <span className="text-info" style=${{fontWeight: 'bold'}}>${progress}%</span> ...`
+            }), this.node);
+            return;
+            // const progressBar = html`
+            // <div class="progress">
+            //     <div class="progress-bar" role="progress"
+            //          aria-valuenow=${String(progress)}
+            //          aria-valuemin="0"
+            //          aria-valuemax="100"
+            //          style=${{width: `${progress}%`}}>
+            //         <span class="sr-only">${progress} loaded...</span>
+            //     </div>
+            // </div>
+            // `;
+            // preact.render(preact.h(progressBar, { }), this.node);
+        }
+
         start(params) {
             // Check params
             const p = new widgetUtils.Params(params);
@@ -56,7 +78,9 @@ define([
             });
 
             // Display loading spinner...
-            preact.render(preact.h(Loading, { }), this.node);
+            preact.render(preact.h(Loading, {
+                message: 'Loading samples...'
+            }), this.node);
 
             // Get the object form the model.
             const model = new Model({
@@ -76,12 +100,17 @@ define([
                     // TODO: TODO: TODO: remove when sample service supports multiple samples w/paging
                     const totalCount = sampleSet.samples.length;
                     sampleSet.samples = sampleSet.samples.slice(0, MAX_SAMPLES);
-                    return model.getSamples(sampleSet.samples)
+                    return model.getSamplesHybrid({
+                        samples: sampleSet.samples,
+                        batchSize: 20,
+                        onProgress: this.onProgress.bind(this)
+                    })
                         .then((samples) => {
                             const samplesMap = samples.reduce((samplesMap, {sample, linkedData}) => {
                                 samplesMap[sample.id] = {
                                     sample,
-                                    linkedDataCount: linkedData.links.length
+                                    // linkedDataCount: linkedData.links.length
+                                    linkedDataCount: 0
                                 };
                                 return samplesMap;
                             }, {});

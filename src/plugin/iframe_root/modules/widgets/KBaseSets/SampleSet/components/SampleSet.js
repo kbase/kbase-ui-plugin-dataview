@@ -129,20 +129,22 @@ define([
                     <span>${version}</span>
                     `;
                 }
-            }, {
-                id: 'linkedDataCount',
-                label: '# Linked Objects',
-                display: true,
-                isSortable: true,
-                style: {
-                    flex: '0 0 10em'
-                },
-                render: (linkedDataCount) => {
-                    return html`
-                    <span>${fmt.formattedInteger(linkedDataCount)}</span>
-                    `;
-                }
-            }];
+            },
+            // {
+            //     id: 'linkedDataCount',
+            //     label: '# Linked Objects',
+            //     display: true,
+            //     isSortable: true,
+            //     style: {
+            //         flex: '0 0 10em'
+            //     },
+            //     render: (linkedDataCount) => {
+            //         return html`
+            //         <span>${fmt.formattedInteger(linkedDataCount)}</span>
+            //         `;
+            //     }
+            // }
+            ];
 
             const props = {
                 columns,
@@ -172,7 +174,7 @@ define([
             };
 
             return html`
-                <${DataTable} ...${props} />
+                <${DataTable} rowHeight=${40} ...${props} />
             `;
 
             // const rows = this.props.sampleSet.samples.map((sample) => {
