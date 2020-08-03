@@ -11,3 +11,19 @@
     height: 500px; */
     height: 100%;
 }
+
+.Map-detail-row {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+.Map-col-wrapper {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.Map-detail-row .Col {
+    overflow: hidden;
+}

@@ -20,7 +20,7 @@ define([
     const {Component, Fragment} = preact;
     const html = htm.bind(preact.h);
 
-    const MAX_SAMPLES = 100;
+    const MAX_SAMPLES = 1000;
 
     class Main extends Component {
         constructor(props) {

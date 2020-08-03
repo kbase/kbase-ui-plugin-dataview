@@ -258,13 +258,11 @@ define([
                 const isHighlighted =  (this.state.highlightedSamples.some((sampleId) => {
                     return sampleId === sample.id;
                 }));
-                // console.log('sample', sample);
                 return {
                     id: sample.id,
                     name: sample.name,
                     source: sample.sample.dataSourceDefinition.id,
                     sourceId: sample.sample.node_tree[0].id,
-                    material: metadata.material.value,
                     latitude: metadata.latitude.value,
                     longitude: metadata.longitude.value,
                     description: getMetadataField(sample, 'location_description'),
@@ -289,14 +287,6 @@ define([
                 {
                     id: 'source',
                     label: 'Source',
-                    type: 'string',
-                    style: {
-                        flex: '0 0 5em'
-                    }
-                },
-                {
-                    id: 'material',
-                    label: 'Material',
                     type: 'string',
                     style: {
                         flex: '0 0 5em'
@@ -347,94 +337,8 @@ define([
                 },
             ];
 
-            const formatLatLong = (value) => {
-                return Intl.NumberFormat('en-US', {
-                    maximumFractionDigits: 4,
-                    minimumFractionDigits: 4,
-                    useGrouping: true
-                }).format(value);
-            };
-
-            const row = (row) => {
-                return html`
-                    <div className="Map-detail-row">
-                        <div className="Row">
-                            <div className="Col" style=${{flex: '2 1 0px'}}>
-                                <div className="Map-col-wrapper">
-                                    <a href=${`/#sampleview/${row.id}`} target="_blank">${row.name}</a>
-                                </div>
-                            </div>
-                            
-                            <div className="Col">
-                                <div className="Map-col-wrapper">
-                                    ${row.source}
-                                </div>
-                            </div>
-
-                            <div className="Col">
-                                <div className="Map-col-wrapper">
-                                    ${row.material}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="Row">
-                            <div className="Col">
-                                <div className="Map-col-wrapper">
-                                    ${formatLatLong(row.longitude)}
-                                </div>
-                            </div>
-                            
-                            <div className="Col">
-                                <div className="Map-col-wrapper">
-                                    ${formatLatLong(row.latitude)}
-                                </div>
-                            </div>
-
-                            <div className="Col">
-                               
-                                <div className="Map-col-wrapper">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            };
-
-            const header = () => {
-                return html`
-                <div className="Map-detail-row">
-                    <div className="Row">
-                        <div className="Col" style=${{flex: '2 1 0px'}}>
-                            Name
-                        </div>
-                        
-                        <div className="Col">
-                            Source
-                        </div>
-
-                        <div className="Col">
-                            Material
-                        </div>
-                    </div>
-                    <div className="Row">
-                        <div className="Col">
-                            Longitude
-                        </div>
-                        
-                        <div className="Col">
-                            Latitude
-                        </div>
-
-                        <div className="Col">
-                            Description
-                        </div>
-                    </div>
-                </div>
-                `;
-            };
-
             return html`
-                <${DataTable} dataSource=${coordsTable} render=${{row, header}}  rowHeight=${60}/>
+                <${DataTable} dataSource=${coordsTable} columns=${columns}  rowHeight=${40}/>
             `;
         }
 
@@ -442,10 +346,10 @@ define([
             return html`
                 <div className="Map">
                     <${Row}>
-                        <${Col} style=${{marginRight: '5px'}}>
+                        <${Col}>
                             ${this.renderMap()}
                         <//>
-                        <${Col} style=${{marginLeft: '5px'}}>
+                        <${Col}>
                             ${this.renderCoordsTable()}
                         <//>
                     <//>

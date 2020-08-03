@@ -117,6 +117,72 @@ define([
 
         }
 
+        getSamplesHybrid({samples, batchSize, onProgress}) {
+            const sampleService = new DynamicServiceClient({
+                module: 'SampleService',
+                url: this.runtime.config('services.ServiceWizard.url'),
+                token: this.runtime.service('session').getAuthToken()
+            });
+
+            // const fetchSample = (sample) => {
+            //     return Promise.all([
+            //         sampleService
+            //             .callFunc('get_sample', [{
+            //                 id: sample.id,
+            //                 version: sample.version
+            //             }]),
+
+            //         sampleService
+            //             .callFunc('get_data_links_from_sample', [{
+            //                 id: sample.id,
+            //                 version: sample.version
+            //             }])
+            //     ])
+            //         .then(([[sample], [linkedData]]) => {
+            //             return {sample: this.augmentSample(sample), linkedData};
+            //         });
+            // };
+
+            const fetchSample2 = (sample) => {
+                return Promise.all([
+                    sampleService
+                        .callFunc('get_sample', [{
+                            id: sample.id,
+                            version: sample.version
+                        }])
+                ])
+                    .then(([[sample]]) => {
+                        return {sample: this.augmentSample(sample)};
+                    });
+            };
+
+            const batchCount = Math.ceil(samples.length / batchSize);
+            const batchSamples = [];
+            for (let i = 0; i < batchCount; i += 1) {
+                batchSamples.push(samples.slice(i * batchSize, (i + 1) * batchSize));
+            }
+            console.log('batch samples...', batchCount);
+            return Promise.mapSeries(batchSamples, (samples, index) => {
+                const start = new Date().getTime();
+                return Promise.all(samples.map((sample) => {
+                    return fetchSample2(sample);
+                }))
+                    .then((result) => {
+                        if (onProgress) {
+                            onProgress(index, batchCount);
+                        }
+                        console.log('series', new Date().getTime() - start);
+                        return result;
+                    });
+            })
+                .then((results) => {
+                    return results.reduce((all, result) => {
+                        return all.concat(result);
+                    }, []);
+                });
+
+        }
+
         getObject() {
             const workspace = new GenericClient({
                 module: 'Workspace',

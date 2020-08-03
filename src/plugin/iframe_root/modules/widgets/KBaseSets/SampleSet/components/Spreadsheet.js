@@ -2,6 +2,7 @@ define([
     'preact',
     'htm',
     'components/common',
+    '../../../../ResizeObserver',
     'yaml!../data/templates/enigma1.yml',
     'yaml!../data/templates/sesar1.yml',
     'yaml!../data/metadataValidation.yml',
@@ -12,6 +13,7 @@ define([
     preact,
     htm,
     common,
+    ResizeObserver2,
     enigmaTemplate,
     sesarTemplate,
     fieldDefinitions,
@@ -20,13 +22,25 @@ define([
     'use strict';
 
     const MAX_CELL_WIDTH = 200;
+    const ROW_HEIGHT = 40;
 
     const {Component } = preact;
     const html = htm.bind(preact.h);
 
     function outerWidth(el) {
+        el.offsetHeight;
         const rect = el.getBoundingClientRect();
-        return rect.right - rect.left;
+        return Math.ceil(rect.right - rect.left);
+    }
+
+    function outerDimensions(el) {
+        el.offsetHeight;
+        const rect = el.getBoundingClientRect();
+        const width = Math.ceil(rect.right - rect.left);
+        const height = Math.ceil(rect.bottom - rect.top);
+        return {
+            width, height
+        };
     }
 
     class Spreadsheet extends Component {
@@ -35,9 +49,34 @@ define([
 
             this.bodyRef = preact.createRef();
             this.headerRef = preact.createRef();
+            this.columnDefs = this.createColumnDefs();
+            this.firstRow = null;
+            this.lastRow = null;
+            this.firstCol = null;
+            this.lastCol = null;
+
+            this.observer = new ResizeObserver2(this.bodyObserver.bind(this));
         }
 
         componentDidMount() {
+            window.setTimeout(() => {
+                this.setState({
+                    trigger: true
+                });
+            }, 0);
+            if (this.observer && this.bodyRef.current) {
+                this.observer.observe(this.bodyRef.current);
+            }
+        }
+
+        componentWillUnmount() {
+            window.removeEventListener('resize', this.handleWindowResize.bind(this));
+            if (this.scrollTimer) {
+                window.clearTimeout(this.scrollTimer);
+            }
+            if (this.observer && this.bodyRef.current) {
+                this.observer.unobserve(this.bodyRef.current);
+            }
         }
 
         extractSources(sampleSet) {
@@ -77,15 +116,51 @@ define([
         }
 
         handleBodyScroll(e) {
-            // console.log(e.target.scrollLeft);
             if (!this.headerRef.current) {
                 return ;
             }
             this.headerRef.current.scrollLeft = e.target.scrollLeft;
-            // console.log
+
+            if (this.scrollTimer) {
+                return;
+            }
+
+            this.scrollTimer = window.setTimeout(() => {
+                this.setState({
+                    triggerRefresh: new Date().getTime()
+                });
+                this.scrollTimer = null;
+            }, 100);
         }
 
-        renderSpreadsheet() {
+        bodyObserver() {
+            if (this.resizeTimer) {
+                return;
+            }
+
+            this.resizeTimer = window.setTimeout(() => {
+                this.setState({
+                    triggerRefresh: new Date().getTime()
+                });
+                this.resizeTimer = null;
+            }, 100);
+        }
+
+
+        handleWindowResize() {
+            if (this.resizeTimer) {
+                return;
+            }
+
+            this.resizeTimer = window.setTimeout(() => {
+                this.setState({
+                    triggerRefresh: new Date().getTime()
+                });
+                this.resizeTimer = null;
+            }, 100);
+        }
+
+        createColumnDefs() {
             const sources = this.extractSources(this.props.sampleSet);
             if (sources.length === 0) {
                 throw new Error('No source could be determined');
@@ -95,53 +170,6 @@ define([
             }
 
             const source = sources[0];
-            // for now, assume all are from the sample template
-
-            // eventually, we may have tabs -- one tab per template
-
-            // but for now ... gather the superset of all sample fields
-            // const controlledFieldKeys = {};
-            // const userFieldKeys = {};
-            // const allKeys = new Set();
-            // const fieldDefs = {};
-
-            // this.props.sampleSet.samples.forEach((sample) => {
-            //     Object.entries(sample.sample.node_tree[0].meta_user).forEach(([key, ]) => {
-            //         fieldDefs[key] = {
-            //             key,
-            //             width: '10em',
-            //             type: 'user'
-            //         };
-            //     });
-
-            //     Object.entries(sample.sample.node_tree[0].meta_controlled).forEach(([key, ]) => {
-            //         fieldDefs[key] = {
-            //             key,
-            //             width: '10em',
-            //             type: 'controlled'
-            //         };
-            //     });
-            // });
-
-            // create an alpha ordered set for now.
-            // const sampleFieldDefs = Object.entries(fieldDefs)
-            //     .map(([, value]) => {
-            //         return value;
-            //     })
-            //     .sort((a, b) => {
-            //         return a.key.localeCompare(b.key);
-            //     });
-
-            // Determine the width of each column label. This, for now, determines the
-            // column width.
-            // TODO: do this for every element!
-            const testNodeContainer = document.createElement('div');
-            testNodeContainer.position = 'absolute';
-            document.body.appendChild(testNodeContainer);
-            const testNode = document.createElement('div');
-            testNodeContainer.appendChild(testNode);
-            testNode.style.display = 'inline';
-            testNode.style.visibility = 'hidden';
 
             // const columnDefs = sesarTemplateX.columns.slice(0);
             const templateDef = (() => {
@@ -216,17 +244,40 @@ define([
                 });
             });
 
-            testNode.classList = ['Spreadsheet-cell'];
+            this.measureColumnWidths(columnDefs);
+
+            return columnDefs;
+        }
+
+        measureColumnWidths(columnDefs) {
+            const testNodeContainer = document.createElement('div');
+            testNodeContainer.position = 'absolute';
+            document.body.appendChild(testNodeContainer);
+
+            const cellTestNode = document.createElement('div');
+            testNodeContainer.appendChild(cellTestNode);
+            cellTestNode.classList = ['Spreadsheet-cell-measurer'];
+
+
+            const cellTestInnerNode = document.createElement('div');
+            cellTestNode.appendChild(cellTestInnerNode);
+            cellTestInnerNode.classList = ['Spreadsheet-cell-content-measurer'];
+
+
+            const headerTestNode = document.createElement('div');
+            testNodeContainer.appendChild(headerTestNode);
+            headerTestNode.classList = ['Spreadsheet-cell-measurer'];
+
+            const headerTestInnerNode = document.createElement('div');
+            headerTestNode.appendChild(headerTestInnerNode);
+            headerTestInnerNode.classList = ['Spreadsheet-header-cell-content-measurer'];
+
             const measures = {};
 
-            // Here, in a nested loop (columnDefs, samples)
-            // we measure the width of each column.
             columnDefs.forEach((columnDef) => {
                 // Measure column header width.
-                testNode.innerText = columnDef.label;
-                testNode.classList.add('Spreadsheet-header-cell');
-                const headerWidth = outerWidth(testNode);
-                testNode.classList.remove('Spreadsheet-header-cell');
+                headerTestInnerNode.innerText = columnDef.label;
+                const headerWidth = outerWidth(headerTestNode);
 
                 // Get max widths for all row values for this column.
                 let width = headerWidth;
@@ -253,20 +304,12 @@ define([
                                 }
                                 let units;
                                 if (controlledField.units) {
-                                    units = html`<i style=${{marginLeft: '1em'}}>${controlledField.units}</i>`;
+                                    units = `<i style="margin-left: 10px">${controlledField.units}</i>`;
                                 } else {
                                     units = '';
                                 }
-                                const content = html`<span>${this.formatValue(controlledField.value, columnDef.format)}${units}</span>`;
+                                const content = `<span>${this.formatValue(controlledField.value, columnDef.format)}${units}</span>`;
                                 return content;
-                                // const tooltip = `${this.formatValue(controlledField.value, columnDef.format)} ${controlledField.units || ''}`;
-                                // return html`
-                                //     <div className="Spreadsheet-cell Spreadsheet-controlled-field" title=${tooltip}>
-                                //         <div className="Spreadsheet-cell-content">
-                                //             ${content}
-                                //         </div>
-                                //     </div>
-                                // `;
                             })();
                         case 'user':
                             var userField = sample.sample.node_tree[0].meta_user[columnDef.key];
@@ -287,8 +330,8 @@ define([
                         if (measures[content]) {
                             return measures[content];
                         }
-                        testNode.innerHTML = content;
-                        const w = outerWidth(testNode);
+                        cellTestInnerNode.innerHTML = content;
+                        const w = outerWidth(cellTestNode);
                         measures[content] = w;
                         return w;
                     })();
@@ -296,14 +339,16 @@ define([
                     width = Math.max(width, thisWidth);
                 });
 
-
                 const maxWidth = Math.max(headerWidth, Math.min(width, MAX_CELL_WIDTH));
-
-                columnDef.width = `${Math.ceil(maxWidth)}px`;
+                columnDef.width = Math.ceil(maxWidth);
             });
 
-            const headerCells = columnDefs.map((columnDef) => {
-                const classes = ['Spreadsheet-header-cell Spreadsheet-cell'];
+            document.body.removeChild(testNodeContainer);
+        }
+
+        renderHeader() {
+            return this.columnDefs.map((columnDef) => {
+                const classes = ['Spreadsheet-header-cell'];
                 switch (columnDef.type) {
                 case 'sample':
                     classes.push('Spreadsheet-sample-field');
@@ -323,27 +368,100 @@ define([
                 }
 
                 const style = {
-                    flexBasis: columnDef.width
+                    flexBasis: `${columnDef.width}px`
                 };
 
                 return html`
                     <div className=${classes.join(' ')} style=${style}>
-                        ${columnDef.label}
+                        <div className="Spreadsheet-cell-content" title=${columnDef.label}>
+                            ${columnDef.label}
+                        </div>
                     </div>
                `;
             });
+        }
 
+        doMeasurements() {
+            this.spreadsheetHeight = this.props.sampleSet.samples.length * ROW_HEIGHT;
+            this.spreadsheetWidth = this.columnDefs.reduce((total, def) => {
+                total += def.width;
+                return total;
+            }, 0);
 
+            const body = this.bodyRef.current;
+            if (!body) {
+                return;
+            }
+
+            const {width, height} = outerDimensions(body);
+            this.firstRow = Math.floor(body.scrollTop / ROW_HEIGHT);
+            this.lastRow = this.firstRow + Math.ceil(height / ROW_HEIGHT);
+
+            this.firstCol = (() => {
+                let rowWidth = 0;
+                const left = body.scrollLeft;
+                for (let i = 0; i < this.columnDefs.length; i += 1) {
+                    const def = this.columnDefs[i];
+                    if (left >= rowWidth && left < (rowWidth + def.width)) {
+                        return i;
+                    }
+                    rowWidth += def.width;
+                }
+            })();
+
+            this.lastCol = (() => {
+                let rowWidth = 0;
+                const right = body.scrollLeft + width;
+                for (let i = 0; i < this.columnDefs.length; i += 1) {
+                    const def = this.columnDefs[i];
+                    if (rowWidth >= right) {
+                        return i;
+                    }
+                    rowWidth += def.width;
+                }
+                console.warn('dropped off bottom', rowWidth, right);
+                return this.columnDefs.length - 1;
+            })();
+        }
+
+        renderBody() {
             // Another nested loop of (samples, columnDefs).
             // for each sample
             // for the template fields
             // for each template field, find the sample field and render a cell
+            if (this.firstCol === null) {
+                return;
+            }
+
+            const samples = this.props.sampleSet.samples.slice(this.firstRow, this.lastRow + 1);
+            const cols = this.columnDefs.slice(this.firstCol, this.lastCol + 1);
+            const leftMargin = this.columnDefs.slice(0, this.firstCol).reduce((margin, def) => {
+                return margin + def.width;
+            }, 0);
+
             const rows = [];
-            this.props.sampleSet.samples.forEach((sample) => {
-                const row = columnDefs.map((columnDef) => {
+            samples.forEach((sample, rowCount) => {
+                let totalWidth = leftMargin;
+                const rowStyle= {
+                    top: (this.firstRow + rowCount) * ROW_HEIGHT,
+                    right: '0',
+                    // bottom: String(spreadsheetHeight - (rowCount * ROW_HEIGHT + ROW_HEIGHT)),
+                    left: '0',
+                    height: ROW_HEIGHT
+                };
+                const row = cols.map((columnDef) => {
                     const style = {
-                        flexBasis: columnDef.width
+                        // top: rowCount * ROW_HEIGHT,
+                        top: '0',
+                        // right: String(spreadsheetWidth - totalWidth + columnDef.width),
+                        // bottom: rowCount * ROW_HEIGHT + ROW_HEIGHT,
+                        // bottom: '0',
+                        left: totalWidth,
+                        width: columnDef.width,
+                        height: ROW_HEIGHT
                     };
+
+                    totalWidth += columnDef.width;
                     switch (columnDef.type) {
                     case 'sample':
                         var sampleField = sample.sample[columnDef.key];
@@ -355,7 +473,7 @@ define([
                             `;
                         }
                         return html`
-                            <div className="Spreadsheet-cell Spreadsheet-sample-field" style=${style}title=${sampleField}>
+                            <div className="Spreadsheet-cell Spreadsheet-sample-field" style=${style} title=${sampleField}>
                                 <div className="Spreadsheet-cell-content" >
                                     ${sampleField}
                                 </div>
@@ -389,7 +507,7 @@ define([
                             }
                             let units;
                             if (controlledField.units) {
-                                units = html`<i style=${{marginLeft: '1em'}}>${controlledField.units}</i>`;
+                                units = html`<i style=${{marginLeft: '10px'}}>${controlledField.units}</i>`;
                             } else {
                                 units = '';
                             }
@@ -444,24 +562,35 @@ define([
                             </div>
                         `;
                     }
+
                 });
                 rows.push(html`
-                    <div className="Spreadsheet-row">
+                    <div className="Spreadsheet-grid-row" style=${rowStyle}>
                         ${row}
                     </div>
                 `);
             });
+            return html`
+             <div className="Spreadsheet-grid" 
+                  style=${{top: 0, left: 0, width: `${this.spreadsheetWidth}px`, height: `${this.spreadsheetHeight}px`}}>
+                ${rows}
+            </div>
+            `;
+        }
 
-            const body = rows;
+        renderSpreadsheet2() {
+            this.doMeasurements();
             const result = html`
                 <div className="Spreadsheet-container">
                     <div className="Spreadsheet-header" ref=${this.headerRef}>
                         <div className="Spreadsheet-header-container">
-                            ${headerCells}
+                            ${this.renderHeader()}
                         </div>
                     </div>
-                    <div className="Spreadsheet-body" ref=${this.bodyRef} onScroll=${this.handleBodyScroll.bind(this)}>
-                        ${body}
+                    <div className="Spreadsheet-body" ref=${this.bodyRef} 
+                         onScroll=${this.handleBodyScroll.bind(this)}
+                         >
+                        ${this.renderBody()}
                     </div>
                 </div>
             `;
@@ -472,7 +601,7 @@ define([
         render() {
             return html`
             <div className="Spreadsheet">
-                ${this.renderSpreadsheet()}
+                ${this.renderSpreadsheet2()}
             </div>
             `;
         }

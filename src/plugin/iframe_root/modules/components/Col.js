@@ -19,7 +19,7 @@ define([
 
         render() {
             return html`
-                <div className="Col">
+                <div className="Col" style=${this.props.style || {}}>
                     ${this.props.children}
                 </div>
             `;
