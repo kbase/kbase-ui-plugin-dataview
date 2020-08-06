@@ -6,7 +6,6 @@ define([
     'components/Col',
     'components/Table',
     'components/DataTable',
-    'components/common',
 
     'css!./Map.css'
 ], function (
@@ -16,8 +15,7 @@ define([
     Row,
     Col,
     Table,
-    DataTable,
-    common
+    DataTable
 ) {
     'use strict';
 
@@ -108,30 +106,12 @@ define([
             return layer;
         }
 
-        // removeLayer(key) {
-        //     const openLayer = this.openLayers[key];
-        //     if (!openLayer) {
-        //         return;
-        //     }
-
-        //     if (this.map === null) {
-        //         return;
-        //     }
-        //     this.map.removeLayer(openLayer.instance);
-        // }
-
         componentDidMount() {
             if (this.mapRef.current === null) {
                 return;
             }
             this.map = leaflet.map(this.mapRef.current);
 
-            // leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            //     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-            // }).addTo(map);
-            // leaflet.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-            //     attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
-            // }).addTo(map);
             const tile1 = this.addLayer('OpenStreetMap');
             const tile2 = this.addLayer('OpenTopoMap');
             const tile3 = this.addLayer('StamenWatercolor');
@@ -143,6 +123,11 @@ define([
                 EsriWorldImagery: tile4
             };
             leaflet.control.layers(baseMaps, null).addTo(this.map);
+
+            if (this.props.sampleSet.samples.length === 0) {
+                this.map.setView([0, 0], 1);
+                return;
+            }
 
 
             // Should be dynamic?
@@ -242,7 +227,19 @@ define([
             `;
         }
 
+        renderEmptySet() {
+            return html`
+                <div class="alert alert-warning">
+                <span style=${{fontSize: '150%', marginRight: '4px'}}>∅</span> - Sorry, no samples in this set.
+                </div>
+            `;
+        }
+
         renderCoordsTable() {
+            if (this.props.sampleSet.samples.length === 0) {
+                return this.renderEmptySet();
+            }
+
             const coordsTable = this.props.sampleSet.samples.map((sample) => {
                 const metadata = sample.sample.node_tree[0].meta_controlled;
                 if (!isDefined(metadata.latitude)  || !isDefined(metadata.longitude)) {
@@ -275,77 +272,77 @@ define([
                     return coord;
                 });
 
-            const columns = [
-                {
-                    id: 'name',
-                    label: 'Name',
-                    type: 'string',
-                    render: (name, row) => {
-                        return html`
-                            <a href=${`/#sampleview/${row.id}`} target="_blank">${name}</a>
-                        `;
-                    }
-                },
-                {
-                    id: 'source',
-                    label: 'Source',
-                    type: 'string',
-                    style: {
-                        flex: '0 0 5em'
-                    }
-                },
-                {
-                    id: 'material',
-                    label: 'Material',
-                    type: 'string',
-                    style: {
-                        flex: '0 0 5em'
-                    }
-                },
-                // {
-                //     id: 'sourceId',
-                //     label: 'ID',
-                //     type: 'string',
-                //     style: {
-                //         flex: '0 0 7em'
-                //     }
-                // },
-                {
-                    id: 'latitude',
-                    label: 'Latitude',
-                    type: 'float',
-                    precision: 4,
-                    style: {
-                        flex: '0 0 7em'
-                    }
-                },
-                {
-                    id: 'longitude',
-                    label: 'Longitude',
-                    type: 'float',
-                    precision: 4,
-                    style: {
-                        flex: '0 0 7em'
-                    }
+            // const columns = [
+            //     {
+            //         id: 'name',
+            //         label: 'Name',
+            //         type: 'string',
+            //         render: (name, row) => {
+            //             return html`
+            //                 <a href=${`/#sampleview/${row.id}`} target="_blank">${name}</a>
+            //             `;
+            //         }
+            //     },
+            //     {
+            //         id: 'source',
+            //         label: 'Source',
+            //         type: 'string',
+            //         style: {
+            //             flex: '0 0 5em'
+            //         }
+            //     },
+            //     {
+            //         id: 'material',
+            //         label: 'Material',
+            //         type: 'string',
+            //         style: {
+            //             flex: '0 0 5em'
+            //         }
+            //     },
+            //     // {
+            //     //     id: 'sourceId',
+            //     //     label: 'ID',
+            //     //     type: 'string',
+            //     //     style: {
+            //     //         flex: '0 0 7em'
+            //     //     }
+            //     // },
+            //     {
+            //         id: 'latitude',
+            //         label: 'Latitude',
+            //         type: 'float',
+            //         precision: 4,
+            //         style: {
+            //             flex: '0 0 7em'
+            //         }
+            //     },
+            //     {
+            //         id: 'longitude',
+            //         label: 'Longitude',
+            //         type: 'float',
+            //         precision: 4,
+            //         style: {
+            //             flex: '0 0 7em'
+            //         }
 
-                },
-                {
-                    id: 'description',
-                    label: 'Description',
-                    type: 'string',
-                    style: {
-                        flex: '0 0 10em'
-                    },
-                    render: (description) => {
-                        if (!description) {
-                            return html`
-                                <div style=${{textAlign: 'center'}}>${common.na()}</div>
-                            `;
-                        }
-                        return description;
-                    }
-                },
-            ];
+            //     },
+            //     {
+            //         id: 'description',
+            //         label: 'Description',
+            //         type: 'string',
+            //         style: {
+            //             flex: '0 0 10em'
+            //         },
+            //         render: (description) => {
+            //             if (!description) {
+            //                 return html`
+            //                     <div style=${{textAlign: 'center'}}>${common.na()}</div>
+            //                 `;
+            //             }
+            //             return description;
+            //         }
+            //     },
+            // ];
 
             const formatLatLong = (value) => {
                 return Intl.NumberFormat('en-US', {
