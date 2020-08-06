@@ -229,7 +229,18 @@ define([
         //     `;
         // }
 
+        renderEmptySet() {
+            return html`
+                <div class="alert alert-warning" style=${{marginTop: '10px'}}>
+                <span style=${{fontSize: '150%', marginRight: '4px'}}>∅</span> - Sorry, no samples in this set.
+                </div>
+            `;
+        }
+
         render() {
+            if (this.props.sampleSet.samples.length === 0) {
+                return this.renderEmptySet();
+            }
             return html`
             <div className="SampleSet">
                 ${this.renderSamplesTable()}
