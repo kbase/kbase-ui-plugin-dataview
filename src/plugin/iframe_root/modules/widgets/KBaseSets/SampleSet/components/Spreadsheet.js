@@ -43,6 +43,8 @@ define([
         };
     }
 
+
+
     class Spreadsheet extends Component {
         constructor(props) {
             super(props);
@@ -161,6 +163,9 @@ define([
         }
 
         createColumnDefs() {
+            if (this.props.sampleSet.samples.length === 0) {
+                return;
+            }
             const sources = this.extractSources(this.props.sampleSet);
             if (sources.length === 0) {
                 throw new Error('No source could be determined');
@@ -249,7 +254,134 @@ define([
             return columnDefs;
         }
 
-        measureColumnWidths(columnDefs) {
+        createColumnDefs2() {
+            const sources = this.extractSources(this.props.sampleSet);
+            if (sources.length === 0) {
+                throw new Error('No source could be determined');
+            }
+            if (sources.length > 1) {
+                throw new Error('Too many sources, cannot show spreadsheet view');
+            }
+
+            const source = sources[0];
+
+            // const columnDefs = sesarTemplateX.columns.slice(0);
+            const templateDef = (() => {
+                switch (source) {
+                case 'SESAR':
+                    return sesarTemplate;
+                case 'ENIGMA':
+                    return enigmaTemplate;
+                }
+            })();
+            const columnMapping = sampleUploaderSpecs[source].column_mapping;
+            const reverseColumnMapping = Object.entries(columnMapping).reduce((mapping, [key, value]) => {
+                mapping[value] = key;
+                return mapping;
+            }, {});
+
+            const {testNodeContainer, cellTestNode, cellTestInnerNode, headerTestNode, headerTestInnerNode} = this.createTestNodes();
+            const measures = {};
+
+            // Here we build up column definitions for all of the columns in the template,
+            // retaining order.
+            // Some columns are "mapped" to sample fields rather than metadata.
+            const columnDefs = templateDef.columns.map((key) => {
+                if (reverseColumnMapping[key]) {
+                    const mappedKey = reverseColumnMapping[key];
+                    const mappedDef = fieldDefinitions.validators[mappedKey];
+                    headerTestInnerNode.innerText = mappedDef.key_metadata.display_name;
+                    if (mappedDef) {
+                        return {
+                            type: 'node',
+                            key,
+                            label: mappedDef.key_metadata.display_name,
+                            format: mappedDef.format,
+                            width: Math.min(outerWidth(headerTestNode), MAX_CELL_WIDTH)
+                        };
+                    }
+                    console.error('Mapped NOT FOUND', key);
+                    throw new Error('Mapped field Not found: ' + key);
+                    // return {
+                    //     type: 'unknown',
+                    //     key,
+                    //     label: key
+                    // };
+                }
+                const def = fieldDefinitions.validators[key];
+                if (!def) {
+                    console.warn('NOT FOUND', key);
+                    // throw new Error('Not found: ' + key);
+                    headerTestInnerNode.innerText = key;
+                    return {
+                        type: 'unknown',
+                        key,
+                        label: key,
+                        width: Math.min(outerWidth(headerTestNode), MAX_CELL_WIDTH)
+                    };
+                }
+                headerTestInnerNode.innerText = def.key_metadata.display_name;
+                return {
+                    type: 'metadata',
+                    key,
+                    label: def.key_metadata.display_name,
+                    format: def.format,
+                    width: Math.min(outerWidth(headerTestNode), MAX_CELL_WIDTH)
+                };
+            });
+
+            // scour the samples to add user fields; user fields go at the end of the column definitions.
+            // They use the column type 'user'.
+            const userFieldMapping = {};
+            // for (let i = 0; i < this.props.sampleSet.samples.length; i += 1) {
+            //     const sample = this.props.sampleSet.samples[i];
+            // console.log('sample?', sample);
+            this.props.sampleSet.samples.forEach((sample) => {
+
+                // Add new column defs for new user fields.
+                // Ideally, the first sample has all of the user fields, but you never know.
+                const userMetadataKeys = Object.keys(sample.sample.node_tree[0].meta_user);
+                for (let j = 0; j < userMetadataKeys.length; j += 1) {
+                    const key = userMetadataKeys[j];
+                    if (userFieldMapping[key]) {
+                        continue;
+                    }
+                    headerTestInnerNode.innerText = key;
+                    const width = Math.min(outerWidth(headerTestNode), MAX_CELL_WIDTH);
+                    const newDef = {
+                        key,
+                        label: key,
+                        type: 'user',
+                        width
+                    };
+                    userFieldMapping[key] = newDef;
+                    columnDefs.push(newDef);
+                }
+
+                for (let j = 0; j < columnDefs.length; j += 1) {
+                    const columnDef = columnDefs[j];
+                    const content = this.renderCellContent(sample, columnDef);
+
+                    let thisWidth;
+                    if (measures[content]) {
+                        thisWidth = measures[content];
+                    } else {
+                        cellTestInnerNode.innerHTML = content;
+                        const w = outerWidth(cellTestNode);
+                        measures[content] = w;
+                        thisWidth = w;
+                    }
+                    columnDef.width = Math.max(columnDef.width, Math.min(thisWidth, MAX_CELL_WIDTH));
+
+                }
+            });
+
+            document.body.removeChild(testNodeContainer);
+
+            return columnDefs;
+        }
+
+        createTestNodes() {
             const testNodeContainer = document.createElement('div');
             testNodeContainer.position = 'absolute';
             document.body.appendChild(testNodeContainer);
@@ -272,76 +404,83 @@ define([
             headerTestNode.appendChild(headerTestInnerNode);
             headerTestInnerNode.classList = ['Spreadsheet-header-cell-content-measurer'];
 
+            return {testNodeContainer, cellTestNode, cellTestInnerNode, headerTestNode, headerTestInnerNode};
+        }
+
+        renderCellContent(sample, columnDef) {
+            switch (columnDef.type) {
+            case 'sample':
+                var sampleField = sample.sample[columnDef.key];
+                if (!sampleField) {
+                    return common.na();
+                }
+                return `${sampleField}`;
+            case 'node':
+                var nodeField = sample.sample.node_tree[0][columnDef.key];
+                if (!nodeField) {
+                    return common.na();
+                }
+                return `${nodeField}`;
+            case 'metadata':
+                var controlledField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
+                if (!controlledField) {
+                    return common.na();
+                }
+                var units;
+                if (controlledField.units) {
+                    units = `<i style="margin-left: 10px">${controlledField.units}</i>`;
+                } else {
+                    units = '';
+                }
+                return `<span>${this.formatValue(controlledField.value, columnDef.format)}${units}</span>`;
+            case 'user':
+                var userField = sample.sample.node_tree[0].meta_user[columnDef.key];
+                if (!userField) {
+                    return common.na();
+                }
+                return `${userField.value}`;
+            case 'unknown':
+                var unknownField = sample.sample.node_tree[0].meta_user[columnDef.key];
+                if (!unknownField) {
+                    return common.na();
+                }
+                return `${unknownField.value}`;
+            }
+        }
+
+        measureColumnWidths(columnDefs) {
+            const {testNodeContainer, cellTestNode, cellTestInnerNode, headerTestNode, headerTestInnerNode} = this.createTestNodes();
             const measures = {};
 
-            columnDefs.forEach((columnDef) => {
+            for (let i = 0; i < columnDefs.length; i += 1) {
+                const columnDef = columnDefs[i];
+                // columnDefs.forEach((columnDef) => {
                 // Measure column header width.
                 headerTestInnerNode.innerText = columnDef.label;
                 const headerWidth = outerWidth(headerTestNode);
 
                 // Get max widths for all row values for this column.
                 let width = headerWidth;
-                this.props.sampleSet.samples.forEach((sample) => {
-                    const content = (() => {
-                        switch (columnDef.type) {
-                        case 'sample':
-                            var sampleField = sample.sample[columnDef.key];
-                            if (sampleField) {
-                                return `${sampleField}`;
-                            }
-                            break;
-                        case 'node':
-                            var nodeField = sample.sample.node_tree[0][columnDef.key];
-                            if (nodeField) {
-                                return `${nodeField}`;
-                            }
-                            break;
-                        case 'metadata':
-                            return (() => {
-                                const controlledField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
-                                if (!controlledField) {
-                                    return common.na();
-                                }
-                                let units;
-                                if (controlledField.units) {
-                                    units = `<i style="margin-left: 10px">${controlledField.units}</i>`;
-                                } else {
-                                    units = '';
-                                }
-                                const content = `<span>${this.formatValue(controlledField.value, columnDef.format)}${units}</span>`;
-                                return content;
-                            })();
-                        case 'user':
-                            var userField = sample.sample.node_tree[0].meta_user[columnDef.key];
-                            if (userField) {
-                                return `${userField.value}`;
-                            }
-                            break;
-                        case 'unknown':
-                            var unknownField = sample.sample.node_tree[0].meta_user[columnDef.key];
-                            if (unknownField) {
-                                return `${unknownField.value}`;
-                            }
-                            break;
-                        }
-                    })();
+                for (let j = 0; j < this.props.sampleSet.samples.length; j += 1) {
+                // this.props.sampleSet.samples.forEach((sample) => {
+                    const sample = this.props.sampleSet.samples[j];
+                    const content = this.renderCellContent(sample, columnDef);
 
-                    const thisWidth = (() => {
-                        if (measures[content]) {
-                            return measures[content];
-                        }
+                    let thisWidth;
+                    if (measures[content]) {
+                        thisWidth = measures[content];
+                    } else {
                         cellTestInnerNode.innerHTML = content;
                         const w = outerWidth(cellTestNode);
                         measures[content] = w;
-                        return w;
-                    })();
-
+                        thisWidth = w;
+                    }
                     width = Math.max(width, thisWidth);
-                });
+                }
 
                 const maxWidth = Math.max(headerWidth, Math.min(width, MAX_CELL_WIDTH));
                 columnDef.width = Math.ceil(maxWidth);
-            });
+            }
 
             document.body.removeChild(testNodeContainer);
         }
@@ -598,7 +737,18 @@ define([
             return result;
         }
 
+        renderEmptySet() {
+            return html`
+                <div class="alert alert-warning">
+                <span style=${{fontSize: '150%', marginRight: '4px'}}>∅</span> - Sorry, no samples in this set.
+                </div>
+            `;
+        }
+
         render() {
+            if (this.props.sampleSet.samples.length === 0) {
+                return this.renderEmptySet();
+            }
             return html`
             <div className="Spreadsheet">
                 ${this.renderSpreadsheet2()}
