@@ -31,17 +31,19 @@ define([
 
         augmentSample(sample) {
             const metadataKeys = Object.keys(sample.node_tree[0].meta_controlled);
+            const userMetadataKeys = Object.keys(sample.node_tree[0].meta_user);
+            const allKeys = metadataKeys.concat(userMetadataKeys);
             let dataSourceDefinition;
             loop:
             for (const def of templateDefinitions.templates) {
                 if (def.signalFields.includes) {
-                    if (intersect(def.signalFields.includes, metadataKeys)) {
+                    if (intersect(def.signalFields.includes, allKeys)) {
                         dataSourceDefinition = def;
                         break loop;
                     }
                 }
                 if (def.signalFields.does_not_include) {
-                    if (!intersect(def.signalFields.does_not_include, metadataKeys)) {
+                    if (!intersect(def.signalFields.does_not_include, allKeys)) {
                         dataSourceDefinition = def;
                         break loop;
                     }

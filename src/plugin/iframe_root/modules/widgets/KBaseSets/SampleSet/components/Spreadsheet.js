@@ -43,8 +43,6 @@ define([
         };
     }
 
-
-
     class Spreadsheet extends Component {
         constructor(props) {
             super(props);

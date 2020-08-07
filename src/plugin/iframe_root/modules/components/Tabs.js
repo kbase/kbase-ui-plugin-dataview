@@ -46,20 +46,24 @@ define([
             if (!this.state.selectedTab) {
                 return;
             }
-            // console.log('tab?', this.state.selectedTab);
+
             if (this.state.selectedTab.render) {
                 return this.state.selectedTab.render();
             }
             if (this.state.selectedTab.renderText) {
                 const text = this.state.selectedTab.renderText();
                 return html`
-                    <div  className="Tabs-pane-default-content" dangerouslySetInnerHTML=${{__html: text}}></div>
+                    <div  
+                        className="Tabs-pane-default-content" 
+                        dangerouslySetInnerHTML=${{__html: text}}></div>
                 `;
             }
             if (this.state.selectedTab.text) {
                 const text = this.state.selectedTab.text;
                 return html`
-                    <div className="Tabs-pane-default-content" dangerouslySetInnerHTML=${{__html: text}}></div>
+                    <div 
+                        className="Tabs-pane-default-content" 
+                        dangerouslySetInnerHTML=${{__html: text}}></div>
                 `;
             }
             return html`
@@ -99,7 +103,7 @@ define([
                     <div className="Tabs-tabs">
                         ${tabs}
                     </div>
-                    <div className="Tabs-pane">
+                    <div className="Tabs-pane" data-k-b-testhook-tabpane="${this.state.selectedTab.id}">
                         ${this.renderTabPane()}
                     </div>
                 </div>
