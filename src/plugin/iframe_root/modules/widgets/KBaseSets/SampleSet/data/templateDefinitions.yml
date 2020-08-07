@@ -5,12 +5,14 @@ templates:
     description: A sample template based on SESAR
     reference: https://www.geosamples.org/
     signalFields:
-      does_not_include:
-        - experiment_name
+      includes:
+        - location_description
+        - locality_description
   - id: ENIGMA
     name: ENIGMA
     description: A sample template based on ENIGMA
     reference: https://enigma.lbl.gov
     signalFields:
-      includes:
-        - experiment_name
+      does_not_include:
+        - location_description
+        - locality_description

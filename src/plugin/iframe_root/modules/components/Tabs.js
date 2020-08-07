@@ -103,7 +103,7 @@ define([
                     <div className="Tabs-tabs">
                         ${tabs}
                     </div>
-                    <div className="Tabs-pane" data-k-b-testhook-tabpane="${this.state.selectedTab.id}>
+                    <div className="Tabs-pane" data-k-b-testhook-tabpane="${this.state.selectedTab.id}">
                         ${this.renderTabPane()}
                     </div>
                 </div>
