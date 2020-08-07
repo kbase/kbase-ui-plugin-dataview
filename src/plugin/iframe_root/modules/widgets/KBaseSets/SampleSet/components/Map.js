@@ -261,7 +261,7 @@ define([
                     name: sample.name,
                     source: sample.sample.dataSourceDefinition.id,
                     sourceId: sample.sample.node_tree[0].id,
-                    material: metadata.material.value,
+                    material: getMetadataField(sample, 'material'),
                     latitude: metadata.latitude.value,
                     longitude: metadata.longitude.value,
                     description: getMetadataField(sample, 'location_description'),
