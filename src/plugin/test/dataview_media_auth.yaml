@@ -38,8 +38,6 @@ specs:
         selector:
           - type: plugin
             value: dataview
-          - type: widget
-            value: dataObjectVisualizer
           - type: tabpane
             value: main
           - type: tabpane
