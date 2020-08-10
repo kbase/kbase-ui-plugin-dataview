@@ -171,6 +171,7 @@ define([
                         ${this.renderNarrativeRow()}
                         ${this.renderLastUpdatedRow()}
                         ${this.renderPermalinkRow()}
+                        ${this.renderButtonsRow()}
                     </tbody>
                 </table>
             `;
@@ -433,11 +434,12 @@ define([
             `;
         }
 
-        render() {
+        renderOverview() {
             const id = `panel-${new Uuid(4).format()}`;
             return html`
             <div className="row">
                 <div className="col-sm-6">
+                    ${this.renderHeader()}
                     ${this.renderSummary()}
                 </div>
                 <div className="col-sm-6">
@@ -453,6 +455,15 @@ define([
                     </div>
                 </div>
             </div>
+            `;
+        }
+
+        render() {
+            return html`
+                <${CollapsiblePanel} collapsed=${false}
+                                     title="Overview">
+                    ${this.renderOverview()}
+                <//>
             `;
         }
     }

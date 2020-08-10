@@ -128,7 +128,7 @@ define([
         }
 
         async fetchOutgoingReferences(wsClient, ref) {
-            const [[result]] = await wsClient.callFunc('get_object_provenance', [[{ref}]]);
+            const [[result, ..._rest]] = await wsClient.callFunc('get_object_provenance', [[{ref}]]);
             const objectRefs = result.provenance.reduce((objectRefs, reference) => {
                 reference.resolved_ws_objects.forEach((ref) => {
                     objectRefs.push(ref);
