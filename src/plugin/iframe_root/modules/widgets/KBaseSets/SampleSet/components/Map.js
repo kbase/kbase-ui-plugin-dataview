@@ -25,6 +25,13 @@ define([
     function isDefined(value) {
         return (typeof value !== 'undefined');
     }
+    function pluralOf(value, singular, plural) {
+        if (value === 1) {
+            return `${value} ${singular}`;
+        } else {
+            return `${value} ${plural}`;
+        }
+    }
 
     function getMetadataField(sample, key, defaultValue) {
         const metadata = sample.sample.node_tree[0].meta_controlled;
@@ -110,7 +117,9 @@ define([
             if (this.mapRef.current === null) {
                 return;
             }
-            this.map = leaflet.map(this.mapRef.current);
+            this.map = leaflet.map(this.mapRef.current, {
+                preferCanvas: true
+            });
 
             const tile1 = this.addLayer('OpenStreetMap');
             const tile2 = this.addLayer('OpenTopoMap');
@@ -205,13 +214,20 @@ define([
                 }
             });
 
+            // var circleMarker = L.circleMarker(latLng, {
+            //     color: '#3388ff'
+            // }).addTo(map);
+
+            const showTooltips = (locationSamples.length < 50);
+
             // create markers.
             locationSamples.forEach((locationSample) => {
-                leaflet.marker(locationSample.coord, {
-                    title: `lat: ${locationSample.coord[0]}\nlng: ${locationSample.coord[1]}`
+                leaflet.circleMarker(locationSample.coord, {
+                    title: `lat: ${locationSample.coord[0]}\nlng: ${locationSample.coord[1]}`,
+                    color: 'red'
                 })
-                    .bindTooltip(`${locationSample.samples.length} samples`, {
-                        permanent: true,
+                    .bindTooltip(`${pluralOf(locationSample.samples.length, 'sample', 'samples')}`, {
+                        permanent: showTooltips,
                         direction: 'auto'
                     })
                     .addTo(this.map)
