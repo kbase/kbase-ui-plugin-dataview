@@ -124,11 +124,36 @@ define([
             };
             leaflet.control.layers(baseMaps, null).addTo(this.map);
 
-            if (this.props.sampleSet.samples.length === 0) {
-                this.map.setView([0, 0], 1);
-                return;
-            }
+            this.updateSampleMapping();
+        }
 
+        renderMap() {
+            return html`
+                <div className="Map-container" ref=${this.mapRef}></div>
+            `;
+        }
+
+        renderEmptySet() {
+            return html`
+                <div class="alert alert-warning">
+                <span style=${{fontSize: '150%', marginRight: '4px'}}>∅</span> - Sorry, no samples in this set.
+                </div>
+            `;
+        }
+
+        renderNoGeolocation() {
+            return html`
+                <div class="alert alert-warning">
+                <span style=${{fontSize: '150%', marginRight: '4px'}}>∅</span> - Sorry, no samples in this set have geolocation information.
+                </div>
+            `;
+        }
+
+        updateSampleMapping() {
+            // if (this.props.sampleSet.samples.length === 0) {
+            //     this.map.setView([0, 0], 1);
+            //     return;
+            // }
 
             // Should be dynamic?
 
@@ -214,25 +239,14 @@ define([
                     });
             });
 
-            // const bounds = new leaflet.LatLngBounds(coords);
-            this.map.fitBounds(locationSamples.map((locationSample) => {
-                return locationSample.coord;
-            }));
-
-        }
-
-        renderMap() {
-            return html`
-                <div className="Map-container" ref=${this.mapRef}></div>
-            `;
-        }
-
-        renderEmptySet() {
-            return html`
-                <div class="alert alert-warning">
-                <span style=${{fontSize: '150%', marginRight: '4px'}}>∅</span> - Sorry, no samples in this set.
-                </div>
-            `;
+            if (locationSamples.length === 0) {
+                this.map.setView([0, 0], 1);
+            } else {
+                // const bounds = new leaflet.LatLngBounds(coords);
+                this.map.fitBounds(locationSamples.map((locationSample) => {
+                    return locationSample.coord;
+                }));
+            }
         }
 
         renderCoordsTable() {
@@ -271,6 +285,10 @@ define([
                 .filter((coord) => {
                     return coord;
                 });
+
+            if (coordsTable.length === 0) {
+                return this.renderNoGeolocation();
+            }
 
             // const columns = [
             //     {
