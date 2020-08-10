@@ -4,14 +4,13 @@ define([
     'preact',
     'htm',
     'kb_lib/html',
-    'kb_lib/htmlBootstrapBuilders',
-    'kbaseUI/widget/widgetSet',
     'utils',
     'collapsiblePanel',
     'components/error',
     'components/Tabs',
     'components/WidgetWrapper',
     'components/Overview/index',
+    'components/MiniOverview/index',
     'uuid',
 
     'css!./objectViewWidget.css',
@@ -22,14 +21,13 @@ define([
     preact,
     htm,
     htmlTags,
-    BS,
-    WidgetSet,
     utils,
     collapsiblePanel,
     ErrorComponent,
     Tabs,
     WidgetWrapper,
     OverviewComponent,
+    MiniOverviewComponent,
     Uuid
 ) {
     'use strict';
@@ -43,8 +41,9 @@ define([
         let mount = null;
         let container = null;
         let layout = null;
-        const overviewId = new Uuid(4).format();
 
+        const overviewId = new Uuid(4).format();
+        const miniOverviewId = new Uuid(4).format();
         const  widgetSet = runtime.service('widget').newWidgetSet();
 
         function renderTabs(params) {
@@ -67,6 +66,17 @@ define([
                                 key=${new Uuid(4).format()}
                                 config=${{}},
                                 style=${style}
+                            />
+                        `;
+                    }
+                }, {
+                    id: 'overview',
+                    title: 'Overview',
+                    render: () => {
+                        return html`
+                            <${OverviewComponent} 
+                                runtime=${runtime}
+                                ...${params}
                             />
                         `;
                     }
@@ -126,7 +136,7 @@ define([
                 });
             }
 
-            preact.render(preact.h(Tabs, {tabs}), document.getElementById('tabs123'));
+            preact.render(preact.h(Tabs, {tabs, paneStyle: {paddingTop: '10px'}}), document.getElementById('tabs123'));
         }
 
         function renderPanel() {
@@ -149,12 +159,18 @@ define([
                         }
                     }),
                     div({
-                        id: overviewId,
-                        // id: widgetSet.addWidget('kb_dataview_overview'),
+                        id: miniOverviewId,
                         style: {
-                            flex: '0 0 auto'
+                            flex: '0 0 auto',
+                            marginBottom: '10px'
                         }
                     }),
+                    // div({
+                    //     id: overviewId,
+                    //     style: {
+                    //         flex: '0 0 auto'
+                    //     }
+                    // }),
                     div({
                         id: 'tabs123',
                         style: {
@@ -164,10 +180,6 @@ define([
                             minHeight: '0px'
                         }
                     })
-                    // BS.buildTabs({
-                    //     tabs,
-                    //     id: 'mainTabs'
-                    // }).content
                 ])
             ]);
         }
@@ -215,7 +227,9 @@ define([
                     const props = Object.assign({}, params);
                     props.runtime = runtime;
 
-                    preact.render(preact.h(OverviewComponent, props), document.getElementById(overviewId));
+                    preact.render(preact.h(MiniOverviewComponent, props), document.getElementById(miniOverviewId));
+
+                    // preact.render(preact.h(OverviewComponent, props), document.getElementById(overviewId));
 
                     return Promise.all([objectInfo, widgetSet.start(params)]);
                 })

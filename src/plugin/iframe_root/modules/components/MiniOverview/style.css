@@ -1,0 +1,48 @@
+.MiniOverview {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 4px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.MiniOverview-titleCol {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: row;
+}
+
+.MiniOverview-titleCol-icon {
+    flex: 0 0 auto;
+}
+
+.MiniOverview-titleCol-title {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+.MiniOverview-titleCol-title-title {
+    flex: 0 0 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0px;
+    font-size: 150%;
+    font-weight: bold;
+}
+
+.MiniOverview-titleCol-title-type {
+    flex: 0 0 auto;
+    font-style: italic;
+}
+
+.MiniOverview-savedCol {
+    flex: 0 0 auto;
+    padding-right: 10px;
+}
+
+.MiniOverview-buttonsCol {
+    flex: 0 0 auto;
+}
