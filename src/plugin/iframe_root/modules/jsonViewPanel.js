@@ -10,7 +10,13 @@ define(['kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'], function (html, Wid
 
         function renderLayout() {
             var div = t('div');
-            return div(
+            return div({
+                style: {
+                    flex: '1 1 0px',
+                    overflow: 'auto',
+                    minHeight: '0px'
+                }
+            }, div(
                 {
                     class: 'container-fluid',
                     style: {
@@ -24,7 +30,7 @@ define(['kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'], function (html, Wid
                         div({ class: 'col-md-4' }, [div({ id: widgetSet.addWidget('kb_dataview_jsonViewOverview') })])
                     ])
                 ]
-            );
+            ));
         }
 
         function init(config) {
