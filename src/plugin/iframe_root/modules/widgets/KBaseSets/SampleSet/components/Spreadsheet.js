@@ -81,7 +81,7 @@ define([
 
         extractSources(sampleSet) {
             const sources = sampleSet.samples.reduce((sources, sample) => {
-                sources.add(sample.sample.dataSourceDefinition.id);
+                sources.add(sample.sample.dataSourceDefinition);
                 return sources;
             }, new Set());
             return Array.from(sources);
@@ -176,14 +176,14 @@ define([
 
             // const columnDefs = sesarTemplateX.columns.slice(0);
             const templateDef = (() => {
-                switch (source) {
+                switch (source.source) {
                 case 'SESAR':
                     return sesarTemplate;
                 case 'ENIGMA':
                     return enigmaTemplate;
                 }
             })();
-            const columnMapping = sampleUploaderSpecs[source].column_mapping;
+            const columnMapping = sampleUploaderSpecs[source.source].column_mapping;
             const reverseColumnMapping = Object.entries(columnMapping).reduce((mapping, [key, value]) => {
                 mapping[value] = key;
                 return mapping;
@@ -265,7 +265,7 @@ define([
 
             // const columnDefs = sesarTemplateX.columns.slice(0);
             const templateDef = (() => {
-                switch (source) {
+                switch (source.source) {
                 case 'SESAR':
                     return sesarTemplate;
                 case 'ENIGMA':
@@ -333,7 +333,6 @@ define([
             const userFieldMapping = {};
             // for (let i = 0; i < this.props.sampleSet.samples.length; i += 1) {
             //     const sample = this.props.sampleSet.samples[i];
-            // console.log('sample?', sample);
             this.props.sampleSet.samples.forEach((sample) => {
 
                 // Add new column defs for new user fields.

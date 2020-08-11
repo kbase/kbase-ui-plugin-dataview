@@ -30,25 +30,32 @@ define([
         }
 
         augmentSample(sample) {
-            const metadataKeys = Object.keys(sample.node_tree[0].meta_controlled);
-            const userMetadataKeys = Object.keys(sample.node_tree[0].meta_user);
-            const allKeys = metadataKeys.concat(userMetadataKeys);
+            // const metadataKeys = Object.keys(sample.node_tree[0].meta_controlled);
+            // const userMetadataKeys = Object.keys(sample.node_tree[0].meta_user);
+            const sampleSourceId = sample.node_tree[0].id;
+            // const allKeys = metadataKeys.concat(userMetadataKeys);
             let dataSourceDefinition;
             loop:
-            for (const def of templateDefinitions.templates) {
-                if (def.signalFields.includes) {
-                    if (intersect(def.signalFields.includes, allKeys)) {
-                        dataSourceDefinition = def;
-                        break loop;
-                    }
+            for (const [, def] of Object.entries(templateDefinitions.templates)) {
+                if (sampleSourceId.match(def.idPattern)) {
+                    dataSourceDefinition = def;
+                    break loop;
                 }
-                if (def.signalFields.does_not_include) {
-                    if (!intersect(def.signalFields.does_not_include, allKeys)) {
-                        dataSourceDefinition = def;
-                        break loop;
-                    }
-                }
+                // if (def.signalFields.includes) {
+                //     if (intersect(def.signalFields.includes, allKeys)) {
+                //         dataSourceDefinition = def;
+                //         break loop;
+                //     }
+                // }
+                // if (def.signalFields.does_not_include) {
+                //     if (!intersect(def.signalFields.does_not_include, allKeys)) {
+                //         dataSourceDefinition = def;
+                //         break loop;
+                //     }
+                // }
             }
+
+            // console.log('datasource definition?', dataSourceDefinition);
 
             if (!dataSourceDefinition) {
                 console.error('Cannot determine source!', sample.node_tree[0].meta_controlled);
