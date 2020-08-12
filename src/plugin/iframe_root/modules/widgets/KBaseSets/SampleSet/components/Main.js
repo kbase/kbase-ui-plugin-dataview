@@ -3,7 +3,7 @@ define([
     'htm',
     'components/Tabs',
     './Spreadsheet',
-    './Map',
+    './SampleMap',
     './SampleSet',
 
     'css!./Main.css'
@@ -12,7 +12,7 @@ define([
     htm,
     Tabs,
     Spreadsheet,
-    Map,
+    SampleMap,
     SampleSet
 ) {
     'use strict';
@@ -60,7 +60,7 @@ define([
 
         renderMap() {
             return html`
-            <${Map} sampleSet=${this.props.sampleSet} />
+            <${SampleMap} sampleSet=${this.props.sampleSet} />
             `;
         }
 

@@ -11,16 +11,6 @@ define([
 ) {
     'use strict';
 
-    function intersect(arr1, arr2) {
-        for (const item1 of arr1) {
-            for (const item2 of arr2) {
-                if (item1 === item2) {
-                    return true;
-                }
-            }
-        }
-    }
-
     class Model {
         constructor(config) {
             this.runtime = config.runtime;

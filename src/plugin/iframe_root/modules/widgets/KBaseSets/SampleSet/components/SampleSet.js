@@ -174,7 +174,7 @@ define([
             };
 
             return html`
-                <${DataTable} rowHeight=${40} ...${props} />
+                <${DataTable} heights=${{row: 40, col: 40}} ...${props} />
             `;
 
             // const rows = this.props.sampleSet.samples.map((sample) => {

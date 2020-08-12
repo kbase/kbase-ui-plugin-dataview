@@ -159,7 +159,7 @@ define(['./windowChannel', './runtime'], (WindowChannel, Runtime) => {
                     // this.rootViewModel.bus.on('set-plugin-params', ({ pluginParams }) => {
                     //     this.hostChannel.send('set-plugin-params', { pluginParams });
                     // });
- 
+
                     // this.channel.on('show-help', () => {
                     //     this.showHelp();
                     // });

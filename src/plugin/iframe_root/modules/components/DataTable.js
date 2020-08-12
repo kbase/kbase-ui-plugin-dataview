@@ -80,8 +80,11 @@ define([
         //     }, 100);
         // }
         renderHeader() {
+            // if (!this.props.header) {
+            //     return;
+            // }
             const style = {
-                height: `${this.props.rowHeight}px`
+                height: `${this.props.heights.header}px`
             };
             if (this.props.columns) {
                 return (() => {
@@ -105,7 +108,7 @@ define([
         }
 
         doMeasurements() {
-            this.tableHeight = this.props.dataSource.length * this.props.rowHeight;
+            this.tableHeight = this.props.dataSource.length * this.props.heights.row;
 
             const body = this.bodyRef.current;
             if (!body) {
@@ -113,8 +116,8 @@ define([
             }
 
             const {height} = outerDimensions(body);
-            this.firstRow = Math.floor(body.scrollTop / this.props.rowHeight);
-            this.lastRow = this.firstRow + Math.ceil(height / this.props.rowHeight);
+            this.firstRow = Math.floor(body.scrollTop / this.props.heights.row);
+            this.lastRow = this.firstRow + Math.ceil(height / this.props.heights.row);
         }
 
         renderRows() {
@@ -123,12 +126,12 @@ define([
             }
             const table = this.props.dataSource.slice(this.firstRow, this.lastRow + 1);
             return table.map((values, index) => {
-                const top = (this.firstRow + index) * this.props.rowHeight;
+                const top = (this.firstRow + index) * this.props.heights.row;
                 const style = {
                     top,
                     right: '0',
                     left: '0',
-                    height: `${this.props.rowHeight}px`
+                    height: `${this.props.heights.row}px`
                 };
 
                 return (() => {
@@ -174,12 +177,19 @@ define([
                                 rowClasses.push('DataTable-row-highlighted');
                             }
                             return html`
-                                <div className=${rowClasses.join(' ')} style=${style}>${row}</div>
+                                <div className=${rowClasses.join(' ')} style=${style} onClick=${() => {this.onRowClick(values);}}>${row}</div>
                             `;
                         })();
                     }
                 })();
             });
+        }
+
+        onRowClick(values) {
+            if (!this.props.onClick) {
+                return;
+            }
+            this.props.onClick(values);
         }
 
         handleBodyScroll() {
@@ -197,7 +207,7 @@ define([
 
         renderBody() {
             const rows = this.renderRows();
-            const tableHeight = this.props.dataSource.length * this.props.rowHeight;
+            const tableHeight = this.props.dataSource.length * this.props.heights.row;
             const style = {
                 height: `${tableHeight}px`
             };
