@@ -1,4 +1,4 @@
-.Map {
+.SampleMap {
     flex: 1 1 0px;
     display: flex;
     flex-direction: column;
@@ -6,24 +6,32 @@
     margin-top: 10px;
 }
 
-.Map-container {
+.SampleMap-container {
     /* width: 500px;
     height: 500px; */
     height: 100%;
 }
 
-.Map-detail-row {
+.SampleMap-detail-row {
     flex: 1 1 0px;
     display: flex;
     flex-direction: column;
+    border: 1px solid rgba(200, 200, 200, 0.5);
+    box-shadow: 4px 4px 4px rgba(100, 100, 100, 0.5);
+    margin: 4px 8px 6px 4px;
+    padding: 4px;
 }
 
-.Map-col-wrapper {
+.SampleMap-col-wrapper {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
 
-.Map-detail-row .Col {
+.SampleMap-detail-row .Col {
     overflow: hidden;
+}
+
+.SampleMap-field-label {
+    color: rgba(150, 150, 150, 1);
 }

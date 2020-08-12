@@ -2,20 +2,24 @@ define([
     'preact',
     'htm',
     'leaflet',
+    'uuid',
     'components/Row',
     'components/Col',
     'components/Table',
     'components/DataTable',
+    'components/common',
 
-    'css!./Map.css'
+    'css!./SampleMap.css'
 ], function (
     preact,
     htm,
     leaflet,
+    Uuid,
     Row,
     Col,
     Table,
-    DataTable
+    DataTable,
+    common
 ) {
     'use strict';
 
@@ -46,11 +50,14 @@ define([
         return defaultValue;
     }
 
-    class Map extends Component {
+    class SampleMap extends Component {
         constructor(props) {
             super(props);
 
             this.mapRef = preact.createRef();
+
+            this.samplesMarkers = new Map();
+            this.markers = new Map();
 
             this.map = null;
 
@@ -138,7 +145,7 @@ define([
 
         renderMap() {
             return html`
-                <div className="Map-container" ref=${this.mapRef}></div>
+                <div className="SampleMap-container" ref=${this.mapRef}></div>
             `;
         }
 
@@ -159,29 +166,6 @@ define([
         }
 
         updateSampleMapping() {
-            // if (this.props.sampleSet.samples.length === 0) {
-            //     this.map.setView([0, 0], 1);
-            //     return;
-            // }
-
-            // Should be dynamic?
-
-            // generate coords
-            // const coords = this.props.sampleSet.samples.map((sample) => {
-            //     const metadata = sample.sample.node_tree[0].meta_controlled;
-            //     if (!isDefined(metadata.latitude)  || !isDefined(metadata.longitude)) {
-            //         return;
-            //     }
-            //     return {
-            //         id: sample.id,
-            //         name: sample.name,
-            //         coord: [metadata.latitude.value, metadata.longitude.value]
-            //     }
-            // })
-            //     .filter((coord) => {
-            //         return coord;
-            //     });
-
             const locationSamples = [];
             this.props.sampleSet.samples.forEach((sample) => {
                 const metadata = sample.sample.node_tree[0].meta_controlled;
@@ -199,16 +183,19 @@ define([
                         id: sample.id,
                         name: sample.name
                     });
+                    existingLocationSample.sampleIds.push(sample.id);
                 } else {
                     locationSamples.push({
                         samples: [{
                             id: sample.id,
                             name: sample.name
                         }],
+                        sampleIds: [sample.id],
                         coordinate: {
                             latitude: metadata.latitude.value,
                             longitude: metadata.longitude.value
                         },
+                        markerId: new Uuid(4).format(),
                         coord: [metadata.latitude.value, metadata.longitude.value]
                     });
                 }
@@ -221,48 +208,128 @@ define([
             const showTooltips = (locationSamples.length < 50);
 
             // create markers.
-            locationSamples.forEach((locationSample) => {
-                leaflet.circleMarker(locationSample.coord, {
-                    title: `lat: ${locationSample.coord[0]}\nlng: ${locationSample.coord[1]}`,
+            locationSamples.forEach((location) => {
+                const marker = leaflet.circleMarker(location.coord, {
+                    title: `lat: ${location.coord[0]}\nlng: ${location.coord[1]}`,
                     color: 'red'
                 })
-                    .bindTooltip(`${pluralOf(locationSample.samples.length, 'sample', 'samples')}`, {
+                    .bindTooltip(`${pluralOf(location.samples.length, 'sample', 'samples')}`, {
                         permanent: showTooltips,
                         direction: 'auto'
                     })
                     .addTo(this.map)
                     .on('mouseover', () => {
-                        const highlightedSamples = locationSample.samples.map((sample) => {
-                            return sample.id;
-                        });
-                        this.setState({
-                            freezeSamples: false,
-                            highlightedSamples
-                        });
+                        // const highlightedSamples = locationSample.samples.map((sample) => {
+                        //     return sample.id;
+                        // });
+                        // this.setState({
+                        //     freezeSamples: false,
+                        //     highlightedSamples
+                        // });
                     })
                     .on('mouseout', () => {
-                        if (this.state.freezeSamples) {
-                            return;
-                        }
-                        this.setState({
-                            highlightedSamples: []
-                        });
+                        // if (this.state.freezeSamples) {
+                        //     return;
+                        // }
+                        // this.setState({
+                        //     highlightedSamples: []
+                        // });
                     })
                     .on('click', () => {
-                        this.setState({
-                            freezeSamples: true
-                        });
+                        this.onClickMarker(location);
                     });
+                // const markerId = new Uuid(4).format();
+                location.samples.forEach((sample) => {
+                    this.samplesMarkers.set(sample.id, {
+                        markerId: location.markerId
+                    });
+                });
+                this.markers.set(location.markerId, {
+                    selected: false,
+                    marker,
+                    location
+                });
+
             });
 
             if (locationSamples.length === 0) {
                 this.map.setView([0, 0], 1);
             } else {
-                // const bounds = new leaflet.LatLngBounds(coords);
                 this.map.fitBounds(locationSamples.map((locationSample) => {
                     return locationSample.coord;
-                }));
+                }), {
+                    padding: [50, 50]
+                });
             }
+        }
+
+        onClickMarker(location) {
+            this.selectLocation(location);
+        }
+
+        selectLocation(location) {
+            const marker = this.markers.get(location.markerId);
+            if (!marker) {
+                return;
+            }
+
+            const highlightedSamples = location.samples.map((sample) => {
+                return sample.id;
+            });
+            if (marker.selected) {
+                const newHighlighted = this.state.highlightedSamples.filter((sampleId) => {
+                    return !location.sampleIds.includes(sampleId);
+                });
+                this.setState({highlightedSamples: newHighlighted});
+            } else {
+                this.setState({
+                    highlightedSamples: this.state.highlightedSamples.concat(highlightedSamples)
+                });
+            }
+
+            if (marker.selected) {
+                marker.marker.setStyle({
+                    color: 'red'
+                });
+            } else {
+                marker.marker.setStyle({
+                    color: 'green',
+                    fill: true,
+                    fillColor: 'green'
+                });
+            }
+
+            marker.marker.removeFrom(this.map);
+            marker.marker.addTo(this.map);
+            marker.selected = !marker.selected;
+            this.markers.set(location.markerId, marker);
+        }
+
+
+
+        clearSelectedSamples() {
+            const markerIds = this.state.highlightedSamples.reduce((markerIds, sampleId) => {
+                // return !location.sampleIds.includes(sampleId);
+
+                const sample = this.samplesMarkers.get(sampleId);
+                markerIds.add(sample.markerId);
+                return markerIds;
+            }, new Set());
+            Array.from(markerIds).forEach((markerId) => {
+                const marker = this.markers.get(markerId);
+                marker.marker.setStyle({
+                    color: 'red'
+                });
+            });
+            this.setState({
+                highlightedSamples: []
+            });
+        }
+
+        onRowClick(sample) {
+            const {markerId} = this.samplesMarkers.get(sample.id);
+            const {location} = this.markers.get(markerId);
+            this.selectLocation(location);
         }
 
         renderCoordsTable() {
@@ -282,10 +349,9 @@ define([
                     }
                 }
 
-                const isHighlighted =  (this.state.highlightedSamples.some((sampleId) => {
-                    return sampleId === sample.id;
-                }));
-                // console.log('sample', sample);
+                // const isHighlighted =  (this.state.highlightedSamples.some((sampleId) => {
+                //     return sampleId === sample.id;
+                // }));
                 return {
                     id: sample.id,
                     name: sample.name,
@@ -294,8 +360,7 @@ define([
                     material: getMetadataField(sample, 'material'),
                     latitude: metadata.latitude.value,
                     longitude: metadata.longitude.value,
-                    description: getMetadataField(sample, 'location_description'),
-                    isHighlighted
+                    description: getMetadataField(sample, 'location_description')
                 };
             })
                 .filter((coord) => {
@@ -305,78 +370,6 @@ define([
             if (coordsTable.length === 0) {
                 return this.renderNoGeolocation();
             }
-
-            // const columns = [
-            //     {
-            //         id: 'name',
-            //         label: 'Name',
-            //         type: 'string',
-            //         render: (name, row) => {
-            //             return html`
-            //                 <a href=${`/#sampleview/${row.id}`} target="_blank">${name}</a>
-            //             `;
-            //         }
-            //     },
-            //     {
-            //         id: 'source',
-            //         label: 'Source',
-            //         type: 'string',
-            //         style: {
-            //             flex: '0 0 5em'
-            //         }
-            //     },
-            //     {
-            //         id: 'material',
-            //         label: 'Material',
-            //         type: 'string',
-            //         style: {
-            //             flex: '0 0 5em'
-            //         }
-            //     },
-            //     // {
-            //     //     id: 'sourceId',
-            //     //     label: 'ID',
-            //     //     type: 'string',
-            //     //     style: {
-            //     //         flex: '0 0 7em'
-            //     //     }
-            //     // },
-            //     {
-            //         id: 'latitude',
-            //         label: 'Latitude',
-            //         type: 'float',
-            //         precision: 4,
-            //         style: {
-            //             flex: '0 0 7em'
-            //         }
-            //     },
-            //     {
-            //         id: 'longitude',
-            //         label: 'Longitude',
-            //         type: 'float',
-            //         precision: 4,
-            //         style: {
-            //             flex: '0 0 7em'
-            //         }
-
-            //     },
-            //     {
-            //         id: 'description',
-            //         label: 'Description',
-            //         type: 'string',
-            //         style: {
-            //             flex: '0 0 10em'
-            //         },
-            //         render: (description) => {
-            //             if (!description) {
-            //                 return html`
-            //                     <div style=${{textAlign: 'center'}}>${common.na()}</div>
-            //                 `;
-            //             }
-            //             return description;
-            //         }
-            //     },
-            // ];
 
             const formatLatLong = (value) => {
                 return Intl.NumberFormat('en-US', {
@@ -388,42 +381,49 @@ define([
 
             const row = (row) => {
                 return html`
-                    <div className="Map-detail-row">
+                    <div className="SampleMap-detail-row">
                         <div className="Row">
-                            <div className="Col" style=${{flex: '2 1 0px'}}>
-                                <div className="Map-col-wrapper">
-                                    <a href=${`/#sampleview/${row.id}`} target="_blank">${row.name}</a>
+                            <div className="Col" style=${{flex: '1 1 0px'}}>
+                                <div className="Row">
+                                    <div className="Col">
+                                        <div className="SampleMap-col-wrapper">
+                                            <div className="SampleMap-field-label">sample name</div>
+                                            <a href=${`/#sampleview/${row.id}`} target="_blank">${row.name}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="Row">
+                                    <div className="Col">
+                                        <div className="SampleMap-col-wrapper">
+                                            <div className="SampleMap-field-label">latitude</div>
+                                            ${formatLatLong(row.longitude)}
+                                        </div>
+                                    </div>
+                                
+                                    <div className="Col">
+                                        <div className="SampleMap-col-wrapper">
+                                            <div className="SampleMap-field-label">longitude</div>
+                                            ${formatLatLong(row.latitude)}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <div className="Col">
-                                <div className="Map-col-wrapper">
-                                    ${row.source}
+                            <div className="Col" style=${{flex: '1 1 0px'}}>
+                                <div className="Row">
+                                    <div className="Col">
+                                        <div className="SampleMap-col-wrapper">
+                                            <div className="SampleMap-field-label">material</div>
+                                            ${row.material}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div className="Col">
-                                <div className="Map-col-wrapper">
-                                    ${row.material}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="Row">
-                            <div className="Col">
-                                <div className="Map-col-wrapper">
-                                    ${formatLatLong(row.longitude)}
-                                </div>
-                            </div>
-                            
-                            <div className="Col">
-                                <div className="Map-col-wrapper">
-                                    ${formatLatLong(row.latitude)}
-                                </div>
-                            </div>
-
-                            <div className="Col">
-                               
-                                <div className="Map-col-wrapper">
+                                <div className="Row">
+                                    <div className="Col">
+                                        <div className="SampleMap-col-wrapper">
+                                            <div className="SampleMap-field-label">description</div>
+                                            ${row.description || common.na()}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -432,46 +432,42 @@ define([
             };
 
             const header = () => {
+                const selected = (() => {
+                    if (this.state.highlightedSamples.length === 0) {
+                        return;
+                    }
+                    return html`
+                        <span style=${{marginLeft: '4px'}}>
+                        (
+                            ${this.state.highlightedSamples.length} selected
+                            <span 
+                            style=${{color: '#337ab7', cursor: 'pointer', marginLeft: '4px'}} 
+                            onClick=${this.clearSelectedSamples.bind(this)}>clear</span>
+                            </span>
+                        )
+                    `;
+                })();
                 return html`
-                <div className="Map-detail-row">
-                    <div className="Row">
-                        <div className="Col" style=${{flex: '2 1 0px'}}>
-                            Name
-                        </div>
-                        
-                        <div className="Col">
-                            Source
-                        </div>
-
-                        <div className="Col">
-                            Material
-                        </div>
-                    </div>
-                    <div className="Row">
-                        <div className="Col">
-                            Longitude
-                        </div>
-                        
-                        <div className="Col">
-                            Latitude
-                        </div>
-
-                        <div className="Col">
-                            Description
-                        </div>
-                    </div>
+                <div style=${{flex: '1 1 0px', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+                    ${pluralOf(this.props.sampleSet.samples.length, 'sample', 'samples')}
+                    ${selected}
                 </div>
                 `;
             };
 
             return html`
-                <${DataTable} dataSource=${coordsTable} render=${{row, header}}  rowHeight=${60}/>
+                <${DataTable} 
+                    dataSource=${coordsTable} 
+                    render=${{row, header}}
+                    heights=${{row: 120, header: 30}}
+                    onClick=${this.onRowClick.bind(this)}/>
             `;
         }
 
+
         render() {
             return html`
-                <div className="Map">
+                <div className="SampleMap">
                     <${Row}>
                         <${Col} style=${{marginRight: '5px'}}>
                             ${this.renderMap()}
@@ -485,5 +481,5 @@ define([
         }
     }
 
-    return Map;
+    return SampleMap;
 });

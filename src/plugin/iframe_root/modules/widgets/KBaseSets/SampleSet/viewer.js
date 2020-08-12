@@ -1,22 +1,16 @@
 define([
-    'bluebird',
     'preact',
     'htm',
     'kb_lib/widgetUtils',
-    'lib/Params',
-    'lib/formatters',
-    'components/Loading',
+    'components/Progress',
     './model',
     'components/SimpleError',
     './components/Main'
 ], function (
-    Promise,
     preact,
     htm,
     widgetUtils,
-    Params,
-    fmt,
-    Loading,
+    Progress,
     Model,
     SimpleError,
     Main
@@ -24,7 +18,6 @@ define([
     'use strict';
 
     const html = htm.bind(preact.h);
-
     const MAX_SAMPLES = 10000;
 
     class Viewer {
@@ -42,26 +35,23 @@ define([
             this.node = node;
         }
 
+        renderSimpleProgress(progress) {
+            return html`Loading samples <span className="text-info" style=${{fontWeight: 'bold'}}>${progress}%</span> ...`;
+        }
+
         onProgress(current, total) {
             const progress = Math.round(100 * current/total);
-            // console.log('progress?', current, total, width);
-            // return;
-            preact.render(preact.h(Loading, {
-                message: html`Loading samples <span className="text-info" style=${{fontWeight: 'bold'}}>${progress}%</span> ...`
-            }), this.node);
-            return;
-            // const progressBar = html`
-            // <div class="progress">
-            //     <div class="progress-bar" role="progress"
-            //          aria-valuenow=${String(progress)}
-            //          aria-valuemin="0"
-            //          aria-valuemax="100"
-            //          style=${{width: `${progress}%`}}>
-            //         <span class="sr-only">${progress} loaded...</span>
-            //     </div>
-            // </div>
-            // `;
-            // preact.render(preact.h(progressBar, { }), this.node);
+            this.renderProgress(progress);
+        }
+
+        renderProgress(progress) {
+            const content = html`
+                <div style=${{width: '50%'}}>
+                    <div>Loading samples...</div>
+                    <${Progress} progress=${progress} />
+                </div>
+            `;
+            preact.render(content, this.node);
         }
 
         start(params) {
@@ -78,9 +68,7 @@ define([
             });
 
             // Display loading spinner...
-            preact.render(preact.h(Loading, {
-                message: 'Loading samples...'
-            }), this.node);
+            this.renderProgress(0);
 
             // Get the object form the model.
             const model = new Model({
@@ -91,8 +79,6 @@ define([
             });
 
             // Display the object!
-
-            // preact.render(preact.h(SimpleError, {message: 'foo'}), this.node);
 
             return model
                 .getObject()
@@ -106,10 +92,9 @@ define([
                         onProgress: this.onProgress.bind(this)
                     })
                         .then((samples) => {
-                            const samplesMap = samples.reduce((samplesMap, {sample, linkedData}) => {
+                            const samplesMap = samples.reduce((samplesMap, {sample}) => {
                                 samplesMap[sample.id] = {
                                     sample,
-                                    // linkedDataCount: linkedData.links.length
                                     linkedDataCount: 0
                                 };
                                 return samplesMap;
@@ -119,8 +104,6 @@ define([
                                 sampleSetItem.linkedDataCount = samplesMap[sampleSetItem.id].linkedDataCount;
                             });
                             preact.render(preact.h(Main, {sampleSet, totalCount}), this.node);
-                            // preact.render(preact.h(SimpleError, {message: 'whaaat?'}), this.node);
-
                         })
                         .catch((err) => {
                             console.error('Error fetching samples', err);
