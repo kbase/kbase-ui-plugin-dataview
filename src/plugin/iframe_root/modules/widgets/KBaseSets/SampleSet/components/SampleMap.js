@@ -388,7 +388,7 @@ define([
                                     <div className="Col">
                                         <div className="SampleMap-col-wrapper">
                                             <div className="SampleMap-field-label">sample name</div>
-                                            <a href=${`/#sampleview/${row.id}`} target="_blank">${row.name}</a>
+                                            <a href=${`/#samples/view/${row.id}`} target="_parent">${row.name}</a>
                                         </div>
                                     </div>
                                 </div>
