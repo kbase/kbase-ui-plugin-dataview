@@ -425,7 +425,7 @@ define([
                 }
                 var units;
                 if (controlledField.units) {
-                    units = `<i style="margin-left: 10px">${controlledField.units}</i>`;
+                    units = html`${' '}<i>${controlledField.units}</i>`;
                 } else {
                     units = '';
                 }
@@ -508,7 +508,10 @@ define([
                 };
 
                 return html`
-                    <div className=${classes.join(' ')} style=${style}>
+                    <div className=${classes.join(' ')} 
+                         style=${style}
+                         role="cell"
+                         data-k-b-testhook-cell=${columnDef.key}>
                         <div className="Spreadsheet-cell-content" title=${columnDef.label}>
                             ${columnDef.label}
                         </div>
@@ -560,6 +563,54 @@ define([
             })();
         }
 
+        renderCell(sample, columnDef) {
+            switch (columnDef.type) {
+            case 'sample':
+                var sampleField = sample.sample[columnDef.key];
+                if (!sampleField) {
+                    return common.na();
+                }
+                return html`${sampleField}`;
+            case 'node':
+                var nodeField = sample.sample.node_tree[0][columnDef.key];
+                if (!nodeField) {
+                    return common.na();
+                }
+                return html`${nodeField}`;
+            case 'metadata':
+                return (() => {
+                    const controlledField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
+                    if (!controlledField) {
+                        return common.na();
+                    }
+                    let units;
+                    if (controlledField.units) {
+                        units = html`${' '}<i>${controlledField.units}</i>`;
+                    } else {
+                        units = '';
+                    }
+                    const content = html`<span>${this.formatValue(controlledField.value, columnDef.format)}${units}</span>`;
+                    return content;
+                })();
+            case 'user':
+                return (() => {
+                    const userField = sample.sample.node_tree[0].meta_user[columnDef.key];
+                    if (!userField) {
+                        return common.na();
+                    }
+                    return html`${userField.value}`;
+                })();
+            case 'unknown':
+                var unknownField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
+                if (!unknownField) {
+                    return common.na();
+                }
+                return html`${unknownField.value}`;
+            default:
+                return common.na();
+            }
+        }
+
         renderBody() {
             // Another nested loop of (samples, columnDefs).
             // for each sample
@@ -598,110 +649,159 @@ define([
                     };
 
                     totalWidth += columnDef.width;
-                    switch (columnDef.type) {
-                    case 'sample':
-                        var sampleField = sample.sample[columnDef.key];
-                        if (!sampleField) {
-                            return html`
-                                <div className="Spreadsheet-cell Spreadsheet-sample-field" style=${style}>
-                                    ${common.na()}
-                                </div>
-                            `;
-                        }
-                        return html`
-                            <div className="Spreadsheet-cell Spreadsheet-sample-field" style=${style} title=${sampleField}>
-                                <div className="Spreadsheet-cell-content" >
-                                    ${sampleField}
-                                </div>
-                            </div>
-                        `;
-                    case 'node':
-                        var nodeField = sample.sample.node_tree[0][columnDef.key];
-                        if (!nodeField) {
-                            return html`
-                                <div className="Spreadsheet-cell Spreadsheet-sample-field" style=${style}>
-                                    ${common.na()}
-                                </div>
-                            `;
-                        }
-                        return html`
-                            <div className="Spreadsheet-cell Spreadsheet-sample-field" style=${style} title=${nodeField}>
-                                <div className="Spreadsheet-cell-content">
-                                    ${nodeField}
-                                </div>
-                            </div>
-                        `;
-                    case 'metadata':
-                        return (() => {
-                            const controlledField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
-                            if (!controlledField) {
-                                return html`
-                                    <div className="Spreadsheet-cell Spreadsheet-controlled-field" style=${style}>
-                                        ${common.na()}
-                                    </div>
-                                `;
-                            }
-                            let units;
-                            if (controlledField.units) {
-                                units = html`<i style=${{marginLeft: '10px'}}>${controlledField.units}</i>`;
-                            } else {
-                                units = '';
-                            }
-                            const content = html`<span>${this.formatValue(controlledField.value, columnDef.format)}${units}</span>`;
-                            const tooltip = `${this.formatValue(controlledField.value, columnDef.format)} ${controlledField.units || ''}`;
-                            return html`
-                                <div className="Spreadsheet-cell Spreadsheet-controlled-field" style=${style} title=${tooltip}>
-                                    <div className="Spreadsheet-cell-content">
-                                        ${content}
-                                    </div>
-                                </div>
-                            `;
-                        })();
-                    case 'user':
-                        return (() => {
-                            const userField = sample.sample.node_tree[0].meta_user[columnDef.key];
-                            if (!userField) {
-                                return html`
-                                <div className="Spreadsheet-cell Spreadsheet-user-field" style=${style}>
-                                    ${common.na()}
-                                </div>
-                            `;
-                            }
-                            return html`
-                            <div className="Spreadsheet-cell Spreadsheet-user-field" style=${style} title=${userField.value}>
-                                <div className="Spreadsheet-cell-content">
-                                    ${userField.value}
-                                </div>
-                            </div>
-                        `;
-                        })();
-                    case 'unknown':
-                        var unknownField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
-                        if (!unknownField) {
-                            return html`
-                                <div className="Spreadsheet-cell Spreadsheet-unknown-field" style=${style}>
-                                    ${common.na()}
-                                </div>
-                            `;
-                        }
-                        return html`
-                            <div className="Spreadsheet-cell Spreadsheet-unknown-field" style=${style}>
-                                <div className="Spreadsheet-cell-content">
-                                    ${unknownField.value}
-                                </div>
-                            </div>
-                        `;
-                    default:
-                        return html`
-                            <div className="Spreadsheet-cell Spreadsheet-unmapped-field" style=${style}>
-                                ${common.na()}
-                            </div>
-                        `;
-                    }
 
+                    const content = this.renderCell(sample, columnDef);
+                    // TODO: add back in tooltip / title support to renderCell.
+                    // title=${sampleField}
+                    return html`
+                        <div className="Spreadsheet-cell Spreadsheet-sample-field" 
+                            style=${style} 
+                            role="cell"
+                            data-k-b-testhook-cell=${columnDef.key}>
+                            <div className="Spreadsheet-cell-content" >
+                                ${content}
+                            </div>
+                        </div>
+                    `;
                 });
+                //     switch (columnDef.type) {
+                //     case 'sample':
+                //         var sampleField = sample.sample[columnDef.key];
+                //         if (!sampleField) {
+                //             return html`
+                //                 <div className="Spreadsheet-cell Spreadsheet-sample-field"
+                //                      style=${style}
+                //                      role="cell"
+                //                      data-k-b-testhook-coll=${columnDef.key} >
+                //                     ${common.na()}
+                //                 </div>
+                //             `;
+                //         }
+                //         return html`
+                //             <div className="Spreadsheet-cell Spreadsheet-sample-field"
+                //                  style=${style}
+                //                  title=${sampleField}
+                //                  role="cell"
+                //                  data-k-b-testhook-coll=${columnDef.key}>
+                //                 <div className="Spreadsheet-cell-content" >
+                //                     ${sampleField}
+                //                 </div>
+                //             </div>
+                //         `;
+                //     case 'node':
+                //         var nodeField = sample.sample.node_tree[0][columnDef.key];
+                //         if (!nodeField) {
+                //             return html`
+                //                 <div className="Spreadsheet-cell Spreadsheet-sample-field"
+                //                      style=${style}
+                //                      role="cell"
+                //                      data-k-b-testhook-coll=${columnDef.key}>
+                //                     ${common.na()}
+                //                 </div>
+                //             `;
+                //         }
+                //         return html`
+                //             <div className="Spreadsheet-cell Spreadsheet-sample-field"
+                //                  style=${style}
+                //                  title=${nodeField}
+                //                  role="cell"
+                //                  data-k-b-testhook-coll=${columnDef.key}>
+                //                 <div className="Spreadsheet-cell-content">
+                //                     ${nodeField}
+                //                 </div>
+                //             </div>
+                //         `;
+                //     case 'metadata':
+                //         return (() => {
+                //             const controlledField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
+                //             if (!controlledField) {
+                //                 return html`
+                //                     <div className="Spreadsheet-cell Spreadsheet-controlled-field"
+                //                          style=${style}
+                //                          role="cell"
+                //                          data-k-b-testhook-coll=${columnDef.key}>
+                //                         ${common.na()}
+                //                     </div>
+                //                 `;
+                //             }
+                //             let units;
+                //             if (controlledField.units) {
+                //                 units = html`<i style=${{marginLeft: '10px'}}>${controlledField.units}</i>`;
+                //             } else {
+                //                 units = '';
+                //             }
+                //             const content = html`<span>${this.formatValue(controlledField.value, columnDef.format)}${units}</span>`;
+                //             const tooltip = `${this.formatValue(controlledField.value, columnDef.format)} ${controlledField.units || ''}`;
+                //             return html`
+                //                 <div className="Spreadsheet-cell Spreadsheet-controlled-field"
+                //                      style=${style}
+                //                      title=${tooltip}
+                //                      role="cell"
+                //                      data-k-b-testhook-coll=${columnDef.key}>
+                //                     <div className="Spreadsheet-cell-content">
+                //                         ${content}
+                //                     </div>
+                //                 </div>
+                //             `;
+                //         })();
+                //     case 'user':
+                //         return (() => {
+                //             const userField = sample.sample.node_tree[0].meta_user[columnDef.key];
+                //             if (!userField) {
+                //                 return html`
+                //                 <div className="Spreadsheet-cell Spreadsheet-user-field"
+                //                      style=${style}
+                //                      role="cell"
+                //                      data-k-b-testhook-coll=${columnDef.key}>
+                //                     ${common.na()}
+                //                 </div>
+                //             `;
+                //             }
+                //             return html`
+                //             <div className="Spreadsheet-cell Spreadsheet-user-field"
+                //                  style=${style}
+                //                  title=${userField.value}
+                //                  role="cell"
+                //                  data-k-b-testhook-coll=${columnDef.key}>
+                //                 <div className="Spreadsheet-cell-content">
+                //                     ${userField.value}
+                //                 </div>
+                //             </div>
+                //         `;
+                //         })();
+                //     case 'unknown':
+                //         var unknownField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
+                //         if (!unknownField) {
+                //             return html`
+                //                 <div className="Spreadsheet-cell Spreadsheet-unknown-field"
+                //                      style=${style}
+                //                      role="cell"
+                //                      data-k-b-testhook-coll=${columnDef.key}>
+                //                     ${common.na()}
+                //                 </div>
+                //             `;
+                //         }
+                //         return html`
+                //             <div className="Spreadsheet-cell Spreadsheet-unknown-field"
+                //                  style=${style}>
+                //                 <div className="Spreadsheet-cell-content">
+                //                     ${unknownField.value}
+                //                 </div>
+                //             </div>
+                //         `;
+                //     default:
+                //         return html`
+                //             <div className="Spreadsheet-cell Spreadsheet-unmapped-field" style=${style}>
+                //                 ${common.na()}
+                //             </div>
+                //         `;
+                //     }
+
+                // });
                 rows.push(html`
-                    <div className="Spreadsheet-grid-row" style=${rowStyle}>
+                    <div className="Spreadsheet-grid-row" 
+                         style=${rowStyle}
+                         role="row">
                         ${row}
                     </div>
                 `);

@@ -46,14 +46,25 @@ define([
         }
 
         renderDescription() {
-            const totalCount = Intl.NumberFormat('en-US', {
-                useGrouping: true
-            }).format(this.props.totalCount);
+            // const totalCount = Intl.NumberFormat('en-US', {
+            //     useGrouping: true
+            // }).format(this.props.totalCount);
+            //
+            //<p>This sample set contains a total of ${totalCount} samples.</p>
+            // TODO: this description should perhaps be markdown? Or simply generate paragraphs on
+            // line feeds. Currently the control is a text input not textarea
+            const description = this.props.sampleSet.description.split('\n')
+                .map((line) => {
+                    return html`
+                    <p>${line}</p>
+                    `;
+                });
             return html`
                 <${Fragment}>
                     <h4>Description</h4>
-                    <p>${this.props.sampleSet.description}</p>
-                    <p>This sample set contains a total of ${totalCount} samples.</p>
+                    <div data-k-b-testhook-element="description">
+                    ${description}
+                    </div>
                 <//>
             `;
         }

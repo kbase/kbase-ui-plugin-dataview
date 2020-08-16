@@ -14,6 +14,16 @@ specs:
       - action: navigate
         path: dataview/{{plugins.dataview.media.case1.objectId}}
       - subtask: plugin
+      # - wait: forElement
+      #   selector:
+      #     - type: plugin
+      #       value: dataview
+      #     - type: tabpane
+      #       value: main
+      #     - type: tabpane
+      #       value: overview
+      #     - type: field
+      #       value: wsid
       - wait: forText
         selector:
           - type: plugin

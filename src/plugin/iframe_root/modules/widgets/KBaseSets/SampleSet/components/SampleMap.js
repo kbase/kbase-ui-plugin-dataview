@@ -385,25 +385,31 @@ define([
                         <div className="Row">
                             <div className="Col" style=${{flex: '1 1 0px'}}>
                                 <div className="Row">
-                                    <div className="Col">
+                                    <div className="Col" >
                                         <div className="SampleMap-col-wrapper">
                                             <div className="SampleMap-field-label">sample name</div>
-                                            <a href=${`/#samples/view/${row.id}`} target="_parent">${row.name}</a>
+                                            <div className="SampleMap-field-value" role="cell" data-k-b-testhook-cell="name">
+                                                <a href=${`/#samples/view/${row.id}`} target="_parent">${row.name}</a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="Row">
-                                    <div className="Col">
+                                    <div className="Col" >
                                         <div className="SampleMap-col-wrapper">
                                             <div className="SampleMap-field-label">latitude</div>
-                                            ${formatLatLong(row.longitude)}
+                                            <div className="SampleMap-field-value" role="cell" data-k-b-testhook-cell="latitude">
+                                                ${formatLatLong(row.longitude)}
+                                            </div>
                                         </div>
                                     </div>
                                 
-                                    <div className="Col">
+                                    <div className="Col" >
                                         <div className="SampleMap-col-wrapper">
                                             <div className="SampleMap-field-label">longitude</div>
-                                            ${formatLatLong(row.latitude)}
+                                            <div className="SampleMap-field-value" role="cell" data-k-b-testhook-cell="longitude">
+                                                ${formatLatLong(row.latitude)}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -413,15 +419,19 @@ define([
                                     <div className="Col">
                                         <div className="SampleMap-col-wrapper">
                                             <div className="SampleMap-field-label">material</div>
-                                            ${row.material}
+                                            <div className="SampleMap-field-value" role="cell" data-k-b-testhook-cell="material">
+                                                ${row.material}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="Row">
-                                    <div className="Col">
+                                    <div className="Col" >
                                         <div className="SampleMap-col-wrapper">
                                             <div className="SampleMap-field-label">description</div>
-                                            ${row.description || common.na()}
+                                            <div className="SampleMap-field-value" role="cell" data-k-b-testhook-cell="description">
+                                                ${row.description || common.na()}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

@@ -89,20 +89,20 @@ define([
                     `;
                 }
             },
-            // {
-            //     id: 'savedAt',
-            //     label: 'Saved',
-            //     display: true,
-            //     isSortable: true,
-            //     style: {
-            //         flex: '0 0 10'
-            //     },
-            //     render: (savedAt) => {
-            //         return html`
-            //         <span>${fmt.formattedDate(savedAt)}</span>
-            //         `;
-            //     }
-            // },
+            {
+                id: 'savedAt',
+                label: 'Saved',
+                display: true,
+                isSortable: true,
+                style: {
+                    flex: '0 0 10'
+                },
+                render: (savedAt) => {
+                    return html`
+                    <span>${fmt.formattedDate(savedAt)}</span>
+                    `;
+                }
+            },
             {
                 id: 'savedBy',
                 label: 'By',
@@ -168,7 +168,7 @@ define([
                         savedBy: sample.sample.user,
                         version: sample.sample.version,
                         linkedDataCount: sample.linkedDataCount,
-                        source: sample.sample.dataSourceDefinition.id
+                        source: sample.sample.dataSourceDefinition.source
                     };
                 })
             };
