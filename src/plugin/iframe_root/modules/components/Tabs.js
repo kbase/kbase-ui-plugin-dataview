@@ -93,6 +93,8 @@ define([
                 return html`
                     <div role="presentation" 
                          className=${classes.join(' ')} 
+                         data-k-b-testhook-tab=${tab.id}
+                         role="tab"
                          onClick=${() => {this.selectTab(tab);}}>
                         <span>${tab.title}</span>
                     </div>
@@ -103,7 +105,10 @@ define([
                     <div className="Tabs-tabs">
                         ${tabs}
                     </div>
-                    <div className="Tabs-pane" data-k-b-testhook-tabpane=${this.state.selectedTab.id} style=${this.props.paneStyle || {}}>
+                    <div className="Tabs-pane" 
+                         data-k-b-testhook-tabpane=${this.state.selectedTab.id} 
+                         role="tabpane"
+                         style=${this.props.paneStyle || {}}>
                         ${this.renderTabPane()}
                     </div>
                 </div>

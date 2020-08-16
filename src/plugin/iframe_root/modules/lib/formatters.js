@@ -4,10 +4,10 @@ define([], () => {
     function formattedDate(time) {
         return Intl.DateTimeFormat('en-US', {
             year: 'numeric',
-            month: 'numeric',
-            day: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
             hour: '2-digit',
-            minute: 'numeric',
+            minute: '2-digit',
             hour12: true
         }).format(time);
     }

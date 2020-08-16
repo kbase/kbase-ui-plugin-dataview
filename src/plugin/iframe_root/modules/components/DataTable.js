@@ -154,7 +154,10 @@ define([
                                 })();
                                 const style = col.style || {};
                                 return html`
-                                    <div className="DataTable-col" style=${style}>
+                                    <div className="DataTable-col" 
+                                         style=${style} 
+                                         data-k-b-testhook-cell=${col.id}
+                                         role="cell">
                                         <div className="DataTable-col-content">
                                             ${content}
                                         </div>
@@ -166,10 +169,13 @@ define([
                                 rowClasses.push('DataTable-row-highlighted');
                             }
                             return html`
-                                <div className=${rowClasses.join(' ')} style=${style}>${row}</div>
+                                <div className=${rowClasses.join(' ')} 
+                                     style=${style} 
+                                     role="row">${row}</div>
                             `;
                         })();
                     } else {
+                        // freeform row
                         return (() => {
                             const row = this.props.render.row(values);
                             const rowClasses = ['DataTable-grid-row'];
@@ -177,7 +183,10 @@ define([
                                 rowClasses.push('DataTable-row-highlighted');
                             }
                             return html`
-                                <div className=${rowClasses.join(' ')} style=${style} onClick=${() => {this.onRowClick(values);}}>${row}</div>
+                                <div className=${rowClasses.join(' ')} 
+                                     style=${style} 
+                                     role="row"
+                                     onClick=${() => {this.onRowClick(values);}}>${row}</div>
                             `;
                         })();
                     }
