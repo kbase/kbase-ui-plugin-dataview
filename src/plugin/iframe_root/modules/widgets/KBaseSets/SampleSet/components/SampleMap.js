@@ -140,6 +140,10 @@ define([
             };
             leaflet.control.layers(baseMaps, null).addTo(this.map);
 
+            leaflet.control.scale({
+                position: 'topleft'
+            }).addTo(this.map);
+
             this.updateSampleMapping();
         }
 
@@ -211,7 +215,8 @@ define([
             locationSamples.forEach((location) => {
                 const marker = leaflet.circleMarker(location.coord, {
                     title: `lat: ${location.coord[0]}\nlng: ${location.coord[1]}`,
-                    color: 'red'
+                    color: 'red',
+                    radius: 5
                 })
                     .bindTooltip(`${pluralOf(location.samples.length, 'sample', 'samples')}`, {
                         permanent: showTooltips,
