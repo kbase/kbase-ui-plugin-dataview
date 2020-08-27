@@ -55,7 +55,6 @@ require(['loader'], function () {
                 })
                 .then((dispatcher) => {
                     integration.onNavigate(({ view, params }) => {
-                       
                         dispatcher.dispatch({ view, params })
                             .catch((ex) => {
                                 // TODO: this should trigger an error display
