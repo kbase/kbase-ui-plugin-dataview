@@ -394,7 +394,7 @@ define([
                                         <div className="SampleMap-col-wrapper">
                                             <div className="SampleMap-field-label">sample name</div>
                                             <div className="SampleMap-field-value" role="cell" data-k-b-testhook-cell="name">
-                                                <a href=${`/#samples/view/${row.id}`} target="_parent">${row.name}</a>
+                                                <a href=${`/#samples/view/${row.id}`} target="_blank">${row.name}</a>
                                             </div>
                                         </div>
                                     </div>
