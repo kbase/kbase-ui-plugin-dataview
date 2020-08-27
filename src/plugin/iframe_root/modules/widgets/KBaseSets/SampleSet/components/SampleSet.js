@@ -42,7 +42,7 @@ define([
                 isSortable: true,
                 render: (name, sample) => {
                     return html`
-                    <a href=${`/#samples/view/${sample.id}/${sample.version}`} target="_parent">${name}</a>
+                    <a href=${`/#samples/view/${sample.id}/${sample.version}`} target="_blank">${name}</a>
                     `;
                 }
             }, {
