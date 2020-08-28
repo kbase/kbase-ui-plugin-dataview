@@ -209,7 +209,7 @@ define([
             //     color: '#3388ff'
             // }).addTo(map);
 
-            const showTooltips = (locationSamples.length < 50);
+            const showTooltips = (locationSamples.length <= 10);
 
             const radius = (() => {
                 if (locationSamples.length <= 10) {
