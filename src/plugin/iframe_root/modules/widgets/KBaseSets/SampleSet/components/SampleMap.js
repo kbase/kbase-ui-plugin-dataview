@@ -211,12 +211,19 @@ define([
 
             const showTooltips = (locationSamples.length < 50);
 
+            const radius = (() => {
+                if (locationSamples.length <= 10) {
+                    return 10;
+                }
+                return 5;
+            })();
+
             // create markers.
             locationSamples.forEach((location) => {
                 const marker = leaflet.circleMarker(location.coord, {
                     title: `lat: ${location.coord[0]}\nlng: ${location.coord[1]}`,
                     color: 'red',
-                    radius: 5
+                    radius
                 })
                     .bindTooltip(`${pluralOf(location.samples.length, 'sample', 'samples')}`, {
                         permanent: showTooltips,
