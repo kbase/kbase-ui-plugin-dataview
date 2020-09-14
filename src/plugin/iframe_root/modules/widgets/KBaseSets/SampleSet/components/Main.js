@@ -75,7 +75,6 @@ define([
             `;
         }
 
-
         render() {
             const tabs = [{
                 id: 'sampleset',
@@ -101,7 +100,7 @@ define([
                 render: () => {
                     return html`
                     <div className="FlexCol" style=${{marginTop: '10px'}}>
-                        <${Spreadsheet} sampleSet=${this.props.sampleSet}/>
+                        <${Spreadsheet} sampleSet=${this.props.sampleSet} />
                     </div>
                     `;
                 }

@@ -56,6 +56,15 @@ define([
             this.lastCol = null;
 
             this.observer = new ResizeObserver2(this.bodyObserver.bind(this));
+
+            // Just for now ... a better impl is a spreadsheet data source.
+            this.state = {
+                table: this.props.sampleSet.samples.slice(),
+                currentSort: {
+                    column: null,
+                    direction: null
+                }
+            };
         }
 
         componentDidMount() {
@@ -79,8 +88,8 @@ define([
             }
         }
 
-        extractSources(sampleSet) {
-            const sources = sampleSet.samples.reduce((sources, sample) => {
+        extractSources(table) {
+            const sources = table.reduce((sources, sample) => {
                 sources.add(sample.sample.dataSourceDefinition);
                 return sources;
             }, new Set());
@@ -93,7 +102,7 @@ define([
             }
 
             switch (formatter.type) {
-            case 'numeric':
+            case 'number':
                 if (formatter.precision) {
                     return Intl.NumberFormat('en-US', {
                         maximumSignificantDigits: formatter.precision,
@@ -164,7 +173,7 @@ define([
             if (this.props.sampleSet.samples.length === 0) {
                 return;
             }
-            const sources = this.extractSources(this.props.sampleSet);
+            const sources = this.extractSources(this.props.sampleSet.samples);
             if (sources.length === 0) {
                 throw new Error('No source could be determined');
             }
@@ -253,7 +262,7 @@ define([
         }
 
         createColumnDefs2() {
-            const sources = this.extractSources(this.props.sampleSet);
+            const sources = this.extractSources(this.props.sampleSet.samples);
             if (sources.length === 0) {
                 throw new Error('No source could be determined');
             }
@@ -429,7 +438,7 @@ define([
                 } else {
                     units = '';
                 }
-                return `<span>${this.formatValue(controlledField.value, columnDef.format)}${units}</span>`;
+                return `<span>${this.formatValue(controlledField.value, columnDef.spec)}${units}</span>`;
             case 'user':
                 var userField = sample.sample.node_tree[0].meta_user[columnDef.key];
                 if (!userField) {
@@ -507,16 +516,125 @@ define([
                     flexBasis: `${columnDef.width}px`
                 };
 
+                const [sortIcon, sortControl] = (() => {
+                    if (this.state.currentSort.column === columnDef.key) {
+                        if (this.state.currentSort.direction === 1) {
+                            return ['fa-sort-asc', '-active'];
+                        } else {
+                            return ['fa-sort-desc', '-active'];
+                        }
+                    } else {
+                        return ['fa-sort', ''];
+                    }
+                })();
+
                 return html`
                     <div className=${classes.join(' ')} 
+                         onClick=${() => {this.doSortColumn(columnDef);}}
                          style=${style}
                          role="cell"
                          data-k-b-testhook-cell=${columnDef.key}>
                         <div className="Spreadsheet-cell-content" title=${columnDef.label}>
                             ${columnDef.label}
                         </div>
+                        <div className=${`Spreadsheet-header-cell-sort-control  ${sortControl}`}>
+                            <span className=${`fa ${sortIcon}`}></span>
+                        </div>
                     </div>
                `;
+            });
+        }
+
+        getSampleValue(sample, columnDef, defaultValue) {
+            switch (columnDef.type) {
+            case 'sample':
+                var sampleField = sample.sample[columnDef.key];
+                if (typeof sampleField === 'undefined') {
+                    return defaultValue;
+                }
+                return sampleField;
+            case 'node':
+                var nodeField = sample.sample.node_tree[0][columnDef.key];
+                if (typeof nodeField === 'undefined') {
+                    return defaultValue;
+                }
+                return nodeField;
+            case 'metadata':
+                return (() => {
+                    const controlledField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
+                    if (typeof controlledField === 'undefined') {
+                        return defaultValue;
+                    }
+                    return controlledField.value;
+                })();
+            case 'user':
+                return (() => {
+                    const userField = sample.sample.node_tree[0].meta_user[columnDef.key];
+                    if (typeof userField === 'undefined') {
+                        return defaultValue;
+                    }
+                    return userField;
+                })();
+            case 'unknown':
+                var unknownField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
+                if (typeof unknownField === 'undefined') {
+                    return defaultValue;
+                }
+                return unknownField.value;
+            default:
+                return common.na();
+            }
+        }
+
+        doSortColumn(columnDef) {
+            const def = fieldDefinitions.validators[columnDef.key];
+            if (!def) {
+                console.warn('Field Definition Not Found', columnDef.key);
+                return;
+            }
+            const spec = def.spec;
+
+            if (this.state.currentSort.direction === -1) {
+                this.setState({
+                    table: this.props.sampleSet.samples.slice(),
+                    currentSort: {
+                        column: null,
+                        direction: null
+                    }
+                });
+                return;
+            }
+
+            const direction = (() => {
+                if (this.state.currentSort.column === columnDef.key) {
+                    return this.state.currentSort.direction === 1 ? -1 : 1;
+                }
+                return 1;
+            })();
+
+            const table = this.state.table.sort((aSample, bSample) => {
+                const a = this.getSampleValue(aSample, columnDef);
+                const b = this.getSampleValue(bSample, columnDef);
+                if (typeof a === 'undefined' || a === null) {
+                    return direction * -1;
+                }
+                if (typeof b === 'undefined' || b === null) {
+                    return direction * 1;
+                }
+                switch (spec.type) {
+                case 'string':
+                    return direction * a.localeCompare(b);
+                case 'number':
+                    return direction * (a - b);
+                }
+            }).slice();
+
+            this.setState({
+                table,
+                currentSort: {
+                    column: columnDef.key,
+                    direction
+                }
             });
         }
 
@@ -620,14 +738,15 @@ define([
                 return;
             }
 
-            const samples = this.props.sampleSet.samples.slice(this.firstRow, this.lastRow + 1);
             const cols = this.columnDefs.slice(this.firstCol, this.lastCol + 1);
             const leftMargin = this.columnDefs.slice(0, this.firstCol).reduce((margin, def) => {
                 return margin + def.width;
             }, 0);
 
             const rows = [];
-            samples.forEach((sample, rowCount) => {
+            const viewedTable = this.state.table.slice(this.firstRow, this.lastRow + 1);
+
+            viewedTable.forEach((sample, rowCount) => {
                 let totalWidth = leftMargin;
                 const rowStyle= {
                     top: (this.firstRow + rowCount) * ROW_HEIGHT,
@@ -664,140 +783,6 @@ define([
                         </div>
                     `;
                 });
-                //     switch (columnDef.type) {
-                //     case 'sample':
-                //         var sampleField = sample.sample[columnDef.key];
-                //         if (!sampleField) {
-                //             return html`
-                //                 <div className="Spreadsheet-cell Spreadsheet-sample-field"
-                //                      style=${style}
-                //                      role="cell"
-                //                      data-k-b-testhook-coll=${columnDef.key} >
-                //                     ${common.na()}
-                //                 </div>
-                //             `;
-                //         }
-                //         return html`
-                //             <div className="Spreadsheet-cell Spreadsheet-sample-field"
-                //                  style=${style}
-                //                  title=${sampleField}
-                //                  role="cell"
-                //                  data-k-b-testhook-coll=${columnDef.key}>
-                //                 <div className="Spreadsheet-cell-content" >
-                //                     ${sampleField}
-                //                 </div>
-                //             </div>
-                //         `;
-                //     case 'node':
-                //         var nodeField = sample.sample.node_tree[0][columnDef.key];
-                //         if (!nodeField) {
-                //             return html`
-                //                 <div className="Spreadsheet-cell Spreadsheet-sample-field"
-                //                      style=${style}
-                //                      role="cell"
-                //                      data-k-b-testhook-coll=${columnDef.key}>
-                //                     ${common.na()}
-                //                 </div>
-                //             `;
-                //         }
-                //         return html`
-                //             <div className="Spreadsheet-cell Spreadsheet-sample-field"
-                //                  style=${style}
-                //                  title=${nodeField}
-                //                  role="cell"
-                //                  data-k-b-testhook-coll=${columnDef.key}>
-                //                 <div className="Spreadsheet-cell-content">
-                //                     ${nodeField}
-                //                 </div>
-                //             </div>
-                //         `;
-                //     case 'metadata':
-                //         return (() => {
-                //             const controlledField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
-                //             if (!controlledField) {
-                //                 return html`
-                //                     <div className="Spreadsheet-cell Spreadsheet-controlled-field"
-                //                          style=${style}
-                //                          role="cell"
-                //                          data-k-b-testhook-coll=${columnDef.key}>
-                //                         ${common.na()}
-                //                     </div>
-                //                 `;
-                //             }
-                //             let units;
-                //             if (controlledField.units) {
-                //                 units = html`<i style=${{marginLeft: '10px'}}>${controlledField.units}</i>`;
-                //             } else {
-                //                 units = '';
-                //             }
-                //             const content = html`<span>${this.formatValue(controlledField.value, columnDef.format)}${units}</span>`;
-                //             const tooltip = `${this.formatValue(controlledField.value, columnDef.format)} ${controlledField.units || ''}`;
-                //             return html`
-                //                 <div className="Spreadsheet-cell Spreadsheet-controlled-field"
-                //                      style=${style}
-                //                      title=${tooltip}
-                //                      role="cell"
-                //                      data-k-b-testhook-coll=${columnDef.key}>
-                //                     <div className="Spreadsheet-cell-content">
-                //                         ${content}
-                //                     </div>
-                //                 </div>
-                //             `;
-                //         })();
-                //     case 'user':
-                //         return (() => {
-                //             const userField = sample.sample.node_tree[0].meta_user[columnDef.key];
-                //             if (!userField) {
-                //                 return html`
-                //                 <div className="Spreadsheet-cell Spreadsheet-user-field"
-                //                      style=${style}
-                //                      role="cell"
-                //                      data-k-b-testhook-coll=${columnDef.key}>
-                //                     ${common.na()}
-                //                 </div>
-                //             `;
-                //             }
-                //             return html`
-                //             <div className="Spreadsheet-cell Spreadsheet-user-field"
-                //                  style=${style}
-                //                  title=${userField.value}
-                //                  role="cell"
-                //                  data-k-b-testhook-coll=${columnDef.key}>
-                //                 <div className="Spreadsheet-cell-content">
-                //                     ${userField.value}
-                //                 </div>
-                //             </div>
-                //         `;
-                //         })();
-                //     case 'unknown':
-                //         var unknownField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
-                //         if (!unknownField) {
-                //             return html`
-                //                 <div className="Spreadsheet-cell Spreadsheet-unknown-field"
-                //                      style=${style}
-                //                      role="cell"
-                //                      data-k-b-testhook-coll=${columnDef.key}>
-                //                     ${common.na()}
-                //                 </div>
-                //             `;
-                //         }
-                //         return html`
-                //             <div className="Spreadsheet-cell Spreadsheet-unknown-field"
-                //                  style=${style}>
-                //                 <div className="Spreadsheet-cell-content">
-                //                     ${unknownField.value}
-                //                 </div>
-                //             </div>
-                //         `;
-                //     default:
-                //         return html`
-                //             <div className="Spreadsheet-cell Spreadsheet-unmapped-field" style=${style}>
-                //                 ${common.na()}
-                //             </div>
-                //         `;
-                //     }
-
-                // });
                 rows.push(html`
                     <div className="Spreadsheet-grid-row" 
                          style=${rowStyle}
