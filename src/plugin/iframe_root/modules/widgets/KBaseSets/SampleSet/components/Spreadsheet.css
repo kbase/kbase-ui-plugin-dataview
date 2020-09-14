@@ -45,6 +45,25 @@
     font-weight: bold;
 }
 
+.Spreadsheet-header-cell-sort-control {
+    flex: 0 0 auto;
+    color: silver;
+}
+
+.Spreadsheet-header-cell:hover {
+    background-color: rgba(200, 200, 200, 0.3);
+    cursor: pointer;
+}
+
+.Spreadsheet-header-cell:hover .Spreadsheet-header-cell-sort-control {
+    color: #337ab7;
+}
+
+.Spreadsheet-header-cell-sort-control.-active {
+    color: #337ab7;
+}
+
+
 .Spreadsheet-header-cell.Spreadsheet-sample-cell {
     font-weight: bold;
 }
@@ -118,6 +137,7 @@
 }
 
 .Spreadsheet-cell-content {
+    flex: 1 1 0px;
     display: block;
     overflow: hidden;
     white-space: nowrap;

@@ -39,27 +39,30 @@ async function minify(rootDir) {
         matches.map(async (match) => {
             // console.log(`minifying ${match}...`);
             const contents = await fs.readFileAsync(match, 'utf8');
-            const result = Terser.minify(contents, {
-                output: {
-                    beautify: false,
-                    max_line_len: 80,
-                    quote_style: 0
-                },
-                compress: {
-                    // required in uglify-es 3.3.10 in order to work
-                    // around a bug in the inline implementation.
-                    // it should be fixed in an upcoming release.
-                    inline: 1
-                },
-                safari10: true
-            });
-            if (result.error) {
-                console.error('Error minifying file: ' + match, result);
-                throw new Error('Error minifying file ' + match) + ':' + result.error;
-            } else if (result.code.length === 0) {
-                console.warn('Skipping empty file: ' + match);
-            } else {
-                return fs.writeFileAsync(match, result.code);
+            try {
+                const result = await Terser.minify(contents, {
+                    output: {
+                        beautify: false,
+                        max_line_len: 80,
+                        quote_style: 0
+                    },
+                    compress: {
+                        // required in uglify-es 3.3.10 in order to work
+                        // around a bug in the inline implementation.
+                        // it should be fixed in an upcoming release.
+                        inline: 1
+                    },
+                    safari10: true
+                });
+
+                if (result.code.length === 0) {
+                    console.warn('Skipping empty file: ' + match);
+                } else {
+                    return fs.writeFileAsync(match, result.code);
+                }
+            } catch (ex) {
+                console.error('Error minifying file: ' + match, ex);
+                throw new Error('Error minifying file ' + match) + ':' + ex.error;
             }
         })
     );
