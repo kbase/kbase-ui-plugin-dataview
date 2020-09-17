@@ -38,8 +38,8 @@ async function minify(rootDir) {
     return Promise.all(
         matches.map(async (match) => {
             // console.log(`minifying ${match}...`);
-            const contents = await fs.readFileAsync(match, 'utf8');
             try {
+                const contents = await fs.readFileAsync(match, 'utf8');
                 const result = await Terser.minify(contents, {
                     output: {
                         beautify: false,

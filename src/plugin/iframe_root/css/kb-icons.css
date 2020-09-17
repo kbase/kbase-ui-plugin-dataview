@@ -35,11 +35,6 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-
-/* NOTE: i really don't want to adjust font sizes, but for now these icons are only in one place on
- * the landing page and need to look right. By default, they are too small, and bumping them up to
- * larger makes them look different in firefox vs chrome; so yet another temporary hack -- mike*/
-
 .icon-compare:before {
     content: "a";
 }
