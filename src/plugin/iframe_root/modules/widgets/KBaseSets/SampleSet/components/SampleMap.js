@@ -411,7 +411,7 @@ define([
                                         <div className="SampleMap-col-wrapper">
                                             <div className="SampleMap-field-label">latitude</div>
                                             <div className="SampleMap-field-value" role="cell" data-k-b-testhook-cell="latitude">
-                                                ${formatLatLong(row.longitude)}
+                                                ${formatLatLong(row.latitude)}
                                             </div>
                                         </div>
                                     </div>
@@ -420,7 +420,7 @@ define([
                                         <div className="SampleMap-col-wrapper">
                                             <div className="SampleMap-field-label">longitude</div>
                                             <div className="SampleMap-field-value" role="cell" data-k-b-testhook-cell="longitude">
-                                                ${formatLatLong(row.latitude)}
+                                                ${formatLatLong(row.longitude)}
                                             </div>
                                         </div>
                                     </div>
