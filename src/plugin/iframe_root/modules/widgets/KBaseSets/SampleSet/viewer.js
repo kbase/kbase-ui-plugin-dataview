@@ -54,6 +54,98 @@ define([
             preact.render(content, this.node);
         }
 
+
+        samplesToTable(model, samples, sampleSet) {
+            const columnDefs = model.createColumnDefs(sampleSet);
+            const sampleColumns = columnDefs.map((def) => {
+                return {
+                    key: def.key,
+                    title: def.label,
+                    type: def.dataType,
+                    format: def.format
+                };
+            });
+
+            sampleColumns.unshift({
+                key: 'row_number',
+                title: '#',
+                type: 'number'
+            });
+
+            function formatValue(value, formatter) {
+                if (!formatter) {
+                    return value;
+                }
+
+                switch (formatter.type) {
+                case 'number':
+                    if (formatter.precision) {
+                        return Intl.NumberFormat('en-US', {
+                            maximumSignificantDigits: formatter.precision,
+                            useGrouping: formatter.group ? true : false
+                        }).format(value);
+                    } else if (formatter.decimalPlaces) {
+                        return Intl.NumberFormat('en-US', {
+                            maximumFractionDigits: formatter.decimalPlaces,
+                            minimumFractionDigits: formatter.decimalPlaces,
+                            useGrouping: formatter.group ? true : false
+                        }).format(value);
+                    } else {
+                        return Intl.NumberFormat('en-US', {
+                            useGrouping: formatter.group ? true : false
+                        }).format(value);
+                    }
+                default:
+                    return value;
+                }
+            }
+
+            function getCellContent(sample, columnDef) {
+                switch (columnDef.type) {
+                case 'sample':
+                    var sampleField = sample.sample[columnDef.key];
+                    if (!sampleField) {
+                        return null;
+                    }
+                    return sampleField;
+                case 'node':
+                    var nodeField = sample.sample.node_tree[0][columnDef.key];
+                    if (!nodeField) {
+                        return null;
+                    }
+                    return nodeField;
+                case 'metadata':
+                    var controlledField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
+                    if (!controlledField) {
+                        return null;
+                    }
+                    return formatValue(controlledField.value, columnDef.spec);
+                case 'user':
+                    var userField = sample.sample.node_tree[0].meta_user[columnDef.key];
+                    if (!userField) {
+                        return null;
+                    }
+                    return userField.value;
+                case 'unknown':
+                    var unknownField = sample.sample.node_tree[0].meta_user[columnDef.key];
+                    if (!unknownField) {
+                        return null;
+                    }
+                    return unknownField.value;
+                }
+            }
+
+            const sampleTable = samples.map((sample, index) => {
+                const row = columnDefs.map((def) =>{
+                    return getCellContent(sample, def);
+                });
+                row.unshift(index + 1);
+                return row;
+            });
+
+            return [sampleColumns, sampleTable];
+        }
+
         start(params) {
             // Check params
             const p = new widgetUtils.Params(params);
@@ -103,7 +195,8 @@ define([
                                 sampleSetItem.sample = samplesMap[sampleSetItem.id].sample;
                                 sampleSetItem.linkedDataCount = samplesMap[sampleSetItem.id].linkedDataCount;
                             });
-                            preact.render(preact.h(Main, {sampleSet, totalCount}), this.node);
+                            const [sampleColumns, sampleTable] = this.samplesToTable(model, samples, sampleSet);
+                            preact.render(preact.h(Main, {sampleSet, totalCount, sampleTable, sampleColumns}), this.node);
                         })
                         .catch((err) => {
                             console.error('Error fetching samples', err);

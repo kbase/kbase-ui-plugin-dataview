@@ -1,4 +1,4 @@
-.Spreadsheet {
+.Spreadsheet2 {
     flex: 1 1 0px;
     display: flex;
     flex-direction: column;
@@ -10,29 +10,32 @@
     box-sizing: border-box;
 }
 
-.Spreadsheet-container {
+.Spreadsheet2-container {
     flex: 1 1 0px;
     display: flex;
     flex-direction: column;
     min-height: 0;
+    /* z-index: 1; */
 }
 
 
-.Spreadsheet-header {
+.Spreadsheet2-header {
     flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
     overflow-y: scroll;
+    /* z-index: 1; */
 }
 
-.Spreadsheet-header-container {
+.Spreadsheet2-header-container {
     flex: 0 0 auto;
     display: flex;
     flex-direction: row;
+    /* z-index: 1; */
 }
 
-.Spreadsheet-header-cell {
+.Spreadsheet2-header-cell {
     flex: 0 0 auto;
     display: flex;
     flex-direction: row;
@@ -43,77 +46,75 @@
     font-weight: bold;
 }
 
-.Spreadsheet-header-cell-sort-control {
+.Spreadsheet2-header-cell-sort-control {
     flex: 0 0 auto;
     color: silver;
+    margin-left: 4px;
 }
 
-.Spreadsheet-header-cell-menu {
+.Spreadsheet2-header-cell-menu {
     flex: 0 0 auto;
     visibility: hidden;
-    color: gray;
+    margin-left: 4px;
 }
 
-.Spreadsheet-header-cell:hover .Spreadsheet-header-cell-menu {
+.Spreadsheet2-header-cell:hover .Spreadsheet2-header-cell-menu {
     visibility: visible;
 }
 
-.Spreadsheet-header-cell-menu:hover {
-    color: #337ab7;
-}
-
-.Spreadsheet-header-cell:hover {
+.Spreadsheet2-header-cell:hover {
     background-color: rgba(200, 200, 200, 0.3);
     cursor: pointer;
 }
 
-.Spreadsheet-header-cell:hover .Spreadsheet-header-cell-sort-control {
+.Spreadsheet2-header-cell:hover .Spreadsheet2-header-cell-sort-control {
     color: #337ab7;
 }
 
-.Spreadsheet-header-cell-sort-control.-active {
+.Spreadsheet2-header-cell-sort-control.-active {
     color: #337ab7;
 }
 
 
-.Spreadsheet-header-cell.Spreadsheet-sample-cell {
+.Spreadsheet2-header-cell.Spreadsheet2-sample-cell {
     font-weight: bold;
 }
 
-.Spreadsheet-header-cell.Spreadsheet-user-cell {
+.Spreadsheet2-header-cell.Spreadsheet2-user-cell {
     font-style: italic;
 }
 
-.Spreadsheet-body {
+.Spreadsheet2-body {
     flex: 1 1 0px;
     /* display: flex; */
     /* flex-direction: column; */
     /* overflow-x: visible; */
-    overflow: auto;
+    overflow: scroll;
     min-width: 0;
     min-height: 0;
+    /* z-index: -1; */
 }
 
-.Spreadsheet-grid {
+.Spreadsheet2-grid {
     position: relative;
 }
 
-.Spreadsheet-grid-row {
+.Spreadsheet2-grid-row {
     position: absolute;
 }
 
-.Spreadsheet-grid-cell {
+.Spreadsheet2-grid-cell {
     position: absolute;
 }
 
-.Spreadsheet-row {
+.Spreadsheet2-row {
     flex: 0 0 40px;
     display: flex;
     flex-direction: row;
     min-width: 0;
 }
 
-.Spreadsheet-cell {
+.Spreadsheet2-cell {
     flex: 0 0 auto;
     /* overflow-x: auto; */
     display: flex;
@@ -126,21 +127,24 @@
     position: absolute;
 }
 
-.Spreadsheet-cell-measurer {
+.Spreadsheet2-cell-measurer {
     display: inline-block;
     visibility: hidden;
 }
 
-.Spreadsheet-cell-content-measurer {
-    display: block;
+.Spreadsheet2-cell-content-measurer {
+    display: flex;
+    flex-direction: row;
     white-space: nowrap;
     min-width: 0;
     padding: 4px;
     border: 1px solid white;
+
 }
 
-.Spreadsheet-header-cell-content-measurer {
-    display: block;
+.Spreadsheet2-header-cell-content-measurer {
+    display: flex;
+    flex-direction: row;
     white-space: nowrap;
     min-width: 0;
     padding: 4px;
@@ -148,7 +152,7 @@
     font-weight: bold;
 }
 
-.Spreadsheet-cell-content {
+.Spreadsheet2-cell-content {
     flex: 1 1 0px;
     display: block;
     overflow: hidden;
@@ -157,14 +161,14 @@
     min-width: 0;
 }
 
-.Spreadsheet-user-field {
+.Spreadsheet2-user-field {
     background-color: yellow;
 }
 
-.Spreadsheet-unknown-field {
+.Spreadsheet2-unknown-field {
     background-color: red;
 }
 
-.Spreadsheet-unmapped-field {
+.Spreadsheet2-unmapped-field {
     background-color: orange;
 }

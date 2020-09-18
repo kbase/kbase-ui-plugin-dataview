@@ -1,0 +1,46 @@
+.DropdownMenu {
+   position: relative;
+}
+
+.DropdownMenu:hover  {
+    visibility: visible;
+    color: #337ab7;
+}
+
+.DropdownMenu-placeholder {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    visibility: none;
+}
+
+.DropdownMenu-dropdown {
+    /* position: absolute; */
+    border: 1px solid red;
+    top: 100%;
+    left: 0;
+    background-color: white;
+    padding: 4px;
+    white-space: nowrap;
+}
+
+.DropdownMenu-dropdown.-open {
+    display: block;
+}
+
+.DropdownMenu-wrapper {
+    /* position: fixed; */
+}
+
+.DropdownMenu-item {
+    padding: 4px;
+}
+
+.DropdownMenu-item:hover {
+    background-color: silver;
+    cursor: pointer;
+}
+
+.DropdownMenu-icon {
+    color: gray;
+}
