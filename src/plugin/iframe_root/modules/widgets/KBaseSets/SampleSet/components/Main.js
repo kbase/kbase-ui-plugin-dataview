@@ -3,6 +3,7 @@ define([
     'htm',
     'components/Tabs',
     './Spreadsheet',
+    './Spreadsheet2',
     './SampleMap',
     './SampleSet',
 
@@ -12,6 +13,7 @@ define([
     htm,
     Tabs,
     Spreadsheet,
+    Spreadsheet2,
     SampleMap,
     SampleSet
 ) {
@@ -94,13 +96,25 @@ define([
                 render: () => {
                     return this.renderMap();
                 }
-            }, {
+            },
+            // {
+            //     id: 'spreadsheet',
+            //     title: 'Spreadsheet',
+            //     render: () => {
+            //         return html`
+            //         <div className="FlexCol" style=${{marginTop: '10px'}}>
+            //             <${Spreadsheet} sampleSet=${this.props.sampleSet} />
+            //         </div>
+            //         `;
+            //     }
+            // },
+            {
                 id: 'spreadsheet',
                 title: 'Spreadsheet',
                 render: () => {
                     return html`
                     <div className="FlexCol" style=${{marginTop: '10px'}}>
-                        <${Spreadsheet} sampleSet=${this.props.sampleSet} />
+                        <${Spreadsheet2} columns=${this.props.sampleColumns} table=${this.props.sampleTable} />
                     </div>
                     `;
                 }

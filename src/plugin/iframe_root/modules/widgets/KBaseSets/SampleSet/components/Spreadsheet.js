@@ -528,6 +528,9 @@ define([
                     }
                 })();
 
+                const menuStateClass = '';
+                const menuIconClass = 'fa-chevron-circle-down';
+
                 return html`
                     <div className=${classes.join(' ')} 
                          onClick=${() => {this.doSortColumn(columnDef);}}
@@ -539,6 +542,9 @@ define([
                         </div>
                         <div className=${`Spreadsheet-header-cell-sort-control  ${sortControl}`}>
                             <span className=${`fa ${sortIcon}`}></span>
+                        </div>
+                        <div className=${`Spreadsheet-header-cell-menu  ${menuStateClass}`}>
+                            <span className=${`fa ${menuIconClass}`}></span>
                         </div>
                     </div>
                `;
