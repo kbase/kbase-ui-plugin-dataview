@@ -11,7 +11,11 @@ services:
         view: dataView
       - path: jsonview/:workspaceId/:objectId/:-objectVersion
         view: jsonView
-      - path: objgraphview/provenance/:workspaceId/:objectId/:-objectVersion
+      - path: objgraphview/:workspaceId/:objectId/:-objectVersion
         view: provenanceView
-      - path: objgraphview2/provenance2/:workspaceId/:objectId/:-objectVersion
+      - path: objgraphview2/:workspaceId/:objectId/:-objectVersion
+        view: provenanceView2
+      - path: provenance/:workspaceId/:objectId/:-objectVersion
+        view: provenanceView
+      - path: provenance2/:workspaceId/:objectId/:-objectVersion
         view: provenanceView2
