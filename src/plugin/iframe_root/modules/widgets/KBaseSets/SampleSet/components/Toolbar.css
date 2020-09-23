@@ -1,6 +1,6 @@
 
 .Toolbar {
-    flex: 0 0 30px;
+    flex: 0 0 auto;
     display: flex;
     flex-direction: row;
     align-items: center;

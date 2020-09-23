@@ -76,7 +76,7 @@ define([
                             return {
                                 title: value,
                                 action: () => {
-                                    this.doFilter(value);
+                                    this.doFilter(`^${value}$`);
                                 }
                             };
                         })
