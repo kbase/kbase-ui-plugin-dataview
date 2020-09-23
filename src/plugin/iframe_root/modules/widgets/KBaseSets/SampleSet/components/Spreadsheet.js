@@ -903,10 +903,12 @@ define([
                 return this.renderEmpty();
             }
             return html`
-            <div className="Spreadsheet-wrapper">
-                <div className="Spreadsheet">
-                    ${this.renderToolbar()}
-                    ${this.renderSpreadsheet()}
+            <div className="Spreadsheet-outer">
+                ${this.renderToolbar()} 
+                <div className="Spreadsheet-wrapper">
+                    <div className="Spreadsheet">
+                        ${this.renderSpreadsheet()}
+                    </div>
                 </div>
             </div>
             `;
