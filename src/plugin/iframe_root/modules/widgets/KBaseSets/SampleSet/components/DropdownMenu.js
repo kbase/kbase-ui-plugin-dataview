@@ -12,134 +12,156 @@ define([
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
+    class MenuItem extends Component {
+        constructor(props) {
+            super(props);
+            this.state = {
+                isOpen: false
+            };
+        }
+
+        toggleSubMenu(event) {
+            event.stopPropagation();
+            this.setState({isOpen: !this.state.isOpen});
+        }
+
+        renderSubMenu() {
+            const item = this.props.item;
+            const [subMenu, menuClass] = (() => {
+                if (this.state.isOpen) {
+                    return [html`<${DropdownMenu} menu=${item.menu} />`, '-open'];
+                }
+                return [null, ''];
+            })();
+            const menuIconClass = (() => {
+                if (this.state.isOpen) {
+                    return 'fa fa-chevron-down';
+                }
+                return 'fa fa-chevron-right';
+            })();
+            return html`
+            <div className=${`DropdownMenu-item ${menuClass}`} onClick=${this.toggleSubMenu.bind(this)}>
+                <div className="DropdownMenu-item-label">
+                    ${item.title} 
+                </div>
+                <div className=${`DropdownMenu-item-submenu-icon ${menuIconClass}`} />
+                ${subMenu}
+            </div>
+        `;
+        }
+
+        renderDataMenu() {
+            const item = this.props.item;
+            const [subMenu, menuClass] = (() => {
+                if (this.state.isOpen) {
+                    const items = item.dataMenu.items.map((item) => {
+                        if (item.action) {
+                            return html`
+                            <div className="DropdownMenu-item" onClick=${(event) => {this.doAction(event, item.action);}}>
+                                <div className="DropdownMenu-item-label">${item.title}</div>
+                            </div>
+                            `;
+                        } else {
+                            return html`
+                            <div className="DropdownMenu-item" onClick=${this.props.onActionCompleted}>
+                                <div className="DropdownMenu-item-label">${item.title}</div>
+                            </div>
+                            `;
+                        }
+                    });
+                    return [html`<div className="DropdownMenu-dataMenu">${items}</div>`, '-open'];
+                }
+                return [null, ''];
+            })();
+            const menuIconClass = (() => {
+                if (this.state.isOpen) {
+                    return 'fa fa-chevron-down';
+                }
+                return 'fa fa-chevron-right';
+            })();
+            return html`
+            <div className=${`DropdownMenu-item ${menuClass}`} 
+                 onClick=${this.toggleSubMenu.bind(this)}>
+                <div className="DropdownMenu-item-label">
+                    ${item.title} 
+                </div>
+                <div className=${`DropdownMenu-item-submenu-icon ${menuIconClass}`} />
+                ${subMenu}
+            </div>
+        `;
+        }
+
+        doAction(event, action) {
+            event.stopPropagation();
+            try {
+                action();
+            } catch (ex) {
+                console.error('Error ', ex);
+            }
+            this.props.onActionCompleted();
+        }
+
+        render() {
+            const item = this.props.item;
+            if (item.action) {
+                return html`
+                    <div className="DropdownMenu-item" onClick=${(event) => {this.doAction(event, item.action);}}>
+                        <div className="DropdownMenu-item-label">${item.title}</div>
+                    </div>
+                `;
+            }
+            if (item.menu) {
+                return this.renderSubMenu(item);
+            }
+            if (item.dataMenu) {
+                return this.renderDataMenu(item);
+            }
+            return html`
+                <div className="DropdownMenu-item">
+                    <div className="DropdownMenu-item-label">${item.title}</div>
+                </div>
+            `;
+        }
+    }
+
     class DropdownMenu extends Component {
         constructor(props) {
             super(props);
             this.ref = preact.createRef();
+            this.dropdownRef = preact.createRef();
             this.state = {
                 open: false
             };
-            this.isOpen = false;
-            this.currentDropdown = null;
-
-            this.handleAnyClick = () => {
-                console.log('click');
-                this.removeDropdown();
-            };
         }
-
-        componentDidMount() {
-            this.spreadsheet = document.querySelector('.Spreadsheet');
-        }
-
-        componentWillUnmount() {
-            this.removeDropdown();
-        }
-
-        removeDropdown() {
-            if (this.currentDropdown) {
-                this.spreadsheet.removeChild(this.currentDropdown);
-                this.currentDropdown = null;
-                document.body.removeEventListener('click', this.handleAnyClick);
-            }
-        }
-
-        // handleAnyClick() {
-        //     console.log('click');
-        //     this.removeDropdown();
-        // }
 
         toggleMenu() {
-            if (this.currentDropdown) {
-                this.removeDropdown();
+            if (!this.ref.current) {
                 return;
             }
-            const top = this.ref.current.offsetTop + this.ref.current.offsetHeight;
-            const left = this.ref.current.offsetLeft;
-            // console.log('hmm', top, left);
-            // const style = {
-            //     top, left
-            // };
-            // const dropdownClass = (() => {
-            //     if (this.state.open) {
-            //         return '-open';
-            //     }
-            //     return '';
-            // })();
-            const dropdown = html`
-            <div className="DropdownMenu-dropdown">
-                ${this.renderMenu()}
-            </div>
-            `;
-
-            this.currentDropdown = this.spreadsheet.appendChild(document.createElement('div'));
-            this.currentDropdown.style.position = 'absolute';
-            this.currentDropdown.style.top = `${top}px`;
-            this.currentDropdown.style.left = `${left}px`;
-            console.log('hmm', top, left);
-            preact.render(dropdown, this.currentDropdown);
-            document.body.addEventListener('click', this.handleAnyClick);
+            this.setState({
+                open: !this.state.open
+            });
         }
 
-        // toggleMenux() {
-        //     if (!this.ref.current) {
-        //         return;
-        //     }
-        //     this.setState({
-        //         open: !this.state.open
-        //     });
-
-        // }
-
-        // renderDropdown() {
-        //     if (!this.state.open) {
-        //         return;
-        //     }
-
-        //     if (this.ref.current === null) {
-        //         return;
-        //     }
-
-        //     const top = this.ref.current.offsetTop;
-        //     const left = this.ref.current.offsetLeft;
-        //     const style = {
-        //         top, left
-        //     };
-        //     // const dropdownClass = (() => {
-        //     //     if (this.state.open) {
-        //     //         return '-open';
-        //     //     }
-        //     //     return '';
-        //     // })();
-        //     const dropdown = html`
-        //     <div className="DropdownMenu-dropdown" style=${style}>
-        //         ${this.renderMenu()}
-        //     </div>
-        //     `;
-        //     this.currentDropdown = document.body.appendChild(document.createElement('div'));
-        //     hmm.style.position = 'relative';
-        //     preact.render(dropdown, hmm);
-        // }
+        doActionCompleted() {
+            this.props.onClose();
+        }
 
         renderMenu() {
-            return this.props.menu.map((item) => {
-                return html`
-                    <div className="DropdownMenu-item" onClick=${item.action}>
-                        ${item.title}
-                        <div className="DropdownMenu-placeholder"></div>
-                    </div>
-                `;
+            return this.props.menu.items.map((item) => {
+                return html`<${MenuItem} item=${item} onActionCompleted=${this.doActionCompleted.bind(this)}/>`;
             });
         }
 
         render() {
-            // const style={};
             const menuStateClass = '';
-            const menuIconClass = 'fa-chevron-circle-down';
-            // this.renderDropdown();
             return html`
-                <div className=${`DropdownMenu ${menuStateClass}`} onClick=${(e) => {e.stopPropagation(); this.toggleMenu();}} ref=${this.ref}>
-                    <span className=${`DropdownMenu-icon fa ${menuIconClass}`}></span>
+                <div className=${`DropdownMenu ${menuStateClass}`} ref=${this.ref}>
+                    <div className="DropdownMenu-dropdown" ref=${this.dropdownRef}>
+                        <div className="DropdownMenu-wrapper">
+                            ${this.renderMenu()}
+                        </div>
+                    </div>
                 </div>
             `;
         }

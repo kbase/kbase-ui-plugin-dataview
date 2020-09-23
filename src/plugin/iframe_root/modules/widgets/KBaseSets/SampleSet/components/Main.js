@@ -3,7 +3,6 @@ define([
     'htm',
     'components/Tabs',
     './Spreadsheet',
-    './Spreadsheet2',
     './SampleMap',
     './SampleSet',
 
@@ -13,7 +12,6 @@ define([
     htm,
     Tabs,
     Spreadsheet,
-    Spreadsheet2,
     SampleMap,
     SampleSet
 ) {
@@ -114,7 +112,7 @@ define([
                 render: () => {
                     return html`
                     <div className="FlexCol" style=${{marginTop: '10px'}}>
-                        <${Spreadsheet2} columns=${this.props.sampleColumns} table=${this.props.sampleTable} />
+                        <${Spreadsheet} columns=${this.props.sampleColumns} table=${this.props.sampleTable} />
                     </div>
                     `;
                 }

@@ -53,8 +53,6 @@ define([
                 // }
             }
 
-            // console.log('datasource definition?', dataSourceDefinition);
-
             if (!dataSourceDefinition) {
                 console.error('Cannot determine source!', sample.node_tree[0].meta_controlled);
                 throw new Error('Cannot determine source!');
@@ -216,7 +214,6 @@ define([
         }
 
         createColumnDefs(sampleSet) {
-
             function extractSources(table) {
                 const sources = table.reduce((sources, sample) => {
                     sources.add(sample.sample.dataSourceDefinition);
@@ -255,7 +252,7 @@ define([
             // Here we build up column definitions for all of the columns in the template,
             // retaining order.
             // Some columns are "mapped" to sample fields rather than metadata.
-            const columnDefs = templateDef.columns.map((key) => {
+            const columnDefs = templateDef.columns.map((key, index) => {
                 if (reverseColumnMapping[key]) {
                     const mappedKey = reverseColumnMapping[key];
                     const mappedDef = fieldDefinitions.validators[mappedKey];
@@ -295,24 +292,25 @@ define([
                 };
             });
 
-
             // scour the samples to add user fields; user fields go at the end of the column definitions.
             // They use the column type 'user'.
-            const userFieldMapping = {};
-            sampleSet.samples.forEach((sample) => {
+            const userFieldMapping = sampleSet.samples.reduce((userFields, sample) => {
                 Object.keys(sample.sample.node_tree[0].meta_user).forEach((key) => {
-                    if (userFieldMapping[key]) {
+                    if (userFields[key]) {
                         return;
                     }
-                    const newDef = {
-                        key,
+                    const userKey = `_user_${key}`;
+                    userFields[userKey] = {
+                        userKey,
                         label: key,
                         fieldType: 'user',
                         type: 'string'
                     };
-                    userFieldMapping[key] = newDef;
-                    columnDefs.push(newDef);
                 });
+                return userFields;
+            }, {});
+            Object.entries(userFieldMapping).forEach(([key, def]) => {
+                columnDefs[key] = def;
             });
             return columnDefs;
         }

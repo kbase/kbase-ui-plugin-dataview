@@ -1,3 +1,13 @@
+.Spreadsheet-wrapper {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
+}
+
 .Spreadsheet {
     flex: 1 1 0px;
     display: flex;
@@ -5,7 +15,7 @@
     min-height: 0;
     min-width: 0;
     overflow-x: auto;
-    position: relative;
+    /* position: relative; */
     /* overflow-y: auto; */
     box-sizing: border-box;
 }
@@ -15,6 +25,7 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
+    /* z-index: 1; */
 }
 
 
@@ -23,13 +34,15 @@
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
-    overflow-y: scroll;
+    /* overflow-y: scroll; */
+    /* z-index: 1; */
 }
 
 .Spreadsheet-header-container {
     flex: 0 0 auto;
     display: flex;
     flex-direction: row;
+    /* z-index: 1; */
 }
 
 .Spreadsheet-header-cell {
@@ -46,30 +59,36 @@
 .Spreadsheet-header-cell-sort-control {
     flex: 0 0 auto;
     color: silver;
+    margin-left: 4px;
 }
 
 .Spreadsheet-header-cell-menu {
     flex: 0 0 auto;
     visibility: hidden;
-    color: gray;
+    margin-left: 4px;
 }
 
-.Spreadsheet-header-cell:hover .Spreadsheet-header-cell-menu {
+/* .Spreadsheet-header-cell:hover .Spreadsheet-header-cell-menu {
     visibility: visible;
-}
-
-.Spreadsheet-header-cell-menu:hover {
-    color: #337ab7;
 }
 
 .Spreadsheet-header-cell:hover {
     background-color: rgba(200, 200, 200, 0.3);
     cursor: pointer;
+} */
+
+.Spreadsheet-header-cell.-active .Spreadsheet-header-cell-menu {
+    visibility: visible;
 }
 
-.Spreadsheet-header-cell:hover .Spreadsheet-header-cell-sort-control {
-    color: #337ab7;
+.Spreadsheet-header-cell.-active {
+    background-color: rgba(200, 200, 200, 0.3);
+    cursor: pointer;
 }
+
+/* .Spreadsheet-header-cell:hover .Spreadsheet-header-cell-sort-control {
+    color: #337ab7;
+} */
 
 .Spreadsheet-header-cell-sort-control.-active {
     color: #337ab7;
@@ -86,12 +105,14 @@
 
 .Spreadsheet-body {
     flex: 1 1 0px;
+    position: relative; 
     /* display: flex; */
     /* flex-direction: column; */
     /* overflow-x: visible; */
-    overflow: auto;
+    overflow: scroll;
     min-width: 0;
     min-height: 0;
+    /* z-index: -1; */
 }
 
 .Spreadsheet-grid {
@@ -132,15 +153,18 @@
 }
 
 .Spreadsheet-cell-content-measurer {
-    display: block;
+    display: flex;
+    flex-direction: row;
     white-space: nowrap;
     min-width: 0;
     padding: 4px;
     border: 1px solid white;
+
 }
 
 .Spreadsheet-header-cell-content-measurer {
-    display: block;
+    display: flex;
+    flex-direction: row;
     white-space: nowrap;
     min-width: 0;
     padding: 4px;
