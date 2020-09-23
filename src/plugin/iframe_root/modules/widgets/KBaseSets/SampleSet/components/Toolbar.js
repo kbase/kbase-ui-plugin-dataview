@@ -58,10 +58,9 @@ define([
                         </option>
                     `;
                 });
-                const selectStyle = this.props.currentSort ? {} : {color: 'rgb(145, 145, 145)'};
                 return html`
-                <select className="form-control" onChange=${this.onSortSelectChange.bind(this)} style=${selectStyle}>
-                    <option value=''>Select a column</option>
+                <select className="form-control" onChange=${this.onSortSelectChange.bind(this)}>
+                    <option value=''><span></span></option>
                     ${options}
                 </select>
                 `;
@@ -140,10 +139,9 @@ define([
                         </option>
                     `;
                 });
-                const selectStyle = this.props.currentFilter ? {} : {color: 'rgb(145, 145, 145)'};
                 return html`
-                <select className="form-control" onChange=${this.onFilterSelectChange.bind(this)} style=${selectStyle}>
-                    <option value="">Select a column</option>
+                <select className="form-control" onChange=${this.onFilterSelectChange.bind(this)}>
+                    <option value=""></option>
                     ${options}
                 </select>
                 `;
