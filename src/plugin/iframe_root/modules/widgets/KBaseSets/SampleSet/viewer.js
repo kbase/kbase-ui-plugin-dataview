@@ -57,8 +57,9 @@ define([
 
         samplesToTable(model, samples, sampleSet) {
             const columnDefs = model.createColumnDefs(sampleSet);
-            const sampleColumns = columnDefs.map((def) => {
+            const sampleColumns = columnDefs.map((def, index) => {
                 return {
+                    index: index + 1,
                     key: def.key,
                     title: def.label,
                     type: def.dataType,
@@ -67,6 +68,7 @@ define([
             });
 
             sampleColumns.unshift({
+                index: 0,
                 key: 'row_number',
                 title: '#',
                 type: 'number'
