@@ -131,12 +131,12 @@
                         {
                             "row": 1,
                             "cell": "latitude",
-                            "text": "33.323609999999995 degrees"
+                            "text": "33.323609999999995"
                         },
                         {
                             "row": 1,
                             "cell": "longitude",
-                            "text": "-81.71806 degrees"
+                            "text": "-81.71806"
                         },
                         {
                             "row": 1,
@@ -152,6 +152,11 @@
                             "row": 1,
                             "cell": "elevation_unit",
                             "text": "∅"
+                        },
+                        {
+                            "row": 1,
+                            "cell": "navigation_type",
+                            "text": "GPS"
                         },
                         {
                             "row": 1,
@@ -176,7 +181,7 @@
                         {
                             "row": 1,
                             "cell": "collection_date",
-                            "text": "10/D/YYYY month"
+                            "text": "10/D/YYYY"
                         },
                         {
                             "row": 1,
