@@ -1,4 +1,4 @@
-define ([
+define([
     'jquery',
     'vendor/datatables/jquery.dataTables',
     'kbaseUI/widget/legacy/kbaseTable',
@@ -7,7 +7,7 @@ define ([
     'kb_lib/jsonRpc/dynamicServiceClient',
     'widgets/metagenomes/contigBrowserPanel',
     'kbaseUI/widget/legacy/widget'
-], function(
+], function (
     $,
     jquery_dataTables,
 
@@ -98,12 +98,12 @@ define ([
 
         state: WidgetState(),
 
-        init: function(options) {
+        init: function (options) {
             this._super(options);
-            var errorMessage
+            var errorMessage;
 
             if (options.upas){
-                this.metagenome_ref = options.upas.id
+                this.metagenome_ref = options.upas.id;
             }
             else if (options.ws && options.id && options.ver) {
                 this.metagenome_ref = [options.ws, options.id, options.ver].join('/');
@@ -115,7 +115,7 @@ define ([
                 });
                 return;
             }
-            this.token = this.runtime.token
+            this.token = this.runtime.token;
             this.state.ok();
             this.attachClients();
             this.render();
@@ -131,7 +131,7 @@ define ([
             });
         },
 
-        showError: function(err) {
+        showError: function (err) {
             this.$elem.empty();
             // This wrapper is required because the output widget displays a "Details..." button
             // with float right; without clearing this button will reside inside the error
@@ -142,7 +142,7 @@ define ([
             this.$elem.append($errorBox);
         },
 
-        tabData : function() {
+        tabData : function () {
             var names = ['Browse Features', 'Browse Contigs'];
             var ids = ['browse_features', 'browse_contigs'];
 
@@ -169,22 +169,22 @@ define ([
         /////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////
 
-        buildGeneSearchView: function(params) {
+        buildGeneSearchView: function (params) {
             var self = this;
 
             var BIG_COL_WIDTH = '25%';
 
             // parse parameters
             var $div = params['$div'];
-            if(!$div.is(':empty')) {
+            if (!$div.is(':empty')) {
                 return; // if it has content, then do not rerender
             }
             var metagenome_ref = params['ref'];
 
             var idClick = null;
-            if(params['idClick']) { idClick = params['idClick']; }
+            if (params['idClick']) { idClick = params['idClick']; }
             var contigClick = null;
-            if(params['contigClick']) { contigClick = params['contigClick']; }
+            if (params['contigClick']) { contigClick = params['contigClick']; }
 
             // setup some defaults and variables (should be moved to class variables)
             var limit = 10;
@@ -201,9 +201,9 @@ define ([
                 return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
             }
 
-            var isLastQuery = function(result) {
+            var isLastQuery = function () {
                 // establish edge condition
-                return true
+                return true;
                 // if(start !== result['start']) {
                 //     return false;
                 // }
@@ -223,7 +223,7 @@ define ([
             var $container = $('<div>').addClass('container-fluid').css({'margin':'15px 0px', 'max-width':'100%'});
             $div.append($container);
             var $headerRow = $('<div>').addClass('row')
-                .append($('<div>').addClass('col-md-4').append($pagenateDiv) )
+                .append($('<div>').addClass('col-md-4').append($pagenateDiv))
                 .append($('<div>').addClass('col-md-4').append($loadingDiv))
                 .append($('<div>').addClass('col-md-4').append($input));
             var $resultsRow = $('<div>').addClass('row').css({'margin-top':'15px'})
@@ -249,29 +249,29 @@ define ([
             $pagenateDiv.append($pageForward);
             $pagenateDiv.hide();
 
-            var clearInfo= function() {
+            var clearInfo= function () {
                 $resultsInfoDiv.empty();
                 $pagenateDiv.hide();
             };
 
             // define the functions that do everything
-            var setToLoad = function($panel) {
+            var setToLoad = function ($panel) {
                 //clearInfo();
                 $panel.empty();
                 var $loadingDiv = $('<div>').attr('align', 'left').append($('<i class="fa fa-spinner fa-spin fa-2x">'));
                 $panel.append($loadingDiv);
-                window.setTimeout(function() {
+                window.setTimeout(function () {
                     $loadingDiv.append('&nbsp; Building cache...');
-                    window.setTimeout(function() {
+                    window.setTimeout(function () {
                         $loadingDiv.append(' almost there...');
                     }, 25000);
                 } , 2500);
             };
 
-            var search = function(query, start, limit, sort_by) {
+            var search = function (query, start, limit, sort_by) {
                 $errorDiv.empty();
                 var local_sort_by = [];
-                if(sort_by[0]==='start') {
+                if (sort_by[0]==='start') {
                     local_sort_by.push(['contig_id',1]);
                 }
                 local_sort_by.push(sort_by);
@@ -292,28 +292,28 @@ define ([
                     });
             };
 
-            var showPaginate = function() {
+            var showPaginate = function () {
                 $pagenateDiv.show();
             };
 
-            var showViewInfo = function(start, num_showing, num_found) {
+            var showViewInfo = function (start, num_showing, num_found) {
                 $resultsInfoDiv.empty();
                 $resultsInfoDiv.append('Showing '+(start+1) + ' to ' + (start+num_showing)+' of '+num_found);
             };
-            var showNoResultsView = function() {
+            var showNoResultsView = function () {
                 $noResultsDiv.show();
                 $resultsInfoDiv.empty();
                 $pagenateDiv.hide();
             };
 
-            var buildRow = function(rowData) {
+            var buildRow = function (rowData) {
                 var $tr = $('<tr>');
                 var hasFunc = false;
                 var hasOntology = false;
                 var hasAlias = false;
 
-                if(idClick) {
-                    var getCallback = function(rowData) { return function() {idClick(rowData);};};
+                if (idClick) {
+                    var getCallback = function (rowData) { return function () {idClick(rowData);};};
                     $tr.append($('<td>').append(
                         $('<a>').css('cursor','pointer').append(rowData['feature_id'])
                             .on('click',getCallback(rowData)))
@@ -323,7 +323,7 @@ define ([
                 }
                 $tr.append($('<td>').append(rowData['feature_type']));
                 $tr.append($('<td>').append(rowData['function']));
-                if(rowData['function']) { hasFunc = true; }
+                if (rowData['function']) { hasFunc = true; }
 
                 var $td = $('<td>');
                 $tr.append($td);
@@ -331,13 +331,13 @@ define ([
                 $td = $('<td>');
                 $tr.append($td);
 
-                if(rowData['global_location']['contig_id']) {
+                if (rowData['global_location']['contig_id']) {
                     var loc = rowData['global_location'];
                     $tr.append($('<td>').append(numberWithCommas(loc['start'])));
                     $tr.append($('<td>').append(loc['strand']));
                     $tr.append($('<td>').append(numberWithCommas(loc['stop'])));
-                    if(contigClick) {
-                        getCallback = function() { return function() {contigClick(loc['contig_id']);};};
+                    if (contigClick) {
+                        getCallback = function () { return function () {contigClick(loc['contig_id']);};};
                         $tr.append($('<td>').append(
                             $('<div>').css({'word-break':'break-all'}).append(
                                 $('<a>').css('cursor','pointer').append(loc['contig_id'])
@@ -357,38 +357,38 @@ define ([
                 };
             };
 
-            var renderResult = function($table, results) {
+            var renderResult = function ($table, results) {
                 $table.find('tr:gt(0)').remove();
                 $loadingDiv.empty();
                 $noResultsDiv.hide();
                 clearInfo();
 
                 var features = results['features'];
-                if(features.length>0) {
+                if (features.length>0) {
                     var hasFunc = false;
                     var hasOntology = false;
                     var hasAlias = false;
-                    for(var k=0; k<features.length; k++) {
+                    for (var k=0; k<features.length; k++) {
                         var row = buildRow(features[k]);
                         $table.append(row.$tr);
-                        if(row.hasFunc) { hasFunc = true; }
-                        if(row.hasOntology) { hasOntology = true; }
-                        if(row.hasAlias) { hasAlias = true; }
+                        if (row.hasFunc) { hasFunc = true; }
+                        if (row.hasOntology) { hasOntology = true; }
+                        if (row.hasAlias) { hasAlias = true; }
                     }
                     n_results = results['num_found'];
                     showViewInfo(results['start'], features.length, results['num_found']);
                     showPaginate(results['num_found']);
-                    if(hasFunc) {
+                    if (hasFunc) {
                         $table.find('.feature-tbl-function').css('width',BIG_COL_WIDTH);
                     } else {
                         $table.find('.feature-tbl-function').css('width','1%');
                     }
-                    if(hasOntology) {
+                    if (hasOntology) {
                         $table.find('.feature-tbl-ontology_terms').css('width',BIG_COL_WIDTH);
                     } else {
                         $table.find('.feature-tbl-ontology_terms').css('width','1%');
                     }
-                    if(hasAlias) {
+                    if (hasAlias) {
                         $table.find('.feature-tbl-aliases').css('width',BIG_COL_WIDTH);
                     } else {
                         $table.find('.feature-tbl-aliases').css('width','1%');
@@ -406,15 +406,15 @@ define ([
             $resultDiv.append($table);
 
 
-            var buildColumnHeader = function(name, id, click_event) {
+            var buildColumnHeader = function (name, id, click_event) {
                 var $sortIcon = $('<i>').css('margin-left','8px');
                 var $th = $('<th>')
                     .append('<b>'+name+'</b>')
                     .append($sortIcon);
-                if(click_event) {
+                if (click_event) {
                     $th
                         .css('cursor','pointer')
-                        .on('click', function() {
+                        .on('click', function () {
                             click_event(id, $sortIcon);
                         });
                 }
@@ -426,7 +426,7 @@ define ([
                 };
             };
 
-            var buildTableHeader = function() {
+            var buildTableHeader = function () {
                 var inFlight = false;
 
                 var $colgroup = $('<colgroup>');
@@ -434,10 +434,10 @@ define ([
                 var $tr = $('<tr>');
                 var ASC=0; var DESC=1; var ID=0; var DIR=1;
                 var cols = {};
-                var sortEvent = function(id, $sortIcon) {
-                    if(inFlight) { return; } // skip if a sort call is already running
-                    if(sort_by[ID] == id) {
-                        if(sort_by[DIR] === DESC) {
+                var sortEvent = function (id, $sortIcon) {
+                    if (inFlight) { return; } // skip if a sort call is already running
+                    if (sort_by[ID] == id) {
+                        if (sort_by[DIR] === DESC) {
                             sort_by[DIR] = ASC;
                             $sortIcon.removeClass();
                             $sortIcon.addClass('fa fa-sort-asc');
@@ -469,7 +469,7 @@ define ([
                         });
                 };
 
-                var buildSingleColHeader = function(key, title, width, showSortedIcon, sortEvent, target) {
+                var buildSingleColHeader = function (key, title, width, showSortedIcon, sortEvent, target) {
                     target.$colgroup.append($('<col span=1>').addClass('feature-tbl-'+key).css('width',width));
                     var h = buildColumnHeader(title, key, sortEvent);
                     target.$tr.append(h.$th);
@@ -495,7 +495,7 @@ define ([
                 buildSingleColHeader('stops', 'Length', '1%', false, sortEvent, target);
                 buildSingleColHeader('contig_ids', 'Contig', '5%', true, sortEvent, target);
 
-                return { $colgroup:$colgroup, $theader:$tr };
+                return {$colgroup:$colgroup, $theader:$tr};
             };
 
             var headers = buildTableHeader();
@@ -509,7 +509,7 @@ define ([
             // Perform the first search
             search('', start, limit, sort_by)
                 .then(
-                    function(results) {
+                    function (results) {
                         $input.prop('disabled', false);
                         renderResult($table, results);
                     });
@@ -517,29 +517,29 @@ define ([
 
 
             $pageBack.on('click',function () {
-                if(start===0) return;
-                if((start-limit)<0) {
+                if (start===0) return;
+                if ((start-limit)<0) {
                     start = 0;
                 } else {
                     start = start-limit;
                 }
                 setToLoad($loadingDiv);
                 search($input.val(),start, limit, sort_by)
-                    .then(function(result) {
-                        if(isLastQuery(result)) { 
+                    .then(function (result) {
+                        if (isLastQuery(result)) {
                             renderResult($table, result);
                         }
                     });
             });
             $pageForward.on('click',function () {
-                if(start+limit>n_results) {
+                if (start+limit>n_results) {
                     return;
                 }
                 start = start+limit;
                 setToLoad($loadingDiv);
                 search($input.val(),start, limit, sort_by)
-                    .then(function(result) {
-                        if(isLastQuery(result)) { 
+                    .then(function (result) {
+                        if (isLastQuery(result)) {
                             renderResult($table, result);
                         }
                     });
@@ -549,16 +549,16 @@ define ([
             //put in a slight delay so on rapid typing we don't make a flood of calls
             var fetchTimeout = null;
             // var lastQuery = null;
-            $input.on('input', function() {
+            $input.on('input', function () {
                 // if we were waiting on other input, cancel that request
-                if(fetchTimeout) { window.clearTimeout(fetchTimeout); }
-                fetchTimeout = window.setTimeout(function() {
+                if (fetchTimeout) { window.clearTimeout(fetchTimeout); }
+                fetchTimeout = window.setTimeout(function () {
                     fetchTimeout = null;
                     setToLoad($loadingDiv);
                     start=0;
                     search($input.val(),start, limit, sort_by)
-                        .then(function(result) {
-                            if(isLastQuery(result)) { renderResult($table, result); }
+                        .then(function (result) {
+                            if (isLastQuery(result)) { renderResult($table, result); }
                         });
                 }, 300);
             });
@@ -578,11 +578,11 @@ define ([
         /////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////
-        buildContigSearchView: function(params) {
+        buildContigSearchView: function (params) {
             var self = this;
             // parse parameters
             var $div = params['$div'];
-            if(!$div.is(':empty')) {
+            if (!$div.is(':empty')) {
                 return; // if it has content, then do not rerender
             }
             var metagenome_ref = params['ref'];
@@ -607,7 +607,7 @@ define ([
             // var $input = $('<input type="text" class="form-control" placeholder="Search Contigs">');
             // $input.prop('disabled', true);
 
-            var isLastQuery = function(result) {
+            var isLastQuery = function () {
 
                 return true;
             };
@@ -622,7 +622,7 @@ define ([
             var $container = $('<div>').addClass('container-fluid').css({'margin':'15px 0px', 'max-width':'100%'});
             $div.append($container);
             var $headerRow = $('<div>').addClass('row')
-                .append($('<div>').addClass('col-md-4').append($pagenateDiv) )
+                .append($('<div>').addClass('col-md-4').append($pagenateDiv))
                 .append($('<div>').addClass('col-md-4').append($loadingDiv));
                 // .append($('<div>').addClass('col-md-4').append($input));
             var $resultsRow = $('<div>').addClass('row').css({'margin-top':'15px'})
@@ -648,20 +648,20 @@ define ([
             $pagenateDiv.append($pageForward);
             $pagenateDiv.hide();
 
-            var clearInfo= function() {
+            var clearInfo= function () {
                 $resultsInfoDiv.empty();
                 $pagenateDiv.hide();
             };
 
             // define the functions that do everything
-            var setToLoad = function($panel) {
+            var setToLoad = function ($panel) {
                 //clearInfo();
                 $panel.empty();
                 var $loadingDiv = $('<div>').attr('align', 'left').append($('<i class="fa fa-spinner fa-spin fa-2x">'));
                 $panel.append($loadingDiv);
-                window.setTimeout(function() {
+                window.setTimeout(function () {
                     $loadingDiv.append('&nbsp; Building cache...');
-                    window.setTimeout(function() {
+                    window.setTimeout(function () {
                         $loadingDiv.append(' almost there...');
                     }, 25000);
                 } , 2500);
@@ -684,24 +684,24 @@ define ([
                     });
             }
 
-            var showPaginate = function() {
+            var showPaginate = function () {
                 $pagenateDiv.show();
             };
 
-            var showViewInfo = function(start, num_showing, num_found) {
+            var showViewInfo = function (start, num_showing, num_found) {
                 $resultsInfoDiv.empty();
                 $resultsInfoDiv.append('Showing '+(start+1) + ' to ' + (start+num_showing)+' of '+num_found);
             };
-            var showNoResultsView = function() {
+            var showNoResultsView = function () {
                 $noResultsDiv.show();
                 $resultsInfoDiv.empty();
                 $pagenateDiv.hide();
             };
 
-            var buildRow = function(rowData) {
+            var buildRow = function (rowData) {
                 var $tr = $('<tr>');
-                if(contigClick) {
-                    var getCallback = function(rowData) { return function() { contigClick(rowData['contig_id']); };};
+                if (contigClick) {
+                    var getCallback = function (rowData) { return function () { contigClick(rowData['contig_id']); };};
                     $tr.append($('<td>').append(
                         $('<a>').css('cursor','pointer').append(rowData['contig_id'])
                             .on('click',getCallback(rowData)))
@@ -715,15 +715,15 @@ define ([
                 return $tr;
             };
 
-            var renderResult = function($table, results) {
+            var renderResult = function ($table, results) {
                 $table.find('tr:gt(0)').remove();
                 $loadingDiv.empty();
                 $noResultsDiv.hide();
                 clearInfo();
 
                 var contigs = results['contigs'];
-                if(contigs.length>0) {
-                    for(var k=0; k<contigs.length; k++) {
+                if (contigs.length>0) {
+                    for (var k=0; k<contigs.length; k++) {
                         $table.append(buildRow(contigs[k]));
                     }
                     n_results = results['num_found'];
@@ -741,15 +741,15 @@ define ([
             $resultDiv.append($table);
 
 
-            var buildColumnHeader = function(name, id, click_event) {
+            var buildColumnHeader = function (name, id, click_event) {
                 var $sortIcon = $('<i>').css('margin-left','8px');
                 var $th = $('<th>')
                     .append('<b>'+name+'</b>')
                     .append($sortIcon);
-                if(click_event) {
+                if (click_event) {
                     $th
                         .css('cursor','pointer')
-                        .on('click', function() {
+                        .on('click', function () {
                             click_event(id, $sortIcon);
                         });
                 }
@@ -761,7 +761,7 @@ define ([
                 };
             };
 
-            var buildTableHeader = function() {
+            var buildTableHeader = function () {
                 var inFlight = false;
 
                 var $colgroup = $('<colgroup>');
@@ -769,10 +769,10 @@ define ([
                 var $tr = $('<tr>');
                 var ASC=0; var DESC=1; var ID=0; var DIR=1;
                 var cols = {};
-                var sortEvent = function(id, $sortIcon) {
-                    if(inFlight) { return; } // skip if a sort call is already running
-                    if(sort_by[ID] == id) {
-                        if(sort_by[DIR] === DESC) {
+                var sortEvent = function (id, $sortIcon) {
+                    if (inFlight) { return; } // skip if a sort call is already running
+                    if (sort_by[ID] == id) {
+                        if (sort_by[DIR] === DESC) {
                             sort_by[DIR] = ASC;
                             $sortIcon.removeClass();
                             $sortIcon.addClass('fa fa-sort-asc');
@@ -792,12 +792,12 @@ define ([
                     inFlight=true;
                     start=0;
                     search_contigs(start, limit, sort_by)
-                        .then(function(result) {
-                            if(isLastQuery(result)) { renderResult($table, result); }
+                        .then(function (result) {
+                            if (isLastQuery(result)) { renderResult($table, result); }
                             inFlight=false;
                             start=0;
                         })
-                        .catch(function(){ inFlight=false; });
+                        .catch(function (){ inFlight=false; });
                 };
 
                 $colgroup.append($('<col span=1>').css('width','20%'));
@@ -817,7 +817,7 @@ define ([
                 $tr.append(h.$th);
                 cols[h.id] = h;
 
-                return { $colgroup:$colgroup, $theader:$tr };
+                return {$colgroup:$colgroup, $theader:$tr};
             };
 
             var headers = buildTableHeader();
@@ -830,7 +830,7 @@ define ([
 
             // Perform the first search
             search_contigs(start, limit, sort_by).then(
-                function(results) {
+                function (results) {
                     // $input.prop('disabled', false);
                     renderResult($table, results);
                 });
@@ -838,27 +838,27 @@ define ([
 
 
             $pageBack.on('click',function () {
-                if(start===0) return;
-                if((start-limit)<0) {
+                if (start===0) return;
+                if ((start-limit)<0) {
                     start = 0;
                 } else {
                     start = start-limit;
                 }
                 setToLoad($loadingDiv);
                 search_contigs(start, limit, sort_by)
-                    .then(function(result) {
-                        if(isLastQuery(result)) { renderResult($table, result); }
+                    .then(function (result) {
+                        if (isLastQuery(result)) { renderResult($table, result); }
                     });
             });
             $pageForward.on('click',function () {
-                if(start+limit>n_results) {
+                if (start+limit>n_results) {
                     return;
                 }
                 start = start+limit;
                 setToLoad($loadingDiv);
                 search_contigs(start, limit, sort_by)
-                    .then(function(result) {
-                        if(isLastQuery(result)) { renderResult($table, result); }
+                    .then(function (result) {
+                        if (isLastQuery(result)) { renderResult($table, result); }
                     });
             });
 
@@ -867,7 +867,7 @@ define ([
             var fetchTimeout = null;
         },
 
-        renderContigData: function(metagenome_ref, contig_id, outputDivs) {
+        renderContigData: function (metagenome_ref, contig_id, outputDivs) {
             var $length = outputDivs.$length;
             var $n_features = outputDivs.$n_features;
             return this.metagenomeAPI
@@ -875,13 +875,13 @@ define ([
                     ref: metagenome_ref,
                     contig_id: contig_id
                 }])
-                .spread(function(result) {
+                .spread(function (result) {
                     var contigData = result['contig'];
-                    $length.append(numberWithCommas(result['contig']['length']))
-                    $n_features.append(numberWithCommas(result['contig']['feature_count']))
+                    $length.append(numberWithCommas(result['contig']['length']));
+                    $n_features.append(numberWithCommas(result['contig']['feature_count']));
                     return contigData;
                 })
-                .catch(function(err) {
+                .catch(function (err) {
                     console.error(err);
                     $length.empty();
                     $length.append(buildError(err));
@@ -891,7 +891,7 @@ define ([
         ////////////////////////
         ////show contig tab////
         //////////////////////
-        showContigTab: function(metagenome_ref, contig_id, pref, tabPane) {
+        showContigTab: function (metagenome_ref, contig_id, pref, tabPane) {
 
             var self = this;
 
@@ -901,7 +901,7 @@ define ([
                 self.lastElemTabNum++;
                 var tabId = '' + pref + 'elem' + self.lastElemTabNum;
                 var $tabDiv = $('<div id="'+tabId+'"> ');
-                tabPane.addTab({tab: tabName, content: $tabDiv, canDelete : true, show: true, deleteCallback: function(name) {
+                tabPane.addTab({tab: tabName, content: $tabDiv, canDelete : true, show: true, deleteCallback: function (name) {
                     tabPane.removeTab(name);
                     tabPane.showTab(tabPane.activeTab());
                 }});
@@ -914,11 +914,11 @@ define ([
                 cbFormat['raw'] = featureData; //Store this in order to span new tabs
                 cbFormat['id'] = featureData['feature_id'];
                 cbFormat['location'] = [];
-                if(featureData['global_location']['contig_id']) {
-                    for(var k=0; k<featureData['location'].length; k++) {
+                if (featureData['global_location']['contig_id']) {
+                    for (var k=0; k<featureData['location'].length; k++) {
                         // only show things on the main contig
                         var loc = featureData['location'][k];
-                        if(featureData['global_location']['contig_id']===loc['contig_id']) {
+                        if (featureData['global_location']['contig_id']===loc['contig_id']) {
                             cbFormat['location'].push([
                                 loc['contig_id'],
                                 loc['start'],
@@ -951,14 +951,14 @@ define ([
                             genes: []
                         };
 
-                        for(var f=0; f<result['features'].length; f++) {
+                        for (var f=0; f<result['features'].length; f++) {
                             contigWindowData['genes'].push(translate_feature_data(result['features'][f]));
                         }
 
                         var cgb = new ContigBrowserPanel();
                         cgb.data.options.contig = contigWindowData;
                         //cgb.data.options.svgWidth = self.width - 28;
-                        cgb.data.options.onClickFunction = function(svgElement, feature) {
+                        cgb.data.options.onClickFunction = function (svgElement, feature) {
                             self.showFeatureTab(metagenome_ref, feature['original_data']['raw'], pref, tabPane);
                         };
                         cgb.data.options.start= start;
@@ -966,7 +966,7 @@ define ([
                         cgb.data.options.showButtons = false;
                         cgb.data.options.token = self.token;
                         cgb.data.$elem = $('<div style="width:100%; height: 120px; overflow: auto;"/>');
-                        cgb.data.$elem.show(function(){
+                        cgb.data.$elem.show(function (){
                             cgb.data.update();
                         });
                         $div.append(cgb.data.$elem);
@@ -1027,7 +1027,7 @@ define ([
                     $length:$lengthField,
                     $n_features:$featureField
                 })
-                    .then(function(contigData) {
+                    .then(function (contigData) {
                         // Browser
                         $browserRow.append($('<i class="fa fa-spinner fa-spin fa-2x">'));
                         var start = 0;
@@ -1039,7 +1039,7 @@ define ([
                         var $contigScrollBack = $('<button class="btn btn-default">')
                             .append('<i class="fa fa-caret-left" aria-hidden="true">')
                             .append(' back 20kb')
-                            .on('click', function() {
+                            .on('click', function () {
                                 if (start-twentyKb < 0) {
                                     return;
                                 }
@@ -1052,7 +1052,7 @@ define ([
                         var $contigScrollForward = $('<button class="btn btn-default">')
                             .append('forward 20kb ')
                             .append('<i class="fa fa-caret-right" aria-hidden="true">')
-                            .on('click', function() {
+                            .on('click', function () {
                                 if (start+twentyKb>contig_length) {
                                     return;
                                 }
@@ -1091,7 +1091,7 @@ define ([
         /////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////
 
-        render: function() {
+        render: function () {
             var pref = new Uuid(4).format();
             var self = this;
 
@@ -1102,7 +1102,7 @@ define ([
             }
 
             var ready = function () {
-                container.empty()
+                container.empty();
                 var $tabPane = $('<div id="'+pref+'tab-content">');
                 container.append($tabPane);
                 // var tabObj = new kbaseTabs($tabPane, {canDelete : true, tabs : []});
@@ -1125,29 +1125,29 @@ define ([
                         continue;
                     var dataTab = aElem.attr('data-tab');
                     var metagenome_ref = self.metagenome_ref;
-                    if (dataTab === 'Browse Features' ) {
-                        aElem.on('click', function() {
+                    if (dataTab === 'Browse Features') {
+                        aElem.on('click', function () {
                             self.buildGeneSearchView({
                                 $div: $('#'+pref+'browse_features'),
                                 ref: metagenome_ref,
                                 // idClick: null,
                                 // contigClick: null,
-                                idClick: function(featureData) {
+                                idClick: function (featureData) {
                                     self.showFeatureTab(metagenome_ref, featureData, pref, tabObj);
                                 },
-                                contigClick: function(contigId) {
+                                contigClick: function (contigId) {
                                     self.showContigTab(metagenome_ref, contigId, pref, tabObj);
                                 }
                             });
                         });
-                        aElem.click()
-                    } else if (dataTab === 'Browse Contigs' ) {
-                        aElem.on('click', function() {
+                        aElem.click();
+                    } else if (dataTab === 'Browse Contigs') {
+                        aElem.on('click', function () {
                             self.buildContigSearchView({
                                 $div: $('#'+pref+'browse_contigs'),
                                 ref: metagenome_ref,
                                 // contigClick: null
-                                contigClick: function(contigId) {
+                                contigClick: function (contigId) {
                                     self.showContigTab(metagenome_ref, contigId, pref, tabObj);
                                 }
                             });
@@ -1160,12 +1160,12 @@ define ([
 
             var metagenome_ref = self.metagenome_ref;
 
-            ready()
+            ready();
             return this;
 
         },
 
-        normalizeMetagenomeDataFromQuery: function(wsReturnedData, metagenome_ref, noDataCallback) {
+        normalizeMetagenomeDataFromQuery: function (wsReturnedData, metagenome_ref, noDataCallback) {
             var info = wsReturnedData['info'];
             var metadata = info[10];
             var genomeData = this.normalizeMetagenomeMetadata(metadata, metagenome_ref, noDataCallback);
@@ -1175,7 +1175,7 @@ define ([
             return genomeData;
         },
 
-        normalizeMetagenomeDataFromNarrative: function(metagenome_info, metagenome_ref, noDataCallback) {
+        normalizeMetagenomeDataFromNarrative: function (metagenome_info, metagenome_ref, noDataCallback) {
             var genomeData = this.normalizeMetagenomeMetadata(metagenome_info['meta'], metagenome_ref, noDataCallback);
             genomeData['ws_obj_name'] = metagenome_info['name'];
             genomeData['version'] = metagenome_info['version'];
@@ -1183,7 +1183,7 @@ define ([
             return genomeData;
         },
 
-        normalizeMetagenomeMetadata: function(metadata, metagenome_ref, noDataCallback) {
+        normalizeMetagenomeMetadata: function (metadata, metagenome_ref, noDataCallback) {
             var genomeData = {
                 genetic_code: '',
                 source: '',
@@ -1192,23 +1192,23 @@ define ([
                 gc_content: ''
             };
 
-            if(metadata['Genetic code']) {
+            if (metadata['Genetic code']) {
                 genomeData.genetic_code = metadata['Genetic code'];
             }
-            if(metadata['Source']) {
+            if (metadata['Source']) {
                 genomeData.source = metadata['Source'];
             }
-            if(metadata['Source ID']) {
+            if (metadata['Source ID']) {
                 genomeData.source_id = metadata['Source ID'];
             }
-            if(metadata['Size']) {
+            if (metadata['Size']) {
                 genomeData.size = metadata['Size'];
             }
             if (metadata['GC Content']){
-                genomeData.gc_content = metadata['GC Content']
+                genomeData.gc_content = metadata['GC Content'];
             }
             if (metadata['Environment']){
-                genomeData.environment = metadata['Environment']
+                genomeData.environment = metadata['Environment'];
             }
 
             return genomeData;
@@ -1228,7 +1228,7 @@ define ([
         //-------------------------------------------------------
         //-------------------------------------------------------
 
-        showFeatureTab: function(metagenome_ref, featureData, pref, tabPane) {
+        showFeatureTab: function (metagenome_ref, featureData, pref, tabPane) {
             var self = this;
 
             function numberWithCommas(x) {
@@ -1241,7 +1241,7 @@ define ([
                 self.lastElemTabNum++;
                 var tabId = '' + pref + 'elem' + self.lastElemTabNum;
                 var $tabDiv = $('<div id="'+tabId+'"> ');
-                tabPane.addTab({tab: tabName, content: $tabDiv, canDelete : true, show: true, deleteCallback: function(name) {
+                tabPane.addTab({tab: tabName, content: $tabDiv, canDelete : true, show: true, deleteCallback: function (name) {
                     tabPane.removeTab(name);
                     tabPane.showTab(tabPane.activeTab());
                 }});
@@ -1255,7 +1255,7 @@ define ([
                 var $seqTD = $('<td>').css({'border':'0', 'color':'#000'});
                 var lines=1;
                 for (var i = 0; i < sequence.length; i++) {
-                    if(i>0 && i%charWrap===0) {
+                    if (i>0 && i%charWrap===0) {
                         $posTD.append('<br>').append(i+1).append(':&nbsp;');
                         $seqTD.append('<br>');
                         lines++;
@@ -1267,7 +1267,7 @@ define ([
                 }
                 $div.append($('<table>').css({'border':'0','border-collapse':'collapse'}).append(
                     $('<tr>').css({'border':'0'}).append($posTD).append($seqTD)));
-                if(lines>5) {
+                if (lines>5) {
                     $div.css({'height':'6em', 'overflow':'auto', 'resize':'vertical'});
                 }
 
@@ -1276,15 +1276,15 @@ define ([
 
             function getFeatureLocationBounds(locationObject) {
                 var loc = {};
-                if(locationObject['strand'] && locationObject['strand'] === '-') {
+                if (locationObject['strand'] && locationObject['strand'] === '-') {
                     loc['end'] = locationObject['start'];
-                    loc['start'] = loc['end'] - locationObject['stop']
+                    loc['start'] = loc['end'] - locationObject['stop'];
                     // loc['start'] = loc['end'] - locationObject['length'];
 
                 } else {
                     // assume it is on + strand
                     loc['start'] = locationObject['start'];
-                    loc['end'] =  loc['start'] + locationObject['stop']
+                    loc['end'] =  loc['start'] + locationObject['stop'];
                     // loc['end'] = loc['start'] + locationObject['length'];
                 }
                 return loc;
@@ -1322,17 +1322,17 @@ define ([
 
                 tblLabels.push('Aliases');
                 var $aliases = $('<div>');
-                if(featureData['aliases']) {
+                if (featureData['aliases']) {
                     var aliases = featureData['aliases'];
                     var isFirst = true;
                     for (var alias in aliases) {
-                        if (aliases.hasOwnProperty(alias)) {
-                            if(isFirst) isFirst=false;
+                        if (Object.prototype.hasOwnProperty.call(aliases, alias)) {
+                            if (isFirst) isFirst=false;
                             else $aliases.append(', ');
                             $aliases.append(alias);
                         }
                     }
-                    if(isFirst) {
+                    if (isFirst) {
                         $aliases.append('None');
                     }
                 }
@@ -1342,7 +1342,7 @@ define ([
                 tblData.push(featureData['feature_type']);
 
                 tblLabels.push('Product Function');
-                if(featureData['function']) {
+                if (featureData['function']) {
                     tblData.push(featureData['function']);
                 } else {
                     tblData.push('None');
@@ -1358,7 +1358,7 @@ define ([
                     $loc.append('Contig:&nbsp;');
                     $loc.append($('<a>').append(featureData['global_location']['contig_id'])
                         .css({'cursor':'pointer'})
-                        .on('click', function() {
+                        .on('click', function () {
                             self.showContigTab(metagenome_ref, featureData['global_location']['contig_id'], pref, tabPane);
                         }));
                     $loc.append('<br>');
@@ -1366,15 +1366,15 @@ define ([
                         var locs = featureData['location'];
                         var $locDiv = $('<div>');
                         var crop = false;
-                        for(var i=0; i<locs.length; i++) {
-                            if(i>0) { $locDiv.append('<br>'); }
-                            if(i>6) { crop=true; }
+                        for (var i=0; i<locs.length; i++) {
+                            if (i>0) { $locDiv.append('<br>'); }
+                            if (i>6) { crop=true; }
                             var loc = locs[i];
                             var bounds = getFeatureLocationBounds(loc);
                             $locDiv.append(numberWithCommas(bounds['start'])+'&nbsp;-&nbsp;' +numberWithCommas(bounds['end'])+'&nbsp;('+loc['strand']+'&nbsp;Strand)');
                         }
                         $loc.append($locDiv);
-                        if(crop) {
+                        if (crop) {
                             $locDiv.css({'height':'10em', 'overflow':'auto', 'resize':'vertical'});
                         }
                     }
@@ -1434,15 +1434,15 @@ define ([
                 }
 
                 // setup mini contig browser
-                var translate_feature_data = function(featureData) {
+                var translate_feature_data = function (featureData) {
                     var cbFormat = {};
                     cbFormat['raw'] = featureData; //Store this in order to span new tabs
                     cbFormat['id'] = featureData['feature_id'];
                     cbFormat['location'] = [];
-                    for(var k=0; k<featureData['location'].length; k++) {
+                    for (var k=0; k<featureData['location'].length; k++) {
                         // only show things on the main contig
                         var loc = featureData['location'][k];
-                        if(featureData['global_location']['contig_id']===loc['contig_id']) {
+                        if (featureData['global_location']['contig_id']===loc['contig_id']) {
                             cbFormat['location'].push([
                                 loc['contig_id'],
                                 loc['start'],
@@ -1472,7 +1472,7 @@ define ([
                     }
                     var search_stop = bounds.end + range;
                     var search_length = search_stop - search_start;
-                    contigDataForBrowser.length = search_stop
+                    contigDataForBrowser.length = search_stop;
 
                     if (search_length > 40000) {
                         search_length = 40000;
@@ -1487,31 +1487,31 @@ define ([
                             page_start: 0,
                             page_limit: 100
                         }])
-                        .spread( function(result) {
-                        $contigBrowser.empty();
-                        for(var f=0; f<result['features'].length; f++) {
-                            contigDataForBrowser['genes'].push(translate_feature_data(result['features'][f]));
-                        }
+                        .spread(function (result) {
+                            $contigBrowser.empty();
+                            for (var f=0; f<result['features'].length; f++) {
+                                contigDataForBrowser['genes'].push(translate_feature_data(result['features'][f]));
+                            }
 
-                        var cgb = new ContigBrowserPanel();
-                        cgb.data.options.contig = contigDataForBrowser;
-                        //cgb.data.options.svgWidth = self.width - 28;
-                        cgb.data.options.onClickFunction = function(svgElement, feature) {
-                            self.showFeatureTab(metagenome_ref, feature['original_data']['raw'], pref, tabPane);
-                        };
-                        cgb.data.options.start = search_start;
-                        cgb.data.options.length = search_length;
-                        cgb.data.options.centerFeature = featureData['feature_id'];
-                        cgb.data.options.showButtons = false;
-                        cgb.data.options.token = self.token;
-                        cgb.data.$elem = $('<div style="width:100%; height: 200px; overflow: auto"/>');
-                        cgb.data.$elem.show(function(){
-                            cgb.data.update();
-                        });
-                        $contigBrowser.append(cgb.data.$elem);
-                        cgb.data.init();
+                            var cgb = new ContigBrowserPanel();
+                            cgb.data.options.contig = contigDataForBrowser;
+                            //cgb.data.options.svgWidth = self.width - 28;
+                            cgb.data.options.onClickFunction = function (svgElement, feature) {
+                                self.showFeatureTab(metagenome_ref, feature['original_data']['raw'], pref, tabPane);
+                            };
+                            cgb.data.options.start = search_start;
+                            cgb.data.options.length = search_length;
+                            cgb.data.options.centerFeature = featureData['feature_id'];
+                            cgb.data.options.showButtons = false;
+                            cgb.data.options.token = self.token;
+                            cgb.data.$elem = $('<div style="width:100%; height: 200px; overflow: auto"/>');
+                            cgb.data.$elem.show(function (){
+                                cgb.data.update();
+                            });
+                            $contigBrowser.append(cgb.data.$elem);
+                            cgb.data.init();
                         })
-                        .catch(function(err) {
+                        .catch(function (err) {
                             console.error(err);
                             $contigBrowser.empty();
                             $contigBrowser.append(buildError(err));
@@ -1563,5 +1563,5 @@ define ([
         }
 
 
-    })
+    });
 });

@@ -68,7 +68,7 @@ define([
                     token: this.runtime.service('session').getAuthToken()
                 },
                 version: 'dev'
-            })
+            });
 
             if (this.options.objectVersion) {
                 objId += '/' + this.options.objectVersion;
@@ -85,22 +85,22 @@ define([
                     const metagenomeObject = result.genomes[0];
                     let assembly_ref = null;
                     const metagenome = metagenomeObject.data;
-                    let metadata = metagenomeObject.info[10]
-                    const add_stats = function(obj, size, gc, num_contigs) {
+                    const metadata = metagenomeObject.info[10];
+                    const add_stats = function (obj, size, gc, num_contigs) {
                             obj.dna_size = size;
                             obj.gc_content = gc;
                             obj.num_contigs = num_contigs;
                         },
-                        assembly_error = function(data, error){
+                        assembly_error = function (data, error){
                             console.error('Error loading contigset subdata', data, error);
                         };
-                    if (metagenome.hasOwnProperty('assembly_ref')){
-                        assembly_ref = metagenome.assembly_ref
+                    if (Object.prototype.hasOwnProperty.call(metagenome, 'assembly_ref')) {
+                        assembly_ref = metagenome.assembly_ref;
                     } else {
-                        assembly_error(metagenome, 'No assembly reference present!')
+                        assembly_error(metagenome, 'No assembly reference present!');
                     }
 
-                    metagenomeObject.objectInfo = serviceUtils.objectInfoToObject(metagenomeObject.info)
+                    metagenomeObject.objectInfo = serviceUtils.objectInfoToObject(metagenomeObject.info);
 
                     if (metadata && metadata['gc_content'] && metadata['size'] && metadata['Number contigs']) {
                         add_stats(metagenome, metadata['size'], metadata['GC content'], metadata['Number contigs']);
@@ -111,7 +111,7 @@ define([
                                 .callFunc('get_stats', [assembly_ref])
                                 .spread(function (stats) {
                                     add_stats(metagenome, stats.dna_size, stats.gc_content, stats.num_contigs);
-                                    _this.render(metagenomeObject)
+                                    _this.render(metagenomeObject);
                                     return null;
                                 })
                                 .catch(function (error) {
@@ -119,7 +119,7 @@ define([
                                 })
                         );
                     }
-                    return null
+                    return null;
                 })
                 .catch(function (error) {
                     console.error('Error loading genome subdata');
@@ -182,13 +182,13 @@ define([
                 panelError(_this.view.panels[0].inner_div, e);
             }
             _this.view.panels[1].inner_div.empty();
-            try{
+            try {
                 _this.view.panels[1].inner_div.KBaseAnnotatedMetagenomeAssemblyWideAssemAnnot({
-                                genomeID: scope.id,
-                                workspaceID: scope.ws,
-                                ver: scope.ver,
-                                genomeInfo: genomeInfo,
-                                runtime: _this.runtime
+                    genomeID: scope.id,
+                    workspaceID: scope.ws,
+                    ver: scope.ver,
+                    genomeInfo: genomeInfo,
+                    runtime: _this.runtime
                 });
             } catch (e){
                 panelError(_this.view.panels[1].inner_div, e);

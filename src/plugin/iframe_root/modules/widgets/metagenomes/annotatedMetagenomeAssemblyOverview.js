@@ -6,7 +6,6 @@
  * is in a different widget.
  */
 define(['jquery', 'kb_common/html', 'numeral', 'kbaseUI/widget/legacy/widget'], function ($, html, numeral) {
-    'use strict';
     $.KBWidget({
         name: 'KBaseAMAOverview',
         parent: 'kbaseWidget',
@@ -40,7 +39,7 @@ define(['jquery', 'kb_common/html', 'numeral', 'kbaseUI/widget/legacy/widget'], 
 
             this.$contigSelect = $('<select>')
                 .addClass('form-control')
-                .css({ width: '60%', 'margin-right': '5px' })
+                .css({width: '60%', 'margin-right': '5px'})
                 .append(
                     $('<option>')
                         .attr('id', this.noContigs)
@@ -103,11 +102,7 @@ define(['jquery', 'kb_common/html', 'numeral', 'kbaseUI/widget/legacy/widget'], 
                 gcContent = 'Unknown',
                 dnaLength = 'Unknown',
                 nFeatures = 0,
-                num_contigs = 0,
-                contigsToLengths = {},
-                isInt = function (n) {
-                    return typeof n === 'number' && n % 1 === 0;
-                };
+                num_contigs = 0;
 
             /** Changes - wjriehl 22apr2016 */
             /* Assume two cases for GC content.
@@ -191,9 +186,12 @@ define(['jquery', 'kb_common/html', 'numeral', 'kbaseUI/widget/legacy/widget'], 
             return obj;
         },
         renderError: function (error) {
-            errString = 'Sorry, an unknown error occurred';
-            if (typeof error === 'string') errString = error;
-            else if (error.error && error.error.message) errString = error.error.message;
+            let errString = 'Sorry, an unknown error occurred';
+            if (typeof error === 'string') {
+                errString = error;
+            } else if (error.error && error.error.message) {
+                errString = error.error.message;
+            }
 
             var $errorDiv = $('<div>')
                 .addClass('alert alert-danger')
