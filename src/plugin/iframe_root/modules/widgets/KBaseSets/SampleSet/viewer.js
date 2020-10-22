@@ -5,7 +5,10 @@ define([
     'components/Progress',
     './model',
     'components/SimpleError',
-    './components/Main'
+    'components/SimpleWarning',
+    'components/SimpleInfo',
+    './components/Main',
+    './components/Empty'
 ], function (
     preact,
     htm,
@@ -13,7 +16,10 @@ define([
     Progress,
     Model,
     SimpleError,
-    Main
+    SimpleWarning,
+    SimpleInfo,
+    Main,
+    Empty
 ) {
     'use strict';
 
@@ -197,8 +203,12 @@ define([
                                 sampleSetItem.sample = samplesMap[sampleSetItem.id].sample;
                                 sampleSetItem.linkedDataCount = samplesMap[sampleSetItem.id].linkedDataCount;
                             });
-                            const [sampleColumns, sampleTable] = this.samplesToTable(model, samples, sampleSet);
-                            preact.render(preact.h(Main, {sampleSet, totalCount, sampleTable, sampleColumns}), this.node);
+                            if (samples.length === 0) {
+                                preact.render(preact.h(SimpleInfo, {title: 'Sorry', message: 'No samples in this set'}), this.node);
+                            } else {
+                                const [sampleColumns, sampleTable] = this.samplesToTable(model, samples, sampleSet);
+                                preact.render(preact.h(Main, {sampleSet, totalCount, sampleTable, sampleColumns}), this.node);
+                            }
                         })
                         .catch((err) => {
                             console.error('Error fetching samples', err);
