@@ -223,7 +223,7 @@ define([
             }
 
             if (sampleSet.samples.length === 0) {
-                return;
+                throw new Error('No samples in this set, cannot process an empty sample set to determine the source.')
             }
             const sources = extractSources(sampleSet.samples);
             if (sources.length === 0) {
@@ -248,6 +248,8 @@ define([
                 mapping[value] = key;
                 return mapping;
             }, {});
+
+            console.log('hmm', templateDef);
 
             // Here we build up column definitions for all of the columns in the template,
             // retaining order.
