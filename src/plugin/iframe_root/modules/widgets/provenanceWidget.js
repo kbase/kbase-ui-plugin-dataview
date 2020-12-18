@@ -251,7 +251,7 @@ define([
                             if (objdata[0].copied) {
                                 text += getTableRow(
                                     'Copied from',
-                                    '<a href="#dataview/' +
+                                    '<a href="/#dataview/' +
                                         objdata[0].copied +
                                         '" target="_blank">' +
                                         objdata[0].copied +
