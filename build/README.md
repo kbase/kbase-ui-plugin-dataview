@@ -4,38 +4,20 @@ These are here (for now) because they are used for the embedded iframe. We don't
 
 ## Building
 
-By hand:
-
-```text
-cd build
-yarn install
-yarn clean
-yarn install
-yarn install-bower
-yarn install-npm
-yarn remove-source-maps
-yarn install-dist
-```
-
-or
-
-```zsh
-yarn install && yarn clean && yarn install && yarn install-bower && yarn install-npm &&yarn remove-source-maps && yarn install-dist
-```
-
-or
+-From the repo top level:
 
 ```zsh
 bash scripts/build.sh
 ```
 
+(your choice of shell - it is a very simple shell script without any special binding to a shell.)
+
 or
 
 ```zsh
-yarn build
+npm run build
 ```
 
-(or your choice of shell - it is a very simple shell script without any special binding to a shell.)
 
 > Only use yarn clean if you want to clean out the stuff installed in vendor, as well as the node and bower packages installed in build.
 
@@ -44,7 +26,7 @@ yarn build
 Use
 
 ```text
-yarn update
+npm run build-dev
 ```
 
 to update the source in dist with an unminified copy of all source files. This must be done after an initial build.
