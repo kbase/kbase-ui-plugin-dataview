@@ -6,7 +6,7 @@
     "scripts": {
         "build": "bash scripts/build-plugin.bash",
         "build-dev": "bash scripts/build-plugin-dev.bash",
-        "watch": "nodemon --watch ./src --ext js,css,yml,yaml,json --exec 'yarn build-dev'"
+        "watch": "nodemon --watch ./src --ext js,css,yml,yaml,json --exec 'npm run build-dev'"
     },
     "repository": {
         "type": "git",
@@ -19,8 +19,8 @@
     },
     "homepage": "https://github.com/kbase/kbase-ui-plugin-dataview#readme",
     "dependencies": {
-        "eslint": "7.9.0",
-        "standard": "14.3.4",
-        "nodemon": "2.0.4"
+        "eslint": "7.24.0",
+        "nodemon": "2.0.7",
+        "standard": "16.0.3"
     }
 }

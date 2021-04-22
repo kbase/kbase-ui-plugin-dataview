@@ -1,14 +1,10 @@
 define([
     'bluebird',
-    'kb_lib/jsonRpc/genericClient',
-    'kb_lib/jsonRpc/dynamicServiceClient'
+    'kb_lib/jsonRpc/genericClient'
 ], function (
     Promise,
-    GenericClient,
-    DynamicServiceClient
+    GenericClient
 ) {
-    'use strict';
-
     class Model {
         constructor({runtime, workspaceId, objectId, objectVersion}) {
             this.runtime = runtime;
@@ -18,9 +14,9 @@ define([
         }
 
         getSamples(samples) {
-            const sampleService = new DynamicServiceClient({
+            const sampleService = new GenericClient({
                 module: 'SampleService',
-                url: this.runtime.config('services.ServiceWizard.url'),
+                url: this.runtime.config('services.SampleService.url'),
                 token: this.runtime.service('session').getAuthToken()
             });
 
@@ -47,9 +43,9 @@ define([
         }
 
         getLinkedSamples() {
-            const sampleService = new DynamicServiceClient({
+            const sampleService = new GenericClient({
                 module: 'SampleService',
-                url: this.runtime.config('services.ServiceWizard.url'),
+                url: this.runtime.config('services.SampleService.url'),
                 token: this.runtime.service('session').getAuthToken()
             });
 

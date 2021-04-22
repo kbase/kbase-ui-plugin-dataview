@@ -262,6 +262,9 @@ install:
     - module: widgets/LinkedSamples/viewer
       name: kb_dataview_linkedSamples
       type: es6
+    - module: widgets/LinkedOntologyTerms/viewer
+      name: kb_dataview_linkedOntologyTerms
+      type: es6
 
   routes:
     - path:
