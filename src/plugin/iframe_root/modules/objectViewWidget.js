@@ -30,10 +30,7 @@ define([
     MiniOverviewComponent,
     Uuid
 ) {
-    'use strict';
-
     const html = htm.bind(preact.h);
-
     const t = htmlTags.tag,
         div = t('div');
 
@@ -44,7 +41,7 @@ define([
 
         const overviewId = new Uuid(4).format();
         const miniOverviewId = new Uuid(4).format();
-        const  widgetSet = runtime.service('widget').newWidgetSet();
+        const widgetSet = runtime.service('widget').newWidgetSet();
 
         function renderTabs(params) {
             const tabs = [
@@ -59,13 +56,13 @@ define([
                             minHeight: '0px'
                         };
                         return html`
-                            <${WidgetWrapper} 
-                                id="kb_dataview_dataObjectVisualizer" 
-                                params=${params}
-                                runtime=${runtime}
-                                key=${new Uuid(4).format()}
-                                config=${{}},
-                                style=${style}
+                            <${WidgetWrapper}
+                                    id="kb_dataview_dataObjectVisualizer"
+                                    params=${params}
+                                    runtime=${runtime}
+                                    key=${new Uuid(4).format()}
+                                    config=${{}},
+                                    style=${style}
                             />
                         `;
                     }
@@ -74,9 +71,9 @@ define([
                     title: 'Overview',
                     render: () => {
                         return html`
-                            <${OverviewComponent} 
-                                runtime=${runtime}
-                                ...${params}
+                            <${OverviewComponent}
+                                    runtime=${runtime}
+                                    ...${params}
                             />
                         `;
                     }
@@ -85,13 +82,13 @@ define([
                     title: 'Provenance',
                     render: () => {
                         return html`
-                            <${WidgetWrapper} 
-                                id="kb_dataview_provenance" 
-                                params=${params}
-                                runtime=${runtime}
-                                key=${new Uuid(4).format()}
-                                config=${{}}
-                                scrolling=${true}
+                            <${WidgetWrapper}
+                                    id="kb_dataview_provenance"
+                                    params=${params}
+                                    runtime=${runtime}
+                                    key=${new Uuid(4).format()}
+                                    config=${{}}
+                                    scrolling=${true}
                             />
                         `;
                     }
@@ -104,13 +101,13 @@ define([
                     title: 'Related Data',
                     render: () => {
                         return html`
-                            <${WidgetWrapper} 
-                                id="kb_dataview_relatedData" 
-                                params=${params}
-                                runtime=${runtime}
-                                key=${new Uuid(4).format()}
-                                config=${{}}
-                                scrolling=${true}
+                            <${WidgetWrapper}
+                                    id="kb_dataview_relatedData"
+                                    params=${params}
+                                    runtime=${runtime}
+                                    key=${new Uuid(4).format()}
+                                    config=${{}}
+                                    scrolling=${true}
                             />
                         `;
                     }
@@ -123,13 +120,32 @@ define([
                     title: 'Linked Samples',
                     render: () => {
                         return html`
-                            <${WidgetWrapper} 
-                                id="kb_dataview_linkedSamples" 
-                                params=${params}
-                                runtime=${runtime}
-                                key=${new Uuid(4).format()}
-                                config=${{}}
-                                scrolling=${true}
+                            <${WidgetWrapper}
+                                    id="kb_dataview_linkedSamples"
+                                    params=${params}
+                                    runtime=${runtime}
+                                    key=${new Uuid(4).format()}
+                                    config=${{}}
+                                    scrolling=${true}
+                            />
+                        `;
+                    }
+                });
+            }
+
+            if (runtime.featureEnabled('object-link-to-term')) {
+                tabs.push({
+                    id: 'linkedOntologyTerms',
+                    title: 'Linked Ontology Terms',
+                    render: () => {
+                        return html`
+                            <${WidgetWrapper}
+                                    id="kb_dataview_linkedOntologyTerms"
+                                    params=${params}
+                                    runtime=${runtime}
+                                    key=${new Uuid(4).format()}
+                                    config=${{}}
+                                    scrolling=${true}
                             />
                         `;
                     }
@@ -236,7 +252,7 @@ define([
                 .catch((error) => {
                     container.innerHTML = '';
                     console.error('ERROR', error);
-                    preact.render(preact.h(ErrorComponent, { runtime, error }), container);
+                    preact.render(preact.h(ErrorComponent, {runtime, error}), container);
                 });
         }
 
@@ -270,7 +286,7 @@ define([
                 .catch((error) => {
                     container.innerHTML = '';
                     console.error('ERROR', error);
-                    preact.render(preact.h(ErrorComponent, { runtime, error }), container);
+                    preact.render(preact.h(ErrorComponent, {runtime, error}), container);
                 });
         }
 
