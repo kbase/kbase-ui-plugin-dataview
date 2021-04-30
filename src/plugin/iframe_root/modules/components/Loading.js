@@ -1,12 +1,11 @@
 define([
     'preact',
-    'htm'
+    'htm',
+    'css!./Loading.css'
 ], function (
     preact,
     htm
 ) {
-    'use strict';
-
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
@@ -17,10 +16,13 @@ define([
                 message = html`<span>${this.props.message}</span>`;
             }
             return html`
-                <div>
-                    ${message}
-                    <span className="fa fa-spinner fa-pulse fa-2x fa-fw"
-                          style=${{color: 'gray'}}></>
+                <div className="Loading-wrapper">
+                    <div className="Loading">
+                        <span className="Loading-message">${message}</span>
+                        <span className="fa fa-spinner fa-pulse fa-2x fa-fw"
+                              style=${{color: 'gray'}}>
+                        </span>
+                    </div>
                 </div>
             `;
         }

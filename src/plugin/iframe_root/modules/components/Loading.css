@@ -1,0 +1,18 @@
+.Loading-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.Loading {
+    display: flex;
+    flex: 0 0 auto;
+    border: 1px solid rgba(150, 150, 150, 0.5);
+    border-radius: 4px;
+    margin: 4px;
+    padding: 10px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(200, 200, 200, 0.3);
+}
