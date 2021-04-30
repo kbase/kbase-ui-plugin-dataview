@@ -7,8 +7,8 @@ define([
     'components/SimpleError',
     'components/SimpleWarning',
     'components/SimpleInfo',
-    './components/Main',
-    './components/Empty'
+    'components/Loading',
+    './components/Main'
 ], function (
     preact,
     htm,
@@ -18,11 +18,9 @@ define([
     SimpleError,
     SimpleWarning,
     SimpleInfo,
-    Main,
-    Empty
+    Loading,
+    Main
 ) {
-    'use strict';
-
     const html = htm.bind(preact.h);
     const MAX_SAMPLES = 10000;
 
@@ -168,7 +166,8 @@ define([
             });
 
             // Display loading spinner...
-            this.renderProgress(0);
+            // this.renderProgress(0);
+            preact.render(preact.h(Loading, {message: 'Loading Sample Set...'}), this.node);
 
             // Get the object form the model.
             const model = new Model({
@@ -186,10 +185,8 @@ define([
                     // TODO: TODO: TODO: remove when sample service supports multiple samples w/paging
                     const totalCount = sampleSet.samples.length;
                     sampleSet.samples = sampleSet.samples.slice(0, MAX_SAMPLES);
-                    return model.getSamplesHybrid({
-                        samples: sampleSet.samples,
-                        batchSize: 20,
-                        onProgress: this.onProgress.bind(this)
+                    return model.getSamples({
+                        samples: sampleSet.samples
                     })
                         .then((samples) => {
                             const samplesMap = samples.reduce((samplesMap, {sample}) => {

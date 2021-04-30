@@ -1,7 +1,6 @@
 define([
     'bluebird',
     'kb_lib/jsonRpc/genericClient',
-    'kb_lib/jsonRpc/dynamicServiceClient',
     'yaml!./data/templateDefinitions.yml',
     'yaml!./data/templates/enigma1.yml',
     'yaml!./data/templates/sesar1.yml',
@@ -10,15 +9,12 @@ define([
 ], function (
     Promise,
     GenericClient,
-    DynamicServiceClient,
     templateDefinitions,
     enigmaTemplate,
     sesarTemplate,
     fieldDefinitions,
     sampleUploaderSpecs
 ) {
-    'use strict';
-
     class Model {
         constructor(config) {
             this.runtime = config.runtime;
@@ -62,131 +58,125 @@ define([
             return sample;
         }
 
-        getSamples(samples) {
-            const sampleService = new DynamicServiceClient({
+        // getSamplesSerial(samples) {
+        //     const sampleService = new GenericClient({
+        //         module: 'SampleService',
+        //         url: this.runtime.config('services.ServiceWizard.url'),
+        //         token: this.runtime.service('session').getAuthToken()
+        //     });
+        //
+        //     return Promise.mapSeries(samples, (sample) => {
+        //         return Promise.all([
+        //             sampleService
+        //                 .callFunc('get_sample', [{
+        //                     id: sample.id,
+        //                     version: sample.version
+        //                 }]),
+        //
+        //             sampleService
+        //                 .callFunc('get_data_links_from_sample', [{
+        //                     id: sample.id,
+        //                     version: sample.version
+        //                 }])
+        //         ])
+        //             .then(([[sample], [linkedData]]) => {
+        //                 return {sample: this.augmentSample(sample), linkedData};
+        //             });
+        //     })
+        //         .then((result) => {
+        //             return result;
+        //         });
+        //
+        // }
+
+        async getSamples({samples}) {
+            const sampleService = new GenericClient({
                 module: 'SampleService',
-                url: this.runtime.config('services.ServiceWizard.url'),
+                url: this.runtime.config('services.SampleService.url'),
                 token: this.runtime.service('session').getAuthToken()
             });
 
-            return Promise.all(samples.map((sample) => {
-                return Promise.all([
-                    sampleService
-                        .callFunc('get_sample', [{
-                            id: sample.id,
-                            version: sample.version
-                        }]),
-                    sampleService
-                        .callFunc('get_data_links_from_sample', [{
-                            id: sample.id,
-                            version: sample.version
-                        }])
-                ])
-                    .then(([[sample], [linkedData]]) => {
-                        return {
-                            sample: this.augmentSample(sample),
-                            linkedData
-                        };
-                    });
-            }));
-        }
-
-        getSamplesSerial(samples) {
-            const sampleService = new DynamicServiceClient({
-                module: 'SampleService',
-                url: this.runtime.config('services.ServiceWizard.url'),
-                token: this.runtime.service('session').getAuthToken()
+            const samplesParam = samples.map(({id, version}) => {
+                return {id, version};
             });
 
-            return Promise.mapSeries(samples, (sample) => {
-                return Promise.all([
-                    sampleService
-                        .callFunc('get_sample', [{
-                            id: sample.id,
-                            version: sample.version
-                        }]),
+            const [rawSamples] = await sampleService
+                .callFunc('get_samples', [{
+                    samples: samplesParam
+                }]);
 
-                    sampleService
-                        .callFunc('get_data_links_from_sample', [{
-                            id: sample.id,
-                            version: sample.version
-                        }])
-                ])
-                    .then(([[sample], [linkedData]]) => {
-                        return {sample: this.augmentSample(sample), linkedData};
-                    });
-            })
-                .then((result) => {
-                    return result;
-                });
-
-        }
-
-        getSamplesHybrid({samples, batchSize, onProgress}) {
-            const sampleService = new DynamicServiceClient({
-                module: 'SampleService',
-                url: this.runtime.config('services.ServiceWizard.url'),
-                token: this.runtime.service('session').getAuthToken()
+            return rawSamples.map((sample) => {
+                return {
+                    sample: this.augmentSample(sample)
+                };
             });
-
-            // const fetchSample = (sample) => {
-            //     return Promise.all([
-            //         sampleService
-            //             .callFunc('get_sample', [{
-            //                 id: sample.id,
-            //                 version: sample.version
-            //             }]),
-
-            //         sampleService
-            //             .callFunc('get_data_links_from_sample', [{
-            //                 id: sample.id,
-            //                 version: sample.version
-            //             }])
-            //     ])
-            //         .then(([[sample], [linkedData]]) => {
-            //             return {sample: this.augmentSample(sample), linkedData};
-            //         });
-            // };
-
-            const fetchSample2 = (sample) => {
-                return Promise.all([
-                    sampleService
-                        .callFunc('get_sample', [{
-                            id: sample.id,
-                            version: sample.version
-                        }])
-                ])
-                    .then(([[sample]]) => {
-                        return {sample: this.augmentSample(sample)};
-                    });
-            };
-
-            const batchCount = Math.ceil(samples.length / batchSize);
-            const batchSamples = [];
-            for (let i = 0; i < batchCount; i += 1) {
-                batchSamples.push(samples.slice(i * batchSize, (i + 1) * batchSize));
-            }
-            console.log('batch samples...', batchCount);
-            return Promise.mapSeries(batchSamples, (samples, index) => {
-                const start = new Date().getTime();
-                return Promise.all(samples.map((sample) => {
-                    return fetchSample2(sample);
-                }))
-                    .then((result) => {
-                        if (onProgress) {
-                            onProgress(index, batchCount);
-                        }
-                        console.log('series', new Date().getTime() - start);
-                        return result;
-                    });
-            })
-                .then((results) => {
-                    return results.reduce((all, result) => {
-                        return all.concat(result);
-                    }, []);
-                });
-
         }
+
+        // getSamplesHybrid({samples, batchSize, onProgress}) {
+        //     const sampleService = new GenericClient({
+        //         module: 'SampleService',
+        //         url: this.runtime.config('services.SampleService.url'),
+        //         token: this.runtime.service('session').getAuthToken()
+        //     });
+        //
+        //     // const fetchSample = (sample) => {
+        //     //     return Promise.all([
+        //     //         sampleService
+        //     //             .callFunc('get_sample', [{
+        //     //                 id: sample.id,
+        //     //                 version: sample.version
+        //     //             }]),
+        //
+        //     //         sampleService
+        //     //             .callFunc('get_data_links_from_sample', [{
+        //     //                 id: sample.id,
+        //     //                 version: sample.version
+        //     //             }])
+        //     //     ])
+        //     //         .then(([[sample], [linkedData]]) => {
+        //     //             return {sample: this.augmentSample(sample), linkedData};
+        //     //         });
+        //     // };
+        //
+        //     const fetchSample2 = (sample) => {
+        //         return Promise.all([
+        //             sampleService
+        //                 .callFunc('get_sample', [{
+        //                     id: sample.id,
+        //                     version: sample.version
+        //                 }])
+        //         ])
+        //             .then(([[sample]]) => {
+        //                 return {sample: this.augmentSample(sample)};
+        //             });
+        //     };
+        //
+        //     const batchCount = Math.ceil(samples.length / batchSize);
+        //     const batchSamples = [];
+        //     for (let i = 0; i < batchCount; i += 1) {
+        //         batchSamples.push(samples.slice(i * batchSize, (i + 1) * batchSize));
+        //     }
+        //     console.log('batch samples...', batchCount);
+        //     return Promise.mapSeries(batchSamples, (samples, index) => {
+        //         const start = new Date().getTime();
+        //         return Promise.all(samples.map((sample) => {
+        //             return fetchSample2(sample);
+        //         }))
+        //             .then((result) => {
+        //                 if (onProgress) {
+        //                     onProgress(index, batchCount);
+        //                 }
+        //                 console.log('series', new Date().getTime() - start);
+        //                 return result;
+        //             });
+        //     })
+        //         .then((results) => {
+        //             return results.reduce((all, result) => {
+        //                 return all.concat(result);
+        //             }, []);
+        //         });
+        //
+        // }
 
         getObject() {
             const workspace = new GenericClient({
@@ -223,7 +213,7 @@ define([
             }
 
             if (sampleSet.samples.length === 0) {
-                throw new Error('No samples in this set, cannot process an empty sample set to determine the source.')
+                throw new Error('No samples in this set, cannot process an empty sample set to determine the source.');
             }
             const sources = extractSources(sampleSet.samples);
             if (sources.length === 0) {
@@ -249,12 +239,10 @@ define([
                 return mapping;
             }, {});
 
-            console.log('hmm', templateDef);
-
             // Here we build up column definitions for all of the columns in the template,
             // retaining order.
             // Some columns are "mapped" to sample fields rather than metadata.
-            const columnDefs = templateDef.columns.map((key, index) => {
+            const columnDefs = templateDef.columns.map((key) => {
                 if (reverseColumnMapping[key]) {
                     const mappedKey = reverseColumnMapping[key];
                     const mappedDef = fieldDefinitions.validators[mappedKey];
