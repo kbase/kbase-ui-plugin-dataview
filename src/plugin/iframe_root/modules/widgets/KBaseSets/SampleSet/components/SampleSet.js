@@ -11,8 +11,6 @@ define([
     fmt,
     DataTable
 ) {
-    'use strict';
-
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
@@ -42,42 +40,12 @@ define([
                 isSortable: true,
                 render: (name, sample) => {
                     return html`
-                    <a href=${`/#samples/view/${sample.id}/${sample.version}`} target="_blank">${name}</a>
+                        <a href=${`/#samples/view/${sample.id}/${sample.version}`} target="_blank">${name}</a>
                     `;
                 }
             }, {
-                id: 'material',
-                label: 'Material',
-                display: true,
-                isSortable: true,
-                style: {
-                    flex: '0 0 10em'
-                },
-                render: (material) => {
-                    return html`
-                    <span>
-                    ${material}
-                    </span>
-                    `;
-                }
-            },
-            {
-                id: 'source',
-                label: 'Source',
-                display: true,
-                isSortable: true,
-                style: {
-                    flex: '0 0 5em'
-                },
-                render: (source) => {
-                    return html`
-                    ${source}
-                    `;
-                }
-            },
-            {
                 id: 'sourceId',
-                label: 'Source ID',
+                label: 'ID',
                 display: true,
                 isSortable: true,
                 style: {
@@ -85,10 +53,40 @@ define([
                 },
                 render: (sourceId) => {
                     return html`
-                    ${sourceId}
+                        ${sourceId}
                     `;
                 }
             },
+            //     {
+            //     id: 'source',
+            //     label: 'Format',
+            //     display: true,
+            //     isSortable: true,
+            //     style: {
+            //         flex: '0 0 10em'
+            //     },
+            //     render: (source) => {
+            //         return html`
+            //             ${source}
+            //         `;
+            //     }
+            // },
+            //     {
+            //     id: 'material',
+            //     label: 'Material',
+            //     display: true,
+            //     isSortable: true,
+            //     style: {
+            //         flex: '0 0 10em'
+            //     },
+            //     render: (material) => {
+            //         return html`
+            //             <span>
+            //         ${material}
+            //         </span>
+            //         `;
+            //     }
+            // },
             {
                 id: 'savedAt',
                 label: 'Saved',
@@ -99,21 +97,20 @@ define([
                 },
                 render: (savedAt) => {
                     return html`
-                    <span>${fmt.formattedDate(savedAt)}</span>
+                        <span>${fmt.formattedDate(savedAt)}</span>
                     `;
                 }
-            },
-            {
+            }, {
                 id: 'savedBy',
                 label: 'By',
                 display: true,
                 isSortable: true,
                 style: {
-                    flex: '0 0 10em'
+                    flex: '0 0 6'
                 },
                 render: (savedBy) => {
                     return html`
-                    <a href=${`/#user/${savedBy}`} target="_blank">${savedBy}</a>
+                        <a href=${`/#user/${savedBy}`} target="_blank">${this.props.userProfiles[savedBy].user.realname}</a>
                     `;
                 }
             }, {
@@ -126,24 +123,24 @@ define([
                 },
                 render: (version) => {
                     return html`
-                    <span>${version}</span>
+                        <span>${version}</span>
                     `;
                 }
             },
-            // {
-            //     id: 'linkedDataCount',
-            //     label: '# Linked Objects',
-            //     display: true,
-            //     isSortable: true,
-            //     style: {
-            //         flex: '0 0 10em'
-            //     },
-            //     render: (linkedDataCount) => {
-            //         return html`
-            //         <span>${fmt.formattedInteger(linkedDataCount)}</span>
-            //         `;
-            //     }
-            // }
+                // {
+                //     id: 'linkedDataCount',
+                //     label: '# Linked Objects',
+                //     display: true,
+                //     isSortable: true,
+                //     style: {
+                //         flex: '0 0 10em'
+                //     },
+                //     render: (linkedDataCount) => {
+                //         return html`
+                //         <span>${fmt.formattedInteger(linkedDataCount)}</span>
+                //         `;
+                //     }
+                // }
             ];
 
             const props = {
@@ -158,23 +155,22 @@ define([
                 //         total: this.props.sampleSet.samples.length
                 //     });
                 // }
-                dataSource: this.props.sampleSet.samples.map((sample) => {
+                dataSource: this.props.samples.map((sample) => {
                     return {
                         id: sample.id,
                         name: sample.name,
-                        material: getMetadataValue(sample.sample, 'material', '-'),
-                        sourceId: sample.sample.node_tree[0].id,
-                        savedAt: sample.sample.save_date,
-                        savedBy: sample.sample.user,
-                        version: sample.sample.version,
-                        linkedDataCount: sample.linkedDataCount,
-                        source: sample.sample.dataSourceDefinition.source
+                        material: getMetadataValue(sample, 'material', '-'),
+                        sourceId: sample.node_tree[0].id,
+                        savedAt: sample.save_date,
+                        savedBy: sample.user,
+                        version: sample.version,
+                        // source: sample.sample.dataSourceDefinition.source
                     };
                 })
             };
 
             return html`
-                <${DataTable} heights=${{row: 40, col: 40}} ...${props} />
+                <${DataTable} heights=${{row: 40, col: 40}} ...${props}/>
             `;
 
             // const rows = this.props.sampleSet.samples.map((sample) => {
@@ -232,7 +228,7 @@ define([
         renderEmptySet() {
             return html`
                 <div class="alert alert-warning" style=${{marginTop: '10px'}}>
-                <span style=${{fontSize: '150%', marginRight: '4px'}}>∅</span> - Sorry, no samples in this set.
+                    <span style=${{fontSize: '150%', marginRight: '4px'}}>∅</span> - Sorry, no samples in this set.
                 </div>
             `;
         }
@@ -242,9 +238,9 @@ define([
                 return this.renderEmptySet();
             }
             return html`
-            <div className="SampleSet">
-                ${this.renderSamplesTable()}
-            </div>
+                <div className="SampleSet">
+                    ${this.renderSamplesTable()}
+                </div>
             `;
         }
     }

@@ -30,24 +30,24 @@ define([
             // const allKeys = metadataKeys.concat(userMetadataKeys);
             let dataSourceDefinition;
             loop:
-            for (const [, def] of Object.entries(templateDefinitions.templates)) {
-                if (sampleSourceId.match(def.idPattern)) {
-                    dataSourceDefinition = def;
-                    break loop;
+                for (const [, def] of Object.entries(templateDefinitions.templates)) {
+                    if (sampleSourceId.match(def.idPattern)) {
+                        dataSourceDefinition = def;
+                        break loop;
+                    }
+                    // if (def.signalFields.includes) {
+                    //     if (intersect(def.signalFields.includes, allKeys)) {
+                    //         dataSourceDefinition = def;
+                    //         break loop;
+                    //     }
+                    // }
+                    // if (def.signalFields.does_not_include) {
+                    //     if (!intersect(def.signalFields.does_not_include, allKeys)) {
+                    //         dataSourceDefinition = def;
+                    //         break loop;
+                    //     }
+                    // }
                 }
-                // if (def.signalFields.includes) {
-                //     if (intersect(def.signalFields.includes, allKeys)) {
-                //         dataSourceDefinition = def;
-                //         break loop;
-                //     }
-                // }
-                // if (def.signalFields.does_not_include) {
-                //     if (!intersect(def.signalFields.does_not_include, allKeys)) {
-                //         dataSourceDefinition = def;
-                //         break loop;
-                //     }
-                // }
-            }
 
             if (!dataSourceDefinition) {
                 console.error('Cannot determine source!', sample.node_tree[0].meta_controlled);
@@ -56,6 +56,40 @@ define([
 
             sample.dataSourceDefinition = dataSourceDefinition;
             return sample;
+        }
+
+        getFormat(sample) {
+            // const metadataKeys = Object.keys(sample.node_tree[0].meta_controlled);
+            // const userMetadataKeys = Object.keys(sample.node_tree[0].meta_user);
+            const sampleSourceId = sample.node_tree[0].id;
+            // const allKeys = metadataKeys.concat(userMetadataKeys);
+            let dataSourceDefinition;
+            loop:
+                for (const [, def] of Object.entries(templateDefinitions.templates)) {
+                    if (sampleSourceId.match(def.idPattern)) {
+                        dataSourceDefinition = def;
+                        break loop;
+                    }
+                    // if (def.signalFields.includes) {
+                    //     if (intersect(def.signalFields.includes, allKeys)) {
+                    //         dataSourceDefinition = def;
+                    //         break loop;
+                    //     }
+                    // }
+                    // if (def.signalFields.does_not_include) {
+                    //     if (!intersect(def.signalFields.does_not_include, allKeys)) {
+                    //         dataSourceDefinition = def;
+                    //         break loop;
+                    //     }
+                    // }
+                }
+
+            if (!dataSourceDefinition) {
+                console.error('Cannot determine source!', sample.node_tree[0].meta_controlled);
+                throw new Error('Cannot determine source!');
+            }
+
+            return dataSourceDefinition;
         }
 
         // getSamplesSerial(samples) {
@@ -105,11 +139,26 @@ define([
                     samples: samplesParam
                 }]);
 
-            return rawSamples.map((sample) => {
-                return {
-                    sample: this.augmentSample(sample)
-                };
-            });
+            const usernames = rawSamples.reduce((usernames, sample) => {
+                usernames.add(sample.user);
+                return usernames;
+            }, new Set());
+
+            // console.log('usernames', usernames, rawSamples);
+
+            const userProfiles = await this.getUserProfiles(Array.from(usernames));
+            const userProfileMap = userProfiles.reduce((userProfileMap, profile) => {
+                userProfileMap[profile.user.username] = profile;
+                return userProfileMap;
+            }, {});
+
+            // console.log('profiles', userProfiles);
+
+            return {
+                samples: rawSamples,
+                format: this.getFormat(rawSamples[0]),
+                userProfiles: userProfileMap
+            };
         }
 
         // getSamplesHybrid({samples, batchSize, onProgress}) {
@@ -178,62 +227,81 @@ define([
         //
         // }
 
-        getObject() {
-            const workspace = new GenericClient({
+        async getObject() {
+            const workspaceClient = new GenericClient({
                 module: 'Workspace',
                 url: this.runtime.config('services.workspace.url'),
                 token: this.runtime.service('session').getAuthToken()
             });
 
-            return workspace
-                .callFunc('get_objects', [
-                    [
-                        {
-                            wsid: this.workspaceId,
-                            objid: this.objectId,
-                            ver: this.objectVersion
-                        }
-                    ]
-                ])
-                .spread((object) => {
-                    if (!object[0]) {
-                        throw new Error('Not found');
-                    }
-                    return object[0].data;
-                });
+            const [result] = await workspaceClient.callFunc('get_objects2', [{
+                objects: [
+                    {
+                        wsid: this.workspaceId,
+                        objid: this.objectId,
+                        ver: this.objectVersion
+                    }]
+            }]);
+
+            if (!result.data[0]) {
+                throw new Error('Not found');
+            }
+            const {info, data} = result.data[0];
+            const [
+                objid, name, type, save_date, ver, saved_by, wsiid, workspace, chsum, size, meta
+            ] = info;
+
+            const infoAsObject = {
+                objid, name, type, save_date, ver, saved_by, wsiid, workspace, chsum, size, meta
+            };
+
+            return {info: infoAsObject, data};
         }
 
-        createColumnDefs(sampleSet) {
-            function extractSources(table) {
-                const sources = table.reduce((sources, sample) => {
-                    sources.add(sample.sample.dataSourceDefinition);
-                    return sources;
-                }, new Set());
-                return Array.from(sources);
-            }
+        async getUserProfiles(usernames) {
+            const userProfileService = new GenericClient({
+                module: 'UserProfile',
+                url: this.runtime.config('services.UserProfile.url'),
+                token: this.runtime.service('session').getAuthToken()
+            });
 
-            if (sampleSet.samples.length === 0) {
-                throw new Error('No samples in this set, cannot process an empty sample set to determine the source.');
-            }
-            const sources = extractSources(sampleSet.samples);
-            if (sources.length === 0) {
-                throw new Error('No source could be determined');
-            }
-            if (sources.length > 1) {
-                throw new Error('Too many sources, cannot show spreadsheet view');
-            }
+            const [profiles] = await userProfileService.callFunc('get_user_profile', [usernames]);
+            return profiles;
+        }
 
-            const source = sources[0];
+        createColumnDefs(sampleSet, samples, format) {
+            // function extractSources(table) {
+            //     const sources = table.reduce((sources, sample) => {
+            //         sources.add(sample.dataSourceDefinition);
+            //         return sources;
+            //     }, new Set());
+            //     return Array.from(sources);
+            // }
+            //
+            // if (sampleSet.samples.length === 0) {
+            //     throw new Error('No samples in this set, cannot process an empty sample set to determine the source.');
+            // }
+            // const sources = extractSources(sampleSet.samples);
+            // if (sources.length === 0) {
+            //     throw new Error('No source could be determined');
+            // }
+            // if (sources.length > 1) {
+            //     throw new Error('Too many sources, cannot show spreadsheet view');
+            // }
+
+            // console.log('sources', sources);
+            //
+            // const source = sources[0];
 
             const templateDef = (() => {
-                switch (source.source) {
+                switch (format.source) {
                 case 'SESAR':
                     return sesarTemplate;
                 case 'ENIGMA':
                     return enigmaTemplate;
                 }
             })();
-            const columnMapping = sampleUploaderSpecs[source.source].column_mapping;
+            const columnMapping = sampleUploaderSpecs[format.source].column_mapping;
             const reverseColumnMapping = Object.entries(columnMapping).reduce((mapping, [key, value]) => {
                 mapping[value] = key;
                 return mapping;
@@ -284,8 +352,8 @@ define([
 
             // scour the samples to add user fields; user fields go at the end of the column definitions.
             // They use the column type 'user'.
-            const userFieldMapping = sampleSet.samples.reduce((userFields, sample) => {
-                Object.keys(sample.sample.node_tree[0].meta_user).forEach((key) => {
+            const userFieldMapping = samples.reduce((userFields, sample) => {
+                Object.keys(sample.node_tree[0].meta_user).forEach((key) => {
                     if (userFields[key]) {
                         return;
                     }

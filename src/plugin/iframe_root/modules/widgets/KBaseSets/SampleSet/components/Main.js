@@ -15,12 +15,10 @@ define([
     SampleMap,
     SampleSet
 ) {
-    'use strict';
-
     const {Component, Fragment} = preact;
     const html = htm.bind(preact.h);
 
-    const MAX_SAMPLES = 1000;
+    const MAX_SAMPLES = 10000;
 
     class Main extends Component {
         constructor(props) {
@@ -39,7 +37,7 @@ define([
             //         <h4>Samples</h4>
             return html`
                 <${Fragment}>
-                    <${SampleSet} sampleSet=${this.props.sampleSet} totalCount=${this.props.totalCount} />
+                    <${SampleSet} sampleSet=${this.props.sampleSet} samples=${this.props.samples} totalCount=${this.props.totalCount} userProfiles=${this.props.userProfiles}/>
                     ${truncatedMessage}
                 <//>
             `;
@@ -71,7 +69,30 @@ define([
 
         renderMap() {
             return html`
-            <${SampleMap} sampleSet=${this.props.sampleSet} />
+            <${SampleMap} samples=${this.props.samples} />
+            `;
+        }
+
+        renderSummary() {
+            return html`
+                <div className="Main-summary">
+                    <div className="Main-summary-field">
+                        <div className="Main-summary-field-label" style=${{textDecoration: 'underline'}}>Summary</div>
+                    </div>
+                    <div className="Main-summary-field">
+                        <div className="Main-summary-field-label">Sample count:</div>
+                        <div className="Main-summary-field-value">${this.props.samples.length}</div>
+                    </div>
+                    <div className="Main-summary-field">
+                        <div className="Main-summary-field-label">Format:</div>
+                        <div className="Main-summary-field-value">${this.props.format.source}</div>
+                    </div>
+                    
+                    <div className="Main-summary-field">
+                        <div className="Main-summary-field-label">Description:</div>
+                        <div className="Main-summary-field-value">${this.props.sampleSet.description}</div>
+                    </div>
+                </div>
             `;
         }
 
@@ -118,7 +139,8 @@ define([
                 }
             }];
             return html`
-            <div className="SampleSet">
+            <div className="Main">
+                ${this.renderSummary()}
                 <${Tabs} tabs=${tabs} />
             </div>
             `;

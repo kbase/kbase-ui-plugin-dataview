@@ -21,8 +21,6 @@ define([
     DataTable,
     common
 ) {
-    'use strict';
-
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
@@ -38,11 +36,11 @@ define([
     }
 
     function getMetadataField(sample, key, defaultValue) {
-        const metadata = sample.sample.node_tree[0].meta_controlled;
+        const metadata = sample.node_tree[0].meta_controlled;
         if (metadata[key]) {
             return metadata[key].value;
         }
-        const userMetadata = sample.sample.node_tree[0].meta_user;
+        const userMetadata = sample.node_tree[0].meta_user;
         if (userMetadata[key]) {
             return userMetadata[key].value;
         }
@@ -171,8 +169,8 @@ define([
 
         updateSampleMapping() {
             const locationSamples = [];
-            this.props.sampleSet.samples.forEach((sample) => {
-                const metadata = sample.sample.node_tree[0].meta_controlled;
+            this.props.samples.forEach((sample) => {
+                const metadata = sample.node_tree[0].meta_controlled;
                 if (!isDefined(metadata.latitude)  || !isDefined(metadata.longitude)) {
                     return;
                 }
@@ -345,12 +343,12 @@ define([
         }
 
         renderCoordsTable() {
-            if (this.props.sampleSet.samples.length === 0) {
+            if (this.props.samples.length === 0) {
                 return this.renderEmptySet();
             }
 
-            const coordsTable = this.props.sampleSet.samples.map((sample) => {
-                const metadata = sample.sample.node_tree[0].meta_controlled;
+            const coordsTable = this.props.samples.map((sample) => {
+                const metadata = sample.node_tree[0].meta_controlled;
                 if (!isDefined(metadata.latitude)  || !isDefined(metadata.longitude)) {
                     return;
                 }
@@ -367,8 +365,8 @@ define([
                 return {
                     id: sample.id,
                     name: sample.name,
-                    source: sample.sample.dataSourceDefinition.id,
-                    sourceId: sample.sample.node_tree[0].id,
+                    // source: sample.sample.dataSourceDefinition.id,
+                    sourceId: sample.node_tree[0].id,
                     material: getMetadataField(sample, 'material'),
                     latitude: metadata.latitude.value,
                     longitude: metadata.longitude.value,
@@ -471,7 +469,7 @@ define([
                 })();
                 return html`
                 <div style=${{flex: '1 1 0px', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
-                    ${pluralOf(this.props.sampleSet.samples.length, 'sample', 'samples')}
+                    ${pluralOf(this.props.samples.length, 'sample', 'samples')}
                     ${selected}
                 </div>
                 `;
