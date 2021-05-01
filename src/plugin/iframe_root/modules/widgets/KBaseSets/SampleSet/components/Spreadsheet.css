@@ -114,14 +114,10 @@
 
 .Spreadsheet-body {
     flex: 1 1 0px;
-    position: relative; 
-    /* display: flex; */
-    /* flex-direction: column; */
-    /* overflow-x: visible; */
+    position: relative;
     overflow: scroll;
     min-width: 0;
     min-height: 0;
-    /* z-index: -1; */
 }
 
 .Spreadsheet-grid {

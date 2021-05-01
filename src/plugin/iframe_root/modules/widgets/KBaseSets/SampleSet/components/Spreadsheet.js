@@ -17,12 +17,10 @@ define([
     Popup,
     Toolbar
 ) {
-    'use strict';
-
     const MAX_CELL_WIDTH = 200;
     const ROW_HEIGHT = 40;
 
-    const {Component } = preact;
+    const {Component} = preact;
     const html = htm.bind(preact.h);
 
     function outerWidth(el) {
@@ -95,33 +93,34 @@ define([
                             this.doSort('descending');
                         }
                     },
-                    // {
-                    //     title: 'Clear Any Filter',
-                    //     action: this.doClearFilter.bind(this)
-                    // },
-                    {
-                        title: 'Quick Filter',
-                        dataMenu: filterMenu
-                    }]
+                        // {
+                        //     title: 'Clear Any Filter',
+                        //     action: this.doClearFilter.bind(this)
+                        // },
+                        {
+                            title: 'Quick Filter',
+                            dataMenu: filterMenu
+                        }]
                 };
             })();
 
             return html`
-            <${preact.Fragment}>
-                <div className="Spreadsheet-cell-content" title=${columnDef.title}>
-                    ${columnDef.title}
-                </div>
-               
-                <div className="Spreadsheet-header-cell-menu">
-                    <${Popup} overlaySelector=".Spreadsheet-wrapper" 
-                              scrollSelector=".Spreadsheet-header"
-                            containerTop=${0} 
-                            onOpen=${this.onPopupOpen.bind(this)} 
-                            onClose=${this.onPopupClose.bind(this)}>
-                        <${DropdownMenu} menu=${menu} onClose=${this.onPopupClose.bind(this)}/>
-                    <//>
-                </div>
-            <//>
+                <${preact.Fragment}>
+                    <div className="Spreadsheet-cell-content" title=${columnDef.title}>
+                        ${columnDef.title}
+                    </div>
+
+                    <div className="Spreadsheet-header-cell-menu">
+                        <${Popup} overlaySelector=".Spreadsheet-wrapper"
+                                  scrollSelector=".Spreadsheet-header"
+                                  containerTop=${0}
+                                  onOpen=${this.onPopupOpen.bind(this)}
+                                  onClose=${this.onPopupClose.bind(this)}>
+                            <${DropdownMenu} menu=${menu} onClose=${this.onPopupClose.bind(this)}/>
+                            </
+                            />
+                    </div>
+                <//>
             `;
         }
 
@@ -184,14 +183,19 @@ define([
             const columnNumber = this.props.index;
 
             // onClick=${this.doSort.bind(this)}
-            return html`<div className=${classes.join(' ')} 
-                onMouseEnter=${() => {this.doMouseEnterHeaderCell(columnDef);}}
-                onMouseLeave=${() => {this.doMouseLeaveHeaderCell(columnDef);}}
-                style=${style}
-                role="cell"
-                data-k-b-testhook-cell=${columnDef.key}>
-                ${this.renderCell(columnDef, columnNumber)}
-            </div>`;
+            return html`
+                <div className=${classes.join(' ')}
+                     onMouseEnter=${() => {
+                         this.doMouseEnterHeaderCell(columnDef);
+                     }}
+                     onMouseLeave=${() => {
+                         this.doMouseLeaveHeaderCell(columnDef);
+                     }}
+                     style=${style}
+                     role="cell"
+                     data-k-b-testhook-cell=${columnDef.key}>
+                    ${this.renderCell(columnDef, columnNumber)}
+                </div>`;
         }
     }
 
@@ -234,9 +238,14 @@ define([
 
             this.state = {
                 table,
-                currentSort: null,
-                currentFilter: null,
-                currentSearch: null,
+                currentFilter: {
+                    columnDef: null,
+                    value: null
+                },
+                currentSort: {
+                    columnDef: this.props.columns[0],
+                    direction: 'ascending'
+                },
                 columnMenu: null,
                 scrollbarWidth: null,
                 dimensions: {
@@ -309,7 +318,7 @@ define([
 
         handleBodyScroll(e) {
             if (!this.headerRef.current) {
-                return ;
+                return;
             }
             this.headerRef.current.scrollLeft = e.target.scrollLeft;
 
@@ -382,7 +391,13 @@ define([
         }
 
         measureColumnWidths() {
-            const {testNodeContainer, cellTestNode, cellTestInnerNode, headerTestNode, headerTestInnerNode} = this.createTestNodes();
+            const {
+                testNodeContainer,
+                cellTestNode,
+                cellTestInnerNode,
+                headerTestNode,
+                headerTestInnerNode
+            } = this.createTestNodes();
             const measures = {};
 
             // also gather values for columns for filtering.
@@ -395,7 +410,8 @@ define([
                 columnDef.filterValues = new Set();
 
                 // Measure column header width.
-                const headerWidth = this.renderAndMeasure(html`<${HeaderCell} def=${columnDef} />`, headerTestInnerNode, headerTestNode);
+                const headerWidth = this.renderAndMeasure(html`
+                    <${HeaderCell} def=${columnDef}/>`, headerTestInnerNode, headerTestNode);
                 // headerTestInnerNode.innerText = columnDef.title;
                 // const headerWidth = outerWidth(headerTestNode);
 
@@ -442,30 +458,34 @@ define([
         renderHeader() {
             return this.props.columns.map((columnDef, columnNumber) => {
                 return html`
-                    <${HeaderCell} 
-                        def=${columnDef} 
-                        index=${columnNumber} 
-                        showMenu=${true} 
-                        onFilter=${(filterValue) => {this.doFilterColumn(columnDef, columnNumber, filterValue);}} 
-                        onSort=${(direction) => {this.doSortColumn(columnDef, columnNumber, direction);}} 
-                        onClearFilter=${this.doClearFilter.bind(this)}/>
-               `;
+                    <${HeaderCell}
+                            def=${columnDef}
+                            index=${columnNumber}
+                            showMenu=${true}
+                            onFilter=${(filterValue) => {
+                                this.doFilter(columnDef, filterValue);
+                            }}
+                            onSort=${(direction) => {
+                                this.doSortColumn(columnDef, direction);
+                            }}
+                            onClearFilter=${this.doClearFilter.bind(this)}/>
+                `;
             });
         }
 
         renderHeaderWithMenu() {
             return this.props.columns.map((columnDef, columnNumber) => {
                 return html`
-                   <${HeaderCell} def=${columnDef} index=${columnNumber} />
-               `;
+                    <${HeaderCell} def=${columnDef} index=${columnNumber}/>
+                `;
             });
         }
 
-        sortTable(table, columnDef, columnNumber, direction) {
+        sortTable(table, columnDef, direction) {
             const directionFactor = direction === 'descending' ? -1 : 1;
             table.sort((aRow, bRow) => {
-                const a = aRow.data[columnNumber];
-                const b = bRow.data[columnNumber];
+                const a = aRow.data[columnDef.index];
+                const b = bRow.data[columnDef.index];
                 if (a === b) {
                     return 0;
                 }
@@ -493,8 +513,8 @@ define([
             });
         }
 
-        doSortColumn(columnDef, columnNumber, direction) {
-            this.sortTable(this.state.table, columnDef, columnNumber, direction);
+        doSortColumn(columnDef, direction) {
+            this.sortTable(this.state.table, columnDef, direction);
             this.setState({
                 table: this.state.table.slice(),
                 currentSort: {
@@ -512,7 +532,10 @@ define([
             this.setState({
                 table: this.state.table.slice(),
                 dimensions: {height, width},
-                currentFilter: null
+                currentFilter: {
+                    columnDef: null,
+                    value: null
+                }
             });
         }
 
@@ -527,41 +550,60 @@ define([
             this.setState({
                 table: this.state.table.slice(),
                 dimensions: {height, width},
-                currentFilter: null,
-                currentSearch: null,
-                currentSort: null,
+                currentFilter: {
+                    columnDef: null,
+                    value: null
+                },
+                currentSort: {
+                    columnDef: this.props.columns[0],
+                    direction: 'ascending'
+                },
                 subsetCount: null
             });
         }
 
-        doFilterColumn(columnDef, columnNumber, filterValue) {
-            let count = 0;
+        doFilter(columnDef, filterValue) {
+            let count = null;
             const filterRegexp = new RegExp(filterValue, 'i');
-            this.state.table.forEach((row) => {
-                // an empty filter is the same as matching all.
-                if (filterValue === '') {
+
+            if (!filterValue) {
+                this.state.table.forEach((row) => {
                     row.state.hidden = false;
-                    return;
-                }
-                let rowValue = row.data[columnNumber];
-                if (typeof rowValue === 'undefined') {
-                    row.state.hidden = true;
-                    return;
-                }
-                if (typeof rowValue === 'object') {
-                    row.state.hidden = true;
-                    return;
-                }
-                if (typeof rowValue === 'number') {
-                    rowValue = String(rowValue);
-                }
-                if (rowValue.match(filterRegexp)) {
-                    row.state.hidden = false;
-                    count += 1;
-                } else {
-                    row.state.hidden = true;
-                }
-            });
+                });
+            } else {
+                count = 0;
+                this.state.table.forEach((row) => {
+                    // if column not defined (not selected), search all fields
+                    if (columnDef === null) {
+                        if (row.searchData.match(filterRegexp)) {
+                            row.state.hidden = false;
+                            count += 1;
+                        } else {
+                            row.state.hidden = true;
+                        }
+                        return;
+                    }
+
+                    let rowValue = row.data[columnDef.index];
+                    if (typeof rowValue === 'undefined') {
+                        row.state.hidden = true;
+                        return;
+                    }
+                    if (typeof rowValue === 'object') {
+                        row.state.hidden = true;
+                        return;
+                    }
+                    if (typeof rowValue === 'number') {
+                        rowValue = String(rowValue);
+                    }
+                    if (rowValue.match(filterRegexp)) {
+                        row.state.hidden = false;
+                        count += 1;
+                    } else {
+                        row.state.hidden = true;
+                    }
+                });
+            }
 
             this.setState({
                 table: this.state.table.slice(),
@@ -633,7 +675,6 @@ define([
                     }
                     rowWidth += def.width;
                 }
-                // console.warn('dropped off bottom', rowWidth, right);
                 return this.props.columns.length - 1;
             })();
 
@@ -684,7 +725,6 @@ define([
                     }
                     rowWidth += def.width;
                 }
-                // console.warn('dropped off bottom', rowWidth, right);
                 return this.props.columns.length - 1;
             })();
 
@@ -733,12 +773,14 @@ define([
 
             const displayRows = [];
             const viewedTable = this.state.table
-                .filter((row) => {return !row.state.hidden;})
+                .filter((row) => {
+                    return !row.state.hidden;
+                })
                 .slice(this.firstRow, this.lastRow + 1);
 
             viewedTable.forEach((row, rowCount) => {
                 let totalWidth = leftMargin;
-                const rowStyle= {
+                const rowStyle = {
                     top: (this.firstRow + rowCount) * ROW_HEIGHT,
                     right: '0',
                     // bottom: String(spreadsheetHeight - (rowCount * ROW_HEIGHT + ROW_HEIGHT)),
@@ -761,18 +803,18 @@ define([
                     // TODO: add back in tooltip / title support to renderCell.
                     // title=${sampleField}
                     return html`
-                        <div className="Spreadsheet-cell Spreadsheet-sample-field" 
-                            style=${style} 
-                            role="cell"
-                            data-k-b-testhook-cell=${columnDef.key}>
-                            <div className="Spreadsheet-cell-content" >
+                        <div className="Spreadsheet-cell Spreadsheet-sample-field"
+                             style=${style}
+                             role="cell"
+                             data-k-b-testhook-cell=${columnDef.key}>
+                            <div className="Spreadsheet-cell-content">
                                 ${this.renderCell(cellValue, columnDef)}
                             </div>
                         </div>
                     `;
                 });
                 displayRows.push(html`
-                    <div className="Spreadsheet-grid-row" 
+                    <div className="Spreadsheet-grid-row"
                          style=${rowStyle}
                          role="row">
                         ${displayRow}
@@ -780,10 +822,15 @@ define([
                 `);
             });
             return html`
-             <div className="Spreadsheet-grid" 
-                  style=${{top: 0, left: 0, width: `${this.state.dimensions.width}px`, height: `${this.state.dimensions.height}px`}}>
-                ${displayRows}
-            </div>
+                <div className="Spreadsheet-grid"
+                     style=${{
+                         top: 0,
+                         left: 0,
+                         width: `${this.state.dimensions.width}px`,
+                         height: `${this.state.dimensions.height}px`
+                     }}>
+                    ${displayRows}
+                </div>
             `;
         }
 
@@ -799,7 +846,7 @@ define([
                             ${this.renderHeader()}
                         </div>
                     </div>
-                    <div className="Spreadsheet-body" ref=${this.bodyRef} 
+                    <div className="Spreadsheet-body" ref=${this.bodyRef}
                          onScroll=${this.handleBodyScroll.bind(this)}>
                         ${this.renderBody()}
                     </div>
@@ -812,61 +859,13 @@ define([
         renderEmpty() {
             return html`
                 <div class="alert alert-warning">
-                <span style=${{fontSize: '150%', marginRight: '4px'}}>∅</span> - Sorry, no data in this table.
+                    <span style=${{fontSize: '150%', marginRight: '4px'}}>∅</span> - Sorry, no data in this table.
                 </div>
             `;
         }
 
-        clearSearch() {
-            this.state.table.forEach((row) => {
-                row.state.hidden = false;
-            });
-            const {height, width} = this.calcSpreadsheetDimensions();
-            this.setState({
-                table: this.state.table.slice(),
-                dimensions: {height, width},
-                currentSearch: null
-            });
-        }
+        applySearchFilter() {
 
-        doSearch(query) {
-            let count = 0;
-            const searchRegexp = new RegExp(query, 'i');
-            this.state.table.forEach((row) => {
-                // an empty filter is the same as matching all.
-                if (query === '') {
-                    row.state.hidden = false;
-                    return;
-                }
-                if (row.searchData.match(searchRegexp)) {
-                    row.state.hidden = false;
-                    count += 1;
-                } else {
-                    row.state.hidden = true;
-                }
-            });
-
-            this.setState({
-                table: this.state.table.slice(),
-                currentSearch: {
-                    query
-                },
-                subsetCount: count
-            }, () => {
-                const {height, width} = this.calcSpreadsheetDimensions();
-                this.setState({
-                    table: this.state.table.slice(),
-                    dimensions: {height, width}
-                });
-            });
-        }
-
-        doSearchChange(event) {
-            const query = event.target.value;
-            if (!query) {
-                this.clearSearch();
-            }
-            this.doSearch(query);
         }
 
         getColumn(key) {
@@ -875,26 +874,21 @@ define([
 
         renderToolbar() {
             return html`
-            <${Toolbar} 
+                <${Toolbar}
                         currentSort=${this.state.currentSort}
                         onSort=${this.doSortColumn.bind(this)}
                         onClearSort=${this.doResetSort.bind(this)}
-                        
 
                         currentFilter=${this.state.currentFilter}
-                        onFilter=${this.doFilterColumn.bind(this)}
+                        onFilter=${this.doFilter.bind(this)}
                         onClearFilter=${this.doClearFilter.bind(this)}
-
-                        currentSearch=${this.state.currentSearch}
-                        onSearch=${this.doSearch.bind(this)}
-                        onClearSearch=${this.clearSearch.bind(this)} 
-
 
                         columns=${this.props.columns}
                         total=${this.props.table.length}
                         subsetCount=${this.state.subsetCount}
-                        getColumn=${this.getColumn.bind(this)} 
-                        onReset=${this.doResetAll.bind(this)} />
+                        getColumn=${this.getColumn.bind(this)}
+                        onReset=${this.doResetAll.bind(this)}
+                />
             `;
         }
 
@@ -903,14 +897,14 @@ define([
                 return this.renderEmpty();
             }
             return html`
-            <div className="Spreadsheet-outer">
-                ${this.renderToolbar()} 
-                <div className="Spreadsheet-wrapper">
-                    <div className="Spreadsheet">
-                        ${this.renderSpreadsheet()}
+                <div className="Spreadsheet-outer">
+                    ${this.renderToolbar()}
+                    <div className="Spreadsheet-wrapper">
+                        <div className="Spreadsheet">
+                            ${this.renderSpreadsheet()}
+                        </div>
                     </div>
                 </div>
-            </div>
             `;
         }
     }
