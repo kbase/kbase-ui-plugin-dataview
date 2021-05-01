@@ -40,11 +40,12 @@ define([
         }
 
         renderSimpleProgress(progress) {
-            return html`Loading samples <span className="text-info" style=${{fontWeight: 'bold'}}>${progress}%</span> ...`;
+            return html`Loading samples <span className="text-info" style=${{fontWeight: 'bold'}}>${progress}
+                %</span> ...`;
         }
 
         onProgress(current, total) {
-            const progress = Math.round(100 * current/total);
+            const progress = Math.round(100 * current / total);
             this.renderProgress(progress);
         }
 
@@ -52,15 +53,16 @@ define([
             const content = html`
                 <div style=${{width: '50%'}}>
                     <div>Loading samples...</div>
-                    <${Progress} progress=${progress} />
+                    <${Progress} progress=${progress}/>
                 </div>
             `;
             preact.render(content, this.node);
         }
 
 
-        samplesToTable(model, samples, sampleSet) {
-            const columnDefs = model.createColumnDefs(sampleSet);
+        samplesToTable(model, samples, sampleSet, format) {
+            const columnDefs = model.createColumnDefs(sampleSet, samples, format);
+
             const sampleColumns = columnDefs.map((def, index) => {
                 return {
                     index: index + 1,
@@ -109,31 +111,31 @@ define([
             function getCellContent(sample, columnDef) {
                 switch (columnDef.type) {
                 case 'sample':
-                    var sampleField = sample.sample[columnDef.key];
+                    var sampleField = sample[columnDef.key];
                     if (!sampleField) {
                         return null;
                     }
                     return sampleField;
                 case 'node':
-                    var nodeField = sample.sample.node_tree[0][columnDef.key];
+                    var nodeField = sample.node_tree[0][columnDef.key];
                     if (!nodeField) {
                         return null;
                     }
                     return nodeField;
                 case 'metadata':
-                    var controlledField = sample.sample.node_tree[0].meta_controlled[columnDef.key];
+                    var controlledField = sample.node_tree[0].meta_controlled[columnDef.key];
                     if (!controlledField) {
                         return null;
                     }
                     return formatValue(controlledField.value, columnDef.spec);
                 case 'user':
-                    var userField = sample.sample.node_tree[0].meta_user[columnDef.key];
+                    var userField = sample.node_tree[0].meta_user[columnDef.key];
                     if (!userField) {
                         return null;
                     }
                     return userField.value;
                 case 'unknown':
-                    var unknownField = sample.sample.node_tree[0].meta_user[columnDef.key];
+                    var unknownField = sample.node_tree[0].meta_user[columnDef.key];
                     if (!unknownField) {
                         return null;
                     }
@@ -142,7 +144,7 @@ define([
             }
 
             const sampleTable = samples.map((sample, index) => {
-                const row = columnDefs.map((def) =>{
+                const row = columnDefs.map((def) => {
                     return getCellContent(sample, def);
                 });
                 row.unshift(index + 1);
@@ -152,7 +154,7 @@ define([
             return [sampleColumns, sampleTable];
         }
 
-        start(params) {
+        async start(params) {
             // Check params
             const p = new widgetUtils.Params(params);
             this.workspaceId = p.check('workspaceId', 'number', {
@@ -179,42 +181,43 @@ define([
 
             // Display the object!
 
-            return model
-                .getObject()
-                .then((sampleSet) => {
-                    // TODO: TODO: TODO: remove when sample service supports multiple samples w/paging
-                    const totalCount = sampleSet.samples.length;
-                    sampleSet.samples = sampleSet.samples.slice(0, MAX_SAMPLES);
-                    return model.getSamples({
-                        samples: sampleSet.samples
-                    })
-                        .then((samples) => {
-                            const samplesMap = samples.reduce((samplesMap, {sample}) => {
-                                samplesMap[sample.id] = {
-                                    sample,
-                                    linkedDataCount: 0
-                                };
-                                return samplesMap;
-                            }, {});
-                            sampleSet.samples.forEach((sampleSetItem) => {
-                                sampleSetItem.sample = samplesMap[sampleSetItem.id].sample;
-                                sampleSetItem.linkedDataCount = samplesMap[sampleSetItem.id].linkedDataCount;
-                            });
-                            if (samples.length === 0) {
-                                preact.render(preact.h(SimpleInfo, {title: 'Sorry', message: 'No samples in this set'}), this.node);
-                            } else {
-                                const [sampleColumns, sampleTable] = this.samplesToTable(model, samples, sampleSet);
-                                preact.render(preact.h(Main, {sampleSet, totalCount, sampleTable, sampleColumns}), this.node);
-                            }
-                        })
-                        .catch((err) => {
-                            console.error('Error fetching samples', err);
-                            preact.render(preact.h(SimpleError, {message: err.message}), this.node);
-                        });
+            try {
+                const {info: objectInfo, data: sampleSet} = await model.getObject();
+
+                const totalCount = sampleSet.samples.length;
+                sampleSet.samples = sampleSet.samples.slice(0, MAX_SAMPLES);
+
+                const {samples, format, userProfiles} = await model.getSamples({
+                    samples: sampleSet.samples
                 });
+
+                const samplesMap = samples.reduce((samplesMap, sample) => {
+                    samplesMap[sample.id] = sample;
+                    return samplesMap;
+                }, {});
+
+                const orderedSamples = sampleSet.samples.map((sampleSetItem) => {
+                    return samplesMap[sampleSetItem.id];
+                });
+
+                if (orderedSamples.length === 0) {
+                    preact.render(preact.h(SimpleInfo, {
+                        title: 'Sorry',
+                        message: 'No samples in this set'
+                    }), this.node);
+                } else {
+                    const [sampleColumns, sampleTable] = this.samplesToTable(model, orderedSamples, sampleSet, format);
+                    const params = {sampleSet, samples, totalCount, sampleTable, sampleColumns, userProfiles, format, objectInfo};
+                    preact.render(preact.h(Main, params), this.node);
+                }
+            } catch (ex) {
+                console.error('Error fetching samples', ex);
+                preact.render(preact.h(SimpleError, {message: ex.message}), this.node);
+            }
         }
 
-        stop() {}
+        stop() {
+        }
 
         detach() {
             this.node = '';
