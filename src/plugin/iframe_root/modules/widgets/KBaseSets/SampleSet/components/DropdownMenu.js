@@ -1,14 +1,12 @@
 define([
     'preact',
     'htm',
-
-    'css!./DropdownMenu'
+    './DropdownMenu.styles'
 ], function (
     preact,
-    htm
+    htm,
+    styles
 ) {
-    'use strict';
-
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
@@ -29,7 +27,8 @@ define([
             const item = this.props.item;
             const [subMenu, menuClass] = (() => {
                 if (this.state.isOpen) {
-                    return [html`<${DropdownMenu} menu=${item.menu} />`, '-open'];
+                    return [html`
+                        <${DropdownMenu} menu=${item.menu}/>`, '-open'];
                 }
                 return [null, ''];
             })();
@@ -40,14 +39,20 @@ define([
                 return 'fa fa-chevron-right';
             })();
             return html`
-            <div className=${`DropdownMenu-item ${menuClass}`} onClick=${this.toggleSubMenu.bind(this)}>
-                <div className="DropdownMenu-item-label">
-                    ${item.title} 
+                <div className=${menuClass}
+                     style=${styles.item}
+                     onMouseEnter=${this.hoverItemOn.bind(this)}
+                     onMouseLeave=${this.hoverItemOff.bind(this)}
+                     onClick=${this.toggleSubMenu.bind(this)}>
+                    <div style=${styles.itemLabel}>
+                        ${item.title}
+                    </div>
+                    <div className=${menuIconClass}
+                         style=${styles.itemSubmenuIcon}
+                    />
+                    ${subMenu}
                 </div>
-                <div className=${`DropdownMenu-item-submenu-icon ${menuIconClass}`} />
-                ${subMenu}
-            </div>
-        `;
+            `;
         }
 
         renderDataMenu() {
@@ -57,19 +62,25 @@ define([
                     const items = item.dataMenu.items.map((item) => {
                         if (item.action) {
                             return html`
-                            <div className="DropdownMenu-item" onClick=${(event) => {this.doAction(event, item.action);}}>
-                                <div className="DropdownMenu-item-label">${item.title}</div>
-                            </div>
+                                <div style=${styles.item}
+                                     onMouseEnter=${this.hoverItemOn.bind(this)}
+                                     onMouseLeave=${this.hoverItemOff.bind(this)}
+                                     onClick=${(event) => {
+                                         this.doAction(event, item.action);
+                                     }}>
+                                    <div style=${styles.itemLabel}>${item.title}</div>
+                                </div>
                             `;
                         } else {
                             return html`
-                            <div className="DropdownMenu-item" onClick=${this.props.onActionCompleted}>
-                                <div className="DropdownMenu-item-label">${item.title}</div>
-                            </div>
+                                <div style=${item} onClick=${this.props.onActionCompleted}>
+                                    <div style=${styles.itemLabel}>${item.title}</div>
+                                </div>
                             `;
                         }
                     });
-                    return [html`<div className="DropdownMenu-dataMenu">${items}</div>`, '-open'];
+                    return [html`
+                        <div style=${styles.dataMenu}>${items}</div>`, '-open'];
                 }
                 return [null, ''];
             })();
@@ -80,15 +91,18 @@ define([
                 return 'fa fa-chevron-right';
             })();
             return html`
-            <div className=${`DropdownMenu-item ${menuClass}`} 
-                 onClick=${this.toggleSubMenu.bind(this)}>
-                <div className="DropdownMenu-item-label">
-                    ${item.title} 
-                </div>
-                <div className=${`DropdownMenu-item-submenu-icon ${menuIconClass}`} />
-                ${subMenu}
-            </div>
-        `;
+                <div className=${menuClass}
+                     style=${styles.item}
+                         onMouseEnter=${this.hoverItemOn.bind(this)}
+                         onMouseLeave=${this.hoverItemOff.bind(this)}
+                     onClick=${this.toggleSubMenu.bind(this)}>
+                    <div style=${styles.itemLabel}>
+                        ${item.title}
+                    </div>
+                    <div className=${menuIconClass} style=${styles.itemSubmenuIcon}/>
+                        ${subMenu}
+                    </div>
+            `;
         }
 
         doAction(event, action) {
@@ -105,8 +119,13 @@ define([
             const item = this.props.item;
             if (item.action) {
                 return html`
-                    <div className="DropdownMenu-item" onClick=${(event) => {this.doAction(event, item.action);}}>
-                        <div className="DropdownMenu-item-label">${item.title}</div>
+                    <div style=${styles.item}
+                         onClick=${(event) => {
+                             this.doAction(event, item.action);
+                         }}
+                         onMouseEnter=${this.hoverItemOn.bind(this)}
+                         onMouseLeave=${this.hoverItemOff.bind(this)}>
+                        <div style=${styles.itemLabel}>${item.title}</div>
                     </div>
                 `;
             }
@@ -117,12 +136,26 @@ define([
                 return this.renderDataMenu(item);
             }
             return html`
-                <div className="DropdownMenu-item">
-                    <div className="DropdownMenu-item-label">${item.title}</div>
+                <div style=${styles.item} onMouseEnter=${this.hoverItemOn.bind(this)}
+                     onMouseLeave=${this.hoverItemOff.bind(this)}>
+                    <div style=${styles.itemLabel}>${item.title}</div>
                 </div>
             `;
         }
+
+        hoverItemOn(event) {
+            Object.entries(styles.itemHover).forEach(([name, value]) => {
+                event.target.style.setProperty(name, value);
+            });
+        }
+
+        hoverItemOff(event) {
+            Object.entries(styles.itemHover).forEach(([name, value]) => {
+                event.target.style.removeProperty(name);
+            });
+        }
     }
+
 
     class DropdownMenu extends Component {
         constructor(props) {
@@ -149,16 +182,16 @@ define([
 
         renderMenu() {
             return this.props.menu.items.map((item) => {
-                return html`<${MenuItem} item=${item} onActionCompleted=${this.doActionCompleted.bind(this)}/>`;
+                return html`
+                    <${MenuItem} item=${item} onActionCompleted=${this.doActionCompleted.bind(this)}/>`;
             });
         }
 
         render() {
-            const menuStateClass = '';
             return html`
-                <div className=${`DropdownMenu ${menuStateClass}`} ref=${this.ref}>
-                    <div className="DropdownMenu-dropdown" ref=${this.dropdownRef}>
-                        <div className="DropdownMenu-wrapper">
+                <div style=${styles.main} ref=${this.ref}>
+                    <div style=${styles.dropdown} ref=${this.dropdownRef}>
+                        <div style=${styles.wrapper}>
                             ${this.renderMenu()}
                         </div>
                     </div>
@@ -166,5 +199,6 @@ define([
             `;
         }
     }
+
     return DropdownMenu;
 });

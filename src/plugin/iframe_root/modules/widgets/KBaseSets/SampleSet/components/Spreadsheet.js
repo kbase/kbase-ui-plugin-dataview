@@ -6,8 +6,8 @@ define([
     './DropdownMenu',
     './Popup',
     './Toolbar',
-
-    'css!./Spreadsheet.css'
+    'components/Empty',
+    './Spreadsheet.styles'
 ], function (
     preact,
     htm,
@@ -15,7 +15,9 @@ define([
     ResizeObserver2,
     DropdownMenu,
     Popup,
-    Toolbar
+    Toolbar,
+    Empty,
+    styles
 ) {
     const MAX_CELL_WIDTH = 200;
     const ROW_HEIGHT = 40;
@@ -104,13 +106,18 @@ define([
                 };
             })();
 
+            const menuStyle = Object.assign({}, styles.Spreadsheet_header_cell_menu);
+            if (this.state.isActive || this.state.isStickyOpen) {
+                menuStyle.visibility = 'visible';
+            }
+
             return html`
                 <${preact.Fragment}>
-                    <div className="Spreadsheet-cell-content" title=${columnDef.title}>
+                    <div style=${styles.Spreadsheet_cell_content} title=${columnDef.title}>
                         ${columnDef.title}
                     </div>
 
-                    <div className="Spreadsheet-header-cell-menu">
+                    <div style=${menuStyle}>
                         <${Popup} overlaySelector=".Spreadsheet-wrapper"
                                   scrollSelector=".Spreadsheet-header"
                                   containerTop=${0}
@@ -169,29 +176,31 @@ define([
         }
 
         render() {
-            const classes = ['Spreadsheet-header-cell'];
+            const style = Object.assign({}, styles.Spreadsheet_header_cell);
 
-            if (this.state.isActive || this.state.isStickyOpen) {
-                classes.push('-active');
+            // if (this.state.isActive || this.state.isStickyOpen) {
+            //
+            //     style.visbility = 'visible';
+            //     // Object.assign(style, styles.Spreadsheet_header_cell_menu_active);
+            // }
+
+            style.flexBasis = `${this.props.def.width}px`;
+
+            if (this.props.index === 0) {
+                style.borderLeft = '1px solid silver';
             }
-
-            const style = {
-                flexBasis: `${this.props.def.width}px`
-            };
 
             const columnDef = this.props.def;
             const columnNumber = this.props.index;
 
-            // onClick=${this.doSort.bind(this)}
             return html`
-                <div className=${classes.join(' ')}
+                <div style=${style}
                      onMouseEnter=${() => {
                          this.doMouseEnterHeaderCell(columnDef);
                      }}
                      onMouseLeave=${() => {
                          this.doMouseLeaveHeaderCell(columnDef);
                      }}
-                     style=${style}
                      role="cell"
                      data-k-b-testhook-cell=${columnDef.key}>
                     ${this.renderCell(columnDef, columnNumber)}
@@ -368,19 +377,27 @@ define([
 
             const cellTestNode = document.createElement('div');
             testNodeContainer.appendChild(cellTestNode);
-            cellTestNode.classList = ['Spreadsheet-cell-measurer'];
+            Object.entries(styles.Spreadsheet_cell_measurer).forEach(([name, value]) => {
+                cellTestNode.style.setProperty(name, value);
+            });
 
             const cellTestInnerNode = document.createElement('div');
             cellTestNode.appendChild(cellTestInnerNode);
-            cellTestInnerNode.classList = ['Spreadsheet-cell-content-measurer'];
+            Object.entries(styles.Spreadsheet_cell_content_measurer).forEach(([name, value]) => {
+                cellTestInnerNode.style.setProperty(name, value);
+            });
 
             const headerTestNode = document.createElement('div');
             testNodeContainer.appendChild(headerTestNode);
-            headerTestNode.classList = ['Spreadsheet-cell-measurer'];
+            Object.entries(styles.Spreadsheet_cell_measurer).forEach(([name, value]) => {
+                headerTestNode.style.setProperty(name, value);
+            });
 
             const headerTestInnerNode = document.createElement('div');
             headerTestNode.appendChild(headerTestInnerNode);
-            headerTestInnerNode.classList = ['Spreadsheet-header-cell-content-measurer'];
+            Object.entries(styles.Spreadsheet_cell_content_measurer).forEach(([name, value]) => {
+                headerTestInnerNode.style.setProperty(name, value);
+            });
 
             return {testNodeContainer, cellTestNode, cellTestInnerNode, headerTestNode, headerTestInnerNode};
         }
@@ -469,14 +486,6 @@ define([
                                 this.doSortColumn(columnDef, direction);
                             }}
                             onClearFilter=${this.doClearFilter.bind(this)}/>
-                `;
-            });
-        }
-
-        renderHeaderWithMenu() {
-            return this.props.columns.map((columnDef, columnNumber) => {
-                return html`
-                    <${HeaderCell} def=${columnDef} index=${columnNumber}/>
                 `;
             });
         }
@@ -756,6 +765,14 @@ define([
             return html`<span>${cellValue}</span>`;
         }
 
+        renderEmptyBody() {
+            return html`
+                <div style=${styles.Spreadsheet_centeringContainer}>
+                    <${Empty} message="No matching samples"/>
+                </div>
+            `;
+        }
+
         renderBody() {
             // Another nested loop of (samples, columnDefs).
             // for each sample
@@ -778,23 +795,33 @@ define([
                 })
                 .slice(this.firstRow, this.lastRow + 1);
 
+            if (viewedTable.length === 0) {
+                return this.renderEmptyBody();
+            }
+
             viewedTable.forEach((row, rowCount) => {
                 let totalWidth = leftMargin;
-                const rowStyle = {
+                const rowStyle = Object.assign({}, styles.Spreadsheet_grid_row, {
                     top: (this.firstRow + rowCount) * ROW_HEIGHT,
                     right: '0',
                     // bottom: String(spreadsheetHeight - (rowCount * ROW_HEIGHT + ROW_HEIGHT)),
                     left: '0',
                     height: ROW_HEIGHT
-                };
+                });
+
+                // const baseCellStyle = Object.assign({}, styles.Spreadsheet_cell, styles.Spreadsheet_sample_field)
 
                 const displayRow = cols.map((columnDef, columnNumber) => {
-                    const style = {
+                    const cellStyle = Object.assign({}, styles.Spreadsheet_cell, {
                         top: '0',
                         left: totalWidth,
                         width: columnDef.width,
                         height: ROW_HEIGHT
-                    };
+                    });
+
+                    if (columnNumber === 0) {
+                        cellStyle.borderLeft = '1px solid silver';
+                    }
 
                     totalWidth += columnDef.width;
 
@@ -803,50 +830,46 @@ define([
                     // TODO: add back in tooltip / title support to renderCell.
                     // title=${sampleField}
                     return html`
-                        <div className="Spreadsheet-cell Spreadsheet-sample-field"
-                             style=${style}
+                        <div style=${cellStyle}
                              role="cell"
                              data-k-b-testhook-cell=${columnDef.key}>
-                            <div className="Spreadsheet-cell-content">
+                            <div style=${styles.Spreadsheet_cell_content}>
                                 ${this.renderCell(cellValue, columnDef)}
                             </div>
                         </div>
                     `;
                 });
                 displayRows.push(html`
-                    <div className="Spreadsheet-grid-row"
-                         style=${rowStyle}
+                    <div style=${rowStyle}
                          role="row">
                         ${displayRow}
                     </div>
                 `);
             });
             return html`
-                <div className="Spreadsheet-grid"
-                     style=${{
-                         top: 0,
-                         left: 0,
-                         width: `${this.state.dimensions.width}px`,
-                         height: `${this.state.dimensions.height}px`
-                     }}>
+                <div style=${Object.assign({}, styles.Spreadsheet_grid, {
+                    top: 0,
+                    left: 0,
+                    width: `${this.state.dimensions.width}px`,
+                    height: `${this.state.dimensions.height}px`
+                })}>
                     ${displayRows}
                 </div>
             `;
         }
 
         renderSpreadsheet() {
-            const headerStyle = {
+            const headerStyle = Object.assign({}, styles.Spreadsheet_header, {
                 borderRight: `${this.state.scrollbarWidth || 0}px solid rgba(235, 235, 235, 1)`,
-                borderRadius: '4px'
-            };
+            });
             const result = html`
-                <div className="Spreadsheet-container">
+                <div style=${styles.Spreadsheet_container}>
                     <div className="Spreadsheet-header" style=${headerStyle} ref=${this.headerRef}>
-                        <div className="Spreadsheet-header-container">
+                        <div style=${styles.Spreadsheet_header_container}>
                             ${this.renderHeader()}
                         </div>
                     </div>
-                    <div className="Spreadsheet-body" ref=${this.bodyRef}
+                    <div style=${styles.Spreadsheet_body} ref=${this.bodyRef}
                          onScroll=${this.handleBodyScroll.bind(this)}>
                         ${this.renderBody()}
                     </div>
@@ -857,10 +880,13 @@ define([
         }
 
         renderEmpty() {
+            // return html`
+            //     <div class="alert alert-warning">
+            //         <span style=${{fontSize: '150%', marginRight: '4px'}}>∅</span> - Sorry, no data in this table.
+            //     </div>
+            // `;
             return html`
-                <div class="alert alert-warning">
-                    <span style=${{fontSize: '150%', marginRight: '4px'}}>∅</span> - Sorry, no data in this table.
-                </div>
+                <${Empty} message="No samples in this SampleSet"/>
             `;
         }
 
@@ -897,10 +923,10 @@ define([
                 return this.renderEmpty();
             }
             return html`
-                <div className="Spreadsheet-outer">
+                <div style=${styles.Spreadsheet_outer}>
                     ${this.renderToolbar()}
-                    <div className="Spreadsheet-wrapper">
-                        <div className="Spreadsheet">
+                    <div style=${styles.Spreadsheet_wrapper} className="Spreadsheet-wrapper">
+                        <div style=${styles.Spreadsheet}>
                             ${this.renderSpreadsheet()}
                         </div>
                     </div>

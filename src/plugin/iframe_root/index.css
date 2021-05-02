@@ -56,3 +56,10 @@ for proteome tooltip
 }
 
 /* background-color: white; padding: 4px; border: 1px solid red; display:none; min-height: 25px; position: absolute; */
+
+.FlexCol {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}

@@ -5,20 +5,23 @@ define([
     './Spreadsheet',
     './SampleMap',
     './SampleSet',
-
-    'css!./Main.css'
+    './Main.styles',
+    'lib/merge'
 ], function (
     preact,
     htm,
     Tabs,
     Spreadsheet,
     SampleMap,
-    SampleSet
+    SampleSet,
+    styles,
+    {merge}
 ) {
     const {Component, Fragment} = preact;
     const html = htm.bind(preact.h);
 
     const MAX_SAMPLES = 10000;
+
 
     class Main extends Component {
         constructor(props) {
@@ -75,22 +78,22 @@ define([
 
         renderSummary() {
             return html`
-                <div className="Main-summary">
-                    <div className="Main-summary-field">
-                        <div className="Main-summary-field-label" style=${{textDecoration: 'underline'}}>Summary</div>
+                <div style=${styles.summary}>
+                    <div style=${styles.summaryField}>
+                        <div style=${merge(styles.summaryFieldLabel, {textDecoration: 'underline'})}>Summary</div>
                     </div>
-                    <div className="Main-summary-field">
-                        <div className="Main-summary-field-label">Sample count:</div>
-                        <div className="Main-summary-field-value">${this.props.samples.length}</div>
+                    <div style=${styles.summaryField}>
+                        <div style=${styles.summaryFieldLabel}>Sample count:</div>
+                        <div style=${styles.summaryFieldValue}>${this.props.samples.length}</div>
                     </div>
-                    <div className="Main-summary-field">
-                        <div className="Main-summary-field-label">Format:</div>
-                        <div className="Main-summary-field-value">${this.props.format.source}</div>
+                    <div style=${styles.summaryField}>
+                        <div style=${styles.summaryFieldLabel}>Format:</div>
+                        <div style=${styles.summaryFieldValue}>${this.props.format.source}</div>
                     </div>
                     
-                    <div className="Main-summary-field">
-                        <div className="Main-summary-field-label">Description:</div>
-                        <div className="Main-summary-field-value">${this.props.sampleSet.description}</div>
+                    <div style=${styles.summaryField}>
+                        <div style=${styles.summaryFieldLabel}>Description:</div>
+                        <div style=${styles.summaryFieldValue}>${this.props.sampleSet.description}</div>
                     </div>
                 </div>
             `;
@@ -139,7 +142,7 @@ define([
                 }
             }];
             return html`
-            <div className="Main">
+            <div style=${styles.main}>
                 ${this.renderSummary()}
                 <${Tabs} tabs=${tabs} />
             </div>

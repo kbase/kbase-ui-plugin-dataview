@@ -3,13 +3,13 @@ define([
     'htm',
     'lib/formatters',
     'components/DataTable',
-
-    'css!./SampleSet.css'
+    './SampleSet.styles'
 ], function (
     preact,
     htm,
     fmt,
-    DataTable
+    DataTable,
+    styles
 ) {
     const {Component} = preact;
     const html = htm.bind(preact.h);
@@ -238,7 +238,7 @@ define([
                 return this.renderEmptySet();
             }
             return html`
-                <div className="SampleSet">
+                <div className="SampleSet" style=${styles.main}>
                     ${this.renderSamplesTable()}
                 </div>
             `;
