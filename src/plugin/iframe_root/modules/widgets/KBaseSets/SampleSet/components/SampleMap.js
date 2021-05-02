@@ -8,8 +8,7 @@ define([
     'components/Table',
     'components/DataTable',
     'components/common',
-
-    'css!./SampleMap.css'
+    './SampleMap.styles'
 ], function (
     preact,
     htm,
@@ -19,7 +18,8 @@ define([
     Col,
     Table,
     DataTable,
-    common
+    common,
+    styles
 ) {
     const {Component} = preact;
     const html = htm.bind(preact.h);
@@ -147,7 +147,7 @@ define([
 
         renderMap() {
             return html`
-                <div className="SampleMap-container" ref=${this.mapRef}></div>
+                <div style=${styles.container} ref=${this.mapRef}></div>
             `;
         }
 
@@ -391,14 +391,16 @@ define([
 
             const row = (row) => {
                 return html`
-                    <div className="SampleMap-detail-row">
+                    <div style=${styles.detailRow}>
                         <div className="Row">
                             <div className="Col" style=${{flex: '1 1 0px'}}>
                                 <div className="Row">
                                     <div className="Col" >
-                                        <div className="SampleMap-col-wrapper">
-                                            <div className="SampleMap-field-label">sample name</div>
-                                            <div className="SampleMap-field-value" role="cell" data-k-b-testhook-cell="name">
+                                        <div style=${styles.colWrapper}>
+                                            <div style=${styles.fieldLabel}>sample name</div>
+                                            <div style=${styles.fieldValue} 
+                                                 role="cell" 
+                                                 data-k-b-testhook-cell="name">
                                                 <a href=${`/#samples/view/${row.id}`} target="_blank">${row.name}</a>
                                             </div>
                                         </div>
@@ -406,18 +408,22 @@ define([
                                 </div>
                                 <div className="Row">
                                     <div className="Col" >
-                                        <div className="SampleMap-col-wrapper">
-                                            <div className="SampleMap-field-label">latitude</div>
-                                            <div className="SampleMap-field-value" role="cell" data-k-b-testhook-cell="latitude">
+                                        <div style=${styles.colWrapper}>
+                                            <div style=${styles.fieldLabel}>latitude</div>
+                                            <div style=${styles.fieldValue} 
+                                                 role="cell" 
+                                                 data-k-b-testhook-cell="latitude">
                                                 ${formatLatLong(row.latitude)}
                                             </div>
                                         </div>
                                     </div>
                                 
                                     <div className="Col" >
-                                        <div className="SampleMap-col-wrapper">
-                                            <div className="SampleMap-field-label">longitude</div>
-                                            <div className="SampleMap-field-value" role="cell" data-k-b-testhook-cell="longitude">
+                                        <div style=${styles.colWrapper}>
+                                            <div style=${styles.fieldLabel}>longitude</div>
+                                            <div style=${styles.fieldValue} 
+                                                 role="cell" 
+                                                 data-k-b-testhook-cell="longitude">
                                                 ${formatLatLong(row.longitude)}
                                             </div>
                                         </div>
@@ -427,9 +433,11 @@ define([
                             <div className="Col" style=${{flex: '1 1 0px'}}>
                                 <div className="Row">
                                     <div className="Col">
-                                        <div className="SampleMap-col-wrapper">
-                                            <div className="SampleMap-field-label">material</div>
-                                            <div className="SampleMap-field-value" role="cell" data-k-b-testhook-cell="material">
+                                        <div style=${styles.colWrapper}>
+                                            <div style=${styles.fieldLabel}>material</div>
+                                            <div style=${styles.fieldValue} 
+                                                 role="cell" 
+                                                 data-k-b-testhook-cell="material">
                                                 ${row.material}
                                             </div>
                                         </div>
@@ -437,9 +445,11 @@ define([
                                 </div>
                                 <div className="Row">
                                     <div className="Col" >
-                                        <div className="SampleMap-col-wrapper">
-                                            <div className="SampleMap-field-label">description</div>
-                                            <div className="SampleMap-field-value" role="cell" data-k-b-testhook-cell="description">
+                                        <div style=${styles.colWrapper}>
+                                            <div style=${styles.fieldLabel}>description</div>
+                                            <div style=${styles.fieldValue} 
+                                                 role="cell" 
+                                                 data-k-b-testhook-cell="description">
                                                 ${row.description || common.na()}
                                             </div>
                                         </div>
@@ -487,7 +497,7 @@ define([
 
         render() {
             return html`
-                <div className="SampleMap">
+                <div style=${styles.main}>
                     <${Row}>
                         <${Col} style=${{marginRight: '5px'}}>
                             ${this.renderMap()}

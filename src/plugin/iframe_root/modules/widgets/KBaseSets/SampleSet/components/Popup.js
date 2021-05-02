@@ -1,14 +1,12 @@
 define([
     'preact',
     'htm',
-
-    'css!./Popup'
+    './Popup.styles'
 ], function (
     preact,
-    htm
+    htm,
+    styles
 ) {
-    'use strict';
-
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
@@ -57,14 +55,13 @@ define([
 
             // Use the cover approach.
             this.cover = this.overlayContainer.appendChild(document.createElement('div'));
-            this.cover.classList.add('Popup-cover');
+            Object.entries(styles.cover).forEach(([name, value]) => {
+                this.cover.style.setProperty(name, value);
+            });
             this.cover.addEventListener('click', this.handleAnyClick);
 
-            const style = {
-                left, top
-            };
             const content = html`
-            <div className="Popup-pop" style=${style}>
+            <div style=${Object.assign({}, styles.pop, {left, top})}>
                 ${this.renderContent()}
             </div>
             `;
@@ -82,13 +79,11 @@ define([
         }
 
         render() {
-            const popupStateClass = '';
-            const iconClass = 'fa-chevron-circle-down';
             return html`
-                <div className=${`Popup ${popupStateClass}`}
+                <div style=${styles.main}
                      onClick=${(e) => {e.stopPropagation(); this.togglePopup();}} 
                      ref=${this.ref}>
-                    <span className=${`Popup-icon fa ${iconClass}`}></span>
+                    <span class="fa fa-chevron-circle-down" style=${styles.icon}></span>
                 </div>
             `;
         }

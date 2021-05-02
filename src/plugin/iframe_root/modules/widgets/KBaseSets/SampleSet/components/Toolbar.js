@@ -1,10 +1,11 @@
 define([
     'preact',
     'htm',
-    'css!./Toolbar.css'
+    './Toolbar.styles'
 ], function (
     preact,
-    htm
+    htm,
+    styles
 ) {
     const {Component} = preact;
     const html = htm.bind(preact.h);
@@ -93,11 +94,11 @@ define([
 
             return html`
                 <${preact.Fragment}>
-                    <div className="Toolbar-filter-column">
+                    <div style=${styles.filterColumn}>
                         ${columnsSelect}
                     </div>
                 ${' '}
-                    <div className="Toolbar-filter-value">
+                    <div style=${styles.filterValue}>
                         ${directionSelect}
                     </div>
 
@@ -191,7 +192,7 @@ define([
 
             return html`
                 <${preact.Fragment}>
-                    <div class="Toolbar-filter-value">
+                    <div style=${styles.filterValue}>
                         <input class="form-control"
                                value=${value}
                                placeholder="Search"
@@ -199,7 +200,7 @@ define([
                                onKeyUp=${this.onFilterValueKeyUp.bind(this)}
                                onChange=${this.onFilterValueChange.bind(this)}></input>
                     </div>
-                    <div class="Toolbar-filter-column">
+                    <div style=${styles.filterColumn}>
                         ${columnsSelect}
                     </div>
                 <//>
@@ -318,18 +319,18 @@ define([
 
         render() {
             return html`
-                <div className="Toolbar">
-                    <div className="Toolbar-filter">
+                <div style=${styles.main}>
+                    <div style=${styles.filter}>
                         ${this.renderToolbarFilter()}
                     </div>
-                    <div className="Toolbar-sort">
-                        <div className="Toolbar-label">sort</div>
+                    <div style=${styles.sort}>
+                        <div style=${styles.label}>sort</div>
                         ${this.renderToolbarSort()}
                     </div>
-                    <div className="Toolbar-buttons">
+                    <div style=${styles.buttons}>
                         ${this.renderButtons()}
                     </div>
-                    <div className="Toolbar-counts">
+                    <div style=${styles.counts}>
                         ${this.renderToolbarCounts()}
                     </div>
                 </div>
