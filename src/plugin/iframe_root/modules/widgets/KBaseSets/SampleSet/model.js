@@ -17,13 +17,20 @@ define([
 
         async getJSON(filePath) {
             const currentPath = module.uri.split('/').slice(1, -1).join('/');
+            console.log('[getJSON] 1', filePath, module.uri, currentPath);
             const response = await fetch(`${currentPath}/${filePath}.json`, {
                 method: 'GET'
             });
+            console.log('[getJSON] 2', response);
             if (response.status !== 200) {
                 throw new Error(`Cannot load JSON file ${filePath}`);
             }
-            return await response.json();
+            try {
+                return await response.json();
+            } catch (ex) {
+                console.error('ERROR parsing JSON file', ex);
+                throw new Error(`Error parsing JSON file "${filePath}: ${ex.message}`);
+            }
         }
 
         async getFormat(formatId) {
