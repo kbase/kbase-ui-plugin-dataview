@@ -87,8 +87,12 @@ define([
                         <div style=${styles.summaryFieldValue}>${this.props.samples.length}</div>
                     </div>
                     <div style=${styles.summaryField}>
+                        <div style=${styles.summaryFieldLabel}>Field count:</div>
+                        <div style=${styles.summaryFieldValue}>${this.props.fieldKeys.size}</div>
+                    </div>
+                    <div style=${styles.summaryField}>
                         <div style=${styles.summaryFieldLabel}>Format:</div>
-                        <div style=${styles.summaryFieldValue}>${this.props.format.source}</div>
+                        <div style=${styles.summaryFieldValue}>${this.props.format.title}</div>
                     </div>
                     
                     <div style=${styles.summaryField}>

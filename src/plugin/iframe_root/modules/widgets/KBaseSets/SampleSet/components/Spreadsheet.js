@@ -95,14 +95,14 @@ define([
                             this.doSort('descending');
                         }
                     },
-                        // {
-                        //     title: 'Clear Any Filter',
-                        //     action: this.doClearFilter.bind(this)
-                        // },
-                        {
-                            title: 'Quick Filter',
-                            dataMenu: filterMenu
-                        }]
+                    // {
+                    //     title: 'Clear Any Filter',
+                    //     action: this.doClearFilter.bind(this)
+                    // },
+                    {
+                        title: 'Quick Filter',
+                        dataMenu: filterMenu
+                    }]
                 };
             })();
 
@@ -297,29 +297,30 @@ define([
             }
         }
 
-        formatValue(value, formatter) {
-            if (!formatter) {
+        formatValue(value, column) {
+            if (!column.format) {
                 return value;
             }
 
-            switch (formatter.type) {
+            switch (column.type) {
             case 'number':
-                if (formatter.precision) {
-                    return Intl.NumberFormat('en-US', {
-                        maximumSignificantDigits: formatter.precision,
-                        useGrouping: formatter.group ? true : false
-                    }).format(value);
-                } else if (formatter.decimalPlaces) {
-                    return Intl.NumberFormat('en-US', {
-                        maximumFractionDigits: formatter.decimalPlaces,
-                        minimumFractionDigits: formatter.decimalPlaces,
-                        useGrouping: formatter.group ? true : false
-                    }).format(value);
-                } else {
-                    return Intl.NumberFormat('en-US', {
-                        useGrouping: formatter.group ? true : false
-                    }).format(value);
-                }
+                return Intl.NumberFormat('en-US', column.format).format(value);
+                // if (columnDef.precision) {
+                //     return Intl.NumberFormat('en-US', {
+                //         maximumSignificantDigits: formatter.precision,
+                //         useGrouping: formatter.group ? true : false
+                //     }).format(value);
+                // } else if (formatter.decimalPlaces) {
+                //     return Intl.NumberFormat('en-US', {
+                //         maximumFractionDigits: formatter.decimalPlaces,
+                //         minimumFractionDigits: formatter.decimalPlaces,
+                //         useGrouping: formatter.group ? true : false
+                //     }).format(value);
+                // } else {
+                //     return Intl.NumberFormat('en-US', {
+                //         useGrouping: formatter.group ? true : false
+                //     }).format(value);
+                // }
             default:
                 return value;
             }
@@ -752,8 +753,12 @@ define([
             if (typeof cellValue === 'undefined' || cellValue === null) {
                 return common.na();
             }
-            if (columnDef.format) {
-                cellValue = this.formatValue(cellValue, columnDef.format);
+            if (columnDef.formatter) {
+                try {
+                    cellValue = columnDef.formatter(cellValue);
+                } catch (ex) {
+                    cellValue = `**ERR** ${ex.message}`;
+                }
             }
 
             // if (controlledField.units) {
