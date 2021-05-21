@@ -4,14 +4,13 @@ define([], () => {
             'flex': '1 1 0px',
             'display': 'flex',
             'flexDirection': 'column',
-            'minHeight': '0',
-            'marginTop': '10px'
+            'minHeight': '0'
         },
         summary: {
             'flex': '0 0 auto',
             'display': 'flex',
             'flexDirection': 'row',
-            'marginBottom': '6px'
+            'marginBottom': '14px'
         },
         summaryField: {
             'flex': '0 0 auto',

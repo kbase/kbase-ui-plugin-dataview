@@ -140,7 +140,7 @@ define([
                 render: () => {
                     return html`
                     <div className="FlexCol" style=${{marginTop: '10px'}}>
-                        <${Spreadsheet} columns=${this.props.sampleColumns} table=${this.props.sampleTable} />
+                        <${Spreadsheet} columns=${this.props.sampleColumns} table=${this.props.sampleTable} columnGroups=${this.props.columnGroups} />
                     </div>
                     `;
                 }

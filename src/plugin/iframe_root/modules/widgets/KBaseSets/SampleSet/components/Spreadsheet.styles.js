@@ -151,6 +151,16 @@ define([], () => {
             'textOverflow': 'ellipsis',
             'minWidth': '0'
         },
+        'Spreadsheet_cell_unit': {
+            'flex': '1 1 0px',
+            'display': 'block',
+            'overflow': 'hidden',
+            'whiteSpace': 'nowrap',
+            'textOverflow': 'ellipsis',
+            'minWidth': '0',
+            'fontWeight': 'normal',
+            'fontStyle': 'italic'
+        },
         'Spreadsheet_user_field': {
             'backgroundColor': 'yellow'
         },
