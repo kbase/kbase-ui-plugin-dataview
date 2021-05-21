@@ -53,7 +53,6 @@ define([
         }
 
         renderCell() {
-            // columnDef, columnNumber
             const columnDef = this.props.def;
             const columnNumber = this.props.index;
             const menu = (() => {
@@ -95,14 +94,10 @@ define([
                             this.doSort('descending');
                         }
                     },
-                    // {
-                    //     title: 'Clear Any Filter',
-                    //     action: this.doClearFilter.bind(this)
-                    // },
-                    {
-                        title: 'Quick Filter',
-                        dataMenu: filterMenu
-                    }]
+                        {
+                            title: 'Quick Filter',
+                            dataMenu: filterMenu
+                        }]
                 };
             })();
 
@@ -178,12 +173,6 @@ define([
         render() {
             const style = Object.assign({}, styles.Spreadsheet_header_cell);
 
-            // if (this.state.isActive || this.state.isStickyOpen) {
-            //
-            //     style.visbility = 'visible';
-            //     // Object.assign(style, styles.Spreadsheet_header_cell_menu_active);
-            // }
-
             style.flexBasis = `${this.props.def.width}px`;
 
             if (this.props.index === 0) {
@@ -201,6 +190,55 @@ define([
                      onMouseLeave=${() => {
                          this.doMouseLeaveHeaderCell(columnDef);
                      }}
+                     role="cell"
+                     data-k-b-testhook-cell=${columnDef.key}>
+                    ${this.renderCell(columnDef, columnNumber)}
+                </div>`;
+        }
+    }
+
+    class HeaderUnitCell extends Component {
+        constructor(props) {
+            super(props);
+
+            this.state = {
+                sortDirection: null,
+                isActive: false,
+                isStickyOpen: false
+            };
+        }
+
+        renderCell() {
+            const columnDef = this.props.def;
+
+            const menuStyle = Object.assign({}, styles.Spreadsheet_header_cell_menu);
+            if (this.state.isActive || this.state.isStickyOpen) {
+                menuStyle.visibility = 'visible';
+            }
+
+            return html`
+                <${preact.Fragment}>
+                    <div style=${styles.Spreadsheet_cell_unit} title=${columnDef.unit}>
+                        ${columnDef.unit}
+                    </div>
+                <//>
+            `;
+        }
+
+        render() {
+            const style = Object.assign({}, styles.Spreadsheet_header_cell);
+
+            style.flexBasis = `${this.props.def.width}px`;
+
+            if (this.props.index === 0) {
+                style.borderLeft = '1px solid silver';
+            }
+
+            const columnDef = this.props.def;
+            const columnNumber = this.props.index;
+
+            return html`
+                <div style=${style}
                      role="cell"
                      data-k-b-testhook-cell=${columnDef.key}>
                     ${this.renderCell(columnDef, columnNumber)}
@@ -305,22 +343,6 @@ define([
             switch (column.type) {
             case 'number':
                 return Intl.NumberFormat('en-US', column.format).format(value);
-                // if (columnDef.precision) {
-                //     return Intl.NumberFormat('en-US', {
-                //         maximumSignificantDigits: formatter.precision,
-                //         useGrouping: formatter.group ? true : false
-                //     }).format(value);
-                // } else if (formatter.decimalPlaces) {
-                //     return Intl.NumberFormat('en-US', {
-                //         maximumFractionDigits: formatter.decimalPlaces,
-                //         minimumFractionDigits: formatter.decimalPlaces,
-                //         useGrouping: formatter.group ? true : false
-                //     }).format(value);
-                // } else {
-                //     return Intl.NumberFormat('en-US', {
-                //         useGrouping: formatter.group ? true : false
-                //     }).format(value);
-                // }
             default:
                 return value;
             }
@@ -338,9 +360,6 @@ define([
 
             this.scrollTimer = window.setTimeout(() => {
                 this.calcColumns();
-                // this.setState({
-                //     triggerRefresh: new Date().getTime()
-                // });
                 this.scrollTimer = null;
             }, 100);
         }
@@ -471,6 +490,50 @@ define([
             // // this.headerRef.current.style.marginRight = `${scrollbarWidth}px`;
             // this.headerRef.current.style.borderRight = `${scrollbarWidth}px solid rgba(235, 235, 235, 1)`;
             // this.headerRef.current.style.borderRadius = '4px';
+        }
+
+        renderHeaderGroups() {
+            let colsSoFar = 1;
+            const result = this.props.columnGroups.map((columnGroup) => {
+                // get width of this span.
+
+                const columns = this.props.columns.slice(colsSoFar, colsSoFar + columnGroup.count);
+                colsSoFar += columnGroup.count;
+                const width = columns.reduce((width, column) => {
+                    return width + column.width;
+                }, 0);
+
+                const style = Object.assign({}, styles.Spreadsheet_header_cell);
+
+                if (this.props.index === 0) {
+                    style.borderLeft = '1px solid silver';
+                }
+
+                style.flexBasis = `${width}px`;
+                // create a simple div for now.
+                return html`
+                    <div style=${style} role="cell">
+                        ${columnGroup.title}
+                    </div>
+                `;
+            });
+            const style = Object.assign({}, styles.Spreadsheet_header_cell);
+            style.flexBasis = `${this.props.columns[0].width}px`;
+            style.borderLeft = '1px solid silver';
+            result.unshift(html`
+                <div style=${style} role="cell"></div>
+            `);
+            return result;
+        }
+
+        renderHeaderUnits() {
+            return this.props.columns.map((columnDef, columnNumber) => {
+                return html`
+                    <${HeaderUnitCell}
+                            def=${columnDef}
+                            index=${columnNumber}/>
+                `;
+            });
         }
 
         renderHeader() {
@@ -867,11 +930,17 @@ define([
             const headerStyle = Object.assign({}, styles.Spreadsheet_header, {
                 borderRight: `${this.state.scrollbarWidth || 0}px solid rgba(235, 235, 235, 1)`,
             });
-            const result = html`
+            return html`
                 <div style=${styles.Spreadsheet_container}>
                     <div className="Spreadsheet-header" style=${headerStyle} ref=${this.headerRef}>
                         <div style=${styles.Spreadsheet_header_container}>
+                            ${this.renderHeaderGroups()}
+                        </div>
+                        <div style=${styles.Spreadsheet_header_container}>
                             ${this.renderHeader()}
+                        </div>
+                        <div style=${styles.Spreadsheet_header_container}>
+                            ${this.renderHeaderUnits()}
                         </div>
                     </div>
                     <div style=${styles.Spreadsheet_body} ref=${this.bodyRef}
@@ -880,16 +949,9 @@ define([
                     </div>
                 </div>
             `;
-
-            return result;
         }
 
         renderEmpty() {
-            // return html`
-            //     <div class="alert alert-warning">
-            //         <span style=${{fontSize: '150%', marginRight: '4px'}}>∅</span> - Sorry, no data in this table.
-            //     </div>
-            // `;
             return html`
                 <${Empty} message="No samples in this SampleSet"/>
             `;

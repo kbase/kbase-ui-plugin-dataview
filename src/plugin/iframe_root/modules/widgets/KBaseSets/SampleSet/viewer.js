@@ -104,16 +104,26 @@ define([
 
             // first pass, just flatten out all the fields, and pluck out the ones in fieldKeys.
             const groupedFields = [];
-            for (const {title, fields} of fieldGroups) {
+            const groups = [];
+            for (const {name, title, fields} of fieldGroups) {
+                const group = {
+                    name, title,
+                    count: 0
+                };
                 for (const fieldKey of fields) {
                     if (fieldKeys.has(fieldKey)) {
                         groupedFields.push({
                             groupTitle: title,
+                            groupName: name,
                             type: 'controlled',
                             fieldKey
                         });
                         fieldKeys.delete(fieldKey);
+                        group.count += 1;
                     }
+                }
+                if (group.count > 0) {
+                    groups.push(group);
                 }
             }
 
@@ -130,16 +140,29 @@ define([
             });
 
             // Any remaining fields are field keys
-            Array.from(fieldKeys).sort().forEach((fieldKey) => {
-                groupedFields.push({
-                    groupTitle: 'User Fields',
-                    type: 'user',
-                    fieldKey
+
+            if (fieldKeys.size > 0) {
+                Array.from(fieldKeys).sort().forEach((fieldKey) => {
+                    groupedFields.push({
+                        type: 'user',
+                        fieldKey
+                    });
                 });
-            });
+                groups.push({
+                    name: 'userFields',
+                    title: 'User Fields',
+                    count: fieldKeys.size
+                });
+            }
 
             const sampleColumns = groupedFields.map(({type, fieldKey, schema}, index) => {
                 if (type === 'controlled') {
+                    const unit = (() => {
+                        if ('units' in schema.kbase) {
+                            return schema.kbase.units.canonical;
+                        }
+                        return null;
+                    })();
                     return {
                         index: index + 1,
                         key: fieldKey,
@@ -147,8 +170,8 @@ define([
                         fieldType: 'controlled',
                         type: schema.type,
                         format: schema.kbase.format,
-                        formatter: this.makeFormatter(schema)
-
+                        formatter: this.makeFormatter(schema),
+                        unit
                     };
                 } else {
                     return {
@@ -198,7 +221,7 @@ define([
                 return row;
             });
 
-            return [sampleColumns, sampleTable];
+            return [sampleColumns, sampleTable, groups];
         }
 
         async start(params) {
@@ -261,7 +284,7 @@ define([
                     return;
                 }
 
-                const [sampleColumns, sampleTable] = await this.samplesToTable(model, orderedSamples, sampleSet, format, fieldKeys);
+                const [sampleColumns, sampleTable, columnGroups] = await this.samplesToTable(model, orderedSamples, sampleSet, format, fieldKeys);
                 const params = {
                     sampleSet,
                     samples,
@@ -271,7 +294,8 @@ define([
                     sampleColumns,
                     userProfiles,
                     format,
-                    objectInfo
+                    objectInfo,
+                    columnGroups
                 };
                 preact.render(preact.h(Main, params), this.node);
             } catch (ex) {
