@@ -74,14 +74,6 @@ define([
                         attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
                     }
                 },
-                StamenWatercolor: {
-                    title: 'Stamen Watercolor',
-                    urlTemplate: 'https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.{ext}',
-                    options: {
-                        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                        ext: 'png'
-                    }
-                },
                 NASAGIBSModisTerraTrueColorCR: {
                     title: 'NASAGIBS.ModisTerraTrueColorCR',
                     urlTemplate: 'https://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_CorrectedReflectance_TrueColor/default/{time}/{tilematrixset}{maxZoom}/{z}/{y}/{x}.{format}',
@@ -128,12 +120,10 @@ define([
 
             const tile1 = this.addLayer('OpenStreetMap');
             const tile2 = this.addLayer('OpenTopoMap');
-            const tile3 = this.addLayer('StamenWatercolor');
             const tile4 = this.addLayer('EsriWorldImagery');
             const baseMaps = {
                 OpenStreetMap: tile1,
                 OpenTopoMap: tile2,
-                StamenWatercolor: tile3,
                 EsriWorldImagery: tile4
             };
             leaflet.control.layers(baseMaps, null).addTo(this.map);
@@ -207,7 +197,8 @@ define([
             //     color: '#3388ff'
             // }).addTo(map);
 
-            const showTooltips = (locationSamples.length <= 10);
+            // const showTooltips = (locationSamples.length <= 10);
+            const showTooltips = false;
 
             const radius = (() => {
                 if (locationSamples.length <= 10) {
