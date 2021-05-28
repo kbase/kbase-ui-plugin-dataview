@@ -4,6 +4,7 @@ define([
     'components/Tabs',
     './Spreadsheet',
     './SampleMap',
+    './SampleMap2',
     './SampleSet',
     './Main.styles',
     'lib/merge'
@@ -13,6 +14,7 @@ define([
     Tabs,
     Spreadsheet,
     SampleMap,
+    SampleMap2,
     SampleSet,
     styles,
     {merge}
@@ -76,6 +78,12 @@ define([
             `;
         }
 
+         renderMap2() {
+            return html`
+            <${SampleMap2} samples=${this.props.samples} />
+            `;
+        }
+
         renderSummary() {
             return html`
                 <div style=${styles.summary}>
@@ -121,6 +129,12 @@ define([
                 title: 'Map',
                 render: () => {
                     return this.renderMap();
+                }
+            }, {
+                id: 'map2',
+                title: 'Map 2',
+                render: () => {
+                    return this.renderMap2();
                 }
             },
             // {
