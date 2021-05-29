@@ -32,7 +32,7 @@ define([
         }
 
         async getFormat(formatId) {
-            return this.getJSON(`data2/formats/${formatId.toLowerCase()}`);
+            return this.getJSON(`mock-data/formats/${formatId.toLowerCase()}`);
         }
 
         /**
@@ -43,7 +43,7 @@ define([
         async getFieldSchemas(fieldKeys) {
             return Promise.all(fieldKeys.map((fieldKey) => {
                 const key = fieldKey.replace(':', '-');
-                return this.getJSON(`data2/schemas/${key}`);
+                return this.getJSON(`mock-data/schemas/${key}`);
             }));
         }
 

@@ -29,23 +29,13 @@ define([
         return (typeof value !== 'undefined');
     }
 
-    function plural(value, singular, plural) {
-        if (value === 1) {
-            return `${singular}`;
-        } else {
-            return `${plural}`;
-        }
-    }
-
     class SampleMap extends Component {
         constructor(props) {
             super(props);
 
             this.mapRef = preact.createRef();
-
             this.samplesMarkers = new Map();
             this.markers = new Map();
-
             this.map = null;
 
             this.mapLayers = {
@@ -78,10 +68,6 @@ define([
                         attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
                     }
                 }
-            };
-
-            this.state = {
-                highlightedSamples: []
             };
         }
 
@@ -230,7 +216,7 @@ define([
                 const sampleURL = `${window.location.origin}#samples/view/${sample.id}/${sample.version}`;
                 return `
                     <div>
-                        <a href="${sampleURL}>" target="_blank">${sample.name}</a>
+                        <a href="${sampleURL}" target="_blank">${sample.name}</a>
                     </div>
                 `;
             }).join('');
@@ -252,7 +238,7 @@ define([
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>${plural(location.samples.length, 'Sample', 'Samples')}</th>
+                                    <th>Samples</th>
                                     <td>
                                         ${Intl
                                             .NumberFormat('en-US', {useGrouping: true})
@@ -262,7 +248,7 @@ define([
                             </tbody>
                         </table>
                     </div>
-                    <div style="border-top: 1px solid rgba(200, 200, 200, 1);">
+                    <div style="border-top: 1px solid rgba(200, 200, 200, 1); margin-top: 4px; padding-top: 4px;">
                         ${samples}
                     </div>
                 </div>
@@ -284,9 +270,7 @@ define([
                     <${Row}>
                         <${Col}>
                         ${this.renderMap()}
-                    </
-                    />
-                <//>
+                    <//>
                 </div>
             `;
         }
