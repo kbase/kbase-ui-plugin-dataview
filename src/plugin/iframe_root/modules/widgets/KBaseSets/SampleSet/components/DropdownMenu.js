@@ -156,7 +156,6 @@ define([
         }
     }
 
-
     class DropdownMenu extends Component {
         constructor(props) {
             super(props);

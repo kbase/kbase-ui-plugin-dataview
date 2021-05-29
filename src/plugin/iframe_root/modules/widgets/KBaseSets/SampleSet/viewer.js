@@ -99,7 +99,7 @@ define([
          * @returns {Promise<*[]>}
          */
         async samplesToTable(model, samples, sampleSet, format, allFieldKeys) {
-            const fieldGroups = await model.getJSON('data2/groups/groups');
+            const fieldGroups = await model.getJSON('mock-data/groups/groups');
             const fieldKeys = new Set(Array.from(allFieldKeys));
 
             // first pass, just flatten out all the fields, and pluck out the ones in fieldKeys.
@@ -158,8 +158,8 @@ define([
             const sampleColumns = groupedFields.map(({type, fieldKey, schema}, index) => {
                 if (type === 'controlled') {
                     const unit = (() => {
-                        if ('units' in schema.kbase) {
-                            return schema.kbase.units.canonical;
+                        if ('unit' in schema.kbase) {
+                            return schema.kbase.unit;
                         }
                         return null;
                     })();
