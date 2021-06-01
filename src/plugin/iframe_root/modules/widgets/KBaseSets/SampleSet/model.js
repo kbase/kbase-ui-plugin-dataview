@@ -47,6 +47,15 @@ define([
             }));
         }
 
+        /**
+         *
+         * @returns {Promise<any>}
+         */
+        async getFieldGroups() {
+            const fieldGroups = await this.getJSON('mock-data/groups/groups');
+            return fieldGroups;
+        }
+
         async getSamples({samples}) {
             const sampleService = new GenericClient({
                 module: 'SampleService',

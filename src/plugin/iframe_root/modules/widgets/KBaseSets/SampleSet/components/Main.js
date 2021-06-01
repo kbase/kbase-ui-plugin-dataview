@@ -84,6 +84,12 @@ define([
             `;
         }
 
+        renderFormatTitle() {
+            return html`
+                <a href="${this.props.format.info.homePage}" target="_blank" title="${this.props.format.info.title}">${this.props.format.info.shortTitle}</a>
+            `;
+        }
+
         renderSummary() {
             return html`
                 <div style=${styles.summary}>
@@ -100,7 +106,7 @@ define([
                     </div>
                     <div style=${styles.summaryField}>
                         <div style=${styles.summaryFieldLabel}>Format:</div>
-                        <div style=${styles.summaryFieldValue}>${this.props.format.title}</div>
+                        <div style=${styles.summaryFieldValue}>${this.renderFormatTitle()}</div>
                     </div>
                     
                     <div style=${styles.summaryField}>

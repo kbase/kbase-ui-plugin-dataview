@@ -1,5 +1,10 @@
 {
     "name": "sesar",
+    "info": {
+        "title": "System for Earth Sample Regsitration",
+        "shortTitle": "SESAR",
+        "homePage": "https://www.geosamples.org/"
+    },
     "mappings": {
         "id": "sesar:igsn",
         "parent": "sesar:parent_igsn",
