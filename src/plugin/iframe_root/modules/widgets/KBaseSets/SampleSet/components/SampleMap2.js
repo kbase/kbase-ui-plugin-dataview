@@ -53,14 +53,6 @@ define([
                         attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
                     }
                 },
-                NASAGIBSModisTerraTrueColorCR: {
-                    title: 'NASAGIBS.ModisTerraTrueColorCR',
-                    urlTemplate: 'https://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_CorrectedReflectance_TrueColor/default/{time}/{tilematrixset}{maxZoom}/{z}/{y}/{x}.{format}',
-                    options: {
-                        attribution: 'Imagery provided by services from the Global Imagery Browse Services (GIBS), operated by the NASA/GSFC/Earth Science Data and Information System (<a href="https://earthdata.nasa.gov">ESDIS</a>) with funding provided by NASA/HQ.',
-                        format: 'png'
-                    }
-                },
                 EsriWorldImagery: {
                     title: 'Esri.WorldImagery',
                     urlTemplate: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -164,6 +156,8 @@ define([
                             latitude: metadata.latitude.value,
                             longitude: metadata.longitude.value
                         },
+                        primaryPhysiographicFeature: metadata['sesar:physiographic_feature_primary'].value,
+                        physiographicFeatureName: metadata['sesar:physiographic_feature_name'].value,
                         markerId: new Uuid(4).format(),
                         coord: [metadata.latitude.value, metadata.longitude.value]
                     });
@@ -238,11 +232,21 @@ define([
                                     </td>
                                 </tr>
                                 <tr>
+                                    <th>Feature</th>
+                                    <td>
+                                        ${location.primaryPhysiographicFeature}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Name</th>
+                                    <td>
+                                        ${location.physiographicFeatureName}
+                                    </td>
+                                </tr>
+                                <tr>
                                     <th>Samples</th>
                                     <td>
-                                        ${Intl
-                                            .NumberFormat('en-US', {useGrouping: true})
-                                            .format(location.samples.length)}
+                                        ${Intl.NumberFormat('en-US', {useGrouping: true}).format(location.samples.length)}
                                     </td>
                                 </tr>
                             </tbody>
