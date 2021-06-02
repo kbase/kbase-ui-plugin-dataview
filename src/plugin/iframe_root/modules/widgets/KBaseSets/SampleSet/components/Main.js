@@ -33,7 +33,10 @@ define([
         renderSampleSet() {
             let truncatedMessage = '';
             if (this.props.totalCount > MAX_SAMPLES) {
-                truncatedMessage = html`<div className="alert alert-warning">The total number of results has been truncated; only the first ${MAX_SAMPLES} are displayed during this testing period.</div>`;
+                truncatedMessage = html`
+                    <div className="alert alert-warning">The total number of results has been truncated; only the first
+                        ${MAX_SAMPLES} are displayed during this testing period.
+                    </div>`;
             }
             // const totalCount = Intl.NumberFormat('en-US', {
             //     useGrouping: true
@@ -42,9 +45,11 @@ define([
             //         <h4>Samples</h4>
             return html`
                 <${Fragment}>
-                    <${SampleSet} sampleSet=${this.props.sampleSet} samples=${this.props.samples} totalCount=${this.props.totalCount} userProfiles=${this.props.userProfiles}/>
-                    ${truncatedMessage}
-                <//>
+                    <${SampleSet} sampleSet=${this.props.sampleSet} samples=${this.props.samples}
+                                  totalCount=${this.props.totalCount} userProfiles=${this.props.userProfiles}/>
+                        ${truncatedMessage}
+                    </
+                    />
             `;
         }
 
@@ -59,14 +64,14 @@ define([
             const description = this.props.sampleSet.description.split('\n')
                 .map((line) => {
                     return html`
-                    <p>${line}</p>
+                        <p>${line}</p>
                     `;
                 });
             return html`
                 <${Fragment}>
                     <h4>Description</h4>
                     <div data-k-b-testhook-element="description">
-                    ${description}
+                        ${description}
                     </div>
                 <//>
             `;
@@ -74,19 +79,20 @@ define([
 
         renderMap() {
             return html`
-            <${SampleMap} samples=${this.props.samples} />
+                <${SampleMap} samples=${this.props.samples}/>
             `;
         }
 
-         renderMap2() {
+        renderMap2() {
             return html`
-            <${SampleMap2} samples=${this.props.samples} />
+                <${SampleMap2} samples=${this.props.samples}/>
             `;
         }
 
         renderFormatTitle() {
             return html`
-                <a href="${this.props.format.info.homePage}" target="_blank" title="${this.props.format.info.title}">${this.props.format.info.shortTitle}</a>
+                <a href="${this.props.format.info.homePage}" target="_blank"
+                   title="${this.props.format.info.title}">${this.props.format.info.shortTitle}</a>
             `;
         }
 
@@ -108,7 +114,7 @@ define([
                         <div style=${styles.summaryFieldLabel}>Format:</div>
                         <div style=${styles.summaryFieldValue}>${this.renderFormatTitle()}</div>
                     </div>
-                    
+
                     <div style=${styles.summaryField}>
                         <div style=${styles.summaryFieldLabel}>Description:</div>
                         <div style=${styles.summaryFieldValue}>${this.props.sampleSet.description}</div>
@@ -142,34 +148,23 @@ define([
                 render: () => {
                     return this.renderMap2();
                 }
-            },
-            // {
-            //     id: 'spreadsheet',
-            //     title: 'Spreadsheet',
-            //     render: () => {
-            //         return html`
-            //         <div className="FlexCol" style=${{marginTop: '10px'}}>
-            //             <${Spreadsheet} sampleSet=${this.props.sampleSet} />
-            //         </div>
-            //         `;
-            //     }
-            // },
-            {
+            }, {
                 id: 'spreadsheet',
                 title: 'Spreadsheet',
                 render: () => {
                     return html`
-                    <div className="FlexCol" style=${{marginTop: '10px'}}>
-                        <${Spreadsheet} columns=${this.props.sampleColumns} table=${this.props.sampleTable} columnGroups=${this.props.columnGroups} />
-                    </div>
+                        <div className="FlexCol" style=${{marginTop: '10px'}}>
+                            <${Spreadsheet} columns=${this.props.sampleColumns} table=${this.props.sampleTable}
+                                            columnGroups=${this.props.columnGroups}/>
+                        </div>
                     `;
                 }
             }];
             return html`
-            <div style=${styles.main}>
-                ${this.renderSummary()}
-                <${Tabs} tabs=${tabs} />
-            </div>
+                <div style=${styles.main}>
+                    ${this.renderSummary()}
+                    <${Tabs} tabs=${tabs}/>
+                </div>
             `;
         }
     }

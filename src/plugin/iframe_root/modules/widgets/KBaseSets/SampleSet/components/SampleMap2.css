@@ -1,3 +1,7 @@
+.MapPopUp {
+    margin: 5px 15px 5px 0;
+}
+
 .MapPopUp table th {
     color: rgba(150, 150, 150, 1);
 }
