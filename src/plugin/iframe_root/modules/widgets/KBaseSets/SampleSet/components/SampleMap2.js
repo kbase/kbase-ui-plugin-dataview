@@ -151,6 +151,7 @@ define([
                     const existingLocationSample = locationSamples[existing];
                     existingLocationSample.samples.push({
                         id: sample.id,
+                        version: sample.version,
                         name: sample.name
                     });
                     existingLocationSample.sampleIds.push(sample.id);
