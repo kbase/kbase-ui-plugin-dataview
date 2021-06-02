@@ -25,6 +25,16 @@ define([
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
+    const ADDITIONAL_INFO_FIELDS = [{
+        from: 'sesar:physiographic_feature_primary',
+        to: 'feature',
+        label: 'Feature'
+    }, {
+        from: 'sesar:physiographic_feature_name',
+        to: 'featureName',
+        label: 'Name'
+    }];
+
     function isDefined(value) {
         return (typeof value !== 'undefined');
     }
@@ -145,6 +155,14 @@ define([
                     });
                     existingLocationSample.sampleIds.push(sample.id);
                 } else {
+                    const additionalInfo = {};
+
+                    for (const {from, to} of ADDITIONAL_INFO_FIELDS) {
+                        if (from in metadata) {
+                            additionalInfo[to] = metadata[from].value;
+                        }
+                    }
+
                     locationSamples.push({
                         samples: [{
                             id: sample.id,
@@ -156,8 +174,7 @@ define([
                             latitude: metadata.latitude.value,
                             longitude: metadata.longitude.value
                         },
-                        primaryPhysiographicFeature: metadata['sesar:physiographic_feature_primary'].value,
-                        physiographicFeatureName: metadata['sesar:physiographic_feature_name'].value,
+                        additionalInfo,
                         markerId: new Uuid(4).format(),
                         coord: [metadata.latitude.value, metadata.longitude.value]
                     });
@@ -205,21 +222,6 @@ define([
             }
         }
 
-        renderOptionalPopupRow(location, label, key) {
-            if (!(key in location)) {
-                return '';
-            }
-
-            return `
-                <tr>
-                    <th>${label}</th>
-                    <td>
-                        ${location[key]}
-                    </td>
-                </tr>
-            `;
-        }
-
         renderPopup(location) {
             const samples = location.samples.map((sample) => {
                 const sampleURL = `${window.location.origin}#samples/view/${sample.id}/${sample.version}`;
@@ -229,6 +231,22 @@ define([
                     </div>
                 `;
             }).join('');
+
+            const additionalInfo = ADDITIONAL_INFO_FIELDS.map(({to, label}) => {
+                if (!(to in location.additionalInfo)) {
+                    return '';
+                }
+                return `
+                    <tr>
+                        <th>${label}</th>
+                        <td>
+                            ${location.additionalInfo[to]}
+                        </td>
+                    </tr>
+                `;
+            }).join('\n');
+
+
             return `
                 <div class="MapPopUp">
                     <div style="white-space: nowrap">
@@ -247,8 +265,7 @@ define([
                                     </td>
                                 </tr>
                                 
-                                ${this.renderOptionalPopupRow(location, 'Feature', 'primaryPhysiographicFeature')}
-                                ${this.renderOptionalPopupRow(location, 'Name', 'physiographicFeatureName')}
+                                ${additionalInfo}
                                 
                                 <tr>
                                     <th>Samples</th>
