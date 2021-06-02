@@ -205,6 +205,21 @@ define([
             }
         }
 
+        renderOptionalPopupRow(location, label, key) {
+            if (!(key in location)) {
+                return '';
+            }
+
+            return `
+                <tr>
+                    <th>${label}</th>
+                    <td>
+                        ${location[key]}
+                    </td>
+                </tr>
+            `;
+        }
+
         renderPopup(location) {
             const samples = location.samples.map((sample) => {
                 const sampleURL = `${window.location.origin}#samples/view/${sample.id}/${sample.version}`;
@@ -231,18 +246,10 @@ define([
                                         ${this.formatNumber(location.coordinate.longitude)}
                                     </td>
                                 </tr>
-                                <tr>
-                                    <th>Feature</th>
-                                    <td>
-                                        ${location.primaryPhysiographicFeature}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>Name</th>
-                                    <td>
-                                        ${location.physiographicFeatureName}
-                                    </td>
-                                </tr>
+                                
+                                ${this.renderOptionalPopupRow(location, 'Feature', 'primaryPhysiographicFeature')}
+                                ${this.renderOptionalPopupRow(location, 'Name', 'physiographicFeatureName')}
+                                
                                 <tr>
                                     <th>Samples</th>
                                     <td>
@@ -274,7 +281,9 @@ define([
                     <${Row}>
                         <${Col}>
                         ${this.renderMap()}
-                    <//>
+                    </
+                    />
+                <//>
                 </div>
             `;
         }
