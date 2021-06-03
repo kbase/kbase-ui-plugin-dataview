@@ -7,7 +7,9 @@ define([
     './Popup',
     './Toolbar',
     'components/Empty',
-    './Spreadsheet.styles'
+    './Spreadsheet.styles',
+
+    'css!./Spreadsheet.css'
 ], function (
     preact,
     htm,
@@ -93,11 +95,10 @@ define([
                         action: () => {
                             this.doSort('descending');
                         }
-                    },
-                        {
-                            title: 'Quick Filter',
-                            dataMenu: filterMenu
-                        }]
+                    }, {
+                        title: 'Quick Filter',
+                        dataMenu: filterMenu
+                    }]
                 };
             })();
 
@@ -175,10 +176,6 @@ define([
 
             style.flexBasis = `${this.props.def.width}px`;
 
-            if (this.props.index === 0) {
-                style.borderLeft = '1px solid silver';
-            }
-
             const columnDef = this.props.def;
             const columnNumber = this.props.index;
 
@@ -230,10 +227,6 @@ define([
 
             style.flexBasis = `${this.props.def.width}px`;
 
-            if (this.props.index === 0) {
-                style.borderLeft = '1px solid silver';
-            }
-
             const columnDef = this.props.def;
             const columnNumber = this.props.index;
 
@@ -260,7 +253,7 @@ define([
             // Just for now ... a better impl is a spreadsheet data source.
             // analyze table values...
 
-            const table = this.props.table.map((data, index) => {
+            const table = this.props.table.map(({entity, data}, index) => {
                 const terms = data.reduce((terms, value) => {
                     if (value) {
                         terms.add(String(value));
@@ -274,6 +267,7 @@ define([
                     },
                     index,
                     searchData: Array.from(terms).join(' '),
+                    entity,
                     data
                 };
             });
@@ -390,36 +384,37 @@ define([
             }, 100);
         }
 
+        setStyles(node, styles) {
+            Object.entries(styles).forEach(([name, value]) => {
+                node.style.setProperty(name, value);
+            });
+        }
+
+        createTestNode(container, cellType) {
+            const testNode = document.createElement('div');
+            container.appendChild(testNode);
+            this.setStyles(testNode, styles[`Spreadsheet_${cellType}_measurer`]);
+
+            const testInnerNode = document.createElement('div');
+            testNode.appendChild(testInnerNode);
+            this.setStyles(testInnerNode, styles[`Spreadsheet_${cellType}_content_measurer`]);
+
+            return [testNode, testInnerNode];
+        }
+
         createTestNodes() {
             const testNodeContainer = document.createElement('div');
             testNodeContainer.position = 'absolute';
             document.body.appendChild(testNodeContainer);
 
-            const cellTestNode = document.createElement('div');
-            testNodeContainer.appendChild(cellTestNode);
-            Object.entries(styles.Spreadsheet_cell_measurer).forEach(([name, value]) => {
-                cellTestNode.style.setProperty(name, value);
-            });
+            const [cellTestNode, cellTestInnerNode] = this.createTestNode(testNodeContainer, 'cell');
+            const [headerTestNode, headerTestInnerNode] = this.createTestNode(testNodeContainer, 'header_cell');
+            const [unitTestNode, unitTestInnerNode] = this.createTestNode(testNodeContainer, 'header_cell');
 
-            const cellTestInnerNode = document.createElement('div');
-            cellTestNode.appendChild(cellTestInnerNode);
-            Object.entries(styles.Spreadsheet_cell_content_measurer).forEach(([name, value]) => {
-                cellTestInnerNode.style.setProperty(name, value);
-            });
-
-            const headerTestNode = document.createElement('div');
-            testNodeContainer.appendChild(headerTestNode);
-            Object.entries(styles.Spreadsheet_cell_measurer).forEach(([name, value]) => {
-                headerTestNode.style.setProperty(name, value);
-            });
-
-            const headerTestInnerNode = document.createElement('div');
-            headerTestNode.appendChild(headerTestInnerNode);
-            Object.entries(styles.Spreadsheet_cell_content_measurer).forEach(([name, value]) => {
-                headerTestInnerNode.style.setProperty(name, value);
-            });
-
-            return {testNodeContainer, cellTestNode, cellTestInnerNode, headerTestNode, headerTestInnerNode};
+            return {
+                testNodeContainer, cellTestNode, cellTestInnerNode, headerTestNode, headerTestInnerNode,
+                unitTestNode, unitTestInnerNode
+            };
         }
 
         renderAndMeasure(content, contentNode, measurementNode) {
@@ -433,7 +428,9 @@ define([
                 cellTestNode,
                 cellTestInnerNode,
                 headerTestNode,
-                headerTestInnerNode
+                headerTestInnerNode,
+                unitTestNode,
+                unitTestInnerNode
             } = this.createTestNodes();
             const measures = {};
 
@@ -449,14 +446,15 @@ define([
                 // Measure column header width.
                 const headerWidth = this.renderAndMeasure(html`
                     <${HeaderCell} def=${columnDef}/>`, headerTestInnerNode, headerTestNode);
-                // headerTestInnerNode.innerText = columnDef.title;
-                // const headerWidth = outerWidth(headerTestNode);
+                // Measure unit header width.
+                const unitHeaderWidth = this.renderAndMeasure(html`
+                    <${HeaderUnitCell} def=${columnDef}/>`, unitTestInnerNode, unitTestNode);
 
-                // Get max widths for all row values for this column.
+                // Get max width for all values for this column, across all rows
                 let maxCellWidth = 0;
                 for (let j = 0; j < this.props.table.length; j += 1) {
                     const row = this.props.table[j];
-                    const cellValue = row[i];
+                    const cellValue = row.data[i];
 
                     if (cellValue !== null && typeof cellValue !== 'undefined' && cellValue !== '') {
                         columnDef.filterValues.add(cellValue);
@@ -467,8 +465,6 @@ define([
                         thisWidth = measures[cellValue];
                     } else {
                         const cellWidth = this.renderAndMeasure(this.renderCell(cellValue, columnDef), cellTestInnerNode, cellTestNode);
-                        // cellTestInnerNode.innerHTML = content;
-                        // const w = outerWidth(cellTestNode);
                         measures[cellValue] = cellWidth;
                         thisWidth = cellWidth;
                     }
@@ -478,18 +474,15 @@ define([
                 // Even grosser, or is it just javascript-fu??
                 columnDef.filterValues = Array.from(columnDef.filterValues.values()).sort();
 
-                // We constrain the max column width to be the max header or cell width, but no
-                // wider the the MAX_CELL_WIDTH
-                const maxWidth = Math.min(Math.max(headerWidth, maxCellWidth), MAX_CELL_WIDTH);
+                // We constrain the max column width to be the greater of either header or cell width,
+                // but no wider the the MAX_CELL_WIDTH
+                // TODO: deal with the group header; for now, it is assumed to be smaller than the
+                // spans it covers...
+
+                const maxWidth = Math.min(Math.max(headerWidth, unitHeaderWidth, maxCellWidth), MAX_CELL_WIDTH);
                 columnDef.width = Math.ceil(maxWidth);
             }
             document.body.removeChild(testNodeContainer);
-
-            // // Now get the width of the scrollbar, if any.
-            // const scrollbarWidth = this.bodyRef.current.offsetWidth - this.bodyRef.current.clientWidth;
-            // // this.headerRef.current.style.marginRight = `${scrollbarWidth}px`;
-            // this.headerRef.current.style.borderRight = `${scrollbarWidth}px solid rgba(235, 235, 235, 1)`;
-            // this.headerRef.current.style.borderRadius = '4px';
         }
 
         renderHeaderGroups() {
@@ -505,10 +498,6 @@ define([
 
                 const style = Object.assign({}, styles.Spreadsheet_header_cell);
 
-                if (this.props.index === 0) {
-                    style.borderLeft = '1px solid silver';
-                }
-
                 style.flexBasis = `${width}px`;
                 // create a simple div for now.
                 return html`
@@ -519,7 +508,7 @@ define([
             });
             const style = Object.assign({}, styles.Spreadsheet_header_cell);
             style.flexBasis = `${this.props.columns[0].width}px`;
-            style.borderLeft = '1px solid silver';
+
             result.unshift(html`
                 <div style=${style} role="cell"></div>
             `);
@@ -762,6 +751,7 @@ define([
                     return !row.state.hidden;
                 })
                 .length * ROW_HEIGHT;
+
             const spreadsheetWidth = this.props.columns.reduce((total, def) => {
                 total += def.width;
                 return total;
@@ -824,12 +814,6 @@ define([
                 }
             }
 
-            // if (controlledField.units) {
-            //     units = html`${' '}<i>${controlledField.units}</i>`;
-            // } else {
-            //     units = '';
-            // }
-
             return html`<span>${cellValue}</span>`;
         }
 
@@ -841,6 +825,11 @@ define([
             `;
         }
 
+        doContextMenu(ev, row) {
+            ev.stopPropagation();
+            ev.preventDefault();
+        }
+
         renderBody() {
             // Another nested loop of (samples, columnDefs).
             // for each sample
@@ -850,13 +839,15 @@ define([
                 return;
             }
 
+            // Ge the subset of columns which are currently visible.
             const cols = this.props.columns.slice(this.state.firstCol, this.state.lastCol + 1);
             const leftMargin = this.props.columns.slice(0, this.state.firstCol)
                 .reduce((margin, def) => {
                     return margin + def.width;
                 }, 0);
 
-            const displayRows = [];
+            // Get the sub-table resulting from both filtering and the
+            // currently displayed first and last rows.
             const viewedTable = this.state.table
                 .filter((row) => {
                     return !row.state.hidden;
@@ -867,17 +858,15 @@ define([
                 return this.renderEmptyBody();
             }
 
+            const displayRows = [];
             viewedTable.forEach((row, rowCount) => {
                 let totalWidth = leftMargin;
                 const rowStyle = Object.assign({}, styles.Spreadsheet_grid_row, {
                     top: (this.firstRow + rowCount) * ROW_HEIGHT,
                     right: '0',
-                    // bottom: String(spreadsheetHeight - (rowCount * ROW_HEIGHT + ROW_HEIGHT)),
                     left: '0',
                     height: ROW_HEIGHT
                 });
-
-                // const baseCellStyle = Object.assign({}, styles.Spreadsheet_cell, styles.Spreadsheet_sample_field)
 
                 const displayRow = cols.map((columnDef, columnNumber) => {
                     const cellStyle = Object.assign({}, styles.Spreadsheet_cell, {
@@ -886,10 +875,6 @@ define([
                         width: columnDef.width,
                         height: ROW_HEIGHT
                     });
-
-                    if (columnNumber === 0) {
-                        cellStyle.borderLeft = '1px solid silver';
-                    }
 
                     totalWidth += columnDef.width;
 
@@ -907,8 +892,14 @@ define([
                         </div>
                     `;
                 });
+                // oncontextmenu=${(ev) => {this.doContextMenu(ev, row);}}
                 displayRows.push(html`
                     <div style=${rowStyle}
+                         class="HoverRow"
+                         ondblclick=${(ev) => {
+                             ev.preventDefault();
+                             this.props.onRowClick(row.entity);
+                         }}
                          role="row">
                         ${displayRow}
                     </div>
