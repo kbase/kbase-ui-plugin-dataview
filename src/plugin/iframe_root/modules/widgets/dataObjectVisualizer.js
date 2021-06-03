@@ -7,9 +7,7 @@ define([
     'kb_lib/htmlBootstrapBuilders',
     'kb_service/utils'
 ], function (Promise, _, GenericClient, html, htmlBuilders, BS, APIUtils) {
-    'use strict';
-
-    var t = html.tag,
+    const t = html.tag,
         div = t('div');
 
     function factory(config) {
@@ -26,9 +24,9 @@ define([
             });
             if (mapping) {
                 if (params.sub && params.subid) {
-                    var sub = params.sub.toLowerCase();
+                    const sub = params.sub.toLowerCase();
                     if (mapping.sub) {
-                        if (mapping.sub.hasOwnProperty(sub)) {
+                        if (Object.prototype.hasOwnProperty.call(mapping.sub, sub)) {
                             mapping = mapping.sub[sub]; // ha, crazy line, i know.
                         } else {
                             throw new Error(
@@ -101,7 +99,7 @@ define([
                         var wsobject = APIUtils.objectInfoToObject(objectInfos[0]);
                         var type = APIUtils.parseTypeId(wsobject.type),
                             mapping = findMapping(type, params);
-                        // console.log('widget mapping', mapping);
+
                         if (!mapping) {
                             throw new Error('Sorry, cannot find widget for ' + type.module + '.' + type.name);
                         }
@@ -161,7 +159,8 @@ define([
             container.innerHTML = BS.buildPanel({
                 title: 'Error',
                 body: content,
-                type: 'danger' });
+                type: 'danger'
+            });
         }
 
         // Widget Lifecycle Interface
@@ -192,19 +191,18 @@ define([
                             name: 'data-view',
                             type: 'default',
                             title: result.mapping.title || 'Data View',
-                            body: div({ id: widgetParentId })
+                            body: div({id: widgetParentId})
                         });
                         // These are global.
                         widgetContainer = document.getElementById(widgetParentId);
                     } else if (result.mapping.scrolling) {
-                        widgetContainer = container.appendChild(document.createElement('div')),
+                        widgetContainer = container.appendChild(document.createElement('div'));
                         widgetContainer.style.flex = '1 1 0px';
                         widgetContainer.style.display = 'flex';
                         widgetContainer.style['flex-direction'] = 'column';
                         widgetContainer.style['min-height'] = '0';
                         widgetContainer.style['overflow-y'] = 'auto';
                         widgetContainer.setAttribute('data-k-b-testhook-element', 'scrolling-wrapper');
-                        widgetParentId = html.genId();
                     } else {
                         widgetContainer = container;
                     }

@@ -123,6 +123,11 @@ define([
             `;
         }
 
+        onRowClick(sampleRow) {
+            const {id, version} = sampleRow;
+            window.open(`/#samples/view/${id}/${version}`, '_blank');
+        }
+
         render() {
             const tabs = [{
                 id: 'sampleset',
@@ -154,7 +159,9 @@ define([
                 render: () => {
                     return html`
                         <div className="FlexCol" style=${{marginTop: '10px'}}>
-                            <${Spreadsheet} columns=${this.props.sampleColumns} table=${this.props.sampleTable}
+                            <${Spreadsheet} columns=${this.props.sampleColumns} 
+                                            table=${this.props.sampleTable}
+                                            onRowClick=${this.onRowClick.bind(this)}
                                             columnGroups=${this.props.columnGroups}/>
                         </div>
                     `;

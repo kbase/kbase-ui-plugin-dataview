@@ -1,4 +1,9 @@
 define([], () => {
+    const borderWidth = 0.5;
+    const borderColor = 'rgba(200, 200, 200, 0.5)';
+    const cellBorder = () => {
+        return `${borderWidth}px solid ${borderColor}`;
+    };
     return {
         'Spreadsheet_outer': {
             'flex': '1 1 0px',
@@ -24,7 +29,8 @@ define([], () => {
             'minHeight': '0',
             'minWidth': '0',
             'overflowX': 'auto',
-            'boxSizing': 'border-box'
+            'boxSizing': 'border-box',
+            border: cellBorder()
         },
         'Spreadsheet_container': {
             'flex': '1 1 0px',
@@ -37,7 +43,7 @@ define([], () => {
             'display': 'flex',
             'flexDirection': 'column',
             'overflowX': 'hidden',
-            borderTop: '1px solid silver',
+            // borderTop: cellBorder(),
             backgroundColor: 'rgba(200, 200, 200, 0.2)'
         },
         'Spreadsheet_header_container': {
@@ -55,8 +61,9 @@ define([], () => {
             'minWidth': '0',
             'fontWeight': 'bold',
             cursor: 'default',
-            borderBottom: '1px solid silver',
-            borderRight: '1px solid silver'
+            border: cellBorder()
+            // borderBottom: '1px solid silver',
+            // borderRight: '1px solid silver'
         },
         'Spreadsheet_header_cell_sort_control': {
             'flex': '0 0 auto',
@@ -112,11 +119,11 @@ define([], () => {
             'flexDirection': 'row',
             'alignItems': 'center',
             'padding': '4px',
-            // 'border': '1px solid silver',
             'minWidth': '0',
             'position': 'absolute',
-            borderBottom: '1px solid silver',
-            borderRight: '1px solid silver'
+            border: cellBorder()
+            // borderBottom: '1px solid silver',
+            // borderRight: '1px solid silver'
         },
         'Spreadsheet_cell_measurer': {
             'display': 'inline-block',
@@ -128,9 +135,13 @@ define([], () => {
             'whiteSpace': 'nowrap',
             'minWidth': '0',
             'padding': '4px',
-            // border: '1px solid white',
-            borderBottom: '1px solid white',
-            borderRight: '1px solid white'
+            border: cellBorder()
+            // borderBottom: '1px solid white',
+            // borderRight: '1px solid white'
+        },
+        'Spreadsheet_header_cell_measurer': {
+            'display': 'inline-block',
+            'visibility': 'hidden'
         },
         'Spreadsheet_header_cell_content_measurer': {
             'display': 'flex',
@@ -138,10 +149,10 @@ define([], () => {
             'whiteSpace': 'nowrap',
             'minWidth': '0',
             'padding': '4px',
-            // 'border': '1px solid white',
             'fontWeight': 'bold',
-            borderBottom: '1px solid white',
-            borderRight: '1px solid white'
+            border: cellBorder()
+            // borderBottom: '1px solid white',
+            // borderRight: '1px solid white'
         },
         'Spreadsheet_cell_content': {
             'flex': '1 1 0px',

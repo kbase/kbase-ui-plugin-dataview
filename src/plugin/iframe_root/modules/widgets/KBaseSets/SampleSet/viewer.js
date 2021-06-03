@@ -95,7 +95,7 @@ define([
          * @param samples
          * @param sampleSet
          * @param format
-         * @param fieldKeys {Set} Unique set of all fields.
+         * @param allFieldKeys {Set} Unique set of all fields.
          * @returns {Promise<*[]>}
          */
         async samplesToTable(model, samples, sampleSet, format, allFieldKeys) {
@@ -214,11 +214,18 @@ define([
             }
 
             const sampleTable = samples.map((sample, index) => {
-                const row = groupedFields.map(({title, type, fieldKey}) => {
+                const data = groupedFields.map(({title, type, fieldKey}) => {
                     return getCellContent(sample, title, type, fieldKey);
                 });
-                row.unshift(index + 1);
-                return row;
+                // Add the row number as a synthetic first column.
+                data.unshift(index + 1);
+                return {
+                    entity: {
+                        id: sample.id,
+                        version: sample.version
+                    },
+                    data
+                };
             });
 
             return [sampleColumns, sampleTable, groups];
