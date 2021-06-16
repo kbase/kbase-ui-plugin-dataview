@@ -1,5 +1,4 @@
 define([], function () {
-    'use strict';
     require.config({
         baseUrl: './modules',
         paths: {
@@ -45,6 +44,7 @@ define([], function () {
             underscore: 'vendor/underscore/underscore',
             uuid: 'vendor/pure-uuid/uuid',
             yaml: 'vendor/requirejs-yaml/yaml',
+            json: 'vendor/requirejs-json/json',
             leaflet: 'vendor/leaflet/leaflet-src',
             leaflet_css: 'vendor/leaflet/leaflet'
         },

@@ -1,12 +1,24 @@
 define([
     'module',
     'bluebird',
-    'kb_lib/jsonRpc/genericClient'
+    'kb_lib/jsonRpc/genericClient',
+
+    'json!./data/groups/groups.json',
+    'json!./data/schemas/schemas.json'
 ], function (
     module,
     Promise,
-    GenericClient
+    GenericClient,
+
+    groupsData,
+    schemasData
 ) {
+
+    const schemas = schemasData.reduce((schemas, schema) => {
+        schemas[schema.kbase.sample.key] = schema;
+        return schemas;
+    }, {});
+
     class Model {
         constructor(config) {
             this.runtime = config.runtime;
@@ -31,10 +43,6 @@ define([
             }
         }
 
-        async getFormat(formatId) {
-            return this.getJSON(`mock-data/formats/${formatId.toLowerCase()}`);
-        }
-
         /**
          *
          * @param fieldKeys {Array[string]}
@@ -42,8 +50,7 @@ define([
          */
         async getFieldSchemas(fieldKeys) {
             return Promise.all(fieldKeys.map((fieldKey) => {
-                const key = fieldKey.replace(':', '-');
-                return this.getJSON(`mock-data/schemas/${key}`);
+                return schemas[fieldKey];
             }));
         }
 
@@ -52,8 +59,7 @@ define([
          * @returns {Promise<any>}
          */
         async getFieldGroups() {
-            const fieldGroups = await this.getJSON('mock-data/groups/groups');
-            return fieldGroups;
+            return groupsData;
         }
 
         async getSamples({samples}) {
@@ -84,17 +90,8 @@ define([
             }, {});
 
 
-            // NEW
-
-            // Get the format (from the samples)
-            // Optimization for now ... since all samples in a set are from the same
-            // import, they all have the same format.
-            // Actually, we need to fix up the samples as well, since the format is added
-            // as a metadata field.
             const fieldKeys = new Set();
             rawSamples.forEach((sample) => {
-                sample.format = sample.node_tree[0].meta_controlled['sample_template'].value;
-                delete sample.node_tree[0].meta_controlled['sample_template'];
                 Object.keys(sample.node_tree[0].meta_controlled).forEach((key) => {
                     fieldKeys.add(key);
                 });
