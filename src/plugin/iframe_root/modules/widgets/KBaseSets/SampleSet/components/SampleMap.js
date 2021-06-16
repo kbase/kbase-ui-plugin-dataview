@@ -9,8 +9,8 @@ define([
     'components/DataTable',
     'components/common',
     './SampleMap.styles'
-], function (
-    preact,
+], (
+    {Component, h, createRef},
     htm,
     leaflet,
     Uuid,
@@ -20,19 +20,18 @@ define([
     DataTable,
     common,
     styles
-) {
-    const {Component} = preact;
-    const html = htm.bind(preact.h);
+) => {
+    const html = htm.bind(h);
 
     function isDefined(value) {
         return (typeof value !== 'undefined');
     }
+
     function pluralOf(value, singular, plural) {
         if (value === 1) {
             return `${value} ${singular}`;
-        } else {
-            return `${value} ${plural}`;
         }
+        return `${value} ${plural}`;
     }
 
     function getMetadataField(sample, key, defaultValue) {
@@ -52,7 +51,7 @@ define([
         constructor(props) {
             super(props);
 
-            this.mapRef = preact.createRef();
+            this.mapRef = createRef();
 
             this.samplesMarkers = new Map();
             this.markers = new Map();
@@ -144,7 +143,7 @@ define([
         renderEmptySet() {
             return html`
                 <div class="alert alert-warning">
-                <span style=${{fontSize: '150%', marginRight: '4px'}}>∅</span> - Sorry, no samples in this set.
+                    <span style=${{fontSize: '150%', marginRight: '4px'}}>∅</span> - Sorry, no samples in this set.
                 </div>
             `;
         }
@@ -152,7 +151,8 @@ define([
         renderNoGeolocation() {
             return html`
                 <div class="alert alert-warning">
-                <span style=${{fontSize: '150%', marginRight: '4px'}}>∅</span> - Sorry, no samples in this set have geolocation information.
+                    <span style=${{fontSize: '150%', marginRight: '4px'}}>∅</span> - Sorry, no samples in this set have
+                    geolocation information.
                 </div>
             `;
         }
@@ -161,12 +161,12 @@ define([
             const locationSamples = [];
             this.props.samples.forEach((sample) => {
                 const metadata = sample.node_tree[0].meta_controlled;
-                if (!isDefined(metadata.latitude)  || !isDefined(metadata.longitude)) {
+                if (!isDefined(metadata.latitude) || !isDefined(metadata.longitude)) {
                     return;
                 }
                 const existing = locationSamples.findIndex((locationSample) => {
                     return ((locationSample.coordinate.latitude === metadata.latitude.value) &&
-                         (locationSample.coordinate.longitude === metadata.longitude.value));
+                        (locationSample.coordinate.longitude === metadata.longitude.value));
                 });
 
                 if (existing >= 0) {
@@ -307,7 +307,6 @@ define([
         }
 
 
-
         clearSelectedSamples() {
             const markerIds = this.state.highlightedSamples.reduce((markerIds, sampleId) => {
                 // return !location.sampleIds.includes(sampleId);
@@ -340,7 +339,7 @@ define([
 
             const coordsTable = this.props.samples.map((sample) => {
                 const metadata = sample.node_tree[0].meta_controlled;
-                if (!isDefined(metadata.latitude)  || !isDefined(metadata.longitude)) {
+                if (!isDefined(metadata.latitude) || !isDefined(metadata.longitude)) {
                     return;
                 }
 
@@ -386,11 +385,11 @@ define([
                         <div className="Row">
                             <div className="Col" style=${{flex: '1 1 0px'}}>
                                 <div className="Row">
-                                    <div className="Col" >
+                                    <div className="Col">
                                         <div style=${styles.colWrapper}>
                                             <div style=${styles.fieldLabel}>sample name</div>
-                                            <div style=${styles.fieldValue} 
-                                                 role="cell" 
+                                            <div style=${styles.fieldValue}
+                                                 role="cell"
                                                  data-k-b-testhook-cell="name">
                                                 <a href=${`/#samples/view/${row.id}`} target="_blank">${row.name}</a>
                                             </div>
@@ -398,22 +397,22 @@ define([
                                     </div>
                                 </div>
                                 <div className="Row">
-                                    <div className="Col" >
+                                    <div className="Col">
                                         <div style=${styles.colWrapper}>
                                             <div style=${styles.fieldLabel}>latitude</div>
-                                            <div style=${styles.fieldValue} 
-                                                 role="cell" 
+                                            <div style=${styles.fieldValue}
+                                                 role="cell"
                                                  data-k-b-testhook-cell="latitude">
                                                 ${formatLatLong(row.latitude)}
                                             </div>
                                         </div>
                                     </div>
-                                
-                                    <div className="Col" >
+
+                                    <div className="Col">
                                         <div style=${styles.colWrapper}>
                                             <div style=${styles.fieldLabel}>longitude</div>
-                                            <div style=${styles.fieldValue} 
-                                                 role="cell" 
+                                            <div style=${styles.fieldValue}
+                                                 role="cell"
                                                  data-k-b-testhook-cell="longitude">
                                                 ${formatLatLong(row.longitude)}
                                             </div>
@@ -426,8 +425,8 @@ define([
                                     <div className="Col">
                                         <div style=${styles.colWrapper}>
                                             <div style=${styles.fieldLabel}>material</div>
-                                            <div style=${styles.fieldValue} 
-                                                 role="cell" 
+                                            <div style=${styles.fieldValue}
+                                                 role="cell"
                                                  data-k-b-testhook-cell="material">
                                                 ${row.material}
                                             </div>
@@ -435,11 +434,11 @@ define([
                                     </div>
                                 </div>
                                 <div className="Row">
-                                    <div className="Col" >
+                                    <div className="Col">
                                         <div style=${styles.colWrapper}>
                                             <div style=${styles.fieldLabel}>description</div>
-                                            <div style=${styles.fieldValue} 
-                                                 role="cell" 
+                                            <div style=${styles.fieldValue}
+                                                 role="cell"
                                                  data-k-b-testhook-cell="description">
                                                 ${row.description || common.na()}
                                             </div>
@@ -461,27 +460,33 @@ define([
                         <span style=${{marginLeft: '4px'}}>
                         (
                             ${this.state.highlightedSamples.length} selected
-                            <span 
-                            style=${{color: '#337ab7', cursor: 'pointer', marginLeft: '4px'}} 
-                            onClick=${this.clearSelectedSamples.bind(this)}>clear</span>
+                            <span
+                                    style=${{color: '#337ab7', cursor: 'pointer', marginLeft: '4px'}}
+                                    onClick=${this.clearSelectedSamples.bind(this)}>clear</span>
                             </span>
                         )
                     `;
                 })();
                 return html`
-                <div style=${{flex: '1 1 0px', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
-                    ${pluralOf(this.props.samples.length, 'sample', 'samples')}
-                    ${selected}
-                </div>
+                    <div style=${{
+                        flex: '1 1 0px',
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        ${pluralOf(this.props.samples.length, 'sample', 'samples')}
+                        ${selected}
+                    </div>
                 `;
             };
 
             return html`
-                <${DataTable} 
-                    dataSource=${coordsTable} 
-                    render=${{row, header}}
-                    heights=${{row: 120, header: 30}}
-                    onClick=${this.onRowClick.bind(this)}/>
+                <${DataTable}
+                        dataSource=${coordsTable}
+                        render=${{row, header}}
+                        heights=${{row: 120, header: 30}}
+                        onClick=${this.onRowClick.bind(this)}/>
             `;
         }
 
@@ -491,12 +496,13 @@ define([
                 <div style=${styles.main}>
                     <${Row}>
                         <${Col} style=${{marginRight: '5px'}}>
-                            ${this.renderMap()}
-                        <//>
-                        <${Col} style=${{marginLeft: '5px'}}>
-                            ${this.renderCoordsTable()}
-                        <//>
-                    <//>
+                        ${this.renderMap()}
+                    </
+                    />
+                    <${Col} style=${{marginLeft: '5px'}}>
+                    ${this.renderCoordsTable()}
+                <//>
+                <//>
                 </div>
             `;
         }

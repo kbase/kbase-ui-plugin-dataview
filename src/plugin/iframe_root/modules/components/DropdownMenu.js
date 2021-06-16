@@ -2,11 +2,11 @@ define([
     'preact',
     'htm',
     './DropdownMenu.styles'
-], function (
+], (
     preact,
     htm,
     styles
-) {
+) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
@@ -71,13 +71,12 @@ define([
                                     <div style=${styles.itemLabel}>${item.title}</div>
                                 </div>
                             `;
-                        } else {
-                            return html`
-                                <div style=${item} onClick=${this.props.onActionCompleted}>
-                                    <div style=${styles.itemLabel}>${item.title}</div>
-                                </div>
-                            `;
                         }
+                        return html`
+                            <div style=${item} onClick=${this.props.onActionCompleted}>
+                                <div style=${styles.itemLabel}>${item.title}</div>
+                            </div>
+                        `;
                     });
                     return [html`
                         <div style=${styles.dataMenu}>${items}</div>`, '-open'];
@@ -93,8 +92,8 @@ define([
             return html`
                 <div className=${menuClass}
                      style=${styles.item}
-                         onMouseEnter=${this.hoverItemOn.bind(this)}
-                         onMouseLeave=${this.hoverItemOff.bind(this)}
+                     onMouseEnter=${this.hoverItemOn.bind(this)}
+                     onMouseLeave=${this.hoverItemOff.bind(this)}
                      onClick=${this.toggleSubMenu.bind(this)}>
                     <div style=${styles.itemLabel}>
                         ${item.title}

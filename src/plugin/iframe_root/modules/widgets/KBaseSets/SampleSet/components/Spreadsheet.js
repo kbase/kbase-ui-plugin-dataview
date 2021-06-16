@@ -2,16 +2,17 @@ define([
     'preact',
     'htm',
     'components/common',
-    '../../../../ResizeObserver',
-    './DropdownMenu',
-    './Popup',
+    'ResizeObserver',
+    'components/DropdownMenu',
+    'components/Popup',
     './Toolbar',
     'components/Empty',
     './Spreadsheet.styles',
+    '../constants',
 
     'css!./Spreadsheet.css'
-], function (
-    preact,
+], (
+    {Component, h, Fragment, createRef, render},
     htm,
     common,
     ResizeObserver2,
@@ -19,13 +20,10 @@ define([
     Popup,
     Toolbar,
     Empty,
-    styles
-) {
-    const MAX_CELL_WIDTH = 200;
-    const ROW_HEIGHT = 40;
-
-    const {Component} = preact;
-    const html = htm.bind(preact.h);
+    styles,
+    {MAX_CELL_WIDTH, ROW_HEIGHT}
+) => {
+    const html = htm.bind(h);
 
     function outerWidth(el) {
         el.offsetHeight;
@@ -108,7 +106,7 @@ define([
             }
 
             return html`
-                <${preact.Fragment}>
+                <${Fragment}>
                     <div style=${styles.Spreadsheet_cell_content} title=${columnDef.title}>
                         ${columnDef.title}
                     </div>
@@ -214,7 +212,7 @@ define([
             }
 
             return html`
-                <${preact.Fragment}>
+                <${Fragment}>
                     <div style=${styles.Spreadsheet_cell_unit} title=${columnDef.unit}>
                         ${columnDef.unit}
                     </div>
@@ -243,8 +241,8 @@ define([
         constructor(props) {
             super(props);
 
-            this.bodyRef = preact.createRef();
-            this.headerRef = preact.createRef();
+            this.bodyRef = createRef();
+            this.headerRef = createRef();
             this.firstRow = null;
             this.lastRow = null;
 
@@ -418,7 +416,7 @@ define([
         }
 
         renderAndMeasure(content, contentNode, measurementNode) {
-            preact.render(content, contentNode);
+            render(content, contentNode);
             return outerWidth(measurementNode);
         }
 
@@ -825,7 +823,7 @@ define([
             `;
         }
 
-        doContextMenu(ev, row) {
+        doContextMenu(ev) {
             ev.stopPropagation();
             ev.preventDefault();
         }

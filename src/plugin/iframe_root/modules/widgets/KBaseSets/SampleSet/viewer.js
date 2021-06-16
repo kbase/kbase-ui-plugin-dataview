@@ -8,7 +8,8 @@ define([
     'components/SimpleWarning',
     'components/SimpleInfo',
     'components/Loading',
-    './components/Main'
+    './components/Main',
+    './constants'
 ], function (
     preact,
     htm,
@@ -19,10 +20,10 @@ define([
     SimpleWarning,
     SimpleInfo,
     Loading,
-    Main
+    Main,
+    {MAX_SAMPLES}
 ) {
     const html = htm.bind(preact.h);
-    const MAX_SAMPLES = 10000;
 
     class Viewer {
         constructor(config) {
@@ -69,9 +70,8 @@ define([
                             <a href="${value}" target="_blank">${value}</a>
                         `;
                     case 'ontology-term':
-                        var {namespace} = schema;
                         return html`
-                            <a href="/#ontology/term/${namespace}/${value}" target="_blank">${value}</a>
+                            <a href="/#ontology/term/${schema.namespace}/${value}" target="_blank">${value}</a>
                         `;
                     default:
                         return value;
@@ -79,9 +79,8 @@ define([
                 case 'number':
                     if ('formatting' in schema.kbase) {
                         return Intl.NumberFormat('en-US', schema.kbase.formatting).format(value);
-                    } else {
-                        return value;
                     }
+                    return value;
 
                 default:
                     return value;
@@ -172,18 +171,17 @@ define([
                         formatter: this.makeFormatter(schema),
                         unit
                     };
-                } else {
-                    return {
-                        index: index + 1,
-                        key: fieldKey,
-                        title: fieldKey,
-                        fieldType: 'user',
-                        type: 'string',
-                        formatter: (value) => {
-                            return value;
-                        }
-                    };
                 }
+                return {
+                    index: index + 1,
+                    key: fieldKey,
+                    title: fieldKey,
+                    fieldType: 'user',
+                    type: 'string',
+                    formatter: (value) => {
+                        return value;
+                    }
+                };
             });
 
             sampleColumns.unshift({

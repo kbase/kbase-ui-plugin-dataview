@@ -7,9 +7,10 @@ define([
     './SampleMap2',
     './SampleSet',
     './Main.styles',
-    'lib/merge'
-], function (
-    preact,
+    'lib/merge',
+    '../constants'
+], (
+    {Component, Fragment, h},
     htm,
     Tabs,
     Spreadsheet,
@@ -17,19 +18,12 @@ define([
     SampleMap2,
     SampleSet,
     styles,
-    {merge}
-) {
-    const {Component, Fragment} = preact;
-    const html = htm.bind(preact.h);
-
-    const MAX_SAMPLES = 10000;
-
+    {merge},
+    {MAX_SAMPLES}
+) => {
+    const html = htm.bind(h);
 
     class Main extends Component {
-        constructor(props) {
-            super(props);
-        }
-
         renderSampleSet() {
             let truncatedMessage = '';
             if (this.props.totalCount > MAX_SAMPLES) {
@@ -38,11 +32,6 @@ define([
                         ${MAX_SAMPLES} are displayed during this testing period.
                     </div>`;
             }
-            // const totalCount = Intl.NumberFormat('en-US', {
-            //     useGrouping: true
-            // }).format(this.props.totalCount);
-            // <p>This sample set contains a total of ${totalCount} samples.</p>
-            //         <h4>Samples</h4>
             return html`
                 <${Fragment}>
                     <${SampleSet} sampleSet=${this.props.sampleSet} samples=${this.props.samples}
@@ -54,11 +43,6 @@ define([
         }
 
         renderDescription() {
-            // const totalCount = Intl.NumberFormat('en-US', {
-            //     useGrouping: true
-            // }).format(this.props.totalCount);
-            //
-            //<p>This sample set contains a total of ${totalCount} samples.</p>
             // TODO: this description should perhaps be markdown? Or simply generate paragraphs on
             // line feeds. Currently the control is a text input not textarea
             const description = this.props.sampleSet.description.split('\n')

@@ -10,8 +10,8 @@ define([
     'components/common',
     './SampleMap.styles',
     'css!./SampleMap2.css'
-], function (
-    preact,
+], (
+    {Component, h, createRef},
     htm,
     leaflet,
     Uuid,
@@ -21,9 +21,8 @@ define([
     DataTable,
     common,
     styles
-) {
-    const {Component} = preact;
-    const html = htm.bind(preact.h);
+) => {
+    const html = htm.bind(h);
 
     const ADDITIONAL_INFO_FIELDS = [{
         from: 'sesar:physiographic_feature_primary',
@@ -43,7 +42,7 @@ define([
         constructor(props) {
             super(props);
 
-            this.mapRef = preact.createRef();
+            this.mapRef = createRef();
             this.samplesMarkers = new Map();
             this.markers = new Map();
             this.map = null;
@@ -53,7 +52,7 @@ define([
                     title: 'Open Street Map',
                     urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                     options: {
-                        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                        attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
                     }
                 },
                 OpenTopoMap: {

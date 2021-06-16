@@ -3,12 +3,11 @@ define([
     'htm',
     './Toolbar.styles'
 ], function (
-    preact,
+    {Component, h, Fragment},
     htm,
     styles
 ) {
-    const {Component} = preact;
-    const html = htm.bind(preact.h);
+    const html = htm.bind(h);
 
     class Toolbar extends Component {
         constructor(props) {
@@ -93,7 +92,7 @@ define([
             })();
 
             return html`
-                <${preact.Fragment}>
+                <${Fragment}>
                     <div style=${styles.filterColumn}>
                         ${columnsSelect}
                     </div>
@@ -177,9 +176,8 @@ define([
                 }
                 if (this.props.currentFilter.value === this.state.filter.value) {
                     return this.props.currentFilter.value;
-                } else {
-                    return this.state.filter.value;
                 }
+                return this.state.filter.value;
             })();
 
             const style = {
@@ -191,14 +189,14 @@ define([
             }
 
             return html`
-                <${preact.Fragment}>
+                <${Fragment}>
                     <div style=${styles.filterValue}>
                         <input class="form-control"
                                value=${value}
                                placeholder="Search"
                                style=${style}
                                onKeyUp=${this.onFilterValueKeyUp.bind(this)}
-                               onChange=${this.onFilterValueChange.bind(this)}></input>
+                               onChange=${this.onFilterValueChange.bind(this)} />
                     </div>
                     <div style=${styles.filterColumn}>
                         ${columnsSelect}
@@ -259,7 +257,7 @@ define([
 
         renderClearButton() {
             const enabled = this.isModified() || this.isDirty();
-            let classes = [
+            const classes = [
                 'fa', 'fa-lg', 'fa-trash'
             ];
             let title;
@@ -287,7 +285,7 @@ define([
 
         renderSearchButton() {
             const enabled = this.isDirty();
-            let classes = [
+            const classes = [
                 'fa', 'fa-lg', 'fa-search'
             ];
             let title;
