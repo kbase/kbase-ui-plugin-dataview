@@ -31,6 +31,15 @@ module.exports = function (grunt) {
                     'images/*',
                 ],
                 dest: '../src/plugin/iframe_root/modules/vendor/leaflet'
+            },
+            requirejsJson: {
+                expand: true,
+                flatten: false,
+                cwd: 'node_modules/requirejs-json',
+                src: [
+                    'json.js'
+                ],
+                dest: '../src/plugin/iframe_root/modules/vendor/requirejs-json'
             }
         },
         clean: {

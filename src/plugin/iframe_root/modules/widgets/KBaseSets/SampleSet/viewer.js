@@ -94,11 +94,10 @@ define([
          * @param model
          * @param samples
          * @param sampleSet
-         * @param format
          * @param allFieldKeys {Set} Unique set of all fields.
          * @returns {Promise<*[]>}
          */
-        async samplesToTable(model, samples, sampleSet, format, allFieldKeys) {
+        async samplesToTable(model, samples, sampleSet, allFieldKeys) {
             const fieldGroups = await model.getFieldGroups();
             const fieldKeys = new Set(Array.from(allFieldKeys));
 
@@ -268,10 +267,6 @@ define([
                     samples: sampleSet.samples
                 });
 
-                // Each sample has the format id; sampleSet doesn't.
-                const formatId = samples[0].format;
-                const format = await model.getFormat(formatId);
-
                 const samplesMap = samples.reduce((samplesMap, sample) => {
                     samplesMap[sample.id] = sample;
                     return samplesMap;
@@ -291,7 +286,7 @@ define([
                     return;
                 }
 
-                const [sampleColumns, sampleTable, columnGroups] = await this.samplesToTable(model, orderedSamples, sampleSet, format, fieldKeys);
+                const [sampleColumns, sampleTable, columnGroups] = await this.samplesToTable(model, orderedSamples, sampleSet, fieldKeys);
                 const params = {
                     sampleSet,
                     samples,
@@ -300,7 +295,6 @@ define([
                     sampleTable,
                     sampleColumns,
                     userProfiles,
-                    format,
                     objectInfo,
                     columnGroups
                 };
