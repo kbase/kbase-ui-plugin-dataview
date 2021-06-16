@@ -2,11 +2,11 @@ define([
     'preact',
     'htm',
     './Popup.styles'
-], function (
+], (
     preact,
     htm,
     styles
-) {
+) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
