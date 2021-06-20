@@ -2,13 +2,11 @@ define([
     'preact',
     'htm',
     'lib/formatters'
-], function (
+], (
     preact,
     htm,
     fmt
-) {
-    'use strict';
-
+) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
@@ -26,18 +24,22 @@ define([
     }
 
     class LinkedSamples extends Component {
-        constructor(props) {
-            super(props);
+        renderTimestamp(time) {
+            return html `<span title="${fmt.timestamp(time)}">
+                  ${fmt.date(time)}
+            </span>
+            `;
         }
 
         renderLinkedSamples() {
+            // <td>${(sample.sgetMetadataValueample, 'material', '-')}</td>
             const rows = this.props.linkedSamples.map(({link, sample}) => {
                 return html`
                 <tr>
+                    <td>${link.dataid || '∅'}</td>
                     <td><a href="/#samples/view/${link.id}/${link.version}" target="_blank">${sample.sample.name}</a></td>
-                    <td>${getMetadataValue(sample.sample, 'material', '-')}</td>
                     <td>${sample.sample.node_tree[0].id}</td>
-                    <td>${fmt.formattedDate(sample.sample.save_date)}</td>
+                    <td>${this.renderTimestamp(sample.sample.save_date)}</td> 
                     <td><a href="/#people/${sample.sample.user}" target="_blank">${sample.sample.user}</a></td>
                     <td style=${{textAlign: 'right', paddingRight: '2em'}}>${sample.sample.version}</td>
                     <td style=${{textAlign: 'right', paddingRight: '2em'}}>${fmt.formattedInteger(sample.linkedData.links.length)}</td>
@@ -49,13 +51,13 @@ define([
             <table className="table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th style=${{width: '15em'}}>Material</th>
-                        <th style=${{width: '10em'}}>Source Id</th>
-                        <th style=${{width: '12em'}}>Saved</th>
-                        <th style=${{width: '8em'}}>By</th>
-                        <th style=${{width: '5em'}}>Version</th>
-                        <th style=${{width: '8em'}}># Linked objs</th>
+                        <th style=${{width: '15em', whiteSpace: 'nowrap'}}>Path to Sample</th>
+                        <th style=${{whiteSpace: 'nowrap'}}>Sample Name</th>
+                        <th style=${{whiteSpace: 'nowrap'}}>Id</th>
+                        <th style=${{width: '12em', whiteSpace: 'nowrap'}}>Saved</th>
+                        <th style=${{width: '8em', whiteSpace: 'nowrap'}}>By</th>
+                        <th style=${{width: '5em', whiteSpace: 'nowrap'}}>Version</th>
+                        <th style=${{width: '8em', whiteSpace: 'nowrap'}}># Linked objs</th>
                     </tr>
                 </thead>
                 <tbody>
