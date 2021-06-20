@@ -8,7 +8,7 @@ define([
     './components/LinkedSamples',
     'components/SimpleError',
     './model'
-], function (
+], (
     Promise,
     preact,
     widgetUtils,
@@ -18,9 +18,7 @@ define([
     LinkedSamples,
     SimpleError,
     Model
-) {
-    'use strict';
-
+) => {
     class Viewer {
         constructor(config) {
             this.runtime = config.runtime;
