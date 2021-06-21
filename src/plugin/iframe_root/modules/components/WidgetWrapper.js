@@ -6,14 +6,12 @@ define([
 
     // for effect
     'css!./WidgetWrapper.css'
-], function (
+], (
     preact,
     htm,
     Uuid,
     Promise
-) {
-    'use strict';
-
+) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
