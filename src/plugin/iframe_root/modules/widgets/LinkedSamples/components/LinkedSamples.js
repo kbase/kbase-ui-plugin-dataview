@@ -32,7 +32,7 @@ define([
             super(props);
             this.columns = [{
                 id: 'dataid',
-                label: 'Path to Sample',
+                label: 'Data ID',
                 display: true,
                 isSortable: true,
                 render: (dataid) => {
