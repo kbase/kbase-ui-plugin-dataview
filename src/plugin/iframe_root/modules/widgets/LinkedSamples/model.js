@@ -1,10 +1,10 @@
 define([
     'bluebird',
     'kb_lib/jsonRpc/genericClient'
-], function (
+], (
     Promise,
     GenericClient
-) {
+) => {
     class Model {
         constructor({runtime, workspaceId, objectId, objectVersion}) {
             this.runtime = runtime;
@@ -20,26 +20,33 @@ define([
                 token: this.runtime.service('session').getAuthToken()
             });
 
-            return Promise.all(samples.map((sample) => {
-                return Promise.all([
-                    sampleService
-                        .callFunc('get_sample', [{
-                            id: sample.id,
-                            version: sample.version
-                        }]),
-                    sampleService
-                        .callFunc('get_data_links_from_sample', [{
-                            id: sample.id,
-                            version: sample.version
-                        }])
-                ])
-                    .then(([[sample], [linkedData]]) => {
-                        return {
-                            sample,
-                            linkedData
-                        };
-                    });
-            }));
+            return sampleService.callFunc('get_samples', [{
+                samples
+            }])
+                .then(([samples]) => {
+                    return samples;
+                });
+
+            // return Promise.all(samples.map((sample) => {
+            //     return Promise.all([
+            //         sampleService
+            //             .callFunc('get_sample', [{
+            //                 id: sample.id,
+            //                 version: sample.version
+            //             }]),
+            //         sampleService
+            //             .callFunc('get_data_links_from_sample', [{
+            //                 id: sample.id,
+            //                 version: sample.version
+            //             }])
+            //     ])
+            //         .then(([[sample], [linkedData]]) => {
+            //             return {
+            //                 sample,
+            //                 linkedData
+            //             };
+            //         });
+            // }));
         }
 
         getLinkedSamples() {
@@ -52,9 +59,8 @@ define([
             const upa = (() => {
                 if (this.objectVersion) {
                     return `${this.workspaceId}/${this.objectId}/${this.objectVersion}`;
-                } else {
-                    return `${this.workspaceId}/${this.objectId}`;
                 }
+                return `${this.workspaceId}/${this.objectId}`;
             })();
 
             return sampleService

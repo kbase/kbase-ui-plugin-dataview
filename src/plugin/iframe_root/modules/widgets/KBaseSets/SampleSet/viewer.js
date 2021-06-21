@@ -10,7 +10,7 @@ define([
     'components/Loading',
     './components/Main',
     './constants'
-], function (
+], (
     preact,
     htm,
     widgetUtils,
@@ -22,7 +22,7 @@ define([
     Loading,
     Main,
     {MAX_SAMPLES}
-) {
+) => {
     const html = htm.bind(preact.h);
 
     class Viewer {
@@ -32,12 +32,14 @@ define([
             this.objectId = config.objectId;
             this.objectVersion = config.objectVersion;
             this.createdObjects = null;
+            this.status = 'NONE';
         }
 
         // LIFECYCLE
 
         attach(node) {
             this.node = node;
+            this.status = 'ATTACHED';
         }
 
         renderSimpleProgress(progress) {
@@ -230,6 +232,7 @@ define([
 
         async start(params) {
             // Check params
+            this.status = 'STARTING';
             const p = new widgetUtils.Params(params);
             this.workspaceId = p.check('workspaceId', 'number', {
                 required: true
@@ -245,7 +248,7 @@ define([
             // this.renderProgress(0);
             preact.render(preact.h(Loading, {message: 'Loading Sample Set...'}), this.node);
 
-            // Get the object form the model.
+            // Get the object from the model.
             const model = new Model({
                 runtime: this.runtime,
                 workspaceId: this.workspaceId,
@@ -297,17 +300,30 @@ define([
                     columnGroups
                 };
                 preact.render(preact.h(Main, params), this.node);
+                this.status = 'STARTED';
             } catch (ex) {
+                if (['STOPPING', 'STOPPED', 'DETACHED'].includes(this.status)) {
+                    // ignore, this means the tab has been closed.
+                    return;
+                }
+
+                this.status = 'ERROR';
                 console.error('Error fetching samples', ex);
                 preact.render(preact.h(SimpleError, {message: ex.message}), this.node);
             }
         }
 
         stop() {
+            if (this.status === 'STARTING') {
+                this.status = 'STOPPING';
+            }
+            // Should cancel any pending requests here...
+            this.status = 'STOPPED';
         }
 
         detach() {
             this.node = '';
+            this.status = 'DETACHED';
         }
     }
 
