@@ -45,16 +45,18 @@ define([
                 isSortable: true,
                 render: (name, row) => {
                     return html`
-                    <a href="/#samples/view/${row.id}/${row.version}" target="_blank">${row.name}</a>
+                    <a href="/#samples/view/${row.id}/${row.version}" target="_blank">${name}</a>
                 `;
                 }
             }, {
-                id: 'id',
+                id: 'nodeId',
                 label: 'ID',
                 display: true,
                 isSortable: true,
-                render: (id) => {
-                    return id;
+                render: (nodeId, row) => {
+                    return html`
+                    <a href="/#samples/view/${row.id}/${row.version}" target="_blank">${nodeId}</a>
+                `;
                 }
             }, {
                 id: 'savedAt',
@@ -108,7 +110,8 @@ define([
                     return {
                         dataid: link.dataid,
                         name: sample.name,
-                        id: sample.node_tree[0].id,
+                        id: sample.id,
+                        nodeId: sample.node_tree[0].id,
                         savedAt: sample.save_date,
                         savedBy: sample.user,
                         version: sample.version
