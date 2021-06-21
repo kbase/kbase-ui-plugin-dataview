@@ -15,7 +15,7 @@ define([
 
     'css!./objectViewWidget.css',
     'bootstrap'
-], function (
+], (
     Promise,
     $,
     preact,
@@ -29,12 +29,12 @@ define([
     OverviewComponent,
     MiniOverviewComponent,
     Uuid
-) {
+) => {
     const html = htm.bind(preact.h);
     const t = htmlTags.tag,
         div = t('div');
 
-    function widget({runtime}) {
+    function make({runtime}) {
         let mount = null;
         let container = null;
         let layout = null;
@@ -126,7 +126,8 @@ define([
                                     runtime=${runtime}
                                     key=${new Uuid(4).format()}
                                     config=${{}}
-                                    scrolling=${true}
+                                    scrolling=${true},
+                                    style=${{flex: '1 1 0', display: 'flex', flexDirection: 'column'}}
                             />
                         `;
                     }
@@ -231,7 +232,7 @@ define([
                     ]);
                 })
                 .then(([objectInfo, workspaceInfo]) => {
-                    runtime.send('ui', 'setTitle', 'Data View for ' + objectInfo.name);
+                    runtime.send('ui', 'setTitle', `Data View for ${objectInfo.name}`);
                     params.objectInfo = objectInfo;
                     params.workspaceInfo = workspaceInfo;
 
@@ -267,7 +268,7 @@ define([
                     ]);
                 })
                 .then(([objectInfo, workspaceInfo]) => {
-                    runtime.send('ui', 'setTitle', 'Data View for ' + objectInfo.name);
+                    runtime.send('ui', 'setTitle', `Data View for ${objectInfo.name}`);
                     params.objectInfo = objectInfo;
                     params.workspaceInfo = workspaceInfo;
 
@@ -295,7 +296,7 @@ define([
         }
 
         function detach() {
-            return widgetSet.detach().finally(function () {
+            return widgetSet.detach().finally(() => {
                 if (mount && container) {
                     mount.removeChild(container);
                     container.innerHTML = '';
@@ -314,8 +315,6 @@ define([
     }
 
     return {
-        make: function (config) {
-            return widget(config);
-        }
+        make
     };
 });

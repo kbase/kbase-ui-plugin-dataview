@@ -4,13 +4,11 @@ define([
     '../ResizeObserver',
 
     'css!./DataTable.css'
-], function (
+], (
     preact,
     htm,
     ResizeObserver
-) {
-    'use strict';
-
+) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
@@ -31,6 +29,7 @@ define([
             this.observer = new ResizeObserver(this.bodyObserver.bind(this));
 
         }
+
         componentDidMount() {
             window.setTimeout(() => {
                 this.setState({
@@ -45,6 +44,7 @@ define([
                 // }
             }
         }
+
         componentWillUnmount() {
             // window.removeEventListener('resize', this.handleWindowResize.bind(this));
             if (this.scrollTimer) {
@@ -54,6 +54,7 @@ define([
                 this.observer.unobserve(this.bodyRef.current);
             }
         }
+
         bodyObserver() {
             if (this.resizeTimer) {
                 return;
@@ -66,6 +67,7 @@ define([
                 this.resizeTimer = null;
             }, 100);
         }
+
         // handleWindowResize() {
         //     return;
         //     if (this.resizeTimer) {
@@ -89,22 +91,21 @@ define([
             if (this.props.columns) {
                 return (() => {
                     const header = this.props.columns.map(({label, style}) => {
-                        return html`    
+                        return html`
                             <div className="DataTable-header-col" style=${style || {}}>${label}</div>
                         `;
                     });
                     return html`
-                    <div className="DataTable-header">${header}</div>
-                    `;
-                })();
-            } else {
-                return (() => {
-                    const header = this.props.render.header();
-                    return html`
-                    <div className="DataTable-header" style=${style}>${header}</div>
+                        <div className="DataTable-header">${header}</div>
                     `;
                 })();
             }
+            return (() => {
+                const header = this.props.render.header();
+                return html`
+                    <div className="DataTable-header" style=${style}>${header}</div>
+                `;
+            })();
         }
 
         doMeasurements() {
@@ -145,7 +146,7 @@ define([
                                             return col.render(values[col.id], values);
                                         } catch (ex) {
                                             return html`
-                                            <span className="text-danger">${ex.message}</span>
+                                                <span className="text-danger">${ex.message}</span>
                                             `;
                                         }
                                     } else {
@@ -154,8 +155,8 @@ define([
                                 })();
                                 const style = col.style || {};
                                 return html`
-                                    <div className="DataTable-col" 
-                                         style=${style} 
+                                    <div className="DataTable-col"
+                                         style=${style}
                                          data-k-b-testhook-cell=${col.id}
                                          role="cell">
                                         <div className="DataTable-col-content">
@@ -169,27 +170,30 @@ define([
                                 rowClasses.push('DataTable-row-highlighted');
                             }
                             return html`
-                                <div className=${rowClasses.join(' ')} 
-                                     style=${style} 
-                                     role="row">${row}</div>
-                            `;
-                        })();
-                    } else {
-                        // freeform row
-                        return (() => {
-                            const row = this.props.render.row(values);
-                            const rowClasses = ['DataTable-grid-row'];
-                            if (values.isHighlighted) {
-                                rowClasses.push('DataTable-row-highlighted');
-                            }
-                            return html`
-                                <div className=${rowClasses.join(' ')} 
-                                     style=${style} 
-                                     role="row"
-                                     onClick=${() => {this.onRowClick(values);}}>${row}</div>
+                                <div className=${rowClasses.join(' ')}
+                                     style=${style}
+                                     role="row">${row}
+                                </div>
                             `;
                         })();
                     }
+                    // freeform row
+                    return (() => {
+                        const row = this.props.render.row(values);
+                        const rowClasses = ['DataTable-grid-row'];
+                        if (values.isHighlighted) {
+                            rowClasses.push('DataTable-row-highlighted');
+                        }
+                        return html`
+                            <div className=${rowClasses.join(' ')}
+                                 style=${style}
+                                 role="row"
+                                 onClick=${() => {
+                                     this.onRowClick(values);
+                                 }}>${row}
+                            </div>
+                        `;
+                    })();
                 })();
             });
         }
@@ -221,8 +225,8 @@ define([
                 height: `${tableHeight}px`
             };
             return html`
-                <div className="DataTable-body" 
-                     ref=${this.bodyRef} 
+                <div className="DataTable-body"
+                     ref=${this.bodyRef}
                      onScroll=${this.handleBodyScroll.bind(this)}>
                     <div className="DataTable-grid"
                          style=${style}>
@@ -235,10 +239,10 @@ define([
         render() {
             this.doMeasurements();
             return html`
-            <div className="DataTable">
-                ${this.renderHeader()}
-                ${this.renderBody()}
-            </div>
+                <div className="DataTable">
+                    ${this.renderHeader()}
+                    ${this.renderBody()}
+                </div>
             `;
         }
     }
