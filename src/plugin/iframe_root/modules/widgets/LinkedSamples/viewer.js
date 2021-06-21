@@ -26,15 +26,28 @@ define([
             this.objectId = config.objectId;
             this.objectVersion = config.objectVersion;
             this.createdObjects = null;
+            this.state = {
+                status: 'NONE'
+            };
         }
 
         // LIFECYCLE
 
+        setState(newState) {
+            this.state = newState;
+        }
+
         attach(node) {
             this.node = node;
+            this.setState({
+                status: 'ATTACHED'
+            });
         }
 
         start(params) {
+            this.setState({
+                status: 'STARTING'
+            });
             // Check params
             const p = new Params(params);
             this.workspaceId = p.check('workspaceId', 'integer', {
@@ -48,7 +61,7 @@ define([
             });
 
             // Display loading spinner...
-            preact.render(preact.h(Loading, { }), this.node);
+            preact.render(preact.h(Loading, {message: 'Loading Linked Samples...'}), this.node);
 
             // // Get the object form the model.
             this.model = new Model({
@@ -63,16 +76,36 @@ define([
             return this.model
                 .getLinkedSamples()
                 .then((linkedSamples) => {
+                    if (['STOPPED', 'DETACHED'].includes(this.state.status)) {
+                        return;
+                    }
                     preact.render(preact.h(LinkedSamples, {linkedSamples}), this.node);
+                    this.setState({
+                        status: 'STARTED'
+                    });
                 })
                 .catch((error) => {
+                    if (['STOPPED', 'DETACHED'].includes(this.state.status)) {
+                        return;
+                    }
+                    this.setState({
+                        status: 'ERROR',
+                        message: error.message
+                    });
                     preact.render(preact.h(SimpleError, {message: error.message}), this.node);
                 });
         }
 
-        stop() {}
+        stop() {
+            this.setState({
+                status: 'STOPPED'
+            });
+        }
 
         detach() {
+            this.setState({
+                status: 'DETACHED'
+            });
             this.node = '';
         }
     }

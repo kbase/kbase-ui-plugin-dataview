@@ -37,12 +37,11 @@ define([
                 return html`
                 <tr>
                     <td>${link.dataid || '∅'}</td>
-                    <td><a href="/#samples/view/${link.id}/${link.version}" target="_blank">${sample.sample.name}</a></td>
-                    <td>${sample.sample.node_tree[0].id}</td>
-                    <td>${this.renderTimestamp(sample.sample.save_date)}</td> 
-                    <td><a href="/#people/${sample.sample.user}" target="_blank">${sample.sample.user}</a></td>
-                    <td style=${{textAlign: 'right', paddingRight: '2em'}}>${sample.sample.version}</td>
-                    <td style=${{textAlign: 'right', paddingRight: '2em'}}>${fmt.formattedInteger(sample.linkedData.links.length)}</td>
+                    <td><a href="/#samples/view/${link.id}/${link.version}" target="_blank">${sample.name}</a></td>
+                    <td>${sample.node_tree[0].id}</td>
+                    <td>${this.renderTimestamp(sample.save_date)}</td> 
+                    <td><a href="/#people/${sample.user}" target="_blank">${sample.user}</a></td>
+                    <td style=${{textAlign: 'right', paddingRight: '2em'}}>${sample.version}</td>
                 </tr>
                 `;
             });
@@ -57,7 +56,6 @@ define([
                         <th style=${{width: '12em', whiteSpace: 'nowrap'}}>Saved</th>
                         <th style=${{width: '8em', whiteSpace: 'nowrap'}}>By</th>
                         <th style=${{width: '5em', whiteSpace: 'nowrap'}}>Version</th>
-                        <th style=${{width: '8em', whiteSpace: 'nowrap'}}># Linked objs</th>
                     </tr>
                 </thead>
                 <tbody>
