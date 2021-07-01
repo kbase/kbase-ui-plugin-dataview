@@ -3,16 +3,16 @@ define([
     'bluebird',
     'kb_lib/jsonRpc/genericClient',
 
-    'json!./data/groups/groups.json',
-    'json!./data/schemas/schemas.json'
-], function (
+    'json!./data/groups.json',
+    'json!./data/schemas.json'
+], (
     module,
     Promise,
     GenericClient,
 
     groupsData,
     schemasData
-) {
+) => {
 
     const schemas = schemasData.reduce((schemas, schema) => {
         schemas[schema.kbase.sample.key] = schema;
