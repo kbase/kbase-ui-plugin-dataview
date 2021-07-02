@@ -7,8 +7,6 @@ define([
     preact,
     htm
 ) {
-    'use strict';
-
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
