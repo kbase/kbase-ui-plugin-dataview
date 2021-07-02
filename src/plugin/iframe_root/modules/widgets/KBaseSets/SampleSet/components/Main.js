@@ -5,6 +5,7 @@ define([
     './Spreadsheet',
     './SampleMap',
     './SampleMap2',
+    './SampleMap3',
     './SampleSet',
     './Main.styles',
     'lib/merge',
@@ -16,6 +17,7 @@ define([
     Spreadsheet,
     SampleMap,
     SampleMap2,
+    SampleMap3,
     SampleSet,
     styles,
     {merge},
@@ -73,6 +75,12 @@ define([
             `;
         }
 
+        renderMap3() {
+            return html`
+                <${SampleMap3} samples=${this.props.samples}/>
+            `;
+        }
+
         renderSummary() {
             return html`
                 <div style=${styles.summary}>
@@ -127,12 +135,18 @@ define([
                     return this.renderMap2();
                 }
             }, {
+                id: 'map3',
+                title: 'Map 3',
+                render: () => {
+                    return this.renderMap3();
+                }
+            }, {
                 id: 'spreadsheet',
                 title: 'Spreadsheet',
                 render: () => {
                     return html`
                         <div className="FlexCol" style=${{marginTop: '10px'}}>
-                            <${Spreadsheet} columns=${this.props.sampleColumns} 
+                            <${Spreadsheet} columns=${this.props.sampleColumns}
                                             table=${this.props.sampleTable}
                                             onRowClick=${this.onRowClick.bind(this)}
                                             columnGroups=${this.props.columnGroups}/>

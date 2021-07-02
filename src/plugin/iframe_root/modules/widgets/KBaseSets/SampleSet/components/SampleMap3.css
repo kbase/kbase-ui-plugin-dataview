@@ -1,0 +1,172 @@
+.MapPopUp {
+    margin: 5px 15px 5px 0;
+}
+
+.MapPopUp table th {
+    color: rgba(150, 150, 150, 1);
+}
+
+.MapPopUp table td {
+    padding-left: 4px;
+}
+
+/* Location Detail Table */
+
+.LocationDescription {
+    display: flex;
+    flex-direction: column;
+}
+
+/* All rows */
+.LocationDescription > div {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+}
+
+/* All cells */
+.LocationDescription > div > div {
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+}
+
+.LocationDescription > div > div:nth-child(1) {
+    font-weight: bold;
+    color: rgba(150, 150, 150, 1);
+    flex: 0 0 auto;
+    margin-right: 4px;
+    flex: 0 0 10em;
+}
+
+/*.LocationDescription > div > div:nth-child(1):after {*/
+/*    content: " ⮕"*/
+/*}*/
+
+.LocationDescription > div > div:nth-child(2) {
+    flex: 1 1 0;
+}
+
+/* Sample Table */
+
+.SampleTable {
+
+}
+
+/* All rows */
+.SampleTable > div > div {
+    display: flex;
+    flex-direction: row
+}
+
+/* Header row cells */
+.SampleTable > div:nth-child(1) > div > div {
+    font-weight: bold;
+    color: rgba(150, 150, 150, 1);
+}
+
+/* Data section */
+.SampleTable > div:nth-child(2) {
+    max-height: 10em;
+    overflow: auto;
+}
+
+/* All cells */
+.SampleTable > div > div > div {
+    padding: 4px;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+}
+
+.SampleTable > div > div > div:nth-child(1) {
+    flex: 0 0 2em;
+    font-weight: bold;
+    color: rgba(150, 150, 150, 1);
+}
+
+.SampleTable > div > div > div:nth-child(2) {
+    flex: 1 1 0;
+}
+
+.SampleTable > div > div > div:nth-child(3) {
+    flex: 1 1 0;
+}
+
+/* LatLong Table */
+
+.LatLongTable {
+    display: flex;
+    flex-direction: row;
+}
+
+/* The index column */
+/*.LatLongTable > div:nth-child(1) {*/
+/*    flex: 0 0 2em;*/
+/*    display: flex;*/
+/*    flex-direction: row;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*}*/
+
+.LatLongTable > div:nth-child(1) {
+    display: flex;
+    flex: 0 0 2em;
+    padding: 2px;
+    border: 1px solid rgba(200, 200, 200, 0.5);
+    border-radius: 2em;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2px;
+}
+
+.LatLongTable > div:nth-child(2) {
+    display: flex;
+    flex: 1 1 0;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* The data column */
+
+/*.LatLongTable > div:nth-child(2) {*/
+/*    flex: 1 1 0;*/
+/*}*/
+
+/* Row of the data column */
+/*.LatLongTable > div:nth-child(2) > div {*/
+/*    display: flex;*/
+/*    flex-direction: row*/
+/*}*/
+
+/* Cells */
+/*.LatLongTable > div:nth-child(2) > div > div {*/
+/*    padding: 4px;*/
+/*    white-space: nowrap;*/
+/*    overflow-x: hidden;*/
+/*    text-overflow: ellipsis;*/
+/*}*/
+
+/* header row cells */
+/*.LatLongTable > div:nth-child(2) > div:nth-child(1) > div {*/
+/*    font-weight: bold;*/
+/*    color: rgba(150, 150, 150, 1);*/
+/*}*/
+
+/* Columns */
+/*.LatLongTable > div:nth-child(2) > div > div:nth-child(1) {*/
+/*    flex: 1 1 0;*/
+/*}*/
+
+/*.LatLongTable > div:nth-child(2) > div > div:nth-child(2) {*/
+/*    flex: 1 1 0;*/
+/*}*/
+
+/*.LatLongTable > div:nth-child(2) > div > div:nth-child(3) {*/
+/*    flex: 0 0 3em;*/
+/*}*/
+
+.MarkerLabel {
+    opacity: 0;
+    position: absolute;
+}
