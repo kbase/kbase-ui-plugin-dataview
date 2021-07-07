@@ -46,7 +46,8 @@ define([], function () {
             yaml: 'vendor/requirejs-yaml/yaml',
             json: 'vendor/requirejs-json/json',
             leaflet: 'vendor/leaflet/leaflet-src',
-            leaflet_css: 'vendor/leaflet/leaflet'
+            leaflet_css: 'vendor/leaflet/leaflet',
+            'leaflet-tilejson': 'vendor/leaflet-tilejson/dist'
         },
         shim: {
             bootstrap: {

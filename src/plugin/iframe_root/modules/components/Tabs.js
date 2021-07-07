@@ -9,8 +9,6 @@ define([
     preact,
     htm
 ) {
-    'use strict';
-
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
@@ -53,17 +51,17 @@ define([
             if (this.state.selectedTab.renderText) {
                 const text = this.state.selectedTab.renderText();
                 return html`
-                    <div  
-                        className="Tabs-pane-default-content" 
-                        dangerouslySetInnerHTML=${{__html: text}}></div>
+                    <div
+                            className="Tabs-pane-default-content"
+                            dangerouslySetInnerHTML=${{__html: text}}></div>
                 `;
             }
             if (this.state.selectedTab.text) {
                 const text = this.state.selectedTab.text;
                 return html`
-                    <div 
-                        className="Tabs-pane-default-content" 
-                        dangerouslySetInnerHTML=${{__html: text}}></div>
+                    <div
+                            className="Tabs-pane-default-content"
+                            dangerouslySetInnerHTML=${{__html: text}}></div>
                 `;
             }
             return html`
@@ -80,7 +78,7 @@ define([
         }
 
         renderTabs() {
-            const tabs = this.state.tabs.map((tab) => {
+            return this.state.tabs.map((tab) => {
                 const classes = [
                     'Tabs-tab'
                 ];
@@ -91,32 +89,47 @@ define([
                 }
 
                 return html`
-                    <div role="presentation" 
-                         className=${classes.join(' ')} 
+                    <div className=${classes.join(' ')}
                          data-k-b-testhook-tab=${tab.id}
                          role="tab"
-                         onClick=${() => {this.selectTab(tab);}}>
+                         onClick=${() => {
+                             this.selectTab(tab);
+                         }}>
                         <span>${tab.title}</span>
                     </div>
                 `;
             });
+        }
+
+        renderExtra() {
+            if (!this.props.extra) {
+                return;
+            }
+
+            return html`
+                <div className="Tabs-extra">
+                    ${this.props.extra}
+                </div>
+            `;
+        }
+
+        render() {
             return html`
                 <div className="Tabs">
                     <div className="Tabs-tabs">
-                        ${tabs}
+                        <div className="Tabs-tab-container">
+                            ${this.renderTabs()}
+                        </div>
+                        ${this.renderExtra()}
                     </div>
-                    <div className="Tabs-pane" 
-                         data-k-b-testhook-tabpane=${this.state.selectedTab.id} 
+                    <div className="Tabs-pane"
+                         data-k-b-testhook-tabpane=${this.state.selectedTab.id}
                          role="tabpane"
                          style=${this.props.paneStyle || {}}>
                         ${this.renderTabPane()}
                     </div>
                 </div>
             `;
-        }
-
-        render() {
-            return this.renderTabs();
         }
     }
 

@@ -3,8 +3,6 @@ define([
     'htm',
     'components/Tabs',
     './Spreadsheet',
-    './SampleMap',
-    './SampleMap2',
     './SampleMap3',
     './SampleSet',
     './Main.styles',
@@ -15,8 +13,6 @@ define([
     htm,
     Tabs,
     Spreadsheet,
-    SampleMap,
-    SampleMap2,
     SampleMap3,
     SampleSet,
     styles,
@@ -63,21 +59,30 @@ define([
             `;
         }
 
-        renderMap() {
-            return html`
-                <${SampleMap} samples=${this.props.samples}/>
-            `;
-        }
-
-        renderMap2() {
-            return html`
-                <${SampleMap2} samples=${this.props.samples}/>
-            `;
-        }
-
         renderMap3() {
+
+            // <${Spreadsheet} columns=${this.props.sampleColumns}
+            //                              table=${this.props.sampleTable}
+            //                              onRowClick=${this.onRowClick.bind(this)}
+            //                              columnGroups=${this.props.columnGroups}/>
+
+            const geolocationGroup = this.props.groups.filter((group) => {
+                return group.name === 'geolocation';
+            })[0];
+
+            // const columnsMap = this.props.schemas.reduce((columnsMap, column) => {
+            //     columnsMap[column.key] = column;
+            //     return columnsMap;
+            // }, {});
+
+            const geolocationFields = this.props.sampleColumns.filter((column) => {
+                return geolocationGroup.fields.includes(column.key);
+            });
+
+            // console.log(geolocationFields);
+
             return html`
-                <${SampleMap3} samples=${this.props.samples}/>
+                <${SampleMap3} samples=${this.props.samples} fieldKeys=${geolocationGroup.fields} fieldSchemas=${geolocationFields} />
             `;
         }
 
@@ -126,18 +131,6 @@ define([
                 id: 'map',
                 title: 'Map',
                 render: () => {
-                    return this.renderMap();
-                }
-            }, {
-                id: 'map2',
-                title: 'Map 2',
-                render: () => {
-                    return this.renderMap2();
-                }
-            }, {
-                id: 'map3',
-                title: 'Map 3',
-                render: () => {
                     return this.renderMap3();
                 }
             }, {
@@ -154,10 +147,18 @@ define([
                     `;
                 }
             }];
+            const extra = html`
+                <div>
+                    <a className="btn btn-link" href="https://docs.kbase.us/workflows/samples-and-samplesets"
+                       target="_blank" style=${{fontSize: '120%'}}>
+                        <span className="fa fa-question-circle"></span>
+                    </a>
+                </div>
+            `;
             return html`
                 <div style=${styles.main}>
                     ${this.renderSummary()}
-                    <${Tabs} tabs=${tabs}/>
+                    <${Tabs} tabs=${tabs} extra=${extra}/>
                 </div>
             `;
         }

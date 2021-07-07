@@ -1,4 +1,5 @@
 define([
+    'jquery',
     'preact',
     'htm',
     'leaflet',
@@ -11,6 +12,7 @@ define([
     './SampleMap3.styles',
     'css!./SampleMap3.css'
 ], (
+    $,
     {Component, h, createRef},
     htm,
     leaflet,
@@ -24,15 +26,7 @@ define([
 ) => {
     const html = htm.bind(h);
 
-    const ADDITIONAL_INFO_FIELDS = [{
-        from: 'sesar:physiographic_feature_primary',
-        to: 'feature',
-        label: 'Feature'
-    }, {
-        from: 'sesar:physiographic_feature_name',
-        to: 'featureName',
-        label: 'Name'
-    }];
+    const DETAIL_FIELDS = ['latitude', 'longitude', 'location_description', 'locality'];
 
     const SELECTED_MARKER_STYLE = {
         color: 'red'
@@ -48,25 +42,21 @@ define([
         return (typeof value !== 'undefined');
     }
 
-    function getMetadataField(sample, name, defaultValue) {
-        const metadata = sample.node_tree[0].meta_controlled;
-        const userMetadata = sample.node_tree[0].meta_user;
 
-        if (metadata[name]) {
-            if (metadata[name].units) {
-                return html`<span>${metadata[name].value}</span> <span style="font-style: italic;">${metadata[name].units}</span>`;
-            }
-            return metadata[name].value;
-        }
-
-        if (userMetadata[name]) {
-            return userMetadata[name].value;
-        }
-
-        return defaultValue;
+    function pluralize(count, singular, plural) {
+        const noun = count === 1 ? singular : plural || `${singular}s`;
+        return `${count} ${noun}`;
     }
 
     class Detail extends Component {
+        constructor(props) {
+            super(props);
+            this.schemaMap = props.fieldSchemas.reduce((schemaMap, schema) => {
+                schemaMap[schema.key] = schema;
+                return schemaMap;
+            }, {});
+        }
+
         onMouseOver(index) {
             this.setState({
                 hoveredRow: index
@@ -95,25 +85,87 @@ define([
             this.props.onSelectLocation(location);
         }
 
+        renderMetadataField(sample, fieldKey, defaultValue) {
+            const metadata = sample.node_tree[0].meta_controlled;
+            // const userMetadata = sample.node_tree[0].meta_user;
+
+            if (!(fieldKey in metadata)) {
+                return defaultValue;
+            }
+
+            const formattedValue = this.schemaMap[fieldKey].formatter(metadata[fieldKey].value);
+
+            if (metadata[fieldKey].units) {
+                return html`<span>${formattedValue}</span> <span
+                        style="font-style: italic;">${metadata[fieldKey].units}</span>`;
+            }
+            return metadata[fieldKey].value;
+
+            // if (userMetadata[name]) {
+            //     return userMetadata[name].value;
+            // }
+        }
+
+        renderDetail(location) {
+
+            return DETAIL_FIELDS
+                .filter((fieldKey) => {
+                    return fieldKey in this.schemaMap;
+                })
+                .map((fieldKey) => {
+                    const schema = this.schemaMap[fieldKey];
+                    return html`
+                        <div>
+                            <div>${schema.title}</div>
+                            <div>${this.renderMetadataField(location.samples[0], fieldKey)}</div>
+                        </div>`;
+                });
+        }
+
         renderMoreDetail(location) {
-            return html`
-                 <div>
-                    <div>Country</div>
-                     <div>${getMetadataField(location.samples[0], 'country')}</div>
-                </div>
-                <div>
-                    <div>Elevation</div>
-                    <div>${getMetadataField(location.samples[0], 'sesar:elevation_start')}</div>
-                </div>
-                <div>
-                    <div>Feature name</div>
-                    <div>${getMetadataField(location.samples[0], 'sesar:physiographic_feature_name')}</div>
-                </div>
-                <div>
-                    <div>Feature primary</div>
-                    <div>${getMetadataField(location.samples[0], 'sesar:physiographic_feature_primary')}</div>
-                </div>
-            `;
+            if (!this.props.fieldKeys) {
+                return;
+            }
+
+            return this.props.fieldKeys
+                .filter((key) => {
+                    return !DETAIL_FIELDS.includes(key) && key in this.schemaMap
+                })
+                .map((key) => {
+                    const label = this.schemaMap[key].title;
+                    const field = this.renderMetadataField(location.samples[0], key);
+                    if (typeof field === 'undefined') {
+                        return;
+                    }
+                    return html`
+                        <div>
+                            <div>${label}</div>
+                            <div>${field}</div>
+                        </div>
+                    `;
+                })
+                .filter((field) => {
+                    return field;
+                });
+
+            // return html`
+            //     <div>
+            //         <div>Country</div>
+            //         <div>${getMetadataField(location.samples[0], 'country')}</div>
+            //     </div>
+            //     <div>
+            //         <div>Elevation</div>
+            //         <div>${getMetadataField(location.samples[0], 'sesar:elevation_start')}</div>
+            //     </div>
+            //     <div>
+            //         <div>Feature name</div>
+            //         <div>${getMetadataField(location.samples[0], 'sesar:physiographic_feature_name')}</div>
+            //     </div>
+            //     <div>
+            //         <div>Feature primary</div>
+            //         <div>${getMetadataField(location.samples[0], 'sesar:physiographic_feature_primary')}</div>
+            //     </div>
+            // `;
         }
 
         renderSamples(location) {
@@ -170,61 +222,50 @@ define([
                     // itemStyle.backgroundColor = 'rgba(200, 200, 200, 0.5)';
                     itemStyle.border = '2px solid red';
                 }
-                if (index === this.state.hoveredRow && !isSelected) {
-                    // itemStyle.backgroundColor = 'rgba(200, 200, 200, 0.2)';
-                    itemStyle.border = '2px solid aqua';
+                if (index === this.state.hoveredRow) {
                     itemStyle.cursor = 'pointer';
+                    if (!isSelected) {
+                        itemStyle.border = '2px solid aqua';
+                    }
                 }
                 if (index === this.state.pressedRow) {
                     itemStyle.border = '2px solid red';
                 }
 
                 return html`
-                    <div style=${itemStyle} 
-                        id=${`location_${String(index)}`}
-                        onmouseover=${() => {
-                            this.onMouseOver(index);
-                        }}
-                       onmouseout=${() => {
-                            this.onMouseOut();
-                        }}
-                       onmousedown=${() => {
-                            this.onMouseDown(index);
-                       }}
-                       onmouseup=${() => {
-                            this.onMouseUp(index);
-                       }}
-                        onclick=${() => {
-                            this.onClick(location);
-                        }}
+                    <div style=${itemStyle}
+                         id=${`location_${String(index)}`}
+                         onmouseover=${() => {
+                             this.onMouseOver(index);
+                         }}
+                         onmouseout=${() => {
+                             this.onMouseOut();
+                         }}
+                         onmousedown=${() => {
+                             this.onMouseDown(index);
+                         }}
+                         onmouseup=${() => {
+                             this.onMouseUp(index);
+                         }}
+                         onclick=${(ev) => {
+                             if (ev.target.tagName === 'A') {
+                                 return;
+                             }
+                             this.onClick(location);
+                         }}
                     >
                         <div style=${{borderBottom: '1px solid silver', marginBottom: '4px'}}>
-                            <div className="LatLongTable"> 
+                            <div className="LatLongTable">
                                 <div>
                                     ${index + 1}
                                 </div>
                                 <div>
-                                     ${location.samples.length} samples
+                                    ${pluralize(location.samples.length, 'sample')}
                                 </div>
                             </div>
                         </div>
                         <div className="LocationDescription">
-                            <div>
-                                <div>Latitude</div>
-                                <div>${getMetadataField(location.samples[0], 'latitude')}</div>
-                            </div>
-                            <div>
-                                <div>Longitude</div>
-                                <div>${getMetadataField(location.samples[0], 'longitude')}</div>
-                            </div>
-                            <div>
-                                <div>Location desc</div>
-                                <div>${getMetadataField(location.samples[0], 'location_description')}</div>
-                            </div>
-                            <div>
-                                <div>Locality</div>
-                                <div>${getMetadataField(location.samples[0], 'locality')}</div>
-                            </div>
+                            ${this.renderDetail(location)}
                             ${isSelected ? this.renderMoreDetail(location) : ''}
                         </div>
                         ${isSelected ? this.renderSamples(location) : ''}
@@ -246,7 +287,6 @@ define([
             this.mapRef = createRef();
             this.samplesMarkers = new Map();
             this.markers = new Map();
-            this.map = null;
 
             const locationSamples = this.calcSampleMapping();
 
@@ -258,22 +298,68 @@ define([
                     urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                     options: {
                         attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
-                    }
+                    },
+                    maxZoom: 19
                 },
                 OpenTopoMap: {
                     title: 'Open Topo Map',
                     urlTemplate: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
                     options: {
                         attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
-                    }
+                    },
+                    maxZoom: 17
                 },
                 EsriWorldImagery: {
                     title: 'Esri.WorldImagery',
                     urlTemplate: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                     options: {
                         attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-                    }
-                }
+                    },
+                    maxZoom: 18
+                },
+                // MapTilerSatellite: {
+                //     title: 'MapTiler Satellite',
+                //     urlTemplate: 'https://api.maptiler.com/tiles/{tilesId}/tiles.json?key=ZeHDEmtNulpld1D0IibR',
+                //     options: {
+                //         attribution: 'ATTRIBUTION HERE'
+                //     }
+                // }
+                //
+                // MapTilerSatellite: {
+                //     title: 'MapTiler Satellite',
+                //     urlTemplate: 'https://api.maptiler.com/tiles/satellite/{z}/{x}/{y}.jpg?key=ZeHDEmtNulpld1D0IibR',
+                //     options: {
+                //         attribution: 'ATTRIBUTION HERE'
+                //     }
+                // },
+                // MapTilerTerrainRGB: {
+                //     title: 'MapTiler Terrain RGB',
+                //     urlTemplate: 'https://api.maptiler.com/tiles/terrain-rgb/{z}/{x}/{y}.png?key=ZeHDEmtNulpld1D0IibR',
+                //     options: {
+                //         attribution: 'ATTRIBUTION HERE'
+                //     }
+                // },
+                // MapTilerHillshades: {
+                //     title: 'MapTiler Terrain RGB',
+                //     urlTemplate: 'https://api.maptiler.com/tiles/hillshades/{z}/{x}/{y}.png?key=ZeHDEmtNulpld1D0IibR',
+                //     options: {
+                //         attribution: 'ATTRIBUTION HERE'
+                //     }
+                // },
+                // MapTilerOutdoor: {
+                //     title: 'MapTiler Outdoor',
+                //     urlTemplate: 'https://api.maptiler.com/tiles/outdoor/{z}/{x}/{y}.pbf?key=ZeHDEmtNulpld1D0IibR',
+                //     options: {
+                //         attribution: 'ATTRIBUTION HERE'
+                //     }
+                // },
+                // MapTilerContours: {
+                //     title: 'MapTiler Contours',
+                //     urlTemplate: 'https://api.maptiler.com/tiles/contours/{z}/{x}/{y}.pbf?key=ZeHDEmtNulpld1D0IibR',
+                //     options: {
+                //         attribution: 'ATTRIBUTION HERE'
+                //     }
+                // }
             };
 
             this.state = {
@@ -285,21 +371,23 @@ define([
                     details: 0.25
                 },
                 selectedMarkerId: null,
+                map: null,
+                zoom: null,
                 locationSamples
             };
         }
 
-        addLayer(key) {
+        addLayer(map, key) {
             const layerConfig = this.mapLayers[key];
             if (!layerConfig) {
                 console.warn(`Layer not found: ${key}`);
                 return;
             }
-            if (this.map === null) {
+            if (map === null) {
                 return;
             }
             const layer = leaflet.tileLayer(layerConfig.urlTemplate, layerConfig.options);
-            layer.addTo(this.map);
+            layer.addTo(map);
             return layer;
         }
 
@@ -307,25 +395,85 @@ define([
             if (this.mapRef.current === null) {
                 return;
             }
-            this.map = leaflet.map(this.mapRef.current, {
-                preferCanvas: true
+            const maxZoom = Object.entries(this.mapLayers).reduce((maxZoom, [, value]) => {
+                if (maxZoom === null) {
+                    return value.maxZoom;
+                } else {
+                    return Math.min(maxZoom, value.maxZoom);
+                }
+            }, null);
+            const map = leaflet.map(this.mapRef.current, {
+                preferCanvas: true,
+                minZoom: 1,
+                maxZoom
             });
 
-            const tile1 = this.addLayer('OpenStreetMap');
-            const tile2 = this.addLayer('OpenTopoMap');
-            const tile4 = this.addLayer('EsriWorldImagery');
+            const tile1 = this.addLayer(map, 'OpenStreetMap');
+            const tile2 = this.addLayer(map, 'OpenTopoMap');
+            const tile4 = this.addLayer(map, 'EsriWorldImagery');
+            // const layers = [tile1, tile2, tile4];
+            // const tile1 = this.addLayer('MapTilerSatellite');
+            // const tile2 = this.addLayer('MapTilerTerrainRGB');
+            // const tile3 = this.addLayer('MapTilerHillshades');
+            // const tile3 = this.addLayer('MapTilerContours');
             const baseMaps = {
                 OpenStreetMap: tile1,
                 OpenTopoMap: tile2,
                 EsriWorldImagery: tile4
+                // MapTilerSatellite: tile1,
+                // MapTilerTerrainRGB: tile2,
+                // MapTilerHillshades: tile3
+                // MapTilerContours: tile3
             };
-            leaflet.control.layers(baseMaps, null).addTo(this.map);
+            leaflet.control.layers(baseMaps, null).addTo(map);
 
             leaflet.control.scale({
                 position: 'topleft'
-            }).addTo(this.map);
+            }).addTo(map);
 
-            this.updateSampleMapping(this.state.locationSamples);
+            //  this.map.on('zoomstart', (ev) => {
+            //     const {type, target} = ev;
+            //     const zoom = this.map.getZoom();
+            //     console.log('zoom start', zoom, ev);
+            //
+            // });
+
+            map.on('zoomend', () => {
+                if (this.state.map === null) {
+                    return;
+                }
+                const zoom = this.state.map.getZoom();
+                this.setState({
+                    zoom
+                });
+            });
+            //     // const maxZoom = Object.entries(this.mapLayers).reduce((maxZoom, [, value]) => {
+            //     // if (maxZoom === null) {
+            //     //     return value.maxZoom;
+            //     // } else {
+            //     //    return Math.min(maxZoom, value.maxZoom);
+            //     // }
+            //     Object.entries(baseMaps).forEach(([name, layer]) => {
+            //         if (this.map.getMaxZoom() <= zoom) {
+            //             layersControl.addBaseLayer(layer, name);
+            //             layer.addTo(this.map);
+            //         } else {
+            //             layersControl.removeLayer(layer);
+            //             layer.removeFrom(this.map);
+            //         }
+            //     });
+            // }, null);
+
+            this.updateSampleMapping(map, this.state.locationSamples);
+            this.setState({
+                map,
+                zoom: map.getZoom()
+            }, () => {
+                $(() => {
+                    $('[data-toggle="tooltip"]').tooltip();
+                });
+            });
+
         }
 
         renderMap() {
@@ -368,13 +516,13 @@ define([
                     existingLocationSample.samples.push(sample);
                     existingLocationSample.sampleIds.push(sample.id);
                 } else {
-                    const additionalInfo = {};
-
-                    for (const {from, to} of ADDITIONAL_INFO_FIELDS) {
-                        if (from in metadata) {
-                            additionalInfo[to] = metadata[from].value;
-                        }
-                    }
+                    // const additionalInfo = {};
+                    //
+                    // for (const {from, to} of ADDITIONAL_INFO_FIELDS) {
+                    //     if (from in metadata) {
+                    //         additionalInfo[to] = metadata[from].value;
+                    //     }
+                    // }
 
                     locationSamples.push({
                         samples: [sample],
@@ -383,7 +531,7 @@ define([
                             latitude: metadata.latitude.value,
                             longitude: metadata.longitude.value
                         },
-                        additionalInfo,
+                        // additionalInfo,
                         markerId: new Uuid(4).format(),
                         coord: [metadata.latitude.value, metadata.longitude.value]
                     });
@@ -392,12 +540,13 @@ define([
             return locationSamples;
         }
 
-        updateSampleMapping(locationSamples) {
+
+        updateSampleMapping(map, locationSamples) {
             const radius = (() => {
                 if (locationSamples.length <= 10) {
-                    return 10;
+                    return 20;
                 }
-                return 5;
+                return 10;
             })();
 
             // create markers.
@@ -405,19 +554,32 @@ define([
                 const marker = leaflet.circleMarker(location.coord, {
                     title: `lat: ${location.coord[0]}\nlng: ${location.coord[1]}`,
                     color: 'blue',
+                    fillOpacity: 0.4,
+                    weight: 5,
                     text: String(index),
                     radius
                 })
                     .on('click', () => {
                         this.onClickMarker(location, index);
                     })
-                    .addTo(this.map);
-                // marker.bindTooltip(String(index + 1), {
-                //    permanent: true,
-                //     opacity: 0,
-                //     className: 'MarkerLabel',
-                //    offset: [0, 0]
-                // });
+                    .addTo(map);
+                const tooltipContent = `
+                    <div>
+                        <div style="display: flex; flex-direction: row; align-items: center;">
+                            <div class="Tooltip-circle">${String(index + 1)}</div>
+                            
+                            <span style="margin-left: 1em">${pluralize(location.samples.length, 'sample')}</span>
+                        </div>
+                        <div style="border-top: 1px silver solid; margin-top: 4px; padding-top: 4px; font-style: italic;">
+                            Click to show ${location.samples.length === 1 ? 'sample' : 'samples'}
+                        </div>
+                    </div>
+                `;
+                marker.bindTooltip(tooltipContent, {
+                    permanent: false,
+                    className: 'MarkerLabel',
+                    offset: [0, 0]
+                });
                 location.samples.forEach((sample) => {
                     this.samplesMarkers.set(sample.id, {
                         markerId: location.markerId
@@ -431,9 +593,9 @@ define([
             });
 
             if (locationSamples.length === 0) {
-                this.map.setView([0, 0], 1);
+                map.setView([0, 0], 1);
             } else {
-                this.map.fitBounds(locationSamples.map((locationSample) => {
+                map.fitBounds(locationSamples.map((locationSample) => {
                     return locationSample.coord;
                 }), {
                     padding: [50, 50]
@@ -506,8 +668,8 @@ define([
             }
             marker.selected = true;
             marker.marker.setStyle(SELECTED_MARKER_STYLE);
-            marker.marker.removeFrom(this.map);
-            marker.marker.addTo(this.map);
+            marker.marker.removeFrom(this.state.map);
+            marker.marker.addTo(this.state.map);
             this.markers.set(markerId, marker);
             this.setState({
                 selectedMarkerId: markerId
@@ -521,8 +683,8 @@ define([
             }
             marker.selected = false;
             marker.marker.setStyle(NORMAL_MARKER_STYLE);
-            marker.marker.removeFrom(this.map);
-            marker.marker.addTo(this.map);
+            marker.marker.removeFrom(this.state.map);
+            marker.marker.addTo(this.state.map);
             this.markers.set(markerId, marker);
             this.setState({
                 selectedMarkerId: null
@@ -586,7 +748,7 @@ define([
                     details: 1 - relativeWidth
                 }
             }, () => {
-                this.map.invalidateSize();
+                this.state.map.invalidateSize();
             });
         }
 
@@ -649,15 +811,91 @@ define([
 
         renderDetail() {
             return html`
-                <${Detail} locationSamples=${this.state.locationSamples} 
+                <${Detail} locationSamples=${this.state.locationSamples}
+                           fieldKeys=${this.props.fieldKeys}
+                           fieldSchemas=${this.props.fieldSchemas}
                            onSelectLocation=${this.onSelectLocation.bind(this)}
-                           selectedMarkerId=${this.state.selectedMarkerId} />
+                           selectedMarkerId=${this.state.selectedMarkerId}/>
+            `;
+        }
+
+        onZoomToSamples() {
+            if (this.state.map === null) {
+                return;
+            }
+            if (this.state.locationSamples.length === 0) {
+                this.state.map.setView([0, 0], 1);
+            } else {
+                this.state.map.fitBounds(this.state.locationSamples.map((locationSample) => {
+                    return locationSample.coord;
+                }), {
+                    padding: [50, 50]
+                });
+            }
+        }
+
+        onZoomOutFully() {
+            if (this.state.map === null) {
+                return;
+            }
+
+            this.state.map.setZoom(1);
+        }
+
+        renderToolbar() {
+            if (!this.state.map) {
+                return;
+            }
+            return html`
+                <div className="Toolbar">
+                    <div>
+                        <div>
+                            Zoom Level:
+                        </div>
+                        <div style=${{width: '2em', fontSize: '150%', marginLeft: '0.5em'}}>
+                            ${this.state.zoom}
+                        </div>
+                    </div>
+                    <div>
+                        <button type="button"
+                                class="btn btn-default"
+                                style="border: none;"
+                                onclick=${this.onZoomToSamples.bind(this)}
+                                data-toggle="tooltip"
+                                data-placement="top"
+                                data-trigger="hover"
+                                title="Zoom to Samples">
+                            <span className="fa-stack fa-1x">
+                                <span className="fa fa-map-o fa-stack-2x" style="color: rgba(80, 80, 80, 1);"/>
+                                <span className="fa fa-circle-o fa-stack-1x" style="color: blue;"/>
+                            </span>
+                        </button>
+                        <button type="button"
+                                class="btn btn-default"
+                                style="border: none;"
+                                onclick=${this.onZoomOutFully.bind(this)}
+                                data-toggle="tooltip"
+                                data-placement="top"
+                                data-trigger="hover"
+                                title="Zoom to World">
+                            <span className="fa fa-globe fa-2x" style="color: rgba(80, 80, 80, 1);"></span>
+                        </button>
+                    </div>
+                </div>
             `;
         }
 
         render() {
             return html`
                 <div style=${styles.main}>
+                    <div style=${{
+                        flex: '0 0 auto',
+                        display: 'flex',
+                        flexDirection: 'row',
+                        minHeight: '0',
+                    }}>
+                        ${this.renderToolbar()}
+                    </div>
                     <div style=${{
                         flex: '1 1 0px',
                         display: 'flex',
@@ -671,15 +909,16 @@ define([
                         ${this.renderGrabberOverlay()}
 
                         <${Col} style=${{flexGrow: this.state.grow.map}}>
-                            ${this.renderMap()}
-                        <//>
+                        ${this.renderMap()}
+                    </
+                    />
 
-                        ${this.renderColumnGrabber()}
+                    ${this.renderColumnGrabber()}
 
-                        <${Col} style=${{flexGrow: this.state.grow.details, overflow: 'auto'}}>
-                            ${this.renderDetail()}
-                        <//>
-                    <//>
+                    <${Col} style=${{flexGrow: this.state.grow.details, overflow: 'auto'}}>
+                    ${this.renderDetail()}
+                <//>
+                <//>
                 </div>
             `;
         }

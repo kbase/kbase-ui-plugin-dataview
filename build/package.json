@@ -28,6 +28,7 @@
         "dagre": "0.8.5",
         "htm": "3.0.4",
         "leaflet": "1.7.1",
+        "leaflet-tilejson": "1.0.0-rc4",
         "preact": "10.5.13"
     },
     "devDependencies": {

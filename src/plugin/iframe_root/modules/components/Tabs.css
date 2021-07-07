@@ -12,6 +12,13 @@
     border-bottom: 1px solid #ddd;
 }
 
+.Tabs-tab-container {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: -1px;
+}
+
 .Tabs-tab {
     flex: 0 0 auto;
     display: flex;
@@ -23,9 +30,16 @@
     border-radius: 4px 4px 0 0;
     border-bottom: 1px solid #ddd;
     cursor: pointer;
-    margin-bottom: -1px;
+    /*margin-bottom: -1px;*/
     margin-right: 2px;
-    color: #337ab7
+    color: #337ab7;
+    align-self: center;
+}
+
+.Tabs-extra {
+    flex: 0 0 auto;
+    align-self: center;
+    justify-self: flex-end;
 }
 
 .Tabs-tab:hover {

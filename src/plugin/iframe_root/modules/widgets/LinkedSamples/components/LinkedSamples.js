@@ -3,12 +3,14 @@ define([
     'htm',
     'lib/formatters',
     'components/DataTable',
+    'components/Empty',
     './LinkedSamples.styles'
 ], (
     preact,
     htm,
     fmt,
     DataTable,
+    Empty,
     styles
 ) => {
     const {Component} = preact;
@@ -172,9 +174,7 @@ define([
 
         renderNoLinkedSamples() {
             return html`
-            <div class="alert alert-info">
-            No samples linked to this object.
-            </div>
+            <${Empty} message="No samples are linked to this object." />
             `;
         }
 

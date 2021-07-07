@@ -327,19 +327,6 @@ define([
             }
         }
 
-        formatValue(value, column) {
-            if (!column.format) {
-                return value;
-            }
-
-            switch (column.type) {
-            case 'number':
-                return Intl.NumberFormat('en-US', column.format).format(value);
-            default:
-                return value;
-            }
-        }
-
         handleBodyScroll(e) {
             if (!this.headerRef.current) {
                 return;
