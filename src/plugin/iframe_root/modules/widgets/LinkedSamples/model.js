@@ -71,6 +71,9 @@ define([
                     const samplesToFetch = result.links.map(({id, version}) => {
                         return {id, version};
                     });
+                    if (samplesToFetch.length === 0) {
+                        return [];
+                    }
                     return Promise.all(this.getSamples(samplesToFetch))
                         .then((samples) => {
                             return result.links.map((link, index) => {

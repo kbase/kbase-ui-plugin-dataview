@@ -288,6 +288,11 @@ define([
                 }
 
                 const [sampleColumns, sampleTable, columnGroups] = await this.samplesToTable(model, orderedSamples, sampleSet, fieldKeys);
+
+                // Just get the raw groups and schemas. For mapping view; should refactor to simplify the
+                // complexity here...
+                const groups = await model.getFieldGroups();
+
                 const params = {
                     sampleSet,
                     samples,
@@ -297,7 +302,8 @@ define([
                     sampleColumns,
                     userProfiles,
                     objectInfo,
-                    columnGroups
+                    columnGroups,
+                    groups
                 };
                 preact.render(preact.h(Main, params), this.node);
                 this.status = 'STARTED';

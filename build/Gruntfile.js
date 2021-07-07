@@ -32,6 +32,15 @@ module.exports = function (grunt) {
                 ],
                 dest: '../src/plugin/iframe_root/modules/vendor/leaflet'
             },
+             'leaflet-tilejson': {
+                expand: true,
+                flatten: false,
+                cwd: 'node_modules/leaflet-tilejson',
+                src: [
+                    'dist.js'
+                ],
+                dest: '../src/plugin/iframe_root/modules/vendor/leaflet-tilejson'
+            },
             requirejsJson: {
                 expand: true,
                 flatten: false,
