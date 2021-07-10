@@ -8,6 +8,7 @@ define([
     'components/Col',
     'components/Table',
     'components/DataTable',
+    'components/Button',
     'components/common',
     './SampleMap3.styles',
     'css!./SampleMap3.css'
@@ -21,12 +22,16 @@ define([
     Col,
     Table,
     DataTable,
+    Button,
     common,
     styles
 ) => {
     const html = htm.bind(h);
 
     const DETAIL_FIELDS = ['latitude', 'longitude', 'location_description', 'locality'];
+
+    const ZOOM_SNAP_WORLD = 2;
+    const MIN_ZOOM = 0;
 
     const SELECTED_MARKER_STYLE = {
         color: 'red'
@@ -38,6 +43,8 @@ define([
         fillColor: 'white'
     };
 
+    const CENTER = [51.505, -0.09];
+
     function isDefined(value) {
         return (typeof value !== 'undefined');
     }
@@ -46,6 +53,28 @@ define([
     function pluralize(count, singular, plural) {
         const noun = count === 1 ? singular : plural || `${singular}s`;
         return `${count} ${noun}`;
+    }
+
+    function closeEnough(n1, n2) {
+        if (n1 === null || n2 === null) {
+            return false;
+        }
+        const LatLng = (n) => {
+            if (Array.isArray(n)) {
+                const [lat, lng] = n;
+                return {lat, lng};
+            }
+            return n;
+        };
+        const m1 = LatLng(n1);
+        const m2 = LatLng(n2);
+        if (Math.abs(m2.lat - m1.lat) > 0.01) {
+            return false;
+        }
+        if (Math.abs(m2.lng - m1.lng) > 0.01) {
+            return false;
+        }
+        return true;
     }
 
     class Detail extends Component {
@@ -129,7 +158,7 @@ define([
 
             return this.props.fieldKeys
                 .filter((key) => {
-                    return !DETAIL_FIELDS.includes(key) && key in this.schemaMap
+                    return !DETAIL_FIELDS.includes(key) && key in this.schemaMap;
                 })
                 .map((key) => {
                     const label = this.schemaMap[key].title;
@@ -147,25 +176,6 @@ define([
                 .filter((field) => {
                     return field;
                 });
-
-            // return html`
-            //     <div>
-            //         <div>Country</div>
-            //         <div>${getMetadataField(location.samples[0], 'country')}</div>
-            //     </div>
-            //     <div>
-            //         <div>Elevation</div>
-            //         <div>${getMetadataField(location.samples[0], 'sesar:elevation_start')}</div>
-            //     </div>
-            //     <div>
-            //         <div>Feature name</div>
-            //         <div>${getMetadataField(location.samples[0], 'sesar:physiographic_feature_name')}</div>
-            //     </div>
-            //     <div>
-            //         <div>Feature primary</div>
-            //         <div>${getMetadataField(location.samples[0], 'sesar:physiographic_feature_primary')}</div>
-            //     </div>
-            // `;
         }
 
         renderSamples(location) {
@@ -290,14 +300,13 @@ define([
 
             const locationSamples = this.calcSampleMapping();
 
-            // this.updateSampleMapping(locationSamples);
-
             this.mapLayers = {
                 OpenStreetMap: {
                     title: 'Open Street Map',
                     urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                     options: {
-                        attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+                        attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors',
+                        noWrap: true
                     },
                     maxZoom: 19
                 },
@@ -305,7 +314,8 @@ define([
                     title: 'Open Topo Map',
                     urlTemplate: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
                     options: {
-                        attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+                        attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
+                        noWrap: true
                     },
                     maxZoom: 17
                 },
@@ -313,54 +323,20 @@ define([
                     title: 'Esri.WorldImagery',
                     urlTemplate: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                     options: {
-                        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+                        noWrap: true
                     },
                     maxZoom: 18
-                },
-                // MapTilerSatellite: {
-                //     title: 'MapTiler Satellite',
-                //     urlTemplate: 'https://api.maptiler.com/tiles/{tilesId}/tiles.json?key=ZeHDEmtNulpld1D0IibR',
-                //     options: {
-                //         attribution: 'ATTRIBUTION HERE'
-                //     }
-                // }
-                //
-                // MapTilerSatellite: {
-                //     title: 'MapTiler Satellite',
-                //     urlTemplate: 'https://api.maptiler.com/tiles/satellite/{z}/{x}/{y}.jpg?key=ZeHDEmtNulpld1D0IibR',
-                //     options: {
-                //         attribution: 'ATTRIBUTION HERE'
-                //     }
-                // },
-                // MapTilerTerrainRGB: {
-                //     title: 'MapTiler Terrain RGB',
-                //     urlTemplate: 'https://api.maptiler.com/tiles/terrain-rgb/{z}/{x}/{y}.png?key=ZeHDEmtNulpld1D0IibR',
-                //     options: {
-                //         attribution: 'ATTRIBUTION HERE'
-                //     }
-                // },
-                // MapTilerHillshades: {
-                //     title: 'MapTiler Terrain RGB',
-                //     urlTemplate: 'https://api.maptiler.com/tiles/hillshades/{z}/{x}/{y}.png?key=ZeHDEmtNulpld1D0IibR',
-                //     options: {
-                //         attribution: 'ATTRIBUTION HERE'
-                //     }
-                // },
-                // MapTilerOutdoor: {
-                //     title: 'MapTiler Outdoor',
-                //     urlTemplate: 'https://api.maptiler.com/tiles/outdoor/{z}/{x}/{y}.pbf?key=ZeHDEmtNulpld1D0IibR',
-                //     options: {
-                //         attribution: 'ATTRIBUTION HERE'
-                //     }
-                // },
-                // MapTilerContours: {
-                //     title: 'MapTiler Contours',
-                //     urlTemplate: 'https://api.maptiler.com/tiles/contours/{z}/{x}/{y}.pbf?key=ZeHDEmtNulpld1D0IibR',
-                //     options: {
-                //         attribution: 'ATTRIBUTION HERE'
-                //     }
-                // }
+                }
             };
+
+            this.maxZoom = Object.entries(this.mapLayers).reduce((maxZoom, [, value]) => {
+                if (maxZoom === null) {
+                    return value.maxZoom;
+                } else {
+                    return Math.min(maxZoom, value.maxZoom);
+                }
+            }, null);
 
             this.state = {
                 grabber: {
@@ -373,6 +349,7 @@ define([
                 selectedMarkerId: null,
                 map: null,
                 zoom: null,
+                center: null,
                 locationSamples
             };
         }
@@ -395,35 +372,21 @@ define([
             if (this.mapRef.current === null) {
                 return;
             }
-            const maxZoom = Object.entries(this.mapLayers).reduce((maxZoom, [, value]) => {
-                if (maxZoom === null) {
-                    return value.maxZoom;
-                } else {
-                    return Math.min(maxZoom, value.maxZoom);
-                }
-            }, null);
+
             const map = leaflet.map(this.mapRef.current, {
                 preferCanvas: true,
-                minZoom: 1,
-                maxZoom
+                zoomControl: false,
+                minZoom: 0,
+                maxZoom: this.maxZoom
             });
 
             const tile1 = this.addLayer(map, 'OpenStreetMap');
             const tile2 = this.addLayer(map, 'OpenTopoMap');
             const tile4 = this.addLayer(map, 'EsriWorldImagery');
-            // const layers = [tile1, tile2, tile4];
-            // const tile1 = this.addLayer('MapTilerSatellite');
-            // const tile2 = this.addLayer('MapTilerTerrainRGB');
-            // const tile3 = this.addLayer('MapTilerHillshades');
-            // const tile3 = this.addLayer('MapTilerContours');
             const baseMaps = {
                 OpenStreetMap: tile1,
                 OpenTopoMap: tile2,
                 EsriWorldImagery: tile4
-                // MapTilerSatellite: tile1,
-                // MapTilerTerrainRGB: tile2,
-                // MapTilerHillshades: tile3
-                // MapTilerContours: tile3
             };
             leaflet.control.layers(baseMaps, null).addTo(map);
 
@@ -431,49 +394,41 @@ define([
                 position: 'topleft'
             }).addTo(map);
 
-            //  this.map.on('zoomstart', (ev) => {
-            //     const {type, target} = ev;
-            //     const zoom = this.map.getZoom();
-            //     console.log('zoom start', zoom, ev);
-            //
-            // });
-
             map.on('zoomend', () => {
                 if (this.state.map === null) {
                     return;
                 }
                 const zoom = this.state.map.getZoom();
                 this.setState({
-                    zoom
+                    zoom,
+                    center: this.state.map.getCenter()
                 });
             });
-            //     // const maxZoom = Object.entries(this.mapLayers).reduce((maxZoom, [, value]) => {
-            //     // if (maxZoom === null) {
-            //     //     return value.maxZoom;
-            //     // } else {
-            //     //    return Math.min(maxZoom, value.maxZoom);
-            //     // }
-            //     Object.entries(baseMaps).forEach(([name, layer]) => {
-            //         if (this.map.getMaxZoom() <= zoom) {
-            //             layersControl.addBaseLayer(layer, name);
-            //             layer.addTo(this.map);
-            //         } else {
-            //             layersControl.removeLayer(layer);
-            //             layer.removeFrom(this.map);
-            //         }
-            //     });
-            // }, null);
+            map.on('moveend', () => {
+                if (this.state.map === null) {
+                    return;
+                }
+                const zoom = this.state.map.getZoom();
+                this.setState({
+                    zoom,
+                    center: this.state.map.getCenter()
+                });
+            });
+            map.on('load', () => {
+                if (this.state.map === null) {
+                    return;
+                }
+                this.setState({
+                    zoom: this.state.map.getZoom(),
+                    center: this.state.map.getCenter()
+                });
+            });
 
             this.updateSampleMapping(map, this.state.locationSamples);
             this.setState({
                 map,
                 zoom: map.getZoom()
-            }, () => {
-                $(() => {
-                    $('[data-toggle="tooltip"]').tooltip();
-                });
             });
-
         }
 
         renderMap() {
@@ -832,6 +787,7 @@ define([
                     padding: [50, 50]
                 });
             }
+            // $('[data-toggle="tooltip"]').blur();
         }
 
         onZoomOutFully() {
@@ -839,7 +795,37 @@ define([
                 return;
             }
 
-            this.state.map.setZoom(1);
+            this.state.map.setView(CENTER, ZOOM_SNAP_WORLD);
+        }
+
+        onZoomIn(ev) {
+            ev.stopPropagation();
+            if (this.state.map === null) {
+                return;
+            }
+
+            this.state.map.zoomIn(1);
+        }
+
+        onZoomOut() {
+            if (this.state.map === null) {
+                return;
+            }
+
+            this.state.map.zoomOut(1);
+        }
+
+        renderStackedIcon(container, icon) {
+            return html`
+                <span className="fa-stack fa-1x">
+                    <span className="fa fa-${container} fa-stack-2x" style="color: rgba(80, 80, 80, 1);"/>
+                    <span className="fa fa-${icon} fa-stack-1x" style="color: blue;"/>
+                </span>
+            `;
+        }
+
+        renderIcon(icon) {
+            return html`<span className=${`fa fa-${icon} fa-2x`} style="color: rgba(80, 80, 80, 1);"></span>`;
         }
 
         renderToolbar() {
@@ -857,33 +843,34 @@ define([
                         </div>
                     </div>
                     <div>
-                        <button type="button"
-                                class="btn btn-default"
-                                style="border: none;"
-                                onclick=${this.onZoomToSamples.bind(this)}
-                                data-toggle="tooltip"
-                                data-placement="top"
-                                data-trigger="hover"
-                                title="Zoom to Samples">
-                            <span className="fa-stack fa-1x">
-                                <span className="fa fa-map-o fa-stack-2x" style="color: rgba(80, 80, 80, 1);"/>
-                                <span className="fa fa-circle-o fa-stack-1x" style="color: blue;"/>
-                            </span>
-                        </button>
-                        <button type="button"
-                                class="btn btn-default"
-                                style="border: none;"
-                                onclick=${this.onZoomOutFully.bind(this)}
-                                data-toggle="tooltip"
-                                data-placement="top"
-                                data-trigger="hover"
-                                title="Zoom to World">
-                            <span className="fa fa-globe fa-2x" style="color: rgba(80, 80, 80, 1);"></span>
-                        </button>
+                        <${Button}
+                                onclick=${this.onZoomIn.bind(this)}
+                                title="Zoom in"
+                                disabled=${this.state.map.getZoom() === this.maxZoom}
+                                icon=${this.renderIcon('plus')}/>
+                            <${Button}
+                                    onclick=${this.onZoomOut.bind(this)}
+                                    title="Zoom out"
+                                    disabled=${this.state.map.getZoom() === MIN_ZOOM}
+                                    icon=${this.renderIcon('minus')}
+                            />
+                            <${Button}
+                                    onclick=${this.onZoomToSamples.bind(this)}
+                                    title="Zoom to Samples"
+                                    disabled=${false}
+                                    icon=${this.renderStackedIcon('map-o', 'circle-o')}
+                            />
+                            <${Button}
+                                    onclick=${this.onZoomOutFully.bind(this)}
+                                    title="Zoom to World"
+                                    disabled=${this.state.map.getZoom() === ZOOM_SNAP_WORLD && closeEnough(this.state.center, CENTER)}
+                                    icon=${this.renderIcon('globe')}
+                            />
                     </div>
                 </div>
             `;
         }
+
 
         render() {
             return html`
