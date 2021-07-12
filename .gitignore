@@ -1,8 +1,20 @@
-node_modules/
-bower_components/
-/dist/
+# macOS
 .DS_Store
+
+# Developer tools.
+node_modules/
+
+# The dist directory is created during a build and left in place; it can be used in side-by-side development with
+# kbase-ui.
+/dist/
+
+# We don't check the vendor directory in; the vendor deps are only installed during
+# development, are captured in the dist.tgz.
 vendor/
+
+# Support procrastination!
 /_attic/
-/_in_progress/
+
+# IDEs
 .idea
+.vscode
