@@ -33,17 +33,34 @@ define([
     const ZOOM_SNAP_WORLD = 2;
     const MIN_ZOOM = 0;
 
+
+    const CENTER = [51.505, -0.09];
+
+    const BORDER_INACTIVE = 'rgba(200, 200, 200, 1)';
+    const BORDER_HOVERED = 'rgba(150, 150, 150, 1)';
+    const BORDER_ACTIVE = 'rgba(100, 100, 100, 1)';
+
+    const MARKER_INACTIVE = 'rgba(3, 119, 252, 1)';
+    const MARKER_HOVERED = 'rgba(75, 173, 29, 1)';
+    const MARKER_ACTIVE = 'rgba(232, 116, 7, 1)';
+
     const SELECTED_MARKER_STYLE = {
-        color: 'red'
+        color: MARKER_ACTIVE,
+        dashArray: null
+    };
+
+    const HOVERED_MARKER_STYLE = {
+        color: MARKER_HOVERED,
+        dashArray: '10'
     };
 
     const NORMAL_MARKER_STYLE = {
-        color: 'blue',
+        color: MARKER_INACTIVE,
         fill: true,
-        fillColor: 'white'
+        fillColor: 'white',
+        dashArray: null
     };
 
-    const CENTER = [51.505, -0.09];
 
     function isDefined(value) {
         return (typeof value !== 'undefined');
@@ -86,10 +103,15 @@ define([
             }, {});
         }
 
-        onMouseOver(index) {
+        onMouseOver(location, index) {
+            // Ignore mouse over for a selected location.
+            if (this.props.selectedMarkerId === location.markerId) {
+                return;
+            }
             this.setState({
                 hoveredRow: index
             });
+            this.props.onHoverLocation(location);
         }
 
         onMouseDown(index) {
@@ -104,10 +126,15 @@ define([
             });
         }
 
-        onMouseOut() {
+        onMouseOut(location) {
+            // Ignore mouse out for a selected location.
+            if (this.props.selectedMarkerId === location.markerId) {
+                return;
+            }
             this.setState({
                 hoveredRow: null
             });
+            this.props.onHoverLocation(null);
         }
 
         onClick(location) {
@@ -196,7 +223,7 @@ define([
             });
             return html`
                 <div style=${{borderBottom: '1px solid silver', margin: '4px 0'}}></div>
-                <div className="SampleTable">
+                <div class="SampleTable">
                     <div>
                         <div>
                             <div>
@@ -222,34 +249,34 @@ define([
             }
             const locations = this.props.locationSamples.map((location, index) => {
                 const itemStyle = {
-                    border: '2px solid rgba(200, 200, 200, 0.2)',
+                    border: `2px solid ${BORDER_INACTIVE}`,
                     borderRadius: '8px',
                     margin: '0 0 8px 4px',
-                    padding: '4px'
+                    padding: '4px',
+                    cursor: 'pointer'
                 };
                 const isSelected = this.props.selectedMarkerId === location.markerId;
                 if (isSelected) {
-                    // itemStyle.backgroundColor = 'rgba(200, 200, 200, 0.5)';
-                    itemStyle.border = '2px solid red';
+                    itemStyle.border = `2px solid ${MARKER_ACTIVE}`;
                 }
-                if (index === this.state.hoveredRow) {
-                    itemStyle.cursor = 'pointer';
+                if (location.markerId === this.props.hoveredMarkerId) {
+                    // itemStyle.cursor = 'pointer';
                     if (!isSelected) {
-                        itemStyle.border = '2px solid aqua';
+                        itemStyle.border = `2px dashed ${MARKER_HOVERED}`;
                     }
                 }
                 if (index === this.state.pressedRow) {
-                    itemStyle.border = '2px solid red';
+                    itemStyle.border = `2px solid ${MARKER_ACTIVE}`;
                 }
 
                 return html`
                     <div style=${itemStyle}
                          id=${`location_${String(index)}`}
                          onmouseover=${() => {
-                             this.onMouseOver(index);
+                             this.onMouseOver(location, index);
                          }}
                          onmouseout=${() => {
-                             this.onMouseOut();
+                             this.onMouseOut(location);
                          }}
                          onmousedown=${() => {
                              this.onMouseDown(index);
@@ -265,7 +292,7 @@ define([
                          }}
                     >
                         <div style=${{borderBottom: '1px solid silver', marginBottom: '4px'}}>
-                            <div className="LatLongTable">
+                            <div class="LatLongTable">
                                 <div>
                                     ${index + 1}
                                 </div>
@@ -274,7 +301,7 @@ define([
                                 </div>
                             </div>
                         </div>
-                        <div className="LocationDescription">
+                        <div class="LocationDescription">
                             ${this.renderDetail(location)}
                             ${isSelected ? this.renderMoreDetail(location) : ''}
                         </div>
@@ -333,9 +360,8 @@ define([
             this.maxZoom = Object.entries(this.mapLayers).reduce((maxZoom, [, value]) => {
                 if (maxZoom === null) {
                     return value.maxZoom;
-                } else {
-                    return Math.min(maxZoom, value.maxZoom);
                 }
+                return Math.min(maxZoom, value.maxZoom);
             }, null);
 
             this.state = {
@@ -347,6 +373,7 @@ define([
                     details: 0.25
                 },
                 selectedMarkerId: null,
+                hoveredMarkerId: null,
                 map: null,
                 zoom: null,
                 center: null,
@@ -508,7 +535,7 @@ define([
             locationSamples.forEach((location, index) => {
                 const marker = leaflet.circleMarker(location.coord, {
                     title: `lat: ${location.coord[0]}\nlng: ${location.coord[1]}`,
-                    color: 'blue',
+                    color: MARKER_INACTIVE,
                     fillOpacity: 0.4,
                     weight: 5,
                     text: String(index),
@@ -516,6 +543,12 @@ define([
                 })
                     .on('click', () => {
                         this.onClickMarker(location, index);
+                    })
+                    .on('mouseover', () => {
+                        this.onHoverMarker(location, index);
+                    })
+                    .on('mouseout', () => {
+                        this.onUnHoverMarker();
                     })
                     .addTo(map);
                 const tooltipContent = `
@@ -533,7 +566,8 @@ define([
                 marker.bindTooltip(tooltipContent, {
                     permanent: false,
                     className: 'MarkerLabel',
-                    offset: [0, 0]
+                    offset: [0, -20],
+                    direction: 'top'
                 });
                 location.samples.forEach((sample) => {
                     this.samplesMarkers.set(sample.id, {
@@ -616,6 +650,15 @@ define([
             document.getElementById(`location_${index}`).scrollIntoView({behavior: 'smooth'});
         }
 
+        onHoverMarker(location, index) {
+            this.hoverLocation(location);
+            document.getElementById(`location_${index}`).scrollIntoView({behavior: 'smooth'});
+        }
+
+        onUnHoverMarker() {
+            this.hoverLocation(null);
+        }
+
         selectMarker(markerId) {
             const marker = this.markers.get(markerId);
             if (!marker) {
@@ -628,6 +671,42 @@ define([
             this.markers.set(markerId, marker);
             this.setState({
                 selectedMarkerId: markerId
+            });
+        }
+
+        hoverMarker(markerId) {
+            const marker = this.markers.get(markerId);
+            if (!marker) {
+                return;
+            }
+
+            // Set The marker style to the hovered style..
+            marker.marker.setStyle(HOVERED_MARKER_STYLE);
+            marker.marker.removeFrom(this.state.map);
+            marker.marker.addTo(this.state.map);
+            this.markers.set(markerId, marker);
+
+            // Remember the currently hovered marker id.
+            this.setState({
+                hoveredMarkerId: markerId
+            });
+        }
+
+        unHoverMarker(markerId) {
+            const marker = this.markers.get(markerId);
+            if (!marker) {
+                return;
+            }
+
+            // Set The marker style back to normal.
+            marker.marker.setStyle(NORMAL_MARKER_STYLE);
+            marker.marker.removeFrom(this.state.map);
+            marker.marker.addTo(this.state.map);
+            this.markers.set(markerId, marker);
+
+            // Adjust the hovered marker state
+            this.setState({
+                hoveredMarkerId: null
             });
         }
 
@@ -647,14 +726,43 @@ define([
         }
 
         selectLocation(location) {
+            // Always unselect the previously selected marker.
             if (this.state.selectedMarkerId) {
                 this.unselectMarker(this.state.selectedMarkerId);
+            }
+            // If the newly selected location was also hovered (should have been the case!),
+            // unset that hover state.
+            if (this.state.hoveredMarkerId === location.markerId) {
+                this.unHoverMarker(location.markerId);
+            }
+            // Only select the marker if it is a newly selected marker;
+            // This preserves the behavior that selecting a marker again unselects it.
+            if (this.state.selectedMarkerId !== location.markerId) {
+                this.selectMarker(location.markerId);
+            }
+        }
 
-                if (location.markerId !== this.state.selectedMarkerId) {
-                    this.selectMarker(location.markerId);
+        hoverLocation(location) {
+            // A null location means that nothing is hovered.
+            if (location === null) {
+                // If a marker was already hovered, unhover it.
+                if (this.state.hoveredMarkerId) { // } && (this.state.hoveredMarkerId !== this.state.selectedMarkerId)) {
+                    this.unHoverMarker(this.state.hoveredMarkerId);
                 }
             } else {
-                this.selectMarker(location.markerId);
+                // If a marker was hovered, we need to unhover a previously hovered marker if it is
+                // not the currently hovered one (and is not selected)
+                if (this.state.hoveredMarkerId &&
+                    (location.markerId !== this.state.hoveredMarkerId) &&
+                    (location.markerId !== this.state.selectedMarkerId)
+                ) {
+                    this.unHoverMarker(this.state.hoveredMarkerId);
+                }
+
+                // Now, we'll only hover if the location is not also selected.
+                if (!this.state.selectedMarkerId || location.markerId !== this.state.selectedMarkerId) {
+                    this.hoverMarker(location.markerId);
+                }
             }
         }
 
@@ -666,11 +774,11 @@ define([
                 switch (this.state.grabber.status) {
                 case 'NONE':
                 case 'FREE':
-                    return 'silver';
+                    return BORDER_INACTIVE;
                 case 'OVER':
-                    return 'aqua';
+                    return BORDER_HOVERED;
                 case 'GRABBED':
-                    return 'red';
+                    return BORDER_ACTIVE;
                 }
             })();
             switch (this.state.grabber.status) {
@@ -750,7 +858,7 @@ define([
                      onmousemove=${this.onContainerMouseMove.bind(this)}>
                     <div style=${{
                         padding: '20px',
-                        border: '1px solid silver',
+                        border: `1px solid ${MARKER_INACTIVE}`,
                         borderRadius: '4px',
                         backgroundColor: 'rgba(255, 255, 255, 0.8)'
                     }}>
@@ -764,13 +872,20 @@ define([
             this.selectLocation(location);
         }
 
+        onHoverLocation(location) {
+            this.hoverLocation(location);
+        }
+
         renderDetail() {
             return html`
                 <${Detail} locationSamples=${this.state.locationSamples}
                            fieldKeys=${this.props.fieldKeys}
                            fieldSchemas=${this.props.fieldSchemas}
                            onSelectLocation=${this.onSelectLocation.bind(this)}
-                           selectedMarkerId=${this.state.selectedMarkerId}/>
+                           onHoverLocation=${this.onHoverLocation.bind(this)}
+                           selectedMarkerId=${this.state.selectedMarkerId}
+                           hoveredMarkerId=${this.state.hoveredMarkerId}
+                />
             `;
         }
 
@@ -817,15 +932,15 @@ define([
 
         renderStackedIcon(container, icon) {
             return html`
-                <span className="fa-stack fa-1x">
-                    <span className="fa fa-${container} fa-stack-2x" style="color: rgba(80, 80, 80, 1);"/>
-                    <span className="fa fa-${icon} fa-stack-1x" style="color: blue;"/>
+                <span class="fa-stack fa-1x">
+                    <span class="fa fa-${container} fa-stack-2x" style="color: rgba(80, 80, 80, 1);"/>
+                    <span class="fa fa-${icon} fa-stack-1x" style="color: blue;"/>
                 </span>
             `;
         }
 
         renderIcon(icon) {
-            return html`<span className=${`fa fa-${icon} fa-2x`} style="color: rgba(80, 80, 80, 1);"></span>`;
+            return html`<span class=${`fa fa-${icon} fa-2x`} style="color: rgba(80, 80, 80, 1);"></span>`;
         }
 
         renderToolbar() {
@@ -833,7 +948,7 @@ define([
                 return;
             }
             return html`
-                <div className="Toolbar">
+                <div class="Toolbar">
                     <div>
                         <div>
                             Zoom Level:
