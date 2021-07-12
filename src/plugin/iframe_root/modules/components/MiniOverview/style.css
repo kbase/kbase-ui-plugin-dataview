@@ -8,9 +8,10 @@
 }
 
 .MiniOverview-titleCol {
-    flex: 1 1 0px;
+    flex: 1 1 0;
     display: flex;
     flex-direction: row;
+    min-width:0;
 }
 
 .MiniOverview-titleCol-icon {
@@ -18,9 +19,10 @@
 }
 
 .MiniOverview-titleCol-title {
-    flex: 1 1 0px;
+    flex: 1 1 0;
     display: flex;
     flex-direction: column;
+    min-width:0;
 }
 
 .MiniOverview-titleCol-title-title {
@@ -28,7 +30,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    margin: 0px;
+    margin: 0;
     font-size: 150%;
     font-weight: bold;
 }
