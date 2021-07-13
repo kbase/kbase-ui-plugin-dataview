@@ -9,6 +9,7 @@ define([], () => {
         },
         container: {
             height: '100%'
+            // aspectRatio: '1/1'
         },
         detailRow: {
             flex: '1 1 0px',
