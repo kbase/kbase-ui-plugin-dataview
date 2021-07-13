@@ -8,7 +8,7 @@ disable:
     - narrative-dev
 specs:
   - description: "case 1: sampleset object should be displayed"
-    baseSelector: []
+    baseSelector: [ ]
     enable:
       envs:
         - ci
@@ -61,6 +61,7 @@ specs:
                 value: cell
                 nth: "{{col.col}}"
             text: "{{col.text}}"
+
       # description tab
       - wait: forElement
         selector:
@@ -83,7 +84,11 @@ specs:
             value: description
         text: "{{plugins.dataview.sampleset.case1.description.text}}"
 
-      # Map tab
+      ###
+      ### Map tab
+      ###
+
+      # Select the tab
       - wait: forElement
         selector:
           - type: plugin
@@ -103,11 +108,52 @@ specs:
             value: main
           - type: tabpane
             value: map
+          - type: testid
+            value: "location_{{plugins.dataview.sampleset.case1.map.table.location}}"
           - type: raw
             name: role
             value: row
         count:
           equals: 3
+
+      # Click on the detail box, it should expand and we should have more rows!
+      - wait: forElement
+        selector:
+          - type: plugin
+            value: dataview
+          - type: tabpane
+            value: map
+          - type: testid
+            value: "location_{{plugins.dataview.sampleset.case1.map.table.location}}"
+      - action: click
+
+      - wait: forCount
+        selector:
+          - type: plugin
+            value: dataview
+          - type: tabpane
+            value: main
+          - type: tabpane
+            value: map
+          - type: testid
+            value: "location_{{plugins.dataview.sampleset.case1.map.table.location}}"
+          - type: raw
+            name: role
+            value: row
+        count:
+          equals: 7
+
+      # Now make sure all the values are what we expect.
+#      - wait: forElement
+#        selector:
+#          - type: plugin
+#            value: dataview
+#          - type: tabpane
+#            value: map
+#          - type: testid
+#            value: "location_{{plugins.dataview.sampleset.case1.map.table.location}}"
+
+      # Then loop through the cells
 
       - loop: "plugins.dataview.sampleset.case1.map.table.cells"
         as: cell
@@ -118,18 +164,24 @@ specs:
               - type: plugin
                 value: dataview
               - type: tabpane
-                value: main
-              - type: tabpane
                 value: map
+              # TODO: we need to be able to access the top level
+              # context as well. How? Perhaps a syntax ... if the first
+              # element of the context ref is the "as" for the loop, use the
+              # local context, otherwise, use the global context.
+              - type: testid
+                value: "location_0"
               - type: raw
                 name: role
                 value: row
                 nth: "{{cell.row}}"
-              - type: cell
-                value: "{{cell.cell}}"
+              - type: raw
+                name: role
+                value: cell
+                nth: "{{cell.col}}"
             text: "{{{cell.text}}}"
-
-      # Spreadsheet tab
+#
+#      # Spreadsheet tab
       - wait: forElement
         selector:
           - type: plugin
@@ -139,22 +191,22 @@ specs:
           - type: tab
             value: spreadsheet
       - action: click
-
-      # Have the correct # of rows
-      - wait: forCount
-        selector:
-          - type: plugin
-            value: dataview
-          - type: tabpane
-            value: main
-          - type: tabpane
-            value: spreadsheet
-          - type: raw
-            name: role
-            value: row
-        count:
-          equals: 3
-
+#
+#      # Have the correct # of rows
+#      - wait: forCount
+#        selector:
+#          - type: plugin
+#            value: dataview
+#          - type: tabpane
+#            value: main
+#          - type: tabpane
+#            value: spreadsheet
+#          - type: raw
+#            name: role
+#            value: row
+#        count:
+#          equals: 30
+#
       - loop: "plugins.dataview.sampleset.case1.spreadsheet.table.cells"
         as: cell
         tasks:

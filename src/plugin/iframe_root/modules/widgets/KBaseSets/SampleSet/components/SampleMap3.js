@@ -9,7 +9,9 @@ define([
     'components/Table',
     'components/DataTable',
     'components/Button',
+    './SampleMapDetail',
     'components/common',
+    './common',
     './SampleMap3.styles',
     'css!./SampleMap3.css'
 ], (
@@ -23,35 +25,27 @@ define([
     Table,
     DataTable,
     Button,
+    Detail,
     common,
+    {constants, pluralize},
     styles
 ) => {
     const html = htm.bind(h);
 
-    const DETAIL_FIELDS = ['latitude', 'longitude', 'location_description', 'locality'];
-
     const MIN_ZOOM = 0;
 
-    const BORDER_INACTIVE = 'rgba(200, 200, 200, 1)';
-    const BORDER_HOVERED = 'rgba(150, 150, 150, 1)';
-    const BORDER_ACTIVE = 'rgba(100, 100, 100, 1)';
-
-    const MARKER_INACTIVE = 'rgba(3, 119, 252, 1)';
-    const MARKER_HOVERED = 'rgba(75, 173, 29, 1)';
-    const MARKER_ACTIVE = 'rgba(232, 116, 7, 1)';
-
     const SELECTED_MARKER_STYLE = {
-        color: MARKER_ACTIVE,
+        color: constants.MARKER_ACTIVE,
         dashArray: null
     };
 
     const HOVERED_MARKER_STYLE = {
-        color: MARKER_HOVERED,
+        color:  constants.MARKER_HOVERED,
         dashArray: '10'
     };
 
     const NORMAL_MARKER_STYLE = {
-        color: MARKER_INACTIVE,
+        color:  constants.MARKER_INACTIVE,
         fill: true,
         fillColor: 'white',
         dashArray: null
@@ -65,233 +59,9 @@ define([
     }
 
 
-    function pluralize(count, singular, plural) {
-        const noun = count === 1 ? singular : plural || `${singular}s`;
-        return `${count} ${noun}`;
-    }
 
-    class Detail extends Component {
-        constructor(props) {
-            super(props);
-            this.schemaMap = props.fieldSchemas.reduce((schemaMap, schema) => {
-                schemaMap[schema.key] = schema;
-                return schemaMap;
-            }, {});
-        }
 
-        onMouseOver(location, index) {
-            // Ignore mouse over for a selected location.
-            if (this.props.selectedMarkerId === location.markerId) {
-                return;
-            }
-            this.setState({
-                hoveredRow: index
-            });
-            this.props.onHoverLocation(location);
-        }
 
-        onMouseDown(index) {
-            this.setState({
-                pressedRow: index
-            });
-        }
-
-        onMouseUp() {
-            this.setState({
-                pressedRow: null
-            });
-        }
-
-        onMouseOut(location) {
-            // Ignore mouse out for a selected location.
-            if (this.props.selectedMarkerId === location.markerId) {
-                return;
-            }
-            this.setState({
-                hoveredRow: null
-            });
-            this.props.onHoverLocation(null);
-        }
-
-        onClick(location) {
-            this.props.onSelectLocation(location);
-        }
-
-        renderMetadataField(sample, fieldKey, defaultValue) {
-            const metadata = sample.node_tree[0].meta_controlled;
-            // const userMetadata = sample.node_tree[0].meta_user;
-
-            if (!(fieldKey in metadata)) {
-                return defaultValue;
-            }
-
-            const formattedValue = this.schemaMap[fieldKey].formatter(metadata[fieldKey].value);
-
-            if (metadata[fieldKey].units) {
-                return html`<span>${formattedValue}</span> <span
-                        style="font-style: italic;">${metadata[fieldKey].units}</span>`;
-            }
-            return metadata[fieldKey].value;
-
-            // if (userMetadata[name]) {
-            //     return userMetadata[name].value;
-            // }
-        }
-
-        renderDetail(location) {
-
-            return DETAIL_FIELDS
-                .filter((fieldKey) => {
-                    return fieldKey in this.schemaMap;
-                })
-                .map((fieldKey) => {
-                    const schema = this.schemaMap[fieldKey];
-                    return html`
-                        <div>
-                            <div title="${schema.title}">${schema.title}</div>
-                            <div>${this.renderMetadataField(location.samples[0], fieldKey)}</div>
-                        </div>`;
-                });
-        }
-
-        renderMoreDetail(location) {
-            if (!this.props.fieldKeys) {
-                return;
-            }
-
-            return this.props.fieldKeys
-                .filter((key) => {
-                    return !DETAIL_FIELDS.includes(key) && key in this.schemaMap;
-                })
-                .map((key) => {
-                    const field = this.renderMetadataField(location.samples[0], key);
-                    if (typeof field === 'undefined') {
-                        return;
-                    }
-                    const schema = this.schemaMap[key];
-                    return html`
-                        <div>
-                            <div title="${schema.title}">${schema.title}</div>
-                            <div>${field}</div>
-                        </div>
-                    `;
-                })
-                .filter((field) => {
-                    return field;
-                });
-        }
-
-        renderSamples(location) {
-            const samples = location.samples.map(({id, version, name, node_tree}, index) => {
-                return html`
-                    <div>
-                        <div>
-                            ${index + 1}
-                        </div>
-                        <div>
-                            <a href="/#samples/view/${id}/${version}" target="_blank">${node_tree[0].id}</a>
-                        </div>
-                        <div>
-                            <a href="/#samples/view/${id}/${version}" target="_blank">${name}</a>
-                        </div>
-                    </div>
-                `;
-            });
-            return html`
-                <div style=${{borderBottom: '1px solid silver', margin: '4px 0'}}></div>
-                <div class="SampleTable">
-                    <div>
-                        <div>
-                            <div>
-                            </div>
-                            <div>
-                                ID
-                            </div>
-                            <div>
-                                Name
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        ${samples}
-                    </div>
-                </div>
-            `;
-        }
-
-        render() {
-            if (!this.props.locationSamples) {
-                return;
-            }
-            const locations = this.props.locationSamples.map((location, index) => {
-                const itemStyle = {
-                    border: `2px solid ${BORDER_INACTIVE}`,
-                    borderRadius: '8px',
-                    margin: '0 0 8px 4px',
-                    padding: '4px',
-                    cursor: 'pointer'
-                };
-                const isSelected = this.props.selectedMarkerId === location.markerId;
-                if (isSelected) {
-                    itemStyle.border = `2px solid ${MARKER_ACTIVE}`;
-                }
-                if (location.markerId === this.props.hoveredMarkerId) {
-                    // itemStyle.cursor = 'pointer';
-                    if (!isSelected) {
-                        itemStyle.border = `2px dashed ${MARKER_HOVERED}`;
-                    }
-                }
-                if (index === this.state.pressedRow) {
-                    itemStyle.border = `2px solid ${MARKER_ACTIVE}`;
-                }
-
-                return html`
-                    <div style=${itemStyle}
-                         id=${`location_${String(index)}`}
-                         onmouseover=${() => {
-                             this.onMouseOver(location, index);
-                         }}
-                         onmouseout=${() => {
-                             this.onMouseOut(location);
-                         }}
-                         onmousedown=${() => {
-                             this.onMouseDown(index);
-                         }}
-                         onmouseup=${() => {
-                             this.onMouseUp(index);
-                         }}
-                         onclick=${(ev) => {
-                             if (ev.target.tagName === 'A') {
-                                 return;
-                             }
-                             this.onClick(location);
-                         }}
-                    >
-                        <div style=${{borderBottom: '1px solid silver', marginBottom: '4px'}}>
-                            <div class="LatLongTable">
-                                <div>
-                                    ${index + 1}
-                                </div>
-                                <div>
-                                    ${pluralize(location.samples.length, 'sample')}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="LocationDescription">
-                            ${this.renderDetail(location)}
-                            ${isSelected ? this.renderMoreDetail(location) : ''}
-                        </div>
-                        ${isSelected ? this.renderSamples(location) : ''}
-                    </div>
-                `;
-            });
-            return html`
-                <div>
-                    ${locations}
-                </div>
-            `;
-        }
-    }
 
     class SampleMap extends Component {
         constructor(props) {
@@ -513,7 +283,7 @@ define([
             locationSamples.forEach((location, index) => {
                 const marker = leaflet.circleMarker(location.coord, {
                     title: `lat: ${location.coord[0]}\nlng: ${location.coord[1]}`,
-                    color: MARKER_INACTIVE,
+                    color: constants.MARKER_INACTIVE,
                     fillOpacity: 0.4,
                     weight: 5,
                     text: String(index),
@@ -752,11 +522,11 @@ define([
                 switch (this.state.grabber.status) {
                 case 'NONE':
                 case 'FREE':
-                    return BORDER_INACTIVE;
+                    return constants.BORDER_INACTIVE;
                 case 'OVER':
-                    return BORDER_HOVERED;
+                    return constants.BORDER_HOVERED;
                 case 'GRABBED':
-                    return BORDER_ACTIVE;
+                    return constants.BORDER_ACTIVE;
                 }
             })();
             switch (this.state.grabber.status) {
@@ -836,7 +606,7 @@ define([
                      onmousemove=${this.onContainerMouseMove.bind(this)}>
                     <div style=${{
                         padding: '20px',
-                        border: `1px solid ${MARKER_INACTIVE}`,
+                        border: `1px solid ${constants.MARKER_INACTIVE}`,
                         borderRadius: '4px',
                         backgroundColor: 'rgba(255, 255, 255, 0.8)'
                     }}>
