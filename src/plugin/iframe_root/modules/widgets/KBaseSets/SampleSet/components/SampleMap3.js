@@ -30,11 +30,7 @@ define([
 
     const DETAIL_FIELDS = ['latitude', 'longitude', 'location_description', 'locality'];
 
-    const ZOOM_SNAP_WORLD = 2;
     const MIN_ZOOM = 0;
-
-
-    const CENTER = [51.505, -0.09];
 
     const BORDER_INACTIVE = 'rgba(200, 200, 200, 1)';
     const BORDER_HOVERED = 'rgba(150, 150, 150, 1)';
@@ -61,6 +57,8 @@ define([
         dashArray: null
     };
 
+    const ZOOM_INCREMENT = 0.5;
+
 
     function isDefined(value) {
         return (typeof value !== 'undefined');
@@ -70,28 +68,6 @@ define([
     function pluralize(count, singular, plural) {
         const noun = count === 1 ? singular : plural || `${singular}s`;
         return `${count} ${noun}`;
-    }
-
-    function closeEnough(n1, n2) {
-        if (n1 === null || n2 === null) {
-            return false;
-        }
-        const LatLng = (n) => {
-            if (Array.isArray(n)) {
-                const [lat, lng] = n;
-                return {lat, lng};
-            }
-            return n;
-        };
-        const m1 = LatLng(n1);
-        const m2 = LatLng(n2);
-        if (Math.abs(m2.lat - m1.lat) > 0.01) {
-            return false;
-        }
-        if (Math.abs(m2.lng - m1.lng) > 0.01) {
-            return false;
-        }
-        return true;
     }
 
     class Detail extends Component {
@@ -172,7 +148,7 @@ define([
                     const schema = this.schemaMap[fieldKey];
                     return html`
                         <div>
-                            <div>${schema.title}</div>
+                            <div title="${schema.title}">${schema.title}</div>
                             <div>${this.renderMetadataField(location.samples[0], fieldKey)}</div>
                         </div>`;
                 });
@@ -188,14 +164,14 @@ define([
                     return !DETAIL_FIELDS.includes(key) && key in this.schemaMap;
                 })
                 .map((key) => {
-                    const label = this.schemaMap[key].title;
                     const field = this.renderMetadataField(location.samples[0], key);
                     if (typeof field === 'undefined') {
                         return;
                     }
+                    const schema = this.schemaMap[key];
                     return html`
                         <div>
-                            <div>${label}</div>
+                            <div title="${schema.title}">${schema.title}</div>
                             <div>${field}</div>
                         </div>
                     `;
@@ -404,7 +380,9 @@ define([
                 preferCanvas: true,
                 zoomControl: false,
                 minZoom: 0,
-                maxZoom: this.maxZoom
+                maxZoom: this.maxZoom,
+                zoomSnap: ZOOM_INCREMENT,
+                maxBounds: [[-90,-180],   [90,180]]
             });
 
             const tile1 = this.addLayer(map, 'OpenStreetMap');
@@ -909,8 +887,7 @@ define([
             if (this.state.map === null) {
                 return;
             }
-
-            this.state.map.setView(CENTER, ZOOM_SNAP_WORLD);
+            this.state.map.fitWorld();
         }
 
         onZoomIn(ev) {
@@ -919,7 +896,7 @@ define([
                 return;
             }
 
-            this.state.map.zoomIn(1);
+            this.state.map.zoomIn(ZOOM_INCREMENT);
         }
 
         onZoomOut() {
@@ -927,7 +904,7 @@ define([
                 return;
             }
 
-            this.state.map.zoomOut(1);
+            this.state.map.zoomOut(ZOOM_INCREMENT);
         }
 
         renderStackedIcon(container, icon) {
@@ -972,13 +949,11 @@ define([
                             <${Button}
                                     onclick=${this.onZoomToSamples.bind(this)}
                                     title="Zoom to Samples"
-                                    disabled=${false}
                                     icon=${this.renderStackedIcon('map-o', 'circle-o')}
                             />
                             <${Button}
                                     onclick=${this.onZoomOutFully.bind(this)}
                                     title="Zoom to World"
-                                    disabled=${this.state.map.getZoom() === ZOOM_SNAP_WORLD && closeEnough(this.state.center, CENTER)}
                                     icon=${this.renderIcon('globe')}
                             />
                     </div>
@@ -1011,9 +986,8 @@ define([
                         ${this.renderGrabberOverlay()}
 
                         <${Col} style=${{flexGrow: this.state.grow.map}}>
-                        ${this.renderMap()}
-                    </
-                    />
+                            ${this.renderMap()}
+                        <//>
 
                     ${this.renderColumnGrabber()}
 
