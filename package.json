@@ -20,9 +20,9 @@
     "homepage": "https://github.com/kbase/kbase-ui-plugin-dataview#readme",
     "dependencies": {
         "eslint": "7.30.0",
+        "eslint-config-preact": "1.1.4",
         "nodemon": "2.0.12",
         "standard": "16.0.3",
-        "eslint-config-preact": "1.1.4",
         "standard-readme": "2.0.3"
     }
 }

@@ -40,12 +40,12 @@ define([
     };
 
     const HOVERED_MARKER_STYLE = {
-        color:  constants.MARKER_HOVERED,
+        color: constants.MARKER_HOVERED,
         dashArray: '10'
     };
 
     const NORMAL_MARKER_STYLE = {
-        color:  constants.MARKER_INACTIVE,
+        color: constants.MARKER_INACTIVE,
         fill: true,
         fillColor: 'white',
         dashArray: null
@@ -57,11 +57,6 @@ define([
     function isDefined(value) {
         return (typeof value !== 'undefined');
     }
-
-
-
-
-
 
     class SampleMap extends Component {
         constructor(props) {
@@ -152,7 +147,7 @@ define([
                 minZoom: 0,
                 maxZoom: this.maxZoom,
                 zoomSnap: ZOOM_INCREMENT,
-                maxBounds: [[-90,-180],   [90,180]]
+                maxBounds: [[-90, -180], [90, 180]]
             });
 
             const tile1 = this.addLayer(map, 'OpenStreetMap');
@@ -417,9 +412,18 @@ define([
             marker.marker.removeFrom(this.state.map);
             marker.marker.addTo(this.state.map);
             this.markers.set(markerId, marker);
-            this.setState({
-                selectedMarkerId: markerId
-            });
+            // The wrapping of setState within setTimeout seems to be due to a bug
+            // in Safari (webkit), in which setState triggered from an
+            // event handler does not interact well with pReact's setState
+            // implementation. There are reports of setState and Safari
+            // issues from a few years ago, but supposedly fixed in Safari,
+            // and the workaround removed from pReact... it may be that this
+            // is an undetected edge case.
+            window.setTimeout(() => {
+                this.setState({
+                    selectedMarkerId: markerId
+                });
+            }, 0);
         }
 
         hoverMarker(markerId) {
@@ -605,11 +609,11 @@ define([
                 <div style=${style}
                      onmousemove=${this.onContainerMouseMove.bind(this)}>
                     <div style=${{
-                        padding: '20px',
-                        border: `1px solid ${constants.MARKER_INACTIVE}`,
-                        borderRadius: '4px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.8)'
-                    }}>
+        padding: '20px',
+        border: `1px solid ${constants.MARKER_INACTIVE}`,
+        borderRadius: '4px',
+        backgroundColor: 'rgba(255, 255, 255, 0.8)'
+    }}>
                         Move the mouse back and forth to resize the map.
                     </div>
                 </div>
@@ -736,28 +740,29 @@ define([
             return html`
                 <div style=${styles.main}>
                     <div style=${{
-                        flex: '0 0 auto',
-                        display: 'flex',
-                        flexDirection: 'row',
-                        minHeight: '0',
-                    }}>
+        flex: '0 0 auto',
+        display: 'flex',
+        flexDirection: 'row',
+        minHeight: '0',
+    }}>
                         ${this.renderToolbar()}
                     </div>
                     <div style=${{
-                        flex: '1 1 0px',
-                        display: 'flex',
-                        flexDirection: 'row',
-                        minHeight: '0',
-                        position: 'relative'
-                    }}
+        flex: '1 1 0px',
+        display: 'flex',
+        flexDirection: 'row',
+        minHeight: '0',
+        position: 'relative'
+    }}
                          onmouseenter=${this.onContainerMouseUp.bind(this)}
                          onmouseup=${this.onContainerMouseUp.bind(this)}>
 
                         ${this.renderGrabberOverlay()}
 
                         <${Col} style=${{flexGrow: this.state.grow.map}}>
-                            ${this.renderMap()}
-                        <//>
+                        ${this.renderMap()}
+                    </
+                    />
 
                     ${this.renderColumnGrabber()}
 

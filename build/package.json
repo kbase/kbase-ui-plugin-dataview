@@ -26,10 +26,10 @@
     "dependencies": {
         "bluebird": "3.7.2",
         "dagre": "0.8.5",
-        "htm": "3.0.4",
+        "htm": "3.1.0",
         "leaflet": "1.7.1",
         "leaflet-tilejson": "1.0.0-rc4",
-        "preact": "10.5.13"
+        "preact": "10.5.14"
     },
     "devDependencies": {
         "bluebird": "3.7.2",
@@ -44,7 +44,7 @@
         "js-yaml": "4.1.0",
         "numeral": "2.0.6",
         "requirejs-json": "0.0.3",
-        "tar": "6.1.0",
-        "terser": "5.7.0"
+        "tar": "6.1.2",
+        "terser": "5.7.1"
     }
 }
