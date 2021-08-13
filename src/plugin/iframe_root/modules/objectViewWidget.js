@@ -114,25 +114,23 @@ define([
                 });
             }
 
-            if (runtime.featureEnabled('linked-samples')) {
-                tabs.push({
-                    id: 'linkedSamples',
-                    title: 'Linked Samples',
-                    render: () => {
-                        return html`
-                            <${WidgetWrapper}
-                                    id="kb_dataview_linkedSamples"
-                                    params=${params}
-                                    runtime=${runtime}
-                                    key=${new Uuid(4).format()}
-                                    config=${{}}
-                                    scrolling=${true},
-                                    style=${{flex: '1 1 0', display: 'flex', flexDirection: 'column'}}
-                            />
-                        `;
-                    }
-                });
-            }
+            tabs.push({
+                id: 'linkedSamples',
+                title: 'Linked Samples',
+                render: () => {
+                    return html`
+                        <${WidgetWrapper}
+                                id="kb_dataview_linkedSamples"
+                                params=${params}
+                                runtime=${runtime}
+                                key=${new Uuid(4).format()}
+                                config=${{}}
+                                scrolling=${true},
+                                style=${{flex: '1 1 0', display: 'flex', flexDirection: 'column'}}
+                        />
+                    `;
+                }
+            });
 
             if (runtime.featureEnabled('object-link-to-term')) {
                 tabs.push({

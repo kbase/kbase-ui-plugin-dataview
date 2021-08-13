@@ -6,14 +6,14 @@ define([
     'kb_service/utils',
 
     'bootstrap'
-], function (
+], (
     preact,
     htm,
     View,
     GenericClient,
     APIUtils
-) {
-    'use strict';
+) => {
+
 
     const {Component} = preact;
     const html = htm.bind(preact.h);
@@ -145,8 +145,6 @@ define([
                     return a.name.localeCompare(b.name);
                 });
 
-            // TODO: Hmm, why?
-
 
             return [false, objectInfos];
         }
@@ -156,7 +154,9 @@ define([
                 return [];
             }
             const [result] = await wsClient.callFunc('get_object_info3', [{
-                objects: refs.map((ref) => { return {ref};}),
+                objects: refs.map((ref) => {
+                    return {ref};
+                }),
                 ignoreErrors: 1,
                 includeMetadata: 1
             }]);
@@ -179,11 +179,11 @@ define([
             })
                 .filter((workspaceInfo) => {
                     return (workspaceInfo.metadata.narrative &&
-                           !isNaN(parseInt(workspaceInfo.metadata.narrative)) &&
-                           workspaceInfo.id !== this.props.workspaceId &&
-                           workspaceInfo.metadata.narrative_nice_nice &&
-                           workspaceInfo.metadata.is_temporary &&
-                           workspaceInfo.metadata.is_temporary !== 'true');
+                        !isNaN(parseInt(workspaceInfo.metadata.narrative, 10)) &&
+                        workspaceInfo.id !== this.props.workspaceId &&
+                        workspaceInfo.metadata.narrative_nice_nice &&
+                        workspaceInfo.metadata.is_temporary &&
+                        workspaceInfo.metadata.is_temporary !== 'true');
                 });
         }
 
@@ -200,7 +200,7 @@ define([
                 this.props.objectVersion
             );
 
-            const  [
+            const [
                 objectInfo,
                 workspaceInfo,
                 versions,
@@ -209,7 +209,7 @@ define([
                 writableNarratives
             ] = await Promise.all([
                 wsClient.callFunc('get_object_info3', [{
-                    objects: [{ ref}],
+                    objects: [{ref}],
                     includeMetadata: 1
                 }]).then(([result]) => {
                     return APIUtils.objectInfoToObject(result.infos[0]);
@@ -256,31 +256,31 @@ define([
 
         renderNone() {
             return html`
-            <div className="alert alert-info">
-                Initializing ... <span className="fa fa-spinner fa-pulse fa-fw"></span>
-            </div>
+                <div className="alert alert-info">
+                    Initializing ... <span className="fa fa-spinner fa-pulse fa-fw"></span>
+                </div>
             `;
         }
 
         renderLoading() {
             return html`
-            <div className="well">
-            Loading ... <span className="fa fa-spinner fa-pulse fa-fw"></span>
-            </div>
+                <div className="well">
+                    Loading ... <span className="fa fa-spinner fa-pulse fa-fw"></span>
+                </div>
             `;
         }
 
         renderSuccess() {
             return html`
-            <${View} ...${this.state.data} runtime=${this.props.runtime}/>
+                <${View} ...${this.state.data} runtime=${this.props.runtime}/>
             `;
         }
 
         renderError() {
             return html`
-            <div className="alert alert-danger">
-                ${this.state.error.message}
-            </div>
+                <div className="alert alert-danger">
+                    ${this.state.error.message}
+                </div>
             `;
         }
 
@@ -297,5 +297,6 @@ define([
             }
         }
     }
+
     return Overview;
 });

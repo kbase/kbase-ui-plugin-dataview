@@ -10,7 +10,7 @@ define([
     '../collapsiblePanel',
 
     'bootstrap'
-], function (
+], (
     Promise,
     $,
     APIUtils,
@@ -20,8 +20,8 @@ define([
     Workspace,
     stateFactory,
     collapsiblePanel
-) {
-    'use strict';
+) => {
+
 
     const t = html.tag,
         div = t('div'),
@@ -36,27 +36,27 @@ define([
         button = t('button');
 
     function factory(config) {
-        var mount,
-            container,
-            runtime = config.runtime,
-            workspaceId,
-            objectId,
-            objectRef,
-            state = stateFactory.make(),
-            workspaceClient = new Workspace(runtime.getConfig('services.workspace.url'), {
-                token: runtime.getService('session').getAuthToken()
-            });
+        let mount;
+        let container;
+        const runtime = config.runtime;
+        let workspaceId;
+        let objectId;
+        let objectRef;
+        const state = stateFactory.make();
+        const workspaceClient = new Workspace(runtime.getConfig('services.workspace.url'), {
+            token: runtime.getService('session').getAuthToken()
+        });
 
         const copyButtonID = html.genId();
         const jsonViewButtonID = html.genId();
 
         function dateFormat(dateString) {
-            var monthLookup = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const monthLookup = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
             if (Utils.isBlank(dateString)) {
                 return '';
             }
-            var date = Utils.iso8601ToDate(dateString);
-            return monthLookup[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+            const date = Utils.iso8601ToDate(dateString);
+            return `${monthLookup[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
         }
 
         function fetchVersions() {
@@ -64,13 +64,13 @@ define([
                 .get_object_history({
                     ref: objectRef
                 })
-                .then(function (dataList) {
-                    var versions = dataList.map(function (version) {
+                .then((dataList) => {
+                    const versions = dataList.map((version) => {
                         return APIUtils.object_info_to_object(version);
                     });
                     state.set(
                         'versions',
-                        versions.sort(function (a, b) {
+                        versions.sort((a, b) => {
                             return b.version - a.version;
                         })
                     );
@@ -78,10 +78,10 @@ define([
         }
 
         function fetchOutgoingReferences() {
-            return workspaceClient.get_object_provenance([{ ref: objectRef }]).then(function (provdata) {
-                var refs = provdata[0].refs,
-                    provenace = provdata[0].provenance;
-                provenace.forEach(function (item) {
+            return workspaceClient.get_object_provenance([{ref: objectRef}]).then((provdata) => {
+                let refs = provdata[0].refs;
+                const provenace = provdata[0].provenance;
+                provenace.forEach((item) => {
                     refs = refs.concat(item.resolved_ws_objects);
                 });
                 if (refs.length > 100) {
@@ -98,32 +98,30 @@ define([
             //really need a ws method to get referenced object info
             //do to this correctly. For now, just dump the reference
             //if it's not visible
-            return Promise.try(function () {
+            return Promise.try(() => {
                 if (!refs || refs.length < 1) {
                     return;
                 }
-                var objIds = refs.map(function (ref) {
-                    return { ref: ref };
+                const objIds = refs.map((ref) => {
+                    return {ref};
                 });
                 return workspaceClient
                     .get_object_info_new({
                         objects: objIds,
                         ignoreErrors: 1
                     })
-                    .then(function (dataList) {
-                        var objects = dataList
-                            .filter(function (data) {
-                                if (data) {
-                                    return true;
-                                }
-                                return false;
+                    .then((dataList) => {
+                        const objects = dataList
+                            .filter((data) => {
+                                return !!data;
+
                             })
-                            .map(function (data) {
+                            .map((data) => {
                                 return APIUtils.object_info_to_object(data);
                             });
                         state.set(
                             name,
-                            objects.sort(function (a, b) {
+                            objects.sort((a, b) => {
                                 return b.name - a.name;
                             })
                         );
@@ -138,7 +136,7 @@ define([
                         ref: objectRef
                     }
                 ])
-                .then(function (sizes) {
+                .then((sizes) => {
                     if (sizes[0] > 100) {
                         state.set('too_many_inc_refs', true);
                     } else {
@@ -155,16 +153,16 @@ define([
                         ref: objectRef
                     }
                 ])
-                .then(function (dataList) {
-                    var refs = [];
+                .then((dataList) => {
+                    const refs = [];
                     if (dataList[0]) {
-                        for (var i = 0; i < dataList[0].length; i++) {
+                        for (let i = 0; i < dataList[0].length; i++) {
                             refs.push(APIUtils.object_info_to_object(dataList[0][i]));
                         }
                     }
                     state.set(
                         'inc_references',
-                        refs.sort(function (a, b) {
+                        refs.sort((a, b) => {
                             return b.name - a.name;
                         })
                     );
@@ -174,9 +172,9 @@ define([
 
         function createDataIcon(object_info, size) {
             try {
-                var typeId = object_info[2],
+                const typeId = object_info[2],
                     type = runtime.service('type').parseTypeId(typeId),
-                    icon = runtime.service('type').getIcon({ type: type }),
+                    icon = runtime.service('type').getIcon({type}),
                     div = html.tag('div'),
                     span = html.tag('span'),
                     i = html.tag('i');
@@ -190,12 +188,12 @@ define([
 
                 return div({
                     style: {
-                        fontSize: fontSize
+                        fontSize
                     }
                 }, [
-                    span({ class: 'fa-stack fa-2x' }, [
-                        i({ class: 'fa fa-circle fa-stack-2x', style: { color: icon.color } }),
-                        i({ class: 'fa-inverse fa-stack-1x ' + icon.classes.join(' ') })
+                    span({class: 'fa-stack fa-2x'}, [
+                        i({class: 'fa fa-circle fa-stack-2x', style: {color: icon.color}}),
+                        i({class: `fa-inverse fa-stack-1x ${icon.classes.join(' ')}`})
                     ])
                 ]);
             } catch (err) {
@@ -214,28 +212,28 @@ define([
                     ],
                     includeMetadata: 1
                 })
-                .then(function (data) {
+                .then((data) => {
                     if (!data || data.length === 0) {
                         state.set('status', 'notfound');
                         throw new Error('notfound');
                     }
                     state.set('status', 'found');
-                    var obj = APIUtils.object_info_to_object(data[0]);
+                    const obj = APIUtils.object_info_to_object(data[0]);
                     state.set('object', obj);
 
                     // create the data icon
                     state.set('dataicon', createDataIcon(data[0]));
                 })
-                .then(function () {
+                .then(() => {
                     // The narrative this lives in.
                     // YUCK!
-                    var isIntegerId = /^\d+$/.test(workspaceId);
+                    const isIntegerId = /^\d+$/.test(workspaceId);
                     return workspaceClient
                         .get_workspace_info({
                             id: isIntegerId ? workspaceId : null,
                             workspace: isIntegerId ? null : workspaceId
                         })
-                        .then(function (data) {
+                        .then((data) => {
                             state.set('workspace', APIUtils.workspace_metadata_to_object(data));
                         });
                 })
@@ -246,45 +244,41 @@ define([
                 //     fetchOutgoingReferences(),
                 //     fetchObjectInfo(refs)
                 // ])
-                .then(function () {
+                .then(() => {
                     return fetchVersions();
                 })
-                .then(function () {
+                .then(() => {
                     return checkRefCount();
                 })
-                .then(function () {
+                .then(() => {
                     return fetchReferences();
                 })
-                .then(function () {
+                .then(() => {
                     return fetchOutgoingReferences();
                 })
-                .then(function (refs) {
+                .then((refs) => {
                     return fetchObjectInfo(refs);
                 })
-                .then(function () {
+                .then(() => {
                     // Other narratives this user has.
                     return workspaceClient
                         .list_workspace_info({
                             perm: 'w'
                         })
-                        .then(function (data) {
-                            var objects = data.map(function (x) {
+                        .then((data) => {
+                            const objects = data.map((x) => {
                                 return APIUtils.workspace_metadata_to_object(x);
                             });
-                            var narratives = objects.filter(function (obj) {
-                                if (
-                                    obj.metadata.narrative &&
-                                    !isNaN(parseInt(obj.metadata.narrative)) &&
+                            const narratives = objects.filter((obj) => {
+                                return !!(obj.metadata.narrative &&
+                                    !isNaN(parseInt(obj.metadata.narrative, 10)) &&
                                     // don't keep the current narrative workspace.
                                     obj.id !== workspaceId &&
                                     obj.metadata.narrative_nice_name &&
                                     obj.metadata.is_temporary &&
-                                    obj.metadata.is_temporary !== 'true'
-                                ) {
-                                    return true;
-                                } else {
-                                    return false;
-                                }
+                                    obj.metadata.is_temporary !== 'true');
+
+
                             });
                             state.set('writableNarratives', narratives);
                         });
@@ -292,13 +286,13 @@ define([
         }
 
         function renderLayout() {
-            var div = html.tag('div');
+            const div = html.tag('div');
             return collapsiblePanel({
                 collapsed: false,
                 title: 'Overview',
-                content: div({ dataWidget: 'dataview-overview' }, [
-                    div({ dataPlaceholder: 'alert' }),
-                    div({ dataPlaceholder: 'content' })
+                content: div({dataWidget: 'dataview-overview'}, [
+                    div({dataPlaceholder: 'alert'}),
+                    div({dataPlaceholder: 'content'})
                 ])
             });
         }
@@ -343,36 +337,36 @@ define([
             return [
                 tr([
                     th('Module'),
-                    td({ dataElement: 'module' }, [
+                    td({dataElement: 'module'}, [
                         (function () {
                             if (state.get('sub.sub')) {
-                                return state.get('sub.sub') + ' in ';
-                            } else {
-                                return '';
+                                return `${state.get('sub.sub')} in `;
                             }
+                            return '';
+
                         })(),
                         state.get('object.typeModule')
                     ])
                 ]),
                 tr([
                     th('Type'),
-                    td({ dataElement: 'module' }, [
+                    td({dataElement: 'module'}, [
                         (function () {
                             if (state.get('sub.sub')) {
-                                return state.get('sub.sub') + ' in ';
-                            } else {
-                                return '';
+                                return `${state.get('sub.sub')} in `;
                             }
+                            return '';
+
                         })(),
                         a(
-                            { href: '/#spec/type/' + state.get('object.type'), target: '_blank' },
+                            {href: `/#spec/type/${state.get('object.type')}`, target: '_blank'},
                             state.get('object.typeName')
                         )
                     ])
                 ]),
                 tr([
                     th('Type Version'),
-                    td({ dataElement: 'typeVersion' }, [
+                    td({dataElement: 'typeVersion'}, [
                         state.get('object.typeMajorVersion'),
                         '.',
                         state.get('object.typeMinorVersion')
@@ -385,16 +379,16 @@ define([
             return [
                 tr([
                     th('Type'),
-                    td({ dataElement: 'module' }, [
+                    td({dataElement: 'module'}, [
                         (function () {
                             if (state.get('sub.sub')) {
-                                return state.get('sub.sub') + ' in ';
-                            } else {
-                                return '';
+                                return `${state.get('sub.sub')} in `;
                             }
+                            return '';
+
                         })(),
                         a(
-                            { href: '/#spec/type/' + state.get('object.type'), target: '_blank' },
+                            {href: `/#spec/type/${state.get('object.type')}`, target: '_blank'},
                             state.get('object.typeName')
                         )
                     ])
@@ -407,14 +401,14 @@ define([
                 return tr([
                     th('In Narrative'),
                     td(
-                        { dataElement: 'narrative' },
+                        {dataElement: 'narrative'},
                         a(
                             {
                                 href:
-                                    '/narrative/ws.' +
-                                    state.get('workspace.id') +
-                                    '.obj.' +
-                                    state.get('workspace.metadata.narrative'),
+                                    `/narrative/ws.${
+                                        state.get('workspace.id')
+                                    }.obj.${
+                                        state.get('workspace.metadata.narrative')}`,
                                 target: '_blank'
                             },
                             state.get('workspace.metadata.narrative_nice_name')
@@ -434,20 +428,20 @@ define([
         }
 
         function renderPermalinkRow() {
-            let permalink = getScheme() + '//' + getHost() + '/#dataview/' + objectRef;
+            let permalink = `${getScheme()}//${getHost()}/#dataview/${objectRef}`;
             if (state.get('sub.subid')) {
-                permalink += '?' + state.get('sub.sub') + '&' + state.get('sub.subid');
+                permalink += `?${state.get('sub.sub')}&${state.get('sub.subid')}`;
             }
             return tr([
                 th('Permalink'),
-                td({ dataElement: 'permalink' }, a({ href: permalink, target: '_parent' }, permalink))
+                td({dataElement: 'permalink'}, a({href: permalink, target: '_parent'}, permalink))
             ]);
         }
 
         function renderButtonRow() {
             return tr([
                 th(''),
-                td({ dataElement: 'copy' }, [
+                td({dataElement: 'copy'}, [
                     renderCopyButton(),
                     ' ',
                     renderJSONViewButton()
@@ -457,27 +451,27 @@ define([
 
         function renderVersionRow() {
             const version = state.get('object.version') || 'Latest';
-            return tr([th('Object Version'), td({ dataElement: 'version' }, version)]);
+            return tr([th('Object Version'), td({dataElement: 'version'}, version)]);
         }
 
         function panel(content) {
             const id = html.genId(),
-                headingId = 'heading_' + id,
-                bodyId = 'body_' + id;
-            return div({ class: 'panel panel-default' }, [
-                div({ class: 'panel-heading', role: 'tab', id: headingId }, [
-                    h4({ class: 'panel-title' }, [
+                headingId = `heading_${id}`,
+                bodyId = `body_${id}`;
+            return div({class: 'panel panel-default'}, [
+                div({class: 'panel-heading', role: 'tab', id: headingId}, [
+                    h4({class: 'panel-title'}, [
                         span(
                             {
                                 dataToggle: 'collapse',
-                                dataParent: '#' + content.parent,
-                                dataTarget: '#' + bodyId,
+                                dataParent: `#${content.parent}`,
+                                dataTarget: `#${bodyId}`,
                                 ariaExpanded: 'false',
                                 ariaControls: bodyId,
                                 class: 'collapsed',
-                                style: { cursor: 'pointer' }
+                                style: {cursor: 'pointer'}
                             },
-                            [span({ class: 'fa angle-right' }), content.title]
+                            [span({class: 'fa angle-right'}), content.title]
                         )
                     ])
                 ]),
@@ -487,7 +481,7 @@ define([
                     role: 'tabpanel',
                     ariaLabelledby: headingId
                 }, [
-                    div({ class: 'panel-body' }, [content.body])
+                    div({class: 'panel-body'}, [content.body])
                 ])
             ]);
         }
@@ -520,11 +514,11 @@ define([
         }
 
         function renderMetadataPanel(parent) {
-            var body,
-                metadata = state.get('object.metadata');
+            let body;
+            const metadata = state.get('object.metadata');
             if (metadata && Object.keys(metadata).length > 0) {
-                body = table({ class: 'table' }, [
-                    Object.keys(metadata).map(function (key) {
+                body = table({class: 'table'}, [
+                    Object.keys(metadata).map((key) => {
                         return tr([
                             td(
                                 {
@@ -560,8 +554,8 @@ define([
             }
             return panel({
                 title: 'Metadata',
-                body: body,
-                parent: parent
+                body,
+                parent
             });
         }
 
@@ -576,7 +570,7 @@ define([
                     renderNarrativeRow(),
                     tr([
                         th('Last Updated'),
-                        td({ dataElement: 'last-updated' }, [
+                        td({dataElement: 'last-updated'}, [
                             dateFormat(state.get('object.save_date')),
                             ' by ',
                             a(
@@ -593,33 +587,33 @@ define([
             );
             return panel({
                 title: 'Object Info',
-                body: body,
-                parent: parent
+                body,
+                parent
             });
         }
 
         function renderVersionsPanel(parent) {
-            var content,
-                versions = state.get('versions');
+            let content;
+            const versions = state.get('versions');
             if (versions && versions.length > 0) {
                 content = table(
-                    { class: 'table' },
-                    versions.map(function (version) {
+                    {class: 'table'},
+                    versions.map((version) => {
                         return tr([
                             td(
                                 a(
                                     {
-                                        href: '/#dataview/' + version.wsid + '/' + version.id + '/' + version.version,
+                                        href: `/#dataview/${version.wsid}/${version.id}/${version.version}`,
                                         target: '_parent'
                                     },
-                                    ['v' + version.version]
+                                    [`v${version.version}`]
                                 )
                             ),
                             td([
                                 'Saved on ',
                                 dateFormat(version.save_date),
                                 ' by ',
-                                a({ href: '/#people/' + version.saved_by, target: '_parent' }, version.saved_by)
+                                a({href: `/#people/${version.saved_by}`, target: '_parent'}, version.saved_by)
                             ])
                         ]);
                     })
@@ -630,220 +624,217 @@ define([
             return panel({
                 title: 'Versions',
                 body: content,
-                parent: parent
+                parent
             });
         }
 
         function renderReferencedByPanel(parent) {
-            var content,
-                tooManyRefs = state.get('too_many_inc_refs'),
-                refs = state.get('inc_references');
+            let content;
+            const tooManyRefs = state.get('too_many_inc_refs');
+            const refs = state.get('inc_references');
             if (tooManyRefs) {
                 content = 'Sorry, there are too many references to this data to display.';
-            } else {
-                if (refs && refs.length > 0) {
-                    content = table(
-                        {
-                            class: 'table kb-overview-table',
-                            style: {}
-                        },
-                        [
-                            tr([
-                                th(
-                                    {
-                                        style: {
-                                            width: '40%'
-                                        }
-                                    },
-                                    'Name'
-                                ),
-                                th(
-                                    {
-                                        style: {
-                                            width: '20%'
-                                        }
-                                    },
-                                    'Type'
-                                ),
-                                th(
-                                    {
-                                        style: {
-                                            width: '20%'
-                                        }
-                                    },
-                                    'Saved'
-                                ),
-                                th(
-                                    {
-                                        style: {
-                                            width: '20%'
-                                        }
-                                    },
-                                    'By'
-                                )
-                            ])
-                        ].concat(
-                            refs.map(function (ref) {
-                                return tr([
-                                    td(
-                                        a(
-                                            {
-                                                href: ['/#dataview', ref.wsid, ref.id, ref.version].join('/'),
-                                                title: ref.name,
-                                                target: '_parent'
-                                            },
-                                            ref.name
-                                        )
-                                    ),
-                                    td(
-                                        a(
-                                            {
-                                                href: ['/#spec', 'type', ref.type].join('/'),
-                                                title: ref.typeName,
-                                                target: '_parent'
-                                            },
-                                            ref.typeName
-                                        )
-                                    ),
-                                    td(
-                                        span(
-                                            {
-                                                title: dateFormat(ref.save_date)
-                                            },
-                                            dateFormat(ref.save_date)
-                                        )
-                                    ),
-                                    td(
-                                        a(
-                                            {
-                                                href: ['/#people', ref.saved_by].join('/'),
-                                                title: ref.saved_by,
-                                                target: '_parent'
-                                            },
-                                            ref.saved_by
-                                        )
+            } else if (refs && refs.length > 0) {
+                content = table(
+                    {
+                        class: 'table kb-overview-table',
+                        style: {}
+                    },
+                    [
+                        tr([
+                            th(
+                                {
+                                    style: {
+                                        width: '40%'
+                                    }
+                                },
+                                'Name'
+                            ),
+                            th(
+                                {
+                                    style: {
+                                        width: '20%'
+                                    }
+                                },
+                                'Type'
+                            ),
+                            th(
+                                {
+                                    style: {
+                                        width: '20%'
+                                    }
+                                },
+                                'Saved'
+                            ),
+                            th(
+                                {
+                                    style: {
+                                        width: '20%'
+                                    }
+                                },
+                                'By'
+                            )
+                        ])
+                    ].concat(
+                        refs.map((ref) => {
+                            return tr([
+                                td(
+                                    a(
+                                        {
+                                            href: ['/#dataview', ref.wsid, ref.id, ref.version].join('/'),
+                                            title: ref.name,
+                                            target: '_parent'
+                                        },
+                                        ref.name
                                     )
-                                ]);
-                            })
-                        )
-                    );
-                } else {
-                    content = 'No other data references this data object.';
-                }
+                                ),
+                                td(
+                                    a(
+                                        {
+                                            href: ['/#spec', 'type', ref.type].join('/'),
+                                            title: ref.typeName,
+                                            target: '_parent'
+                                        },
+                                        ref.typeName
+                                    )
+                                ),
+                                td(
+                                    span(
+                                        {
+                                            title: dateFormat(ref.save_date)
+                                        },
+                                        dateFormat(ref.save_date)
+                                    )
+                                ),
+                                td(
+                                    a(
+                                        {
+                                            href: ['/#people', ref.saved_by].join('/'),
+                                            title: ref.saved_by,
+                                            target: '_parent'
+                                        },
+                                        ref.saved_by
+                                    )
+                                )
+                            ]);
+                        })
+                    )
+                );
+            } else {
+                content = 'No other data references this data object.';
             }
             return panel({
                 title: 'Referenced by',
                 body: content,
-                parent: parent
+                parent
             });
         }
 
         function renderReferencesPanel(parent) {
-            var content,
-                tooManyRefs = state.get('too_many_out_refs'),
-                refs = state.get('out_references');
+            let content;
+            const tooManyRefs = state.get('too_many_out_refs');
+            const refs = state.get('out_references');
             if (tooManyRefs) {
                 content = 'Sorry, there are too many references from this data to display.';
-            } else {
-                if (refs && refs.length > 0) {
-                    content = table(
-                        {
-                            class: 'table kb-overview-table'
-                        },
-                        [
-                            tr([
-                                th(
-                                    {
-                                        style: {
-                                            width: '40%'
-                                        }
-                                    },
-                                    'Name'
-                                ),
-                                th(
-                                    {
-                                        style: {
-                                            width: '20%'
-                                        }
-                                    },
-                                    'Type'
-                                ),
-                                th(
-                                    {
-                                        style: {
-                                            width: '20%'
-                                        }
-                                    },
-                                    'Saved'
-                                ),
-                                th(
-                                    {
-                                        style: {
-                                            width: '20%'
-                                        }
-                                    },
-                                    'By'
-                                )
-                            ])
-                        ].concat(
-                            refs.map(function (ref) {
-                                return tr([
-                                    td(
-                                        a(
-                                            {
-                                                href: ['/#dataview', ref.wsid, ref.id, ref.version].join('/'),
-                                                title: ref.name,
-                                                target: '_parent'
-                                            },
-                                            ref.name
-                                        )
-                                    ),
-                                    td(
-                                        a(
-                                            {
-                                                href: ['/#spec', 'type', ref.type].join('/'),
-                                                title: ref.typeName,
-                                                target: '_parent'
-                                            },
-                                            ref.typeName
-                                        )
-                                    ),
-                                    td(
-                                        span(
-                                            {
-                                                title: dateFormat(ref.save_date)
-                                            },
-                                            dateFormat(ref.save_date)
-                                        )
-                                    ),
-                                    td(
-                                        a(
-                                            {
-                                                href: ['/#people', ref.saved_by].join('/'),
-                                                title: ref.saved_by,
-                                                target: '_parent'
-                                            },
-                                            ref.saved_by
-                                        )
+            } else if (refs && refs.length > 0) {
+                content = table(
+                    {
+                        class: 'table kb-overview-table'
+                    },
+                    [
+                        tr([
+                            th(
+                                {
+                                    style: {
+                                        width: '40%'
+                                    }
+                                },
+                                'Name'
+                            ),
+                            th(
+                                {
+                                    style: {
+                                        width: '20%'
+                                    }
+                                },
+                                'Type'
+                            ),
+                            th(
+                                {
+                                    style: {
+                                        width: '20%'
+                                    }
+                                },
+                                'Saved'
+                            ),
+                            th(
+                                {
+                                    style: {
+                                        width: '20%'
+                                    }
+                                },
+                                'By'
+                            )
+                        ])
+                    ].concat(
+                        refs.map((ref) => {
+                            return tr([
+                                td(
+                                    a(
+                                        {
+                                            href: ['/#dataview', ref.wsid, ref.id, ref.version].join('/'),
+                                            title: ref.name,
+                                            target: '_parent'
+                                        },
+                                        ref.name
                                     )
-                                ]);
-                            })
-                        )
-                    );
-                } else {
-                    content = 'This data object references no other data.';
-                }
+                                ),
+                                td(
+                                    a(
+                                        {
+                                            href: ['/#spec', 'type', ref.type].join('/'),
+                                            title: ref.typeName,
+                                            target: '_parent'
+                                        },
+                                        ref.typeName
+                                    )
+                                ),
+                                td(
+                                    span(
+                                        {
+                                            title: dateFormat(ref.save_date)
+                                        },
+                                        dateFormat(ref.save_date)
+                                    )
+                                ),
+                                td(
+                                    a(
+                                        {
+                                            href: ['/#people', ref.saved_by].join('/'),
+                                            title: ref.saved_by,
+                                            target: '_parent'
+                                        },
+                                        ref.saved_by
+                                    )
+                                )
+                            ]);
+                        })
+                    )
+                );
+            } else {
+                content = 'This data object references no other data.';
             }
+
             return panel({
                 title: 'References',
                 body: content,
-                parent: parent
+                parent
             });
         }
 
         function render() {
-            return div({ class: 'row' }, [
-                div({ class: 'col-sm-6' }, [
+            return div({class: 'row'}, [
+                div({class: 'col-sm-6'}, [
                     renderHeader(),
                     table(
                         {
@@ -854,7 +845,7 @@ define([
                             renderNarrativeRow(),
                             tr([
                                 th('Last Updated'),
-                                td({ dataElement: 'last-updated' }, [
+                                td({dataElement: 'last-updated'}, [
                                     dateFormat(state.get('object.save_date')),
                                     ' by ',
                                     a(
@@ -871,8 +862,8 @@ define([
                         ]
                     )
                 ]),
-                div({ class: 'col-sm-6' }, [
-                    div({ class: 'panel-group', id: 'accordion', role: 'tablist', ariaMultiselectable: 'true' }, [
+                div({class: 'col-sm-6'}, [
+                    div({class: 'panel-group', id: 'accordion', role: 'tablist', ariaMultiselectable: 'true'}, [
                         renderObjectInfo('accordion'),
                         renderMetadataPanel('accordion'),
                         renderVersionsPanel('accordion'),
@@ -929,7 +920,7 @@ define([
                         });
                     });
                 })
-                .catch(function (err) {
+                .catch((err) => {
                     console.error(err);
                     if (err.status && err.status === 500) {
                         // User probably doesn't have access -- but in any case we can just tell them
@@ -983,10 +974,11 @@ define([
             }
         }
 
-        return Object.freeze({ attach, start, stop, detach });
+        return Object.freeze({attach, start, stop, detach});
     }
+
     return {
-        make: function (config) {
+        make(config) {
             return factory(config);
         }
     };
