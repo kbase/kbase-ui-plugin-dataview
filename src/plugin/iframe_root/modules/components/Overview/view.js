@@ -11,7 +11,7 @@ define([
 
     'bootstrap',
     'css!./style.css'
-], function (
+], (
     preact,
     htm,
     $,
@@ -21,26 +21,20 @@ define([
     CollapsiblePanel,
     Utils,
     Panel
-) {
-    'use strict';
-
+) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
     function dateFormat(dateString) {
-        var monthLookup = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const monthLookup = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         if (Utils.isBlank(dateString)) {
             return '';
         }
-        var date = Utils.iso8601ToDate(dateString);
-        return monthLookup[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+        const date = Utils.iso8601ToDate(dateString);
+        return `${monthLookup[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
     }
 
     class Overview extends Component {
-        constructor(props) {
-            super(props);
-        }
-
         componentDidMount() {
             $(document).ready(() => {
                 $('[data-toggle="tooltip"]').tooltip({
@@ -58,13 +52,13 @@ define([
             const icon = this.props.runtime.service('type').getIcon({type});
 
             return html`
-            <div>
+                <div>
                 <span className="fa-stack fa-2x">
                     <i className="fa fa-circle fa-stack-2x"
-                       style=${{color: icon.color}} ></i>
+                       style=${{color: icon.color}}></i>
                     <i className=${`fa fa-inverse fa-stack-1x ${icon.classes.join(' ')}`}></i>
                 </span>
-            </div>
+                </div>
             `;
         }
 
@@ -93,84 +87,84 @@ define([
                 permalink += `?${this.props.sub.sub}&${this.props.sub.subid}`;
             }
             return html`
-            <tr>
-                <th>Permalink</th>
-                <td>
-                    <a href="${permalink}" target="_parent">
-                        ${permalink}
-                    </a>
-                </td>
-            </tr>
+                <tr>
+                    <th>Permalink</th>
+                    <td>
+                        <a href="${permalink}" target="_parent">
+                            ${permalink}
+                        </a>
+                    </td>
+                </tr>
             `;
         }
 
         renderVersionRow() {
             return html`
-            <tr>
-                <th>Object Version</th>
-                <td>${this.props.objectInfo.version || 'Latest'}</td>
-            </tr>
+                <tr>
+                    <th>Object Version</th>
+                    <td>${this.props.objectInfo.version || 'Latest'}</td>
+                </tr>
             `;
         }
 
         renderTypeRow() {
             return html`
-            <tr>
-                <th>Type</th>
-                <td>${(this.props.sub && this.props.sub.sub) ? `${this.props.sub.sub} in ` : ''}
-                    <a href="${`/#spec/type/${this.props.objectInfo.type}`}" target="_blank">
-                        ${this.props.objectInfo.typeName}
-                    </a>
-                </td>
-            </tr>
+                <tr>
+                    <th>Type</th>
+                    <td>${(this.props.sub && this.props.sub.sub) ? `${this.props.sub.sub} in ` : ''}
+                        <a href="${`/#spec/type/${this.props.objectInfo.type}`}" target="_blank">
+                            ${this.props.objectInfo.typeName}
+                        </a>
+                    </td>
+                </tr>
             `;
         }
 
         renderTypeModuleRow() {
             return html`
-            <tr>
-                <th>Type Module</th>
-                <td>${(this.props.sub && this.props.sub.sub) ? `${this.props.sub.sub} in ` : ''}
-                    <a href="${`/#spec/module/${this.props.objectInfo.typeModule}`}" target="_blank">
-                        ${this.props.objectInfo.typeModule}
-                    </a>
-                </td>
-            </tr>
+                <tr>
+                    <th>Type Module</th>
+                    <td>${(this.props.sub && this.props.sub.sub) ? `${this.props.sub.sub} in ` : ''}
+                        <a href="${`/#spec/module/${this.props.objectInfo.typeModule}`}" target="_blank">
+                            ${this.props.objectInfo.typeModule}
+                        </a>
+                    </td>
+                </tr>
             `;
         }
 
         renderTypeVersionRow() {
             return html`
-            <tr>
-                <th>Type Version</th>
-                <td>
-                    ${this.props.objectInfo.typeMajorVersion}. ${this.props.objectInfo.typeMinorVersion}
-                </td>
-            </tr>
+                <tr>
+                    <th>Type Version</th>
+                    <td>
+                        ${this.props.objectInfo.typeMajorVersion}. ${this.props.objectInfo.typeMinorVersion}
+                    </td>
+                </tr>
             `;
         }
 
         renderLastUpdatedRow() {
             return html`
-            <tr>
-                <th>Last Updated</th>
-                <td>${dateFormat(this.props.objectInfo.save_date)} by ${' '}
-                    <a href="${`/#people/${this.props.objectInfo.saved_by}`}" target="_blank">
-                        ${this.props.objectInfo.saved_by}
-                    </a>
-                </td>
-            </tr>
+                <tr>
+                    <th>Last Updated</th>
+                    <td>${dateFormat(this.props.objectInfo.save_date)} by ${' '}
+                        <a href="${`/#people/${this.props.objectInfo.saved_by}`}" target="_blank">
+                            ${this.props.objectInfo.saved_by}
+                        </a>
+                    </td>
+                </tr>
             `;
         }
 
         renderSummary() {
-            return html `
+            return html`
                 <table className="table">
                     <tbody>
-                        ${this.renderTypeRow()}
-                        ${this.renderNarrativeRow()}
-                        ${this.renderLastUpdatedRow()}
-                        ${this.renderPermalinkRow()}
+                    ${this.renderTypeRow()}
+                    ${this.renderNarrativeRow()}
+                    ${this.renderLastUpdatedRow()}
+                    ${this.renderPermalinkRow()}
                     </tbody>
                 </table>
             `;
@@ -178,21 +172,21 @@ define([
 
         renderHeader() {
             return html`
-            <div className="Overview-header">   
-                <div>
-                    ${this.renderDataIcon()}
+                <div className="Overview-header">
+                    <div>
+                        ${this.renderDataIcon()}
+                    </div>
+                    <h3 className="Overview-header-title">
+                        ${(this.props.sub && this.props.sub.id) ? this.props.sub.subid : this.props.objectInfo.name}
+                    </h3>
                 </div>
-                <h3 className="Overview-header-title">
-                    ${(this.props.sub && this.props.sub.id) ? this.props.sub.subid : this.props.objectInfo.name}
-                </h3>
-            </div>
             `;
         }
 
         renderObjectInfo(parentId) {
             const body = html`
-            <table className="table">
-                <tbody>
+                <table className="table">
+                    <tbody>
                     ${this.renderVersionRow()}
                     ${this.renderTypeModuleRow()}
                     ${this.renderTypeRow()}
@@ -200,14 +194,14 @@ define([
                     ${this.renderNarrativeRow()}
                     ${this.renderLastUpdatedRow()}
                     ${this.renderPermalinkRow()}
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
             `;
             return html`
-            <${Panel} title="Object Info"
-                      parentId=${parentId}>
-                ${body}
-            <//>
+                <${Panel} title="Object Info"
+                          parentId=${parentId}>
+                    ${body}
+                <//>
             `;
         }
 
@@ -221,26 +215,26 @@ define([
                 }
                 const tableBody = entries.map(([key, value]) => {
                     return html`
-                    <tr>
-                        <th>${key}</th>
-                        <td>${value}</td>
-                    </tr>
+                        <tr>
+                            <th>${key}</th>
+                            <td>${value}</td>
+                        </tr>
                     `;
                 });
                 return html`
-                <table className="table Overview-metadata-table">
-                    <tbody>
+                    <table className="table Overview-metadata-table">
+                        <tbody>
                         ${tableBody}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
                 `;
             })();
 
             return html`
-            <${Panel} title="Metadata"
-                      parentId=${parentId}>
-                ${body}
-            <//>
+                <${Panel} title="Metadata"
+                          parentId=${parentId}>
+                    ${body}
+                <//>
             `;
         }
 
@@ -253,33 +247,34 @@ define([
                 }
                 const tableBody = this.props.versions.map((version) => {
                     return html`
-                    <tr>
-                        <td>
-                            <a href=${`/#dataview/${version.wsid}/${version.id}/${version.version}`} target="_parent">
-                                v${version.version}
-                            </a>
-                        </td>
-                        <td>
-                            Saved on ${dateFormat(version.save_date)} by ${' '}
-                            <a href="/#people/${version.saved_by}" target="_parent">${version.saved_by}</a>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>
+                                <a href=${`/#dataview/${version.wsid}/${version.id}/${version.version}`}
+                                   target="_parent">
+                                        v${version.version}
+                                </a>
+                            </td>
+                            <td>
+                                Saved on ${dateFormat(version.save_date)} by ${' '}
+                                <a href="/#people/${version.saved_by}" target="_parent">${version.saved_by}</a>
+                            </td>
+                        </tr>
                     `;
                 });
                 return html`
-                <table className="table Overview-metadata-table">
-                    <tbody>
+                    <table className="table Overview-metadata-table">
+                        <tbody>
                         ${tableBody}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
                 `;
             })();
 
             return html`
-            <${Panel} title="Versions"
-                      parentId=${parentId}>
-                ${body}
-            <//>
+                <${Panel} title="Versions"
+                          parentId=${parentId}>
+                    ${body}
+                <//>
             `;
         }
 
@@ -301,45 +296,47 @@ define([
 
                 const tableBody = this.props.inc_references.map((ref) => {
                     return html`
-                    <tr>
-                        <td>
-                            <a href=${`/#dataview/${ref.wsid}/${ref.id}/${ref.version}`} target="_parent">${ref.name}</a>
-                        </td>
-                        <td>
-                            <a href=${`/#spec/type/${ref.type}`} target="_parent">${ref.typeName}</a>
-                        </td>
-                        <td>
-                            ${dateFormat(ref.save_date)}
-                        </td>
-                        <td>
-                            <a href=${`/#people/${ref.saved_by}`} target="_parent">${ref.saved_by}</a>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>
+                                <a href=${`/#dataview/${ref.wsid}/${ref.id}/${ref.version}`}
+                                   target="_parent">${ref.name}</a>
+                            </td>
+                            <td>
+                                <a href=${`/#spec/type/${ref.type}`} target="_parent">${ref.typeName}</a>
+                            </td>
+                            <td>
+                                ${dateFormat(ref.save_date)}
+                            </td>
+                            <td>
+                                <a href=${`/#people/${ref.saved_by}`} target="_parent">${ref.saved_by}</a>
+                            </td>
+                        </tr>
                     `;
                 });
 
                 return html`
-                <table className="table kb-overview-table">
-                    <thead>
+                    <table className="table kb-overview-table">
+                        <thead>
                         <tr>
                             <th>Name</th>
                             <th>Type</th>
                             <th>Saved</th>
-                            <th>By</td>
+                            <th>By
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
+                        </thead>
+                        <tbody>
                         ${tableBody}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
                 `;
             })();
 
             return html`
-            <${Panel} title="Referenced by"
-                      parentId=${parentId}>
-                ${body}
-            <//>
+                <${Panel} title="Referenced by"
+                          parentId=${parentId}>
+                    ${body}
+                <//>
             `;
         }
 
@@ -361,45 +358,47 @@ define([
 
                 const tableBody = this.props.out_references.map((ref) => {
                     return html`
-                    <tr>
-                        <td>
-                            <a href=${`/#dataview/${ref.wsid}/${ref.id}/${ref.version}`} target="_parent">${ref.name}</a>
-                        </td>
-                        <td>
-                            <a href=${`/#spec/type/${ref.type}`} target="_parent">${ref.typeName}</a>
-                        </td>
-                        <td>
-                            ${dateFormat(ref.save_date)}
-                        </td>
-                        <td>
-                            <a href=${`/#people/${ref.saved_by}`} target="_parent">${ref.saved_by}</a>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>
+                                <a href=${`/#dataview/${ref.wsid}/${ref.id}/${ref.version}`}
+                                   target="_parent">${ref.name}</a>
+                            </td>
+                            <td>
+                                <a href=${`/#spec/type/${ref.type}`} target="_parent">${ref.typeName}</a>
+                            </td>
+                            <td>
+                                ${dateFormat(ref.save_date)}
+                            </td>
+                            <td>
+                                <a href=${`/#people/${ref.saved_by}`} target="_parent">${ref.saved_by}</a>
+                            </td>
+                        </tr>
                     `;
                 });
 
                 return html`
-                <table className="table kb-overview-table">
-                    <thead>
+                    <table className="table kb-overview-table">
+                        <thead>
                         <tr>
                             <th>Name</th>
                             <th>Type</th>
                             <th>Saved</th>
-                            <th>By</td>
+                            <th>By
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
+                        </thead>
+                        <tbody>
                         ${tableBody}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
                 `;
             })();
 
             return html`
-            <${Panel} title="References"
-                      parentId=${parentId}>
-                ${body}
-            <//>
+                <${Panel} title="References"
+                          parentId=${parentId}>
+                    ${body}
+                <//>
             `;
         }
 
@@ -409,52 +408,53 @@ define([
 
         renderButtonsRow() {
             return html`
-            <tr>
-                <th></th>
-                <td>
-                    <button className="btn btn-default"
-                            data-toggle="tooltip"
-                            data-placement="bottom"
-                            title="Opens (and closes) a panel with which you can copy this data object to a Narrative",
-                            onClick=${this.handleCopyButtonClick.bind(this)}>
-                        Copy
-                    </button>
+                <tr>
+                    <th></th>
+                    <td>
+                        <button className="btn btn-default"
+                                data-toggle="tooltip"
+                                data-placement="bottom"
+                                title="Opens (and closes) a panel with which you can copy this data object to a Narrative"
+                                onClick=${this.handleCopyButtonClick.bind(this)}>
+                            Copy
+                        </button>
                     ${' '}
-                    <a className="btn btn-default"
-                            data-toggle="tooltip"
-                            data-placement="bottom"
-                            title="View the actual JSON for this object"
-                            href=${`/#jsonview/${this.props.objectInfo.ref}`}
-                            target="_parent">
-                        JSON View
-                    </a>
-                </td>
-            </tr>
+                        <a className="btn btn-default"
+                           data-toggle="tooltip"
+                           data-placement="bottom"
+                           title="View the actual JSON for this object"
+                           href=${`/#jsonview/${this.props.objectInfo.ref}`}
+                           target="_parent">
+                            JSON View
+                        </a>
+                    </td>
+                </tr>
             `;
         }
 
         render() {
             const id = `panel-${new Uuid(4).format()}`;
             return html`
-            <div className="row">
-                <div className="col-sm-6">
-                    ${this.renderSummary()}
-                </div>
-                <div className="col-sm-6">
-                    <div className="panel-group"
-                         id=${id}
-                         role="tablist"
-                         aria-multiselectable="true">
-                        ${this.renderObjectInfo(id)}
-                        ${this.renderMetadataPanel(id)}
-                        ${this.renderVersionsPanel(id)}
-                        ${this.renderReferencedByPanel(id)}
-                        ${this.renderReferencesPanel(id)}
+                <div className="row">
+                    <div className="col-sm-6">
+                        ${this.renderSummary()}
+                    </div>
+                    <div className="col-sm-6">
+                        <div className="panel-group"
+                             id=${id}
+                             role="tablist"
+                             aria-multiselectable="true">
+                            ${this.renderObjectInfo(id)}
+                            ${this.renderMetadataPanel(id)}
+                            ${this.renderVersionsPanel(id)}
+                            ${this.renderReferencedByPanel(id)}
+                            ${this.renderReferencesPanel(id)}
+                        </div>
                     </div>
                 </div>
-            </div>
             `;
         }
     }
+
     return Overview;
 });
