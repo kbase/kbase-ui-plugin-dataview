@@ -163,16 +163,16 @@ define([
                 },
                 {
                     index: 1,
-                    fieldKey: 'name',
-                    title: 'Name',
-                    fieldType: 'attribute',
+                    fieldKey: 'id',
+                    title: 'ID',
+                    fieldType: 'node-attribute',
                     type: 'string'
                 },
                 {
                     index: 2,
-                    fieldKey: 'id',
-                    title: 'ID',
-                    fieldType: 'node-attribute',
+                    fieldKey: 'name',
+                    title: 'Name',
+                    fieldType: 'attribute',
                     type: 'string'
                 }
             ];
