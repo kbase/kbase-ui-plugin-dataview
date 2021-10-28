@@ -192,23 +192,23 @@ define([
                          data-testid=${`location_${String(index)}`}
                          id=${`location_${String(index)}`}
                          onmouseover=${() => {
-                             this.onMouseOver(location, index);
-                         }}
+        this.onMouseOver(location, index);
+    }}
                          onmouseout=${() => {
-                             this.onMouseOut(location);
-                         }}
+        this.onMouseOut(location);
+    }}
                          onmousedown=${() => {
-                             this.onMouseDown(index);
-                         }}
+        this.onMouseDown(index);
+    }}
                          onmouseup=${() => {
-                             this.onMouseUp(index);
-                         }}
+        this.onMouseUp(index);
+    }}
                          onclick=${(ev) => {
-                             if (ev.target.tagName === 'A') {
-                                 return;
-                             }
-                             this.onClick(location);
-                         }}
+        if (ev.target.tagName === 'A') {
+            return;
+        }
+        this.onClick(location);
+    }}
                     >
                         <div style=${{borderBottom: '1px solid silver', marginBottom: '4px'}}>
                             <div class="LatLongTable">

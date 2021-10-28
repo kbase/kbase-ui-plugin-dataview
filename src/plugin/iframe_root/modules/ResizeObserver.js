@@ -1,6 +1,4 @@
-define([], function () {
-    'use strict';
-
+define([], () => {
     function outerDimensions(el) {
         el.offsetHeight;
         const rect = el.getBoundingClientRect();

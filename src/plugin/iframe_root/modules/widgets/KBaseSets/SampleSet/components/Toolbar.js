@@ -2,11 +2,11 @@ define([
     'preact',
     'htm',
     './Toolbar.styles'
-], function (
+], (
     {Component, h, Fragment},
     htm,
     styles
-) {
+) => {
     const html = htm.bind(h);
 
     class Toolbar extends Component {
@@ -258,7 +258,7 @@ define([
         renderClearButton() {
             const enabled = this.isModified() || this.isDirty();
             const classes = [
-                'fa', 'fa-lg', 'fa-trash'
+                'fa', 'fa-lg', 'fa-times'
             ];
             let title;
             if (enabled) {
