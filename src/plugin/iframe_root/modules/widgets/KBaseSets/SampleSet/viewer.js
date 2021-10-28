@@ -162,20 +162,14 @@ define([
                     type: 'number'
                 },
                 {
-                    index: 1,
-                    fieldKey: 'id',
-                    title: 'ID',
-                    fieldType: 'node-attribute',
-                    type: 'string'
-                },
-                {
                     index: 2,
                     fieldKey: 'name',
-                    title: 'Name',
+                    title: 'Name/ID',
                     fieldType: 'attribute',
                     type: 'string'
                 }
             ];
+            const initialColumnCount = sampleColumns.length;
             groups.unshift({
                 name: 'sampleFields',
                 title: 'Sample',
@@ -194,7 +188,7 @@ define([
                         return null;
                     })();
                     sampleColumns.push({
-                        index: index + 3,
+                        index: index + initialColumnCount,
                         fieldKey,
                         title: schema.title,
                         fieldType: 'controlled',
@@ -207,7 +201,7 @@ define([
                 }
                 case 'user':
                     sampleColumns.push({
-                        index: index + 3,
+                        index: index + initialColumnCount,
                         fieldKey,
                         title: fieldKey,
                         fieldType: 'user',

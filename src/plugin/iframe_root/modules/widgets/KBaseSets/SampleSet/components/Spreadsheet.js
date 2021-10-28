@@ -799,7 +799,7 @@ define([
                 }
             }
 
-            return html`<span>${cellValue}</span>`;
+            return html`<span title="${cellValue}">${cellValue}</span>`;
         }
 
         renderEmptyBody() {
@@ -865,8 +865,6 @@ define([
 
                     const cellValue = row.data[columnNumber + this.state.firstCol];
 
-                    // TODO: add back in tooltip / title support to renderCell.
-                    // title=${sampleField}
                     return html`
                         <div style=${cellStyle}
                              role="cell"

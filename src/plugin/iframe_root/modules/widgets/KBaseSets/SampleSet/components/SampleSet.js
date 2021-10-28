@@ -30,25 +30,15 @@ define([
         renderSamplesTable() {
             const columns = [{
                 id: 'name',
-                label: 'Name',
-                display: true,
-                isSortable: true,
-                render: (name, sample) => {
-                    return html`
-                        <a href=${`/#samples/view/${sample.id}/${sample.version}`} target="_blank">${name}</a>
-                    `;
-                }
-            }, {
-                id: 'sourceId',
-                label: 'ID',
+                label: 'Name/ID',
                 display: true,
                 isSortable: true,
                 style: {
-                    flex: '0 0 12'
+                    flex: '2 0 0'
                 },
-                render: (sourceId) => {
+                render: (name, sample) => {
                     return html`
-                        ${sourceId}
+                        <a href=${`/#samples/view/${sample.id}/${sample.version}`} target="_blank">${name}</a>
                     `;
                 }
             }, {
@@ -57,7 +47,7 @@ define([
                 display: true,
                 isSortable: true,
                 style: {
-                    flex: '0 0 10'
+                    flex: '0 0 13em'
                 },
                 render: (savedAt) => {
                     return html`
@@ -70,7 +60,7 @@ define([
                 display: true,
                 isSortable: true,
                 style: {
-                    flex: '0 0 6'
+                    flex: '1 0 0'
                 },
                 render: (savedBy) => {
                     return html`
