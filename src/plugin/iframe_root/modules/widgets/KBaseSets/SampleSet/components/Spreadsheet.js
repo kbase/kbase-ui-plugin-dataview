@@ -180,11 +180,11 @@ define([
             return html`
                 <div style=${style}
                      onMouseEnter=${() => {
-                         this.doMouseEnterHeaderCell(columnDef);
-                     }}
+        this.doMouseEnterHeaderCell(columnDef);
+    }}
                      onMouseLeave=${() => {
-                         this.doMouseLeaveHeaderCell(columnDef);
-                     }}
+        this.doMouseLeaveHeaderCell(columnDef);
+    }}
                      role="cell"
                      data-k-b-testhook-cell=${columnDef.key}>
                     ${this.renderCell(columnDef, columnNumber)}
@@ -471,7 +471,7 @@ define([
         }
 
         renderHeaderGroups() {
-            let colsSoFar = 1;
+            let colsSoFar = 0;
             const result = this.props.columnGroups.map((columnGroup) => {
                 // get width of this span.
 
@@ -491,12 +491,12 @@ define([
                     </div>
                 `;
             });
-            const style = Object.assign({}, styles.Spreadsheet_header_cell);
-            style.flexBasis = `${this.props.columns[0].width}px`;
+            // const style = Object.assign({}, styles.Spreadsheet_header_cell);
+            // style.flexBasis = `${this.props.columns[0].width}px`;
 
-            result.unshift(html`
-                <div style=${style} role="cell"></div>
-            `);
+            // result.unshift(html`
+            //     <div style=${style} role="cell"></div>
+            // `);
             return result;
         }
 
@@ -518,11 +518,11 @@ define([
                             index=${columnNumber}
                             showMenu=${true}
                             onFilter=${(filterValue) => {
-                                this.doFilter(columnDef, filterValue);
-                            }}
+        this.doFilter(columnDef, filterValue);
+    }}
                             onSort=${(direction) => {
-                                this.doSortColumn(columnDef, direction);
-                            }}
+        this.doSortColumn(columnDef, direction);
+    }}
                             onClearFilter=${this.doClearFilter.bind(this)}/>
                 `;
             });
@@ -882,9 +882,9 @@ define([
                     <div style=${rowStyle}
                          class="HoverRow"
                          ondblclick=${(ev) => {
-                             ev.preventDefault();
-                             this.props.onRowClick(row.entity);
-                         }}
+        ev.preventDefault();
+        this.props.onRowClick(row.entity);
+    }}
                          role="row">
                         ${displayRow}
                     </div>
@@ -892,11 +892,11 @@ define([
             });
             return html`
                 <div style=${Object.assign({}, styles.Spreadsheet_grid, {
-                    top: 0,
-                    left: 0,
-                    width: `${this.state.dimensions.width}px`,
-                    height: `${this.state.dimensions.height}px`
-                })}>
+        top: 0,
+        left: 0,
+        width: `${this.state.dimensions.width}px`,
+        height: `${this.state.dimensions.height}px`
+    })}>
                     ${displayRows}
                 </div>
             `;

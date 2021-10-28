@@ -60,26 +60,13 @@ define([
         }
 
         renderMap3() {
-
-            // <${Spreadsheet} columns=${this.props.sampleColumns}
-            //                              table=${this.props.sampleTable}
-            //                              onRowClick=${this.onRowClick.bind(this)}
-            //                              columnGroups=${this.props.columnGroups}/>
-
             const geolocationGroup = this.props.groups.filter((group) => {
                 return group.name === 'geolocation';
             })[0];
 
-            // const columnsMap = this.props.schemas.reduce((columnsMap, column) => {
-            //     columnsMap[column.key] = column;
-            //     return columnsMap;
-            // }, {});
-
             const geolocationFields = this.props.sampleColumns.filter((column) => {
                 return geolocationGroup.fields.includes(column.key);
             });
-
-            // console.log(geolocationFields);
 
             return html`
                 <${SampleMap3} samples=${this.props.samples} fieldKeys=${geolocationGroup.fields} fieldSchemas=${geolocationFields} />

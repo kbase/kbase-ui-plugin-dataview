@@ -127,10 +127,8 @@ define([
                 }
             }
 
+            // Get the schemas for all field controlled fields.
             const fieldsToGet = groupedFields
-                .filter(({type}) => {
-                    return type === 'controlled';
-                })
                 .map(({fieldKey}) => {
                     return fieldKey;
                 });
@@ -139,8 +137,7 @@ define([
                 field.schema = fieldSchemas[index];
             });
 
-            // Any remaining fields are field keys
-
+            // Any remaining fields are user fields
             if (fieldKeys.size > 0) {
                 Array.from(fieldKeys).sort().forEach((fieldKey) => {
                     groupedFields.push({
@@ -155,69 +152,105 @@ define([
                 });
             }
 
-            const sampleColumns = groupedFields.map(({type, fieldKey, schema}, index) => {
-                if (type === 'controlled') {
+            // Here we add a group composed of top level fields
+            const sampleColumns = [
+                {
+                    index: 0,
+                    fieldKey: 'row_number',
+                    title: '#',
+                    fieldType: 'row-number',
+                    type: 'number'
+                },
+                {
+                    index: 1,
+                    fieldKey: 'name',
+                    title: 'Name',
+                    fieldType: 'attribute',
+                    type: 'string'
+                },
+                {
+                    index: 2,
+                    fieldKey: 'id',
+                    title: 'ID',
+                    fieldType: 'node-attribute',
+                    type: 'string'
+                }
+            ];
+            groups.unshift({
+                name: 'sampleFields',
+                title: 'Sample',
+                count: sampleColumns.length
+            });
+
+            // Here we add all fields which are mapped to the field
+            // grouping and ordering spec.
+            groupedFields.forEach(({type, fieldKey, schema}, index) => {
+                switch (type) {
+                case 'controlled': {
                     const unit = (() => {
                         if ('unit' in schema.kbase) {
                             return schema.kbase.unit;
                         }
                         return null;
                     })();
-                    return {
-                        index: index + 1,
-                        key: fieldKey,
+                    sampleColumns.push({
+                        index: index + 3,
+                        fieldKey,
                         title: schema.title,
                         fieldType: 'controlled',
                         type: schema.type,
                         format: schema.kbase.format,
                         formatter: this.makeFormatter(schema),
                         unit
-                    };
+                    });
+                    break;
                 }
-                return {
-                    index: index + 1,
-                    key: fieldKey,
-                    title: fieldKey,
-                    fieldType: 'user',
-                    type: 'string',
-                    formatter: (value) => {
-                        return value;
-                    }
-                };
-            });
-
-            sampleColumns.unshift({
-                index: 0,
-                key: 'row_number',
-                title: '#',
-                fieldType: 'synthesized',
-                type: 'number'
-            });
-
-            function getCellContent(sample, title, type, fieldKey) {
-                switch (type) {
-                case 'controlled':
-                    var controlledField = sample.node_tree[0].meta_controlled[fieldKey];
-                    if (!controlledField) {
-                        return null;
-                    }
-                    return controlledField.value;
-                    // return formatValue(controlledField.value, schema);
                 case 'user':
-                    var userField = sample.node_tree[0].meta_user[fieldKey];
-                    if (!userField) {
-                        return null;
-                    }
-                    return userField.value;
+                    sampleColumns.push({
+                        index: index + 3,
+                        fieldKey,
+                        title: fieldKey,
+                        fieldType: 'user',
+                        type: 'string',
+                        formatter: (value) => {
+                            return value;
+                        }
+                    });
+                }
+            });
+
+            function getCellContent(sample, type, fieldKey, rowIndex) {
+                switch (type) {
+                case 'row-number':
+                    return rowIndex + 1;
+                case 'attribute':
+                    return sample[fieldKey];
+                case 'node-attribute':
+                    return sample.node_tree[0][fieldKey];
+                case 'controlled':
+                    return (() => {
+                        const controlledField = sample.node_tree[0].meta_controlled[fieldKey];
+                        if (!controlledField) {
+                            return null;
+                        }
+                        return controlledField.value;
+                    })();
+                case 'user':
+                    return (() => {
+                        const userField = sample.node_tree[0].meta_user[fieldKey];
+                        if (!userField) {
+                            return null;
+                        }
+                        return userField.value;
+                    })();
                 }
             }
 
             const sampleTable = samples.map((sample, index) => {
-                const data = groupedFields.map(({title, type, fieldKey}) => {
-                    return getCellContent(sample, title, type, fieldKey);
+                const data = sampleColumns.map(({fieldType, fieldKey}) => {
+                    return getCellContent(sample, fieldType, fieldKey, index);
                 });
-                // Add the row number as a synthetic first column.
-                data.unshift(index + 1);
+
                 return {
                     entity: {
                         id: sample.id,
