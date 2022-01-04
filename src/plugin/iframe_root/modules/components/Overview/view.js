@@ -406,32 +406,6 @@ define([
             this.props.runtime.send('copyWidget', 'toggle');
         }
 
-        renderButtonsRow() {
-            return html`
-                <tr>
-                    <th></th>
-                    <td>
-                        <button className="btn btn-default"
-                                data-toggle="tooltip"
-                                data-placement="bottom"
-                                title="Opens (and closes) a panel with which you can copy this data object to a Narrative"
-                                onClick=${this.handleCopyButtonClick.bind(this)}>
-                            Copy
-                        </button>
-                    ${' '}
-                        <a className="btn btn-default"
-                           data-toggle="tooltip"
-                           data-placement="bottom"
-                           title="View the actual JSON for this object"
-                           href=${`/#jsonview/${this.props.objectInfo.ref}`}
-                           target="_parent">
-                            JSON View
-                        </a>
-                    </td>
-                </tr>
-            `;
-        }
-
         render() {
             const id = `panel-${new Uuid(4).format()}`;
             return html`
