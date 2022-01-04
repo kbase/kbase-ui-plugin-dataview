@@ -29,9 +29,6 @@ install:
     - module: provenancePanel2
       name: kb_dataview_provenancePanel2
       type: factory
-    - module: widgets/OverviewWidget
-      name: kb_dataview_overview
-      type: factory
     - module: widgets/provenanceWidget
       name: kb_dataview_provenance
       type: factory

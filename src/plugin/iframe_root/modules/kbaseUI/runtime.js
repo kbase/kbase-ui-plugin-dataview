@@ -7,33 +7,31 @@ define([
     './services/type',
     './services/rpc'
 ], (Promise, props, Messenger, SessionService, WidgetService, TypeService, RPCService) => {
-    'use strict';
-
     class Runtime {
-        constructor({ authorization, token, username, config, pluginConfigDB }) {
+        constructor({authorization, token, username, config, pluginConfigDB}) {
             this.authorization = authorization;
             this.token = token;
             this.username = username;
 
-            this.configDB = new props.Props({ data: config });
+            this.configDB = new props.Props({data: config});
             this.pluginConfigDB = pluginConfigDB;
 
             // TODO: fix this!
-            this.pluginPath = '/modules/plugins/' + pluginConfigDB.getItem('package.name') + '/iframe_root';
-            this.pluginResourcePath = this.pluginPath + '/resources';
+            this.pluginPath = `/modules/plugins/${  pluginConfigDB.getItem('package.name')  }/iframe_root`;
+            this.pluginResourcePath = `${this.pluginPath  }/resources`;
 
             this.messenger = new Messenger();
 
             this.heartbeatTimer = null;
 
             this.services = {
-                session: new SessionService({ runtime: this }),
-                widget: new WidgetService({ runtime: this }),
+                session: new SessionService({runtime: this}),
+                widget: new WidgetService({runtime: this}),
                 type: new TypeService({
                     runtime: this,
                     config: this.pluginConfigDB.getItem('install.types')
                 }),
-                rpc: new RPCService({ runtime: this })
+                rpc: new RPCService({runtime: this})
             };
 
             this.featureSwitches = {};
@@ -52,7 +50,7 @@ define([
 
         service(name) {
             if (!(name in this.services)) {
-                throw new Error('The UI service "' + name + '" is not defined');
+                throw new Error(`The UI service "${  name  }" is not defined`);
             }
             return this.services[name];
         }
@@ -64,11 +62,11 @@ define([
         // COMM
 
         send(channel, message, data) {
-            this.messenger.send({ channel, message, data });
+            this.messenger.send({channel, message, data});
         }
 
         receive(channel, message, handler) {
-            return this.messenger.receive({ channel, message, handler });
+            return this.messenger.receive({channel, message, handler});
         }
 
         recv(channel, message, handler) {
@@ -84,7 +82,7 @@ define([
         featureEnabled(id, defaultValue = false) {
             const featureSwitch = this.featureSwitches[id];
             if (!featureSwitch) {
-                throw new Error('Feature switch "' + id + '" not defined');
+                throw new Error(`Feature switch "${  id  }" not defined`);
             }
 
             const enabledFeatureSwitches = this.configDB.getItem('ui.featureSwitches.enabled');
@@ -97,7 +95,7 @@ define([
         start() {
             return Promise.try(() => {
                 this.heartbeatTimer = window.setInterval(() => {
-                    this.send('app', 'heartbeat', { time: new Date().getTime() });
+                    this.send('app', 'heartbeat', {time: new Date().getTime()});
                 }, 1000);
                 return this.services.session.start();
             });

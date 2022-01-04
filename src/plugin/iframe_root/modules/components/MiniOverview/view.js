@@ -62,25 +62,46 @@ define([
             this.props.runtime.send('copyWidget', 'toggle');
         }
 
+        renderJSONViewButton() {
+            const roles = this.props.runtime.service('session').getRoles();
+            if (roles.indexOf('DevToken') === -1) {
+                return;
+            }
+            return html`
+                <a className="btn btn-default"
+                    data-toggle="tooltip"
+                    data-placement="bottom"
+                    title="View the actual JSON for this object"
+                    href=${`/#jsonview/${this.props.objectInfo.ref}`}
+                    target="_parent">
+                    JSON View
+                </a>
+            `;
+        }
+
+        renderCopyButton() {
+            if (!this.props.runtime.service('session').isAuthenticated()) {
+                return;
+            }
+            return html`
+                <button className="btn btn-default"
+                        data-toggle="tooltip"
+                        data-placement="bottom"
+                        title="Opens (and closes) a panel with which you can copy this data object to a Narrative"
+                        onClick=${this.handleCopyButtonClick.bind(this)}>
+                    Copy
+                </button>
+            `;
+        }
+
         renderButtons() {
+            const copyButton = this.renderCopyButton();
+            const jsonViewButton = this.renderJSONViewButton();
             return html`
                 <div>
-                    <button className="btn btn-default"
-                            data-toggle="tooltip"
-                            data-placement="bottom"
-                            title="Opens (and closes) a panel with which you can copy this data object to a Narrative"
-                            onClick=${this.handleCopyButtonClick.bind(this)}>
-                        Copy
-                    </button>
+                    ${copyButton}
                 ${' '}
-                    <a className="btn btn-default"
-                       data-toggle="tooltip"
-                       data-placement="bottom"
-                       title="View the actual JSON for this object"
-                       href=${`/#jsonview/${this.props.objectInfo.ref}`}
-                       target="_parent">
-                        JSON View
-                    </a>
+                    ${jsonViewButton}
                 </div>
             `;
         }
