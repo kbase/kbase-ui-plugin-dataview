@@ -27,7 +27,6 @@ define([
             super(props);
             this.bodyRef = preact.createRef();
             this.observer = new ResizeObserver(this.bodyObserver.bind(this));
-
         }
 
         componentDidMount() {
@@ -202,7 +201,6 @@ define([
         }
 
         onRowClick(values) {
-            console.log('on click?', values);
             if (!this.props.onClick) {
                 return;
             }

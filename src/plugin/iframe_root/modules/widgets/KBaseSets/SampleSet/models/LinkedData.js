@@ -113,11 +113,11 @@ define([
             // Pass through all the data links to pull out the
             // total set of types
 
-            for (const {links} of linkedData) {
-                for (const {objectInfo: {typeName}} of links) {
-                    allTypes.add(typeName);
-                }
-            }
+            // for (const {links} of linkedData) {
+            //     for (const {objectInfo: {typeName}} of links) {
+            //         allTypes.add(typeName);
+            //     }
+            // }
 
             // Then again to get the summary for each sample
 
