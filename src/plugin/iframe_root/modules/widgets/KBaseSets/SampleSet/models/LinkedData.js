@@ -9,7 +9,8 @@ define([
         constructor({runtime}) {
             this.runtime = runtime;
             this.cache = {
-                linkedData: null
+                linkedData: null,
+                types: null
             };
         }
 
@@ -31,16 +32,23 @@ define([
                 ignoreErrors: 1
             }]);
 
-            return infos.reduce((infoMap, info) => {
-                const objectInfo = objectInfoToObject(info);
-                infoMap[objectInfo.ref] = objectInfo;
-                return infoMap;
-            }, {});
+            return infos
+                .filter((info) => {
+                    return info !== null;
+                })
+                .reduce((infoMap, info) => {
+                    const objectInfo = objectInfoToObject(info);
+                    infoMap[objectInfo.ref] = objectInfo;
+                    return infoMap;
+                }, {});
         }
 
         async getLinkedData({samples}) {
             if (this.cache.linkedData) {
-                return this.cache.linkedData;
+                return {
+                    types: this.cache.types,
+                    linkedData: this.cache.linkedData
+                };
             }
 
             const sampleService = new GenericClient({
@@ -69,30 +77,41 @@ define([
 
             this.cache.objectInfos = objectInfos;
 
-            // Create uber view data
+            const types = Object.values(objectInfos).reduce((types, {typeName}) => {
+                types.add(typeName);
+                return types;
+            }, new Set());
 
+            this.cache.types =  Array.from(types.values()).sort();
+
+            // Create uber view data
             this.cache.linkedData = samples.map((sample) => {
                 return {
                     sample,
-                    links: sampleLinks[`${sample.id}/${sample.version}`].map((link) => {
-                        return {
-                            link,
-                            objectInfo: objectInfos[link.upa]
-                        };
-                    })
+                    links: sampleLinks[`${sample.id}/${sample.version}`]
+                        .filter((link) => {
+                            return !!objectInfos[link.upa];
+                        })
+                        .map((link) => {
+                            return {
+                                link,
+                                objectInfo: objectInfos[link.upa]
+                            };
+                        })
 
                 };
             });
-            return this.cache.linkedData;
+            return {
+                types: this.cache.types,
+                linkedData: this.cache.linkedData
+            };
         }
 
         async getLinkedDataSummary({samples}) {
-            const linkedData = await this.getLinkedData({samples});
+            const {types: allTypes, linkedData} = await this.getLinkedData({samples});
 
             // Pass through all the data links to pull out the
             // total set of types
-
-            const allTypes = new Set();
 
             for (const {links} of linkedData) {
                 for (const {objectInfo: {typeName}} of links) {
@@ -120,11 +139,6 @@ define([
                     typeCounts[typeName] += 1;
                     return typeCounts;
                 }, {});
-
-                // const summary = Array.from(allTypes.values()).map((summary, typeName) => {
-                //     summary[typeName] = typeCounts[typeName] || 0;
-                //     return summary;
-                // }, {});
 
                 return {
                     sample,
