@@ -10,7 +10,8 @@ define([], () => {
             flex: '0 0 auto',
             display: 'flex',
             flexDirection: 'row',
-            marginBottom: '14px'
+            marginBottom: '1em',
+            marginLeft: '1em'
         },
         summaryField: {
             flex: '0 0 auto',

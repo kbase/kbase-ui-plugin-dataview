@@ -60,7 +60,7 @@ define([
                 display: true,
                 isSortable: true,
                 style: {
-                    flex: '1 0 0'
+                    flex: '0 0 13em'
                 },
                 render: (savedBy) => {
                     return html`
@@ -74,7 +74,9 @@ define([
                 display: true,
                 isSortable: true,
                 style: {
-                    flex: '0 0 7em'
+                    flex: '0 0 7em',
+                    textAlign: 'right',
+                    paddingRight: '1em'
                 },
                 render: (version) => {
                     return html`
@@ -102,8 +104,12 @@ define([
                 })
             };
 
+            const onRowClick = (row) => {
+                window.open(`/#samples/view/${row.id}/${row.version}`, '_blank');
+            };
+
             return html`
-                <${DataTable} heights=${{row: 40, col: 40}} ...${props}/>
+                <${DataTable} heights=${{row: 40, col: 40}} onClick=${onRowClick} ...${props}/>
             `;
         }
 

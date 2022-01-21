@@ -172,7 +172,10 @@ define([
                             return html`
                                 <div className=${rowClasses.join(' ')}
                                      style=${style}
-                                     role="row">${row}
+                                     role="row" 
+                                     onDblClick=${() => {
+                                this.onRowClick(values);
+                            }}>${row}
                                 </div>
                             `;
                         })();
@@ -189,8 +192,8 @@ define([
                                  style=${style}
                                  role="row"
                                  onClick=${() => {
-                                     this.onRowClick(values);
-                                 }}>${row}
+                            this.onRowClick(values);
+                        }}>${row}
                             </div>
                         `;
                     })();
@@ -199,6 +202,7 @@ define([
         }
 
         onRowClick(values) {
+            console.log('on click?', values);
             if (!this.props.onClick) {
                 return;
             }

@@ -2,10 +2,10 @@ define([
     'preact',
     'htm',
     'css!./Loading.css'
-], function (
+], (
     preact,
     htm
-) {
+) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
 

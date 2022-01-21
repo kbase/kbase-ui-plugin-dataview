@@ -24,7 +24,8 @@ define([], () => {
             flex: '1 1 0px',
             display: 'flex',
             flexDirection: 'row',
-            alignItems: 'center'
+            alignItems: 'center',
+            cursor: 'pointer'
         },
         dataMenu: {
             maxHeight: '10em',
@@ -46,8 +47,7 @@ define([], () => {
         itemLabelWithSubmenu: {},
         itemOpen: {},
         itemHover: {
-            backgroundColor: 'silver',
-            cursor: 'pointer'
+            backgroundColor: 'rgba(200, 200, 200, 0.5)'
         },
         icon: {
             color: 'gray'

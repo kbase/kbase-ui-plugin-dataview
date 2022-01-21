@@ -51,7 +51,7 @@ define([
                 });
             return html`
                 <${Fragment}>
-                    <h4>Description</h4>
+                    <h4 style=>Description</h4>
                     <div data-k-b-testhook-element="description">
                         ${description}
                     </div>
@@ -106,13 +106,22 @@ define([
                 id: 'sampleset',
                 title: 'Sample Set',
                 render: () => {
-                    return this.renderSampleSet();
+                    return html`
+                        <div className="FlexCol" style=${{marginTop: '10px'}}>
+                            ${this.renderSampleSet()}
+                        </div>
+                    `;
                 }
             }, {
                 id: 'description',
                 title: 'Description',
+                display: false,
                 render: () => {
-                    return this.renderDescription();
+                    return html`
+                        <div className="FlexCol" style=${{marginTop: '10px'}}>
+                            ${this.renderDescription()}
+                        </div>
+                    `;
                 }
             }, {
                 id: 'map',
@@ -133,6 +142,20 @@ define([
                         </div>
                     `;
                 }
+            }, {
+                id: 'linked-data-summary',
+                title: 'Linked data summary',
+                render: () => {
+                    return this.props.linkedDataSummaryController.view();
+                }
+
+            }, {
+                id: 'linked-data',
+                title: 'Linked data',
+                render: () => {
+                    return this.props.linkedDataController.view();
+                }
+
             }];
             const extra = html`
                 <div>

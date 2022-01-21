@@ -5,10 +5,10 @@ define([
     // for effect
     'css!./Tabs.css',
     'bootstrap'
-], function (
+], (
     preact,
     htm
-) {
+) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
@@ -78,27 +78,31 @@ define([
         }
 
         renderTabs() {
-            return this.state.tabs.map((tab) => {
-                const classes = [
-                    'Tabs-tab'
-                ];
-                const isSelected = (this.state.selectedTab && this.state.selectedTab.id === tab.id);
+            return this.state.tabs
+                .filter(({display}) => {
+                    return (display !== false);
+                })
+                .map((tab) => {
+                    const classes = [
+                        'Tabs-tab'
+                    ];
+                    const isSelected = (this.state.selectedTab && this.state.selectedTab.id === tab.id);
 
-                if (isSelected) {
-                    classes.push('Tabs-active');
-                }
+                    if (isSelected) {
+                        classes.push('Tabs-active');
+                    }
 
-                return html`
+                    return html`
                     <div className=${classes.join(' ')}
                          data-k-b-testhook-tab=${tab.id}
                          role="tab"
                          onClick=${() => {
-                             this.selectTab(tab);
-                         }}>
+        this.selectTab(tab);
+    }}>
                         <span>${tab.title}</span>
                     </div>
                 `;
-            });
+                });
         }
 
         renderExtra() {

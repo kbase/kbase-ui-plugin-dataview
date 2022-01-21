@@ -4,6 +4,9 @@
     flex-direction: column;
     min-height: 0;
     min-width: 0;
+    border: 1px solid rgb(200, 200, 200);
+    border-radius: 1em;
+    padding: 0.5em;
 }
 
 
@@ -17,6 +20,7 @@
     /* border-top: 1px solid rgba(200, 200, 200, 0.5); */
     /* border-bottom: 2px solid rgba(200, 200, 200, 0.5); */
     /* Force scrollbar so it aligns w/body*/
+    border-bottom: 1px dashed rgb(200, 200, 200);
     overflow-y: scroll;
 }
 
