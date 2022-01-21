@@ -6,14 +6,14 @@ define([
     'kb_service/utils',
 
     'bootstrap'
-], function (
+], (
     preact,
     htm,
     View,
     GenericClient,
     APIUtils
-) {
-    'use strict';
+) => {
+
 
     const {Component} = preact;
     const html = htm.bind(preact.h);
@@ -130,7 +130,7 @@ define([
                 workspaceInfo,
             ] = await Promise.all([
                 wsClient.callFunc('get_object_info3', [{
-                    objects: [{ ref}],
+                    objects: [{ref}],
                     includeMetadata: 1
                 }]).then(([result]) => {
                     return APIUtils.objectInfoToObject(result.infos[0]);

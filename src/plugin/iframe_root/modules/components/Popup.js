@@ -35,8 +35,12 @@ define([
         }
 
         removePop() {
+            this.setState({
+                open: false
+            });
             if (this.cover) {
-                this.cover.removeEventListener('click', this.handleAnyClick);
+                // this.cover.removeEventListener('click', this.handleAnyClick);
+                document.body.removeEventListener('click', this.handleAnyClick);
                 this.cover.parentNode.removeChild(this.cover);
                 this.cover = null;
             }
@@ -44,6 +48,9 @@ define([
         }
 
         togglePopup() {
+            this.setState({
+                open: !this.state.open
+            });
             if (this.currentPop) {
                 this.removePop();
                 return;
@@ -58,7 +65,8 @@ define([
             Object.entries(styles.cover).forEach(([name, value]) => {
                 this.cover.style.setProperty(name, value);
             });
-            this.cover.addEventListener('click', this.handleAnyClick);
+            // this.cover.addEventListener('click', this.handleAnyClick);
+            document.body.addEventListener('click', this.handleAnyClick);
 
             const content = html`
             <div style=${Object.assign({}, styles.pop, {left, top})}>
@@ -79,11 +87,12 @@ define([
         }
 
         render() {
+            const icon = this.state.open ? 'times-circle' : 'chevron-circle-down';
             return html`
                 <div style=${styles.main}
                      onClick=${(e) => {e.stopPropagation(); this.togglePopup();}} 
                      ref=${this.ref}>
-                    <span class="fa fa-chevron-circle-down" style=${styles.icon}></span>
+                    <span class="fa fa-${icon}" style=${styles.icon}></span>
                 </div>
             `;
         }

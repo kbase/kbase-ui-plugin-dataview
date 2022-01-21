@@ -14,7 +14,8 @@ define([
         constructor(props) {
             super(props);
             this.state = {
-                isOpen: false
+                isOpen: false,
+                isHovered: false
             };
         }
 
@@ -38,9 +39,13 @@ define([
                 }
                 return 'fa fa-chevron-right';
             })();
+            let style = styles.item;
+            if (this.state.isHovered) {
+                style = {...style, ...styles.itemHover};
+            }
             return html`
                 <div className=${menuClass}
-                     style=${styles.item}
+                     style=${style}
                      onMouseEnter=${this.hoverItemOn.bind(this)}
                      onMouseLeave=${this.hoverItemOff.bind(this)}
                      onClick=${this.toggleSubMenu.bind(this)}>
@@ -59,15 +64,19 @@ define([
             const item = this.props.item;
             const [subMenu, menuClass] = (() => {
                 if (this.state.isOpen) {
+                    const style = styles.item;
+                    // if (this.state.isHovered) {
+                    //     style = {...style, ...styles.itemHover};
+                    // }
                     const items = item.dataMenu.items.map((item) => {
                         if (item.action) {
                             return html`
-                                <div style=${styles.item}
+                                <div style=${style}
                                      onMouseEnter=${this.hoverItemOn.bind(this)}
                                      onMouseLeave=${this.hoverItemOff.bind(this)}
                                      onClick=${(event) => {
-                                         this.doAction(event, item.action);
-                                     }}>
+                    this.doAction(event, item.action);
+                }}>
                                     <div style=${styles.itemLabel}>${item.title}</div>
                                 </div>
                             `;
@@ -89,9 +98,16 @@ define([
                 }
                 return 'fa fa-chevron-right';
             })();
+
+            let itemStyle = styles.item;
+            if (this.state.isHovered) {
+                itemStyle = {...itemStyle, ...styles.itemHover};
+            }
+            // console.log('style??', itemLabelitemStyletyle, styles.itemLabel);
+
             return html`
                 <div className=${menuClass}
-                     style=${styles.item}
+                     style=${itemStyle}
                      onMouseEnter=${this.hoverItemOn.bind(this)}
                      onMouseLeave=${this.hoverItemOff.bind(this)}
                      onClick=${this.toggleSubMenu.bind(this)}>
@@ -116,12 +132,16 @@ define([
 
         render() {
             const item = this.props.item;
+            let style = styles.item;
+            if (this.state.isHovered) {
+                style = {...style, ...styles.itemHover};
+            }
             if (item.action) {
                 return html`
-                    <div style=${styles.item}
+                    <div style=${style}
                          onClick=${(event) => {
-                             this.doAction(event, item.action);
-                         }}
+        this.doAction(event, item.action);
+    }}
                          onMouseEnter=${this.hoverItemOn.bind(this)}
                          onMouseLeave=${this.hoverItemOff.bind(this)}>
                         <div style=${styles.itemLabel}>${item.title}</div>
@@ -135,7 +155,7 @@ define([
                 return this.renderDataMenu(item);
             }
             return html`
-                <div style=${styles.item} onMouseEnter=${this.hoverItemOn.bind(this)}
+                <div style=${style} onMouseEnter=${this.hoverItemOn.bind(this)}
                      onMouseLeave=${this.hoverItemOff.bind(this)}>
                     <div style=${styles.itemLabel}>${item.title}</div>
                 </div>
@@ -143,15 +163,27 @@ define([
         }
 
         hoverItemOn(event) {
-            Object.entries(styles.itemHover).forEach(([name, value]) => {
-                event.target.style.setProperty(name, value);
+            // Object.entries(styles.itemHover).forEach(([name, value]) => {
+            //     // console.log('item hover...', event.target.style.getPropertyValue('padding'), name, value);
+            //     // event.target.style.setProperty(name, value);
+
+            // });
+            this.setState({
+                isHovered: true
             });
         }
 
         hoverItemOff(event) {
-            Object.entries(styles.itemHover).forEach(([name, value]) => {
-                event.target.style.removeProperty(name);
+            this.setState({
+                isHovered: false
             });
+            // Object.entries(styles.itemHover).forEach(([name, value]) => {
+            //     // console.log('item off', name, value);
+            //     // event.target.style.removeProperty(name);
+            //     this.setState({
+            //         isHovered: false
+            //     });
+            // });
         }
     }
 

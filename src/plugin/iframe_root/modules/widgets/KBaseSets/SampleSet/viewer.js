@@ -9,6 +9,9 @@ define([
     'components/SimpleInfo',
     'components/Loading',
     './components/Main',
+    './models/LinkedData',
+    './controllers/LinkedData',
+    './controllers/LinkedDataSummary',
     './constants'
 ], (
     preact,
@@ -21,6 +24,9 @@ define([
     SimpleInfo,
     Loading,
     Main,
+    LinkedDataModel,
+    LinkedDataController,
+    LinkedDataSummaryController,
     {MAX_SAMPLES}
 ) => {
     const html = htm.bind(preact.h);
@@ -162,7 +168,7 @@ define([
                     type: 'number'
                 },
                 {
-                    index: 2,
+                    index: 1,
                     fieldKey: 'name',
                     title: 'Name/ID',
                     fieldType: 'attribute',
@@ -320,6 +326,24 @@ define([
                 // complexity here...
                 const groups = await model.getFieldGroups();
 
+                const linkedDataModel = new LinkedDataModel({
+                    runtime: this.runtime
+                });
+
+                const linkedDataController = new LinkedDataController({
+                    runtime: this.runtime,
+                    model: linkedDataModel,
+                    samples,
+                    loadingMessage: 'Loading Linked Data...'
+                });
+
+                const linkedDataSummaryController = new LinkedDataSummaryController({
+                    runtime: this.runtime,
+                    model: linkedDataModel,
+                    samples,
+                    loadingMessage: 'Loading Linked Data...'
+                });
+
                 const params = {
                     sampleSet,
                     samples,
@@ -330,7 +354,9 @@ define([
                     userProfiles,
                     objectInfo,
                     columnGroups,
-                    groups
+                    groups,
+                    linkedDataController,
+                    linkedDataSummaryController
                 };
                 preact.render(preact.h(Main, params), this.node);
                 this.status = 'STARTED';

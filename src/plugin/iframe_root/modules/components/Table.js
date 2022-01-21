@@ -4,11 +4,11 @@ define([
 
     'css!./Table.css',
     'bootstrap'
-], function (
+], (
     preact,
     htm
-) {
-    'use strict';
+) => {
+
 
     const {Component} = preact;
     const html = htm.bind(preact.h);
@@ -55,26 +55,26 @@ define([
 
         renderTotalCount(){
             switch (this.state.status) {
-                case 'none':
-                    return '';
-                case 'fetching':
-                    return 'Fetching data...'
-                case 'ok':
-                    if (!this.state.totalCount) {
-                        return 'None available';
-                    }
-                    if (this.state.query) {
-                        return html`
+            case 'none':
+                return '';
+            case 'fetching':
+                return 'Fetching data...';
+            case 'ok':
+                if (!this.state.totalCount) {
+                    return 'None available';
+                }
+                if (this.state.query) {
+                    return html`
                             ${niceNumber(this.state.totalCount)} found for <em>${this.state.query}</em>
                         `;
-                        
-                    } else {
-                        return html`
+
+                }
+                return html`
                             ${niceNumber(this.state.totalCount)} total
                         `;
-                    }
-                case 'error':
-                    return 'error';
+
+            case 'error':
+                return 'error';
             }
         }
 
@@ -157,14 +157,14 @@ define([
 
             const spinnerStyle = {
                 fontSize: '150%',
-                color: 'rgba(200, 200, 200, 1)', 
+                color: 'rgba(200, 200, 200, 1)',
                 backgroundColor: 'white',
                 borderRadius: '10px',
                 border: '1px solid rgba(150, 150, 150, 1)',
-                padding: '10px', 
-                display: 'flex', 
-                flexDirection: 'row', 
-                justifyContent: 'center', 
+                padding: '10px',
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
                 alignItems: 'center'
             };
 
@@ -377,7 +377,7 @@ define([
         //                     ${this.renderPageCounts()}
         //                     </span>
         //                 </div>
-                        
+
         //                 <div style=${colStyle}>
         //                 </div>
         //             </div>
@@ -389,7 +389,7 @@ define([
         }
 
         handleSortButtonClick(column) {
-            let sortDirection = (() => {
+            const sortDirection = (() => {
                 switch (this.state.sortDirection) {
                 case 'ascending':
                     return 'descending';
@@ -414,41 +414,41 @@ define([
             const sortDirection = (() => {
                 if (this.state.sortColumn === column.id) {
                     return this.state.sortDirection;
-                } else {
-                    return column.sort.direction || 'ascending';
                 }
+                return column.sort.direction || 'ascending';
+
             })();
 
             const iconState = (() => {
                 if (this.state.sortColumn === column.id) {
                     return '-active';
-                } else {
-                    return '';
                 }
+                return '';
+
             })();
-            
+
             let iconClass;
             switch (column.sort.type) {
-                case 'alphanumeric':
-                    iconClass = 'sort';
-                    break;
-                case 'numeric':
-                    iconClass = 'sort'
+            case 'alphanumeric':
+                iconClass = 'sort';
+                break;
+            case 'numeric':
+                iconClass = 'sort';
             }
             switch (sortDirection) {
-                case 'descending':
-                    iconClass += '-desc';
-                    break;
-                case 'ascending':
-                default:
-                    iconClass += '-asc';
+            case 'descending':
+                iconClass += '-desc';
+                break;
+            case 'ascending':
+            default:
+                iconClass += '-asc';
             }
 
             return html`
                 <div className="Table-sort-button" 
                     onClick=${() => {
-                        this.handleSortButtonClick(column);
-                }}>
+        this.handleSortButtonClick(column);
+    }}>
                     <div className=${`Table-sort-button-icon${iconState} fa fa-${iconClass}`}></div>
                 </div>
             `;
@@ -464,7 +464,7 @@ define([
                 if (column.width) {
                     cellStyle.width = column.width;
                 }
-                
+
                 return html`
                     <th style=${cellStyle}>
                         <div className="Table-header-cell-wrapper">
@@ -493,7 +493,7 @@ define([
                         if (column.render) {
                             try {
                                 return column.render(tableRow[index], tableRow);
-                            } catch(ex) {
+                            } catch (ex) {
                                 return html`
                                     <span className="text-danger"
                                           title=${ex.message}>
@@ -501,7 +501,7 @@ define([
                                     </span>
                                 `;
                             }
-                        } 
+                        }
                         return tableRow[index];
                     })();
                     return html`

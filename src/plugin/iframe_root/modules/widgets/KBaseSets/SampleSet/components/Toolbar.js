@@ -52,10 +52,11 @@ define([
 
         renderToolbarSort() {
             const columnsSelect = (() => {
+
                 const options = this.props.columns.map((columnDef) => {
-                    const selected = this.props.currentSort && columnDef.key === this.props.currentSort.columnDef.key;
+                    const selected = this.props.currentSort && columnDef.fieldKey === this.props.currentSort.columnDef.fieldKey;
                     return html`
-                        <option value=${columnDef.key}
+                        <option value=${columnDef.fieldKey}
                                 selected=${selected}>
                             ${columnDef.title}
                         </option>
@@ -152,11 +153,11 @@ define([
 
         renderToolbarFilter() {
             const columnsSelect = (() => {
-                const currentKey = this.props.currentFilter.columnDef ? this.props.currentFilter.columnDef.key : null;
+                const currentKey = this.props.currentFilter.columnDef ? this.props.currentFilter.columnDef.fieldKey : null;
                 const options = this.props.columns.map((columnDef) => {
-                    const selected = columnDef.key === currentKey;
+                    const selected = columnDef.fieldKey === currentKey;
                     return html`
-                        <option value=${columnDef.key}
+                        <option value=${columnDef.fieldKey}
                                 selected=${selected}>
                             ${columnDef.title}
                         </option>
