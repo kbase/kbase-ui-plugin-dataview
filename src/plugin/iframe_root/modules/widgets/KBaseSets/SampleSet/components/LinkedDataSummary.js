@@ -17,7 +17,7 @@ define([
         renderLinkedDataSummaryTable() {
             const columns = [{
                 id: 'name',
-                label: 'Name/ID',
+                label: 'Sample Name/ID',
                 display: true,
                 isSortable: true,
                 style: {
@@ -30,11 +30,11 @@ define([
                 }
             }, {
                 id: 'typeCount',
-                label: 'Types',
+                label: 'Unique data types',
                 display: true,
                 isSortable: true,
                 style: {
-                    flex: '0 0 8em',
+                    flex: '0 0 12em',
                     textAlign: 'right',
                     paddingRight: '1em'
                 },
@@ -45,11 +45,11 @@ define([
                 }
             }, {
                 id: 'objectCount',
-                label: 'Objects',
+                label: 'Total linked objects',
                 display: true,
                 isSortable: true,
                 style: {
-                    flex: '0 0 8em',
+                    flex: '0 0 12em',
                     textAlign: 'right',
                     paddingRight: '1em'
                 },

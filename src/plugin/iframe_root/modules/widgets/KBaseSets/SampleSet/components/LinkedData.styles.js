@@ -6,6 +6,18 @@ define([], () => {
             flexDirection: 'column',
             minHeight: '0',
             marginTop: '10px',
+        },
+        Header: {
+            // border: '1px solid rgb(200, 200, 200)',
+            padding: '0.5em',
+            flex: '0 0 auto',
+            marginBottom: '1em'
+        },
+        LinkedData: {
+            flex: '1 1 0px',
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: '0',
             overflowY: 'auto'
         },
         container: {

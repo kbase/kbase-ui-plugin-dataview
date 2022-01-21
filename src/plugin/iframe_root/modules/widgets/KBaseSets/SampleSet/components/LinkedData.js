@@ -1,21 +1,26 @@
 define([
     'preact',
     'htm',
-    'lib/formatters',
-    'components/DataTable',
     'components/Empty',
     './LinkedData.styles'
 ], (
     {Component, h},
     htm,
-    fmt,
-    DataTable,
     Empty,
     styles
 ) => {
     const html = htm.bind(h);
 
     class LinkedData extends Component {
+        constructor(props) {
+            super(props);
+
+            this.state = {
+                linkedData: props.data.linkedData,
+                currentFilter: null,
+                currentSort: 'Type'
+            };
+        }
         renderDataId(link) {
             if (link.dataid) {
                 return link.dataid;
@@ -96,7 +101,7 @@ define([
         }
 
         renderLinkedData() {
-            return this.props.data
+            return this.state.linkedData
                 .filter(({links}) => {
                     return links.length > 0;
                 })
@@ -113,13 +118,119 @@ define([
             `;
         }
 
+        onFilterChange(ev) {
+            const filterValue = ev.target.value;
+            this.applyFilterSort(filterValue, this.state.currentSort);
+        }
+
+        onSortChange(ev) {
+            const sortValue = ev.target.value;
+            this.applyFilterSort(this.state.currentFilter, sortValue);
+        }
+
+        applyFilterSort(filter, sortOption) {
+            const linkedData = this.props.data.linkedData;
+            if (filter === null || filter.length === 0) {
+                this.setState({
+                    linkedData,
+                    currentFilter: null,
+                    currentSort: sortOption
+                });
+                return;
+            }
+            const filteredLinkedData = this.props.data.linkedData.map((item) => {
+                const links = item.links.filter(({objectInfo: {typeName}}) => {
+                    return (typeName === filter);
+                });
+                return {
+                    ...item, links
+                };
+            });
+
+            const sortedLinkedData = filteredLinkedData.map((item) => {
+                const links = item.links.sort((a, b) => {
+                    switch (sortOption) {
+                    case 'Type':
+                        return a.link.created - b.link.created;
+                    case 'Linked':
+                        return a.objectInfo.typeName.localeCompare(b.objectInfo.typeName);
+                    }
+                });
+                return {
+                    ...item, links
+                };
+            });
+
+            this.setState({
+                linkedData: sortedLinkedData,
+                currentSort: sortOption,
+                currentFilter: filter
+            });
+        }
+
+        renderFilterControl() {
+            const options = this.props.data.types.map((typeName) => {
+                const selected = typeName === this.state.currentFilter;
+                return html`
+                    <option value=${typeName} selected=${selected}>${typeName}</option>
+                `;
+            });
+            options.unshift(html`
+                <option value="" selected=${this.state.currentFilter === null}>- none -</option>
+            `);
+            return html`
+                <select class="form-control" id="filter-control" onChange=${this.onFilterChange.bind(this)}>
+                    ${options}
+                </select>
+            `;
+        }
+
+        renderSortControl() {
+            const sortBy = [
+                'Type', 'Linked'
+            ];
+            const options = sortBy.map((sortId) => {
+                const selected = this.state.currentSort === sortId;
+                return html`
+                    <option value=${sortId} selected=${selected}>${sortId}</option>
+                `;
+            });
+            return html`
+                <select class="form-control" id="sort-control" onChange=${this.onSortChange.bind(this)}>
+                    ${options}
+                </select>
+            `;
+        }
+
+        onResetButton() {
+            this.applyFilterSort('', 'Type');
+        }
+
+        renderHeader() {
+            return html`
+                <div style=${styles.Header}>
+                    <div class="form-inline">
+                        <label style=${styles.Label}>Filter</label>
+                        <label for="filter-control" style=${styles.Label}>by object type</label>
+                        ${this.renderFilterControl()}
+                        <label for="sort-control" style=${{...styles.Label, marginLeft: '1em'}}>Sort</label>
+                        ${this.renderSortControl()}
+                        <button class="btn btn-default" style="margin-left: 1em;" onClick=${this.onResetButton.bind(this)}><span class="fa fa-times" /></button>
+                    </div>
+                </div>
+            `;
+        }
+
         render() {
-            if (this.props.data.length === 0) {
+            if (this.state.linkedData.length === 0) {
                 return this.renderEmptySet();
             }
             return html`
                 <div style=${styles.main}>
-                    ${this.renderLinkedData()}
+                    ${this.renderHeader()}
+                    <div style=${styles.LinkedData}>
+                        ${this.renderLinkedData()}
+                    </div>
                 </div>
             `;
         }
