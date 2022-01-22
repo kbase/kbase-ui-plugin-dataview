@@ -35,6 +35,28 @@ define([], () => {
             fontWeight: 'bold',
             marginBottom: '0.5em',
             // marginLeft: '1em'
+            display: 'flex',
+            flexDirection: 'row'
+        },
+        SampleField: {
+            overflowX: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+        },
+        SampleName: {
+            flex: '0 0 15em'
+        },
+        SampleDescription: {
+            flex: '1 1 0',
+        },
+        SampleSaveDate: {
+            flex: '0 0 8em'
+        },
+        SampleVersion: {
+            flex: '0 0 3em'
+        },
+        SampleOwner: {
+            flex: '0 0 10em'
         },
         Links: {
 
@@ -57,6 +79,7 @@ define([], () => {
         Label: {
             fontWeight: 'bold',
             color: 'rgb(150, 150, 150)',
+            marginLeft: '1em',
             marginRight: '0.5em'
         },
         LinkCol1: {
