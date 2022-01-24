@@ -19,9 +19,9 @@ define([
     class LinkedData2 extends Component {
         constructor(props) {
             super(props);
-            this.DEFAULT_SORT = 'Sample Name && Object Type';
+            this.DEFAULT_SORT = 'Sample Name & Object Type';
             this.state = {
-                linkedData: this.calcTable(),
+                linkedData: this.doFilterSort(null, this.DEFAULT_SORT),
                 currentFilter: null,
                 currentSort: this.DEFAULT_SORT
             };
@@ -168,7 +168,7 @@ define([
             `;
         }
 
-        applyFilterSort(filter, sortOption) {
+        doFilterSort(filter, sortOption) {
             const table = this.calcTable();
 
             const filteredTable = (() => {
@@ -180,7 +180,7 @@ define([
                 });
             })();
 
-            const sortedTable = filteredTable
+            return filteredTable
                 .sort((a, b) => {
                     switch (sortOption) {
                     case 'Sample Name & Object Type': {
@@ -206,9 +206,13 @@ define([
                     }
                 });
 
+        }
+
+        applyFilterSort(filter, sortOption) {
+            const linkedData = this.doFilterSort(filter, sortOption);
 
             this.setState({
-                linkedData: sortedTable,
+                linkedData,
                 currentFilter: filter,
                 currentSort: sortOption,
             });
