@@ -3,12 +3,15 @@ define([
     'htm',
     'lib/formatters',
     'components/DataTable',
+    'components/DataTable2',
     './LinkedDataSummary.styles'
 ], (
     {Component, h},
     htm,
     fmt,
     DataTable,
+
+    DataTable2,
     styles
 ) => {
     const html = htm.bind(h);
@@ -109,7 +112,7 @@ define([
             };
 
             return html`
-                <${DataTable} heights=${{row: 40, col: 40}} onClick=${onRowClick} ...${props}/>
+                <${DataTable} heights=${{row: 40, col: 40}} columnHeader=${3} onClick=${onRowClick} ...${props}/>
             `;
         }
 

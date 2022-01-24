@@ -11,7 +11,9 @@ define([
     './components/Main',
     './models/LinkedData',
     './controllers/LinkedData',
+    './controllers/LinkedData2',
     './controllers/LinkedDataSummary',
+    './controllers/LinkedDataSummary2',
     './constants'
 ], (
     preact,
@@ -26,7 +28,9 @@ define([
     Main,
     LinkedDataModel,
     LinkedDataController,
+    LinkedDataController2,
     LinkedDataSummaryController,
+    LinkedDataSummaryController2,
     {MAX_SAMPLES}
 ) => {
     const html = htm.bind(preact.h);
@@ -337,7 +341,21 @@ define([
                     loadingMessage: 'Loading Linked Data...'
                 });
 
+                const linkedDataController2 = new LinkedDataController2({
+                    runtime: this.runtime,
+                    model: linkedDataModel,
+                    samples,
+                    loadingMessage: 'Loading Linked Data...'
+                });
+
                 const linkedDataSummaryController = new LinkedDataSummaryController({
+                    runtime: this.runtime,
+                    model: linkedDataModel,
+                    samples,
+                    loadingMessage: 'Loading Linked Data...'
+                });
+
+                const linkedDataSummaryController2 = new LinkedDataSummaryController2({
                     runtime: this.runtime,
                     model: linkedDataModel,
                     samples,
@@ -356,7 +374,9 @@ define([
                     columnGroups,
                     groups,
                     linkedDataController,
-                    linkedDataSummaryController
+                    linkedDataController2,
+                    linkedDataSummaryController,
+                    linkedDataSummaryController2
                 };
                 preact.render(preact.h(Main, params), this.node);
                 this.status = 'STARTED';
