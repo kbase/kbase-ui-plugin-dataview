@@ -26,7 +26,6 @@ define([
 
             this.DEFAULT_CURRENT_SORT = 'Type';
             this.DEFAULT_CURRENT_SORT_SAMPLE = 'Created - Newest First';
-
             this.state = {
                 linkedData: props.data.linkedData,
                 currentFilter: null,

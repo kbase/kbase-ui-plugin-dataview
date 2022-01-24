@@ -1,0 +1,143 @@
+.DataTable2 {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+    border: 1px solid rgb(200, 200, 200);
+    border-radius: 1em;
+    padding: 0.5em;
+}
+
+
+
+.DataTable2-header {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+    font-weight: bold;
+    color: gray;
+    /* border-top: 1px solid rgba(200, 200, 200, 0.5); */
+    /* border-bottom: 2px solid rgba(200, 200, 200, 0.5); */
+    /* Force scrollbar so it aligns w/body*/
+    border-bottom: 1px dashed rgb(200, 200, 200);
+    /* overflow-y: scroll; */
+}
+
+.DataTable2-headerHeader {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+    font-weight: bold;
+    color: gray;
+    /* border-top: 1px solid rgba(200, 200, 200, 0.5); */
+    /* border-bottom: 2px solid rgba(200, 200, 200, 0.5); */
+    /* Force scrollbar so it aligns w/body*/
+    border-bottom: 1px dashed rgb(200, 200, 200);
+    /* overflow-y: scroll; */
+}
+
+.DataTable2-headerColumns {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: row;
+    font-weight: bold;
+    color: gray;
+    /* border-top: 1px solid rgba(200, 200, 200, 0.5); */
+    /* border-bottom: 2px solid rgba(200, 200, 200, 0.5); */
+    /* Force scrollbar so it aligns w/body*/
+    border-bottom: 1px dashed rgb(200, 200, 200);
+    overflow-x: auto;
+    overflow-y: scroll;
+}
+
+.DataTable2-header::-webkit-scrollbar-track {
+    background-color: white;
+}
+
+.DataTable2-header::-webkit-scrollbar-thumb {
+    background-color: white;
+}
+
+.DataTable2-header-col {
+    flex: 1 1 0px;
+    padding: 4px;
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.DataTable2-body {
+    flex: 1 1 0px;
+    /* display: flex; */
+    /* flex-direction: column; */
+    display: flex;
+    flex-direction: row;
+    min-height: 0;
+    min-width: 0;
+    overflow-y: scroll;
+}
+.DataTable2-bodyHeader {
+    flex: 0 0 auto;
+    /* display: flex; */
+    /* flex-direction: column; */
+    min-height: 0;
+    min-width: 0;
+    overflow-y: scroll;
+}
+.DataTable2-bodyColumns {
+    flex: 1 1 0px;
+    /* display: flex; */
+    /* flex-direction: column; */
+    min-height: 0;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: scroll;
+}
+
+.DataTable2-grid {
+    position: relative;
+}
+
+.DataTable2-grid-row {
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    /* align-items: center; */
+    /* border-bottom: 1px solid rgba(200, 200, 200, 0.5); */
+}
+
+.DataTable2-grid-row:hover {
+    background-color: rgba(200, 200, 200, 0.2);
+    cursor: pointer;
+}
+
+.DataTable2-grid-cell {
+    position: absolute;
+}
+
+.DataTable2-row {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+    border-bottom: 1px solid rgba(200, 200, 200, 0.5);
+}
+
+.DataTable2-row-highlighted {
+    background-color: rgba(200, 200, 200, 0.5);
+}
+
+.DataTable2-col {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    justify-content: center;
+}
+
+.DataTable2-col-content {
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 4px;
+}

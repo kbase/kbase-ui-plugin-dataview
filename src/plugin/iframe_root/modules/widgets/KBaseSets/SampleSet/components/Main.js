@@ -149,11 +149,27 @@ define([
                     return this.props.linkedDataSummaryController.view();
                 }
 
-            }, {
+            },
+            //  {
+            //     id: 'linked-data-summary2',
+            //     title: 'Linked data summary2',
+            //     render: () => {
+            //         return this.props.linkedDataSummaryController2.view();
+            //     }
+
+            // },
+            {
                 id: 'linked-data',
                 title: 'Linked data',
                 render: () => {
                     return this.props.linkedDataController.view();
+                }
+
+            },  {
+                id: 'linked-data2',
+                title: 'Linked data2',
+                render: () => {
+                    return this.props.linkedDataController2.view();
                 }
 
             }];

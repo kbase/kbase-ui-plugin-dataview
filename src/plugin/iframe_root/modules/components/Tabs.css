@@ -34,6 +34,7 @@
     margin-right: 2px;
     color: #337ab7;
     align-self: center;
+    background-color: rgba(200, 200, 200, 0.1);
 }
 
 .Tabs-extra {
@@ -43,13 +44,17 @@
 }
 
 .Tabs-tab:hover {
-    background-color: #eeeeee;
+    border: 1px solid #ddd;
+    border-bottom: 1px solid white;
+    color: #555555;
+    background-color: white;
 }
 
 .Tabs-active {
     border: 1px solid #ddd;
     border-bottom: 1px solid white;
     color: #555555;
+    background-color: white;
 }
 
 .Tabs-active.Tabs-tab:hover {
