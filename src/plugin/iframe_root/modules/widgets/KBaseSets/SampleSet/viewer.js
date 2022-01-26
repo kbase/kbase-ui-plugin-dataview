@@ -10,8 +10,10 @@ define([
     'components/Loading',
     './components/Main',
     './models/LinkedData',
+    './models/LinkedData3',
     './controllers/LinkedData',
     './controllers/LinkedData2',
+    './controllers/LinkedData3',
     './controllers/LinkedDataSummary',
     './controllers/LinkedDataSummary2',
     './constants'
@@ -27,8 +29,10 @@ define([
     Loading,
     Main,
     LinkedDataModel,
+    LinkedDataModel3,
     LinkedDataController,
     LinkedDataController2,
+    LinkedDataController3,
     LinkedDataSummaryController,
     LinkedDataSummaryController2,
     {MAX_SAMPLES}
@@ -348,6 +352,18 @@ define([
                     loadingMessage: 'Loading Linked Data...'
                 });
 
+
+                // const linkedDataModel3 = new LinkedDataModel3({
+                //     runtime: this.runtime
+                // });
+
+                const linkedDataController3 = new LinkedDataController3({
+                    runtime: this.runtime,
+                    model: linkedDataModel,
+                    samples,
+                    loadingMessage: 'Loading Linked Data...'
+                });
+
                 const linkedDataSummaryController = new LinkedDataSummaryController({
                     runtime: this.runtime,
                     model: linkedDataModel,
@@ -375,6 +391,7 @@ define([
                     groups,
                     linkedDataController,
                     linkedDataController2,
+                    linkedDataController3,
                     linkedDataSummaryController,
                     linkedDataSummaryController2
                 };

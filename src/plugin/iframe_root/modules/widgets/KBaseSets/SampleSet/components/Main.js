@@ -144,7 +144,7 @@ define([
                 }
             }, {
                 id: 'linked-data-summary',
-                title: 'Linked data summary',
+                title: 'Linked Data Summary',
                 render: () => {
                     return this.props.linkedDataSummaryController.view();
                 }
@@ -160,16 +160,23 @@ define([
             // },
             {
                 id: 'linked-data',
-                title: 'Linked data',
+                title: 'Linked Data',
                 render: () => {
                     return this.props.linkedDataController.view();
                 }
 
             },  {
                 id: 'linked-data2',
-                title: 'Linked data2',
+                title: 'Linked Data 2',
                 render: () => {
                     return this.props.linkedDataController2.view();
+                }
+
+            },  {
+                id: 'linked-data3',
+                title: 'Linked Data 3',
+                render: () => {
+                    return this.props.linkedDataController3.view();
                 }
 
             }];

@@ -234,7 +234,7 @@ define([
                 `;
             });
             options.unshift(html`
-                <option value="" selected=${this.state.currentFilter === null}>- none -</option>
+                <option value="" selected=${this.state.currentFilter === null}>- All -</option>
             `);
             return html`
                 <select class="form-control" id="filter-control" onChange=${this.onFilterChange.bind(this)}>

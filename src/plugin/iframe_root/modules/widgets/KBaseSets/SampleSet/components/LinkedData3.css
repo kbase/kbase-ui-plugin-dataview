@@ -1,0 +1,11 @@
+.LinkedData3 {
+
+}
+
+.LinkedData3 .LinksCell {
+    border-radius: 0.25em;
+    padding: 0.25em;
+}
+.LinkedData3 .LinksCell:hover {
+    background-color: rgba(200, 200, 200, 0.2);
+}
