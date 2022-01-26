@@ -4,17 +4,28 @@ define([
     'lib/formatters',
     'components/DataTable',
     'components/DataTable2',
-    './LinkedData3.styles'
+    'components/Popover',
+    'components/Nullable',
+    './LinkedData3.styles',
+
+    'css!./LinkedData3.css'
 ], (
-    {Component, h},
+    {Component, h, render: preactRender},
     htm,
     fmt,
     DataTable,
-
     DataTable2,
+    Popover,
+    Nullable,
     styles
 ) => {
     const html = htm.bind(h);
+
+    function htmlToString(htmContent) {
+        const element = document.createElement('div');
+        preactRender(htmContent, element);
+        return element.innerHTML;
+    }
 
     class LinkedData3 extends Component {
         constructor(props) {
@@ -31,7 +42,7 @@ define([
                 display: true,
                 isSortable: true,
                 style: {
-                    flex: '2 0 0'
+                    flex: '1 0 0'
                 },
                 render: (sampleName, row) => {
                     return html`
@@ -57,7 +68,7 @@ define([
                 display: true,
                 isSortable: true,
                 style: {
-                    flex: '0 0 18em'
+                    flex: '1 0 0'
                 },
                 render: (name, row) => {
                     return html`
@@ -78,52 +89,116 @@ define([
                     `;
                 }
             }, {
-                id: 'dataId',
-                label: 'Data Id',
+                id: 'linkCount',
+                label: 'Links',
                 display: true,
                 isSortable: true,
                 style: {
-                    flex: '0 0 8em'
+                    flex: '0 0 4em',
+                    textAlign: 'right',
+                    paddingRight: '1em'
                 },
-                render: (dataId) => {
+                render: (linkCount, row) => {
+                    const render = () => {
+                        const rows = row.links
+                            .sort((a, b) => {
+                                const creationOrder = (a.created - b.created);
+                                if (creationOrder === 0) {
+                                    if (a.dataid === null) {
+                                        return -1;
+                                    } else if (b.dataid === null) {
+                                        return 1;
+                                    }
+                                    return a.dataid.localeCompare(b.dataid);
+
+                                }
+                            })
+                            .map((link) => {
+                                const {dataid, created, createdby} = link;
+                                return html`
+                                <tr>
+                                    <td>
+                                        <${Nullable} value=${dataid} />
+                                    </td>
+                                    <td>
+                                        ${Intl.DateTimeFormat('en-US').format(created)}
+                                    </td>
+                                    <td>
+                                        <a href="/#people/${createdby}" target="_blank">${createdby}</a>
+                                    </td>
+                                </tr>
+                            `;
+
+                            });
+                        const table = html`
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th style=${{color: 'rgba(150, 150, 150)'}}>Data Id</th>
+                                        <th style=${{color: 'rgba(150, 150, 150)'}}>Linked</th>
+                                        <th style=${{color: 'rgba(150, 150, 150)'}}>By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                ${rows}
+                                </tbody>
+                            </table>
+                        `;
+                        return htmlToString(table);
+                    };
                     return html`
-                        ${dataId || '∅'}
+                        <${Popover} render=${render} class="LinksCell">${linkCount}</Popover>
                     `;
                 }
-            }, {
-                id: 'linkedAt',
-                label: 'Linked',
-                display: true,
-                isSortable: true,
-                style: {
-                    flex: '0 0 8em'
-                },
-                render: (linkedAt) => {
-                    return html`
-                        ${Intl.DateTimeFormat('en-US').format(linkedAt)}
-                    `;
-                }
-            }, {
-                id: 'linkedBy',
-                label: 'By',
-                display: true,
-                isSortable: true,
-                style: {
-                    flex: '0 0 12em'
-                },
-                render: (linkedBy) => {
-                    return html`
-                        <a href=${`/#people/${linkedBy}`} target="_blank">${linkedBy}</a>
-                    `;
-                }
-            }];
+            }
+            // {
+            //     id: 'dataId',
+            //     label: 'Data Id',
+            //     display: true,
+            //     isSortable: true,
+            //     style: {
+            //         flex: '0 0 8em'
+            //     },
+            //     render: (dataId) => {
+            //         return html`
+            //             ${dataId}
+            //         `;
+            //     }
+            // }, {
+            //     id: 'linkedAt',
+            //     label: 'Linked',
+            //     display: true,
+            //     isSortable: true,
+            //     style: {
+            //         flex: '0 0 8em'
+            //     },
+            //     render: (linkedAt) => {
+            //         return html`
+            //             ${Intl.DateTimeFormat('en-US').format(linkedAt)}
+            //         `;
+            //     }
+            // }, {
+            //     id: 'linkedBy',
+            //     label: 'By',
+            //     display: true,
+            //     isSortable: true,
+            //     style: {
+            //         flex: '0 0 12em'
+            //     },
+            //     render: (linkedBy) => {
+            //         return html`
+            //             <a href=${`/#people/${linkedBy}`} target="_blank">${linkedBy}</a>
+            //         `;
+            //     }
+            // }
+            ];
         }
 
         calcTable() {
             const table = [];
             this.props.data.linkedData
-                .forEach(({sample, links}) => {
-                    for (const {link: {created, createdby, dataid}, objectInfo: {ref, name, type, typeName, workspaceId, objectId, objectVersion}} of links) {
+                .forEach(({sample, objects}) => {
+                    for (const {objectInfo: {ref, name, type, typeName, workspaceId, id, version}, links} of Object.values(objects)) {
                         table.push({
                             sampleId: sample.id,
                             sampleName: sample.name,
@@ -132,10 +207,12 @@ define([
                             objectName: name,
                             objectTypeName: typeName,
                             objectType: type,
-                            dataId: dataid,
-                            linkedAt: new Date(created),
-                            linkedBy: createdby,
-                            objectRefArray: [workspaceId, objectId, objectVersion]
+                            linkCount: links.length,
+                            objectRefArray: [workspaceId, id, version],
+                            links
+                            // dataId: dataid,
+                            // linkedAt: new Date(created),
+                            // linkedBy: createdby
                         });
                     }
                 });
@@ -198,11 +275,19 @@ define([
                             return typeNameComparison;
                         }
                         return a.sampleName.localeCompare(b.sampleName);
+
                     }
-                    case 'SampleDate':
-                        return a.sampleCreatedAt - b.sampleCreatedAt;
-                    case 'LinkDate':
-                        return a.linkedAt - b.linkedAt;
+                    case 'Object & Sample Name': {
+                        for (const aPart of a.objectRefArray) {
+                            for (const bPart of b.objectRefArray) {
+                                if (aPart == bPart) {
+                                    continue;
+                                }
+                                return aPart - bPart;
+                            }
+                        }
+                        return a.sampleName.localeCompare(b.sampleName);
+                    }
                     }
                 });
 
@@ -252,7 +337,7 @@ define([
 
         renderSortControl() {
             const sortBy = [
-                'Sample Name & Object Type', 'Object Type & Sample Name'
+                'Sample Name & Object Type', 'Object Type & Sample Name', 'Object & Sample Name'
             ];
             const options = sortBy.map((sortId) => {
                 const selected = this.state.currentSort === sortId;
@@ -305,7 +390,7 @@ define([
 
         render() {
             return html`
-                <div style=${styles.main}>
+                <div style=${styles.main} class="LinkedData3">
                     ${this.renderHeader()}
                     ${this.renderLinkedDataTable()}
                 </div>
