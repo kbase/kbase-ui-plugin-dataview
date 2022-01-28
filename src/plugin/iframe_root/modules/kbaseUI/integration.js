@@ -1,8 +1,8 @@
 define(['./windowChannel', './runtime'], (WindowChannel, Runtime) => {
-    'use strict';
+
 
     class Integration {
-        constructor({ rootWindow, pluginConfigDB }) {
+        constructor({rootWindow, pluginConfigDB}) {
             this.rootWindow = rootWindow;
             this.container = rootWindow.document.body;
             // channelId, frameId, hostId, parentHost
@@ -43,21 +43,21 @@ define(['./windowChannel', './runtime'], (WindowChannel, Runtime) => {
             if (this.navigationListeners.length === 1) {
                 const queue = this.navigationQueue;
                 this.navigationQueue = [];
-                queue.forEach(({ view, params }) => {
+                queue.forEach(({view, params}) => {
                     this.navigationListeners.forEach((listener) => {
-                        listener({ view, params });
+                        listener({view, params});
                     });
                 });
             }
         }
 
-        handleNavigation({ view, params }) {
+        handleNavigation({view, params}) {
             // If no listeners yet, queue up the navigation.
             if (this.navigationListeners.length === 0) {
-                this.navigationQueue.push({ view, params });
+                this.navigationQueue.push({view, params});
             } else {
                 this.navigationListeners.forEach((listener) => {
-                    listener({ view, params });
+                    listener({view, params});
                 });
             }
         }
@@ -70,7 +70,7 @@ define(['./windowChannel', './runtime'], (WindowChannel, Runtime) => {
 
         setupListeners() {
             this.channel.on('navigate', (message) => {
-                const { view, params } = message;
+                const {view, params} = message;
 
                 // TODO: proper routing to error page
                 // if ((!path || path.length === 0) && !params.view) {
@@ -78,7 +78,7 @@ define(['./windowChannel', './runtime'], (WindowChannel, Runtime) => {
                 //     return;
                 // }
 
-                this.handleNavigation({ view, params });
+                this.handleNavigation({view, params});
             });
         }
 
@@ -93,15 +93,15 @@ define(['./windowChannel', './runtime'], (WindowChannel, Runtime) => {
             this.runtime.messenger.receive({
                 channel: 'app',
                 message: 'post-form',
-                handler: ({ action, params }) => {
-                    this.channel.send('post-form', { action, params });
+                handler: ({action, params}) => {
+                    this.channel.send('post-form', {action, params});
                 }
             });
             this.runtime.messenger.receive({
                 channel: 'ui',
                 message: 'setTitle',
                 handler: (title) => {
-                    this.channel.send('set-title', { title });
+                    this.channel.send('set-title', {title});
                 }
             });
         }
@@ -123,16 +123,16 @@ define(['./windowChannel', './runtime'], (WindowChannel, Runtime) => {
                         authorization,
                         config
                     } = payload;
-                    const { token, username, realname } = authorization;
+                    const {token, username, realname} = authorization;
                     if (token) {
-                        this.authorization = { token, username, realname };
+                        this.authorization = {token, username, realname};
                     } else {
                         this.authorization = null;
                     }
                     this.token = token;
                     this.username = username;
                     this.config = config;
-                    this.authorized = token ? true : false;
+                    this.authorized = !!token;
 
                     this.runtime = new Runtime({
                         authorization,
@@ -164,7 +164,7 @@ define(['./windowChannel', './runtime'], (WindowChannel, Runtime) => {
                     //     this.showHelp();
                     // });
 
-                    this.channel.on('loggedin', ({ token, username, realname, email }) => {
+                    this.channel.on('loggedin', ({token, username, realname, email}) => {
                         // console.log('loggedin', token, username, realname, email);
                         this.runtime.send('session', 'loggedin');
                         // this.runtime.auth({ token, username, realname, email });

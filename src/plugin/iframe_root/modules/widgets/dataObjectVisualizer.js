@@ -6,20 +6,20 @@ define([
     'kb_lib/htmlBuilders',
     'kb_lib/htmlBootstrapBuilders',
     'kb_service/utils'
-], function (Promise, _, GenericClient, html, htmlBuilders, BS, APIUtils) {
+], (Promise, _, GenericClient, html, htmlBuilders, BS, APIUtils) => {
     const t = html.tag,
         div = t('div');
 
     function factory(config) {
-        var mount,
+        let mount,
             container,
             runtime = config.runtime,
             theWidget,
             widgetContainer;
 
         function findMapping(type, params) {
-            var mapping = runtime.getService('type').getViewer({
-                type: type,
+            let mapping = runtime.getService('type').getViewer({
+                type,
                 id: params.viewer
             });
             if (mapping) {
@@ -30,11 +30,11 @@ define([
                             mapping = mapping.sub[sub]; // ha, crazy line, i know.
                         } else {
                             throw new Error(
-                                'Sub was specified, but config has no correct sub handler, sub:' + sub + 'config:'
+                                `Sub was specified, but config has no correct sub handler, sub:${  sub  }config:`
                             );
                         }
                     } else {
-                        throw new Error('Sub was specified, but config has no sub handler, sub:' + sub);
+                        throw new Error(`Sub was specified, but config has no sub handler, sub:${  sub}`);
                     }
                 }
             } else {
@@ -55,7 +55,7 @@ define([
         // TODO: move this to api utils
         function makeObjectRef(obj) {
             return [obj.workspaceId, obj.objectId, obj.objectVersion]
-                .filter(function (element) {
+                .filter((element) => {
                     if (element) {
                         return true;
                     }
@@ -68,7 +68,7 @@ define([
             // params.objectVersion = params.ver;
 
             // Get other params from the runtime.
-            return Promise.try(function () {
+            return Promise.try(() => {
                 const workspace = new GenericClient({
                     module: 'Workspace',
                     url: runtime.getConfig('services.workspace.url'),
@@ -87,24 +87,24 @@ define([
                             includeMetadata: 1
                         }
                     ])
-                    .spread(function (result) {
+                    .spread((result) => {
                         const objectInfos = result.infos;
                         if (objectInfos.length > 1) {
-                            throw new Error('Too many (' + objectInfos.length + ') objects found.');
+                            throw new Error(`Too many (${  objectInfos.length  }) objects found.`);
                         }
                         if (objectInfos[0] === null) {
                             throw new Error('Object not found');
                         }
 
-                        var wsobject = APIUtils.objectInfoToObject(objectInfos[0]);
-                        var type = APIUtils.parseTypeId(wsobject.type),
+                        const wsobject = APIUtils.objectInfoToObject(objectInfos[0]);
+                        const type = APIUtils.parseTypeId(wsobject.type),
                             mapping = findMapping(type, params);
 
                         if (!mapping) {
-                            throw new Error('Sorry, cannot find widget for ' + type.module + '.' + type.name);
+                            throw new Error(`Sorry, cannot find widget for ${  type.module  }.${  type.name}`);
                         }
                         // These params are from the found object.
-                        var widgetParams = {
+                        const widgetParams = {
                             workspaceId: wsobject.wsid,
                             objectId: wsobject.id,
                             objectName: wsobject.name,
@@ -116,15 +116,15 @@ define([
 
                         // handle sub
                         if (params.sub) {
-                            widgetParams[params.sub.toLowerCase() + 'ID'] = params.subid;
+                            widgetParams[`${params.sub.toLowerCase()  }ID`] = params.subid;
                         }
 
                         // Create params.
                         if (mapping.options) {
-                            mapping.options.forEach(function (item) {
-                                var from = widgetParams[item.from];
+                            mapping.options.forEach((item) => {
+                                const from = widgetParams[item.from];
                                 if (!from && item.optional !== true) {
-                                    throw 'Missing param, from ' + item.from + ', to ' + item.to;
+                                    throw `Missing param, from ${  item.from  }, to ${  item.to}`;
                                 }
                                 widgetParams[item.to] = from;
                             });
@@ -133,7 +133,7 @@ define([
                         return runtime
                             .service('widget')
                             .makeWidget(mapping.widget.name, mapping.widget.config)
-                            .then(function (result) {
+                            .then((result) => {
                                 return {
                                     widget: result,
                                     params: widgetParams,
@@ -145,7 +145,7 @@ define([
         }
 
         function showError(err) {
-            var content;
+            let content;
             console.error(err);
             if (typeof err === 'string') {
                 content = err;
@@ -166,7 +166,7 @@ define([
         // Widget Lifecycle Interface
 
         function attach(node) {
-            return Promise.try(function () {
+            return Promise.try(() => {
                 mount = node;
                 container = document.createElement('div');
                 container.style.display = 'flex';
@@ -178,13 +178,13 @@ define([
         }
 
         function start(params) {
-            var newParams;
+            let newParams;
             return makeWidget(params)
-                .then(function (result) {
+                .then((result) => {
                     theWidget = result.widget;
                     newParams = result.params;
                     if (result.mapping.panel) {
-                        var temp = container.appendChild(document.createElement('div')),
+                        const temp = container.appendChild(document.createElement('div')),
                             widgetParentId = html.genId();
 
                         temp.innerHTML = BS.buildPanel({
@@ -208,17 +208,17 @@ define([
                     }
                     if (theWidget.init) {
                         return theWidget.init(config);
-                    } else {
-                        return null;
                     }
+                    return null;
+
                 })
-                .then(function () {
+                .then(() => {
                     return theWidget.attach(widgetContainer);
                 })
-                .then(function () {
+                .then(() => {
                     return theWidget.start(newParams);
                 })
-                .catch(function (err) {
+                .catch((err) => {
                     // if attaching the widget failed, we attach a
                     // generic error widget:
                     // TO BE DONE
@@ -228,7 +228,7 @@ define([
         }
 
         function run(params) {
-            return Promise.try(function () {
+            return Promise.try(() => {
                 if (theWidget && theWidget.run) {
                     return theWidget.run(params);
                 }
@@ -236,7 +236,7 @@ define([
         }
 
         function stop() {
-            return Promise.try(function () {
+            return Promise.try(() => {
                 if (theWidget && theWidget.stop) {
                     return theWidget.stop();
                 }
@@ -244,7 +244,7 @@ define([
         }
 
         function detach() {
-            return Promise.try(function () {
+            return Promise.try(() => {
                 if (theWidget && theWidget.detach) {
                     return theWidget.detach();
                 }
@@ -252,7 +252,7 @@ define([
         }
 
         function destroy() {
-            return Promise.try(function () {
+            return Promise.try(() => {
                 if (theWidget && theWidget.detach) {
                     return theWidget.detach();
                 }
@@ -260,17 +260,17 @@ define([
         }
 
         return {
-            attach: attach,
-            start: start,
-            run: run,
-            stop: stop,
-            detach: detach,
-            destroy: destroy
+            attach,
+            start,
+            run,
+            stop,
+            detach,
+            destroy
         };
     }
 
     return {
-        make: function (config) {
+        make(config) {
             return factory(config);
         }
     };

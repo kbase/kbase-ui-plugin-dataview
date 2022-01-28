@@ -6,7 +6,7 @@ define([
     'kb_lib/html',
     'utils',
     'collapsiblePanel',
-    'components/error',
+    'components/ErrorView',
     'components/Tabs',
     'components/WidgetWrapper',
     'components/Overview/index',
@@ -23,7 +23,7 @@ define([
     htmlTags,
     utils,
     collapsiblePanel,
-    ErrorComponent,
+    ErrorView,
     Tabs,
     WidgetWrapper,
     OverviewComponent,
@@ -251,7 +251,7 @@ define([
                 .catch((error) => {
                     container.innerHTML = '';
                     console.error('ERROR', error);
-                    preact.render(preact.h(ErrorComponent, {runtime, error}), container);
+                    preact.render(preact.h(ErrorView, {runtime, error}), container);
                 });
         }
 
@@ -285,7 +285,7 @@ define([
                 .catch((error) => {
                     container.innerHTML = '';
                     console.error('ERROR', error);
-                    preact.render(preact.h(ErrorComponent, {runtime, error}), container);
+                    preact.render(preact.h(ErrorView, {runtime, error}), container);
                 });
         }
 

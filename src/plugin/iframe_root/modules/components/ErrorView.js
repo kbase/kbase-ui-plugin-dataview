@@ -1,8 +1,6 @@
 define([
     'preact'
-], function (preact) {
-    'use strict';
-
+], (preact) => {
     const {h, Component} = preact;
 
     class ErrorView extends Component {
@@ -22,6 +20,9 @@ define([
                 break;
             case 'private-object-inadequate-authorization':
                 this.props.runtime.send('ui', 'setTitle', 'Error : Access Denied - Inadequate Authorization');
+                break;
+            case 'object-deleted':
+                this.props.runtime.send('ui', 'setTitle', 'Error : Object Deleted');
                 break;
             default:
                 this.props.runtime.send('ui', 'setTitle', 'Error');
@@ -49,26 +50,36 @@ define([
                         'You are logged in but do not have access to the Narrative this object is located in.'
                     ])
                 );
+            case 'object-deleted':
+                return h('div', null,
+                    h('p', null, [
+                        'This object has been deleted from the Narrative it is located in.'
+                    ]),
+                    h('p', null, [
+                        'A deleted object may not be viewed, but you may ',
+                        h('a', {href: `/narrative/${error.data.workspaceId}`, target: '_blank'}, 'visit the Narrative.')
+                    ])
+                );
             default:
                 // The original error should be included as data.originalError
-                if (error.data.originalError) {
+                if (error.data && error.data.originalError) {
                     return h('div', null, h('p', null, [
                         'The original error message is: ',
                         error.data.originalError.message
                     ]));
-                } else {
-                    return h('div', null, h('p', null, 'No additional information available'));
                 }
+                return h('div', null, h('p', null, 'No additional information available'));
+
             }
         }
 
         renderFooter(error) {
             switch (error.code) {
-            case 'private-object-no-authorization':
-                var url = new URL('', window.location.origin);
+            case 'private-object-no-authorization': {
+                const url = new URL('', window.location.origin);
                 url.hash = 'login';
-                var hash = window.parent.location.hash.substr(1);
-                var nextRequest = {
+                const hash = window.parent.location.hash.substr(1);
+                const nextRequest = {
                     original: hash,
                     path: hash.split('/')
                 };
@@ -83,33 +94,49 @@ define([
                     ]),
                     h('div', null, [
                         h('a', {
-                            href: 'https://kbase.us/contact-us',
+                            href: 'https://www.kbase.us/support',
                             target: '_blank'
                         }, 'KBase Help')
                     ])
                 ]);
+            }
             case 'private-object-inadequate-authorization':
                 return h('div', null, [
                     h('div', null, [
                         h('a', {
-                            href: '/narrative/' + error.data.workspaceID,
+                            href: `/narrative/${  error.data.workspaceId}`,
                             target: '_blank'
                         }, 'Visit the narrative and request access')
                     ]),
                     h('div', null, [
                         h('a', {
-                            href: 'https://kbase.us/contact-us',
+                            href: 'https://www.kbase.us/support',
                             target: '_blank'
-                        }, 'KBase Help')
+                        }, 'KBase Support')
+                    ])
+                ]);
+            case 'object-deleted':
+                return h('div', null, [
+                    h('div', null, [
+                        h('a', {
+                            href: `/narrative/${  error.data.workspaceId}`,
+                            target: '_blank'
+                        }, 'Visit the narrative')
+                    ]),
+                    h('div', null, [
+                        h('a', {
+                            href: 'https://www.kbase.us/support',
+                            target: '_blank'
+                        }, 'KBase Support')
                     ])
                 ]);
             default:
                 return h('div', null, [
                     h('div', null, [
                         h('a', {
-                            href: 'https://kbase.us/contact-us',
+                            href: 'https://www.kbase.us/support',
                             target: '_blank'
-                        }, 'KBase Help')
+                        }, 'KBase Support')
                     ])
                 ]);
             }
@@ -130,6 +157,10 @@ define([
                 },  [
                     h('p', null, error.message),
 
+
+                    h('hr'),
+                    this.renderDescription(error),
+                    h('hr'),
                     h('p', {
                         style: {
                             fontWeight: 'bold',
@@ -144,8 +175,6 @@ define([
                             color: 'rgba(150, 150, 150)'
                         }
                     }, 'plugin: ', 'dataview'),
-                    h('hr'),
-                    this.renderDescription(error)
                 ]),
                 h('div', {
                     className: 'panel-footer'

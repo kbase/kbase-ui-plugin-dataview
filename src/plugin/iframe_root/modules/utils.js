@@ -3,13 +3,13 @@ define([
     'kb_service/utils',
     'kb_service/client/workspace',
     'kb_lib/jsonRpc/genericClient'
-], function (
+], (
     Promise,
     apiUtils,
     Workspace,
     GenericClient
-) {
-    'use strict';
+) => {
+
     class UIError extends Error {
         constructor({message, code, data}) {
             super(message);
@@ -18,7 +18,7 @@ define([
         }
     }
     function getObjectInfo(runtime, params) {
-        return Promise.try(function () {
+        return Promise.try(() => {
             const workspaceId = params.workspaceId,
                 objectId = params.objectId,
                 objectVersion = params.objectVersion;
@@ -39,7 +39,7 @@ define([
             });
 
             return workspace.callFunc('get_object_info3', [{
-                objects: [{ ref: objectRef }],
+                objects: [{ref: objectRef}],
                 includeMetadata: 1,
                 ignoreErrors: 0
             }])
@@ -52,20 +52,29 @@ define([
                             message: 'Private object without authorization ',
                             code: 'private-object-no-authorization',
                             data: {
-                                workspaceID: workspaceId
+                                workspaceId
                             }
                         });
                     } else if (/User .+ may not read workspace/.test(err.message)) {
                         throw new UIError({
-                            message: 'Access denied to this object with reference ' + objectRef,
+                            message: `Access denied to this object with reference ${  objectRef}`,
                             code: 'private-object-inadequate-authorization',
                             data: {
-                                workspaceID: workspaceId,
+                                workspaceId,
+                            }
+                        });
+                    } else if (/^Object .+ in workspace .+ has been deleted$/.test(err.message)) {
+                        throw new UIError({
+                            message: `Object with reference ${objectRef} has been deleted and may not be accessed`,
+                            code: 'object-deleted',
+                            data: {
+                                workspaceId,
+                                objectRef,
                             }
                         });
                     } else {
                         throw new UIError({
-                            message: 'An unknown error occurred while accessing object with reference ' + objectRef,
+                            message: `An unknown error occurred while accessing object with reference ${  objectRef}`,
                             code: 'unknown-error',
                             data: {
                                 originalError: err
@@ -77,7 +86,7 @@ define([
         });
     }
     function getWorkspaceInfo(runtime, params) {
-        return Promise.try(function () {
+        return Promise.try(() => {
             const workspaceId = params.workspaceId;
 
             if (workspaceId === undefined) {
@@ -107,21 +116,21 @@ define([
                             message: 'Private object without authorization ',
                             code: 'private-object-no-authorization',
                             data: {
-                                workspaceID: workspaceId
+                                workspaceId
                             }
                         });
                     } else if (/User .+ may not read workspace/.test(err.message)) {
                         throw new UIError({
-                            message: 'Access denied to this workspace with id ' + workspaceId,
+                            message: `Access denied to this workspace with id ${  workspaceId}`,
                             code: 'private-object-inadequate-authorization',
                             data: {
-                                workspaceID: workspaceId,
+                                workspaceId,
                             }
                         });
                     } else {
                         console.error('ERROR', err);
                         throw new UIError({
-                            message: 'An unknown error occurred while accessing workspace with id ' + workspaceId,
+                            message: `An unknown error occurred while accessing workspace with id ${  workspaceId}`,
                             code: 'unknown-error',
                             data: {
                                 originalError: err
@@ -150,15 +159,15 @@ define([
                     token: runtime.service('session').getAuthToken()
                 });
 
-            return workspaceClient.get_objects([{ ref: objectRef }]).then(function (objectList) {
+            return workspaceClient.get_objects([{ref: objectRef}]).then((objectList) => {
                 if (objectList.length === 0) {
-                    throw new Error('Object not found: ' + objectRef);
+                    throw new Error(`Object not found: ${  objectRef}`);
                 }
                 if (objectList.length > 1) {
-                    throw new Error('Too many objects found: ' + objectRef + ', ' + objectList.length);
+                    throw new Error(`Too many objects found: ${  objectRef  }, ${  objectList.length}`);
                 }
                 if (objectList[0] === null) {
-                    throw new Error('Object x not found with reference ' + objectRef);
+                    throw new Error(`Object x not found with reference ${  objectRef}`);
                 }
                 return objectList[0];
             });
