@@ -56,8 +56,9 @@ define([
                         'This object has been deleted from the Narrative it is located in.'
                     ]),
                     h('p', null, [
-                        'A deleted object may not be viewed, but you may ',
-                        h('a', {href: `/narrative/${error.data.workspaceId}`, target: '_blank'}, 'visit the Narrative.')
+                        'A deleted object is not accessible, but you still may ',
+                        h('a', {href: `/narrative/${error.data.workspaceId}`, target: '_blank'}, 'visit the Narrative'),
+                        ' it was previously located in.'
                     ])
                 );
             default:
