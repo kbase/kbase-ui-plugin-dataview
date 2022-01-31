@@ -378,8 +378,7 @@ define([
                     loadingMessage: 'Loading Linked Data...'
                 });
 
-                // const linksEnabled = this.runtime.featureEnabled('sampleset-data-links');
-                const linksEnabled = true;
+                const linksEnabled = this.runtime.featureEnabled('sampleset-data-links');
 
                 const params = {
                     sampleSet,
