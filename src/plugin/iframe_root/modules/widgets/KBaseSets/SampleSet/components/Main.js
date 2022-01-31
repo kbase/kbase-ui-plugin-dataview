@@ -142,44 +142,51 @@ define([
                         </div>
                     `;
                 }
-            }, {
-                id: 'linked-data-summary',
-                title: 'Linked Data Summary',
-                render: () => {
-                    return this.props.linkedDataSummaryController.view();
-                }
-
             },
-            //  {
-            //     id: 'linked-data-summary2',
-            //     title: 'Linked data summary2',
-            //     render: () => {
-            //         return this.props.linkedDataSummaryController2.view();
-            //     }
+                //  {
+                //     id: 'linked-data-summary2',
+                //     title: 'Linked data summary2',
+                //     render: () => {
+                //         return this.props.linkedDataSummaryController2.view();
+                //     }
 
             // },
-            {
-                id: 'linked-data',
-                title: 'Linked Data',
-                render: () => {
-                    return this.props.linkedDataController.view();
-                }
+            ];
 
-            },  {
-                id: 'linked-data2',
-                title: 'Linked Data 2',
-                render: () => {
-                    return this.props.linkedDataController2.view();
-                }
+            if (this.props.linksEnabled) {
+                tabs.push({
+                    id: 'linked-data-summary',
+                    title: 'Linked Data Summary',
+                    render: () => {
+                        return this.props.linkedDataSummaryController.view();
+                    }
 
-            },  {
-                id: 'linked-data3',
-                title: 'Linked Data 3',
-                render: () => {
-                    return this.props.linkedDataController3.view();
-                }
+                });
+                tabs.push({
+                    id: 'linked-data',
+                    title: 'Linked Data',
+                    render: () => {
+                        return this.props.linkedDataController.view();
+                    }
 
-            }];
+                });
+                tabs.push({
+                    id: 'linked-data2',
+                    title: 'Linked Data 2',
+                    render: () => {
+                        return this.props.linkedDataController2.view();
+                    }
+
+                });
+                tabs.push({
+                    id: 'linked-data3',
+                    title: 'Linked Data 3',
+                    render: () => {
+                        return this.props.linkedDataController3.view();
+                    }
+
+                });
+            }
             const extra = html`
                 <div>
                     <a className="btn btn-link" href="https://docs.kbase.us/workflows/samples-and-samplesets"
