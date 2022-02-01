@@ -27,7 +27,7 @@ define([
             this.DEFAULT_CURRENT_SORT = 'Type';
             this.DEFAULT_CURRENT_SORT_SAMPLE = 'Created - Newest First';
             this.state = {
-                linkedData: props.data.linkedData,
+                linkedData: props.linkedData,
                 currentFilter: null,
                 currentSort: this.DEFAULT_CURRENT_SORT,
                 currentSortSample: this.DEFAULT_CURRENT_SORT_SAMPLE
@@ -38,6 +38,7 @@ define([
             const {currentFilter, currentSort, currentSortSample} = this.state;
             this.applyFilterSort(currentFilter, currentSort, currentSortSample);
         }
+
         renderDataId(link) {
             if (link.dataid) {
                 return link.dataid;
@@ -174,9 +175,9 @@ define([
         applyFilterSort(filter, sortFilterOption, sortSampleOption) {
             const filteredLinkedData = (() => {
                 if (filter === null || filter.length === 0) {
-                    return this.props.data.linkedData.slice();
+                    return this.props.linkedData.slice();
                 }
-                return this.props.data.linkedData.map((item) => {
+                return this.props.linkedData.map((item) => {
                     const links = item.links.filter(({objectInfo: {typeName}}) => {
                         return (typeName === filter);
                     });
@@ -227,7 +228,7 @@ define([
         }
 
         renderFilterControl() {
-            const options = this.props.data.types.map((typeName) => {
+            const options = this.props.types.map((typeName) => {
                 const selected = typeName === this.state.currentFilter;
                 return html`
                     <option value=${typeName} selected=${selected}>${typeName}</option>

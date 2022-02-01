@@ -17,8 +17,6 @@ define([
     class AsyncLoader extends Component {
         constructor(props) {
             super(props);
-            const {loader} = props;
-            this.loader = loader;
             this.state = {
                 status: 'none'
             };
@@ -26,7 +24,7 @@ define([
 
         async componentDidMount() {
             try {
-                const result = await this.loader();
+                const result = await this.props.loader();
                 this.setState({
                     status: 'success',
                     result
@@ -41,9 +39,20 @@ define([
             }
         }
 
+        async shouldComponentUpdate({key}, {status}) {
+            if (key === this.props.key && status === this.state.status) {
+                return false;
+            }
+            return true;
+        }
+
         renderLoading() {
+            const message = this.props.message || 'Loading...';
+            if (this.props.renderLoading) {
+                return this.props.renderLoading(message);
+            }
             return html`
-                <${Loading} message=${this.props.message || 'Loading...'} />
+                <${Loading} inline=${this.props.inlineLoading || false} message=${message} />
             `;
         }
 
@@ -55,7 +64,7 @@ define([
 
         renderSuccess(result) {
             return html`
-                <${this.props.component} data=${result} />
+                <${this.props.component} ...${result} />
             `;
         }
 

@@ -5,6 +5,7 @@ define([
     './Spreadsheet',
     './SampleMap3',
     './SampleSet',
+    './SampleSet2',
     './Main.styles',
     'lib/merge',
     '../constants'
@@ -15,6 +16,7 @@ define([
     Spreadsheet,
     SampleMap3,
     SampleSet,
+    SampleSet2,
     styles,
     {merge},
     {MAX_SAMPLES}
@@ -39,6 +41,42 @@ define([
                     />
             `;
         }
+
+        renderSampleSet2x() {
+            let truncatedMessage = '';
+            if (this.props.totalCount > MAX_SAMPLES) {
+                truncatedMessage = html`
+                    <div className="alert alert-warning">The total number of results has been truncated; only the first
+                        ${MAX_SAMPLES} are displayed during this testing period.
+                    </div>`;
+            }
+            return html`
+                <${Fragment}>
+                    <${SampleSet2} sampleSet=${this.props.sampleSet} samples=${this.props.samples}
+                                  totalCount=${this.props.totalCount} userProfiles=${this.props.userProfiles}/>
+                        ${truncatedMessage}
+                    </
+                    />
+            `;
+        }
+
+        // renderSampleSet2() {
+        //     let truncatedMessage = '';
+        //     if (this.props.totalCount > MAX_SAMPLES) {
+        //         truncatedMessage = html`
+        //             <div className="alert alert-warning">The total number of results has been truncated; only the first
+        //                 ${MAX_SAMPLES} are displayed during this testing period.
+        //             </div>`;
+        //     }
+        //     return html`
+        //         <${Fragment}>
+        //             <${SampleSet2} sampleSet=${this.props.sampleSet} samples=${this.props.samples}
+        //                           totalCount=${this.props.totalCount} userProfiles=${this.props.userProfiles}/>
+        //                 ${truncatedMessage}
+        //             </
+        //             />
+        //     `;
+        // }
 
         renderDescription() {
             // TODO: this description should perhaps be markdown? Or simply generate paragraphs on
@@ -103,16 +141,6 @@ define([
 
         render() {
             const tabs = [{
-                id: 'sampleset',
-                title: 'Sample Set',
-                render: () => {
-                    return html`
-                        <div className="FlexCol" style=${{marginTop: '10px'}}>
-                            ${this.renderSampleSet()}
-                        </div>
-                    `;
-                }
-            }, {
                 id: 'description',
                 title: 'Description',
                 display: false,
@@ -153,34 +181,70 @@ define([
             // },
             ];
 
+            // if (this.props.linksEnabled) {
+            //     tabs.unshift({
+            //         id: 'sampleset2',
+            //         title: 'Sample Set 2',
+            //         render: () => {
+            //             return html`
+            //             <div className="FlexCol" style=${{marginTop: '10px'}}>
+            //                 ${this.renderSampleSet2()}
+            //             </div>
+            //         `;
+            //         }
+            //     });
+            // }
+
             if (this.props.linksEnabled) {
-                tabs.push({
-                    id: 'linked-data-summary',
-                    title: 'Linked Data Summary',
+                tabs.unshift({
+                    id: 'sampleset3',
+                    title: 'Sample Set',
                     render: () => {
-                        return this.props.linkedDataSummaryController.view();
+                        return this.props.sampleSetController3.view();
                     }
-
                 });
-                tabs.push({
-                    id: 'linked-data',
-                    title: 'Linked Data',
+            } else {
+                tabs.unshift({
+                    id: 'sampleset',
+                    title: 'Sample Set',
                     render: () => {
-                        return this.props.linkedDataController.view();
+                        return html`
+                        <div className="FlexCol" style=${{marginTop: '10px'}}>
+                            ${this.renderSampleSet()}
+                        </div>
+                    `;
                     }
-
                 });
-                tabs.push({
-                    id: 'linked-data2',
-                    title: 'Linked Data 2',
-                    render: () => {
-                        return this.props.linkedDataController2.view();
-                    }
+            }
 
-                });
+            if (this.props.linksEnabled) {
+                // tabs.push({
+                //     id: 'linked-data-summary',
+                //     title: 'Linked Data Summary',
+                //     render: () => {
+                //         return this.props.linkedDataSummaryController.view();
+                //     }
+
+                // });
+                // tabs.push({
+                //     id: 'linked-data',
+                //     title: 'Linked Data',
+                //     render: () => {
+                //         return this.props.linkedDataController.view();
+                //     }
+
+                // });
+                // tabs.push({
+                //     id: 'linked-data2',
+                //     title: 'Linked Data 2',
+                //     render: () => {
+                //         return this.props.linkedDataController2.view();
+                //     }
+
+                // });
                 tabs.push({
                     id: 'linked-data3',
-                    title: 'Linked Data 3',
+                    title: 'Linked Data Objects',
                     render: () => {
                         return this.props.linkedDataController3.view();
                     }

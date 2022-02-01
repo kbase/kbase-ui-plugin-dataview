@@ -121,7 +121,7 @@ define([
 
         calcTable() {
             const table = [];
-            this.props.data.linkedData
+            this.props.linkedData
                 .forEach(({sample, links}) => {
                     for (const {link: {created, createdby, dataid}, objectInfo: {ref, name, type, typeName, workspaceId, objectId, objectVersion}} of links) {
                         table.push({
@@ -226,7 +226,7 @@ define([
         }
 
         renderFilterControl() {
-            const options = this.props.data.types.map((typeName) => {
+            const options = this.props.types.map((typeName) => {
                 const selected = typeName === this.state.currentFilter;
                 return html`
                     <option value=${typeName} selected=${selected}>${typeName}</option>

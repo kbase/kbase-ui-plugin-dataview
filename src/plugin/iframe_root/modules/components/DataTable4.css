@@ -1,0 +1,97 @@
+.DataTable4 {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+    border: 1px solid rgb(200, 200, 200); 
+    border-radius: 1em;
+    padding: 0.5em;
+}
+
+.DataTable4-header {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+    font-weight: bold;
+    color: gray;
+    /* Force scrollbar so it aligns w/body*/
+    border-bottom: 1px dashed rgb(200, 200, 200);
+    overflow-y: scroll;
+}
+
+.DataTable4-header::-webkit-scrollbar-track {
+    background-color: white;
+}
+
+.DataTable4-header::-webkit-scrollbar-thumb {
+    background-color: white;
+}
+
+.DataTable4-header-col {
+    flex: 1 1 0px;
+    padding: 4px;
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.DataTable4-body {
+    flex: 1 1 0px;
+    min-height: 0;
+    min-width: 0;
+    overflow-y: scroll;
+}
+
+.DataTable4-grid {
+    /* position: relative; */
+}
+
+.DataTable4-grid-row {
+    padding: 0.25em 0;
+    /* border-bottom: 1px solid rgba(200, 200, 200, 0.5); */
+}
+
+.DataTable4-grid-row:hover {
+    background-color: rgba(200, 200, 200, 0.2);
+    cursor: pointer;
+}
+
+.DataTable4-grid-cell {
+    /* position: absolute; */
+}
+
+.DataTable4-row {
+    display: flex;
+    flex-direction: row;
+    /* font-weight: bold; */
+}
+
+.DataTable4-detail {
+
+}
+
+.DataTable4-row-detail {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+}
+
+.DataTable4-row-highlighted {
+    background-color: rgba(200, 200, 200, 0.5);
+}
+
+.DataTable4-col {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    justify-content: center;
+}
+
+.DataTable4-col-content {
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 4px;
+}
