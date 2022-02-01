@@ -5,12 +5,13 @@ define([
     'components/Progress',
     './model',
     'components/SimpleError',
-    'components/SimpleWarning',
     'components/SimpleInfo',
     'components/Loading',
     './components/Main',
     './models/LinkedData',
-    './models/LinkedData3',
+    './models/SampleSet',
+    './controllers/SampleSetController',
+    './controllers/SampleSetController3',
     './controllers/LinkedData',
     './controllers/LinkedData2',
     './controllers/LinkedData3',
@@ -24,12 +25,13 @@ define([
     Progress,
     Model,
     SimpleError,
-    SimpleWarning,
     SimpleInfo,
     Loading,
     Main,
     LinkedDataModel,
-    LinkedDataModel3,
+    SampleSetModel,
+    SampleSetController,
+    SampleSetController3,
     LinkedDataController,
     LinkedDataController2,
     LinkedDataController3,
@@ -338,6 +340,28 @@ define([
                     runtime: this.runtime
                 });
 
+                const sampleSetModel = new SampleSetModel({
+                    runtime: this.runtime,
+                    sampleSet,
+                    samples,
+                    userProfiles
+                });
+
+                const sampleSetController = new SampleSetController({
+                    runtime: this.runtime,
+                    model: sampleSetModel,
+                    samples,
+                    loadingMessage: 'Loading...'
+                });
+
+                const sampleSetController3 = new SampleSetController3({
+                    runtime: this.runtime,
+                    model: sampleSetModel,
+                    samples,
+                    loadingMessage: 'Loading...'
+                });
+
+
                 const linkedDataController = new LinkedDataController({
                     runtime: this.runtime,
                     model: linkedDataModel,
@@ -345,12 +369,12 @@ define([
                     loadingMessage: 'Loading Linked Data...'
                 });
 
-                const linkedDataController2 = new LinkedDataController2({
-                    runtime: this.runtime,
-                    model: linkedDataModel,
-                    samples,
-                    loadingMessage: 'Loading Linked Data...'
-                });
+                // const linkedDataController2 = new LinkedDataController2({
+                //     runtime: this.runtime,
+                //     model: linkedDataModel,
+                //     samples,
+                //     loadingMessage: 'Loading Linked Data...'
+                // });
 
 
                 // const linkedDataModel3 = new LinkedDataModel3({
@@ -364,19 +388,19 @@ define([
                     loadingMessage: 'Loading Linked Data...'
                 });
 
-                const linkedDataSummaryController = new LinkedDataSummaryController({
-                    runtime: this.runtime,
-                    model: linkedDataModel,
-                    samples,
-                    loadingMessage: 'Loading Linked Data...'
-                });
+                // const linkedDataSummaryController = new LinkedDataSummaryController({
+                //     runtime: this.runtime,
+                //     model: linkedDataModel,
+                //     samples,
+                //     loadingMessage: 'Loading Linked Data...'
+                // });
 
-                const linkedDataSummaryController2 = new LinkedDataSummaryController2({
-                    runtime: this.runtime,
-                    model: linkedDataModel,
-                    samples,
-                    loadingMessage: 'Loading Linked Data...'
-                });
+                // const linkedDataSummaryController2 = new LinkedDataSummaryController2({
+                //     runtime: this.runtime,
+                //     model: linkedDataModel,
+                //     samples,
+                //     loadingMessage: 'Loading Linked Data...'
+                // });
 
                 const linksEnabled = this.runtime.featureEnabled('sampleset-data-links');
 
@@ -391,11 +415,13 @@ define([
                     objectInfo,
                     columnGroups,
                     groups,
+                    sampleSetController,
+                    sampleSetController3,
                     linkedDataController,
-                    linkedDataController2,
+                    // linkedDataController2,
                     linkedDataController3,
-                    linkedDataSummaryController,
-                    linkedDataSummaryController2,
+                    // linkedDataSummaryController,
+                    // linkedDataSummaryController2,
                     linksEnabled
                 };
                 preact.render(preact.h(Main, params), this.node);

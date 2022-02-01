@@ -9,6 +9,7 @@ define([
         constructor(params) {
             super(params);
             this.samples = params.samples;
+            this.inlineLoading = false;
         }
 
         view() {

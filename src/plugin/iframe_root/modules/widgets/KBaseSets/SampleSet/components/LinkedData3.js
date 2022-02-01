@@ -196,7 +196,7 @@ define([
 
         calcTable() {
             const table = [];
-            this.props.data.linkedData
+            this.props.linkedData
                 .forEach(({sample, objects}) => {
                     for (const {objectInfo: {ref, name, type, typeName, workspaceId, id, version}, links} of Object.values(objects)) {
                         table.push({
@@ -277,7 +277,7 @@ define([
                         return a.sampleName.localeCompare(b.sampleName);
 
                     }
-                    case 'Object & Sample Name': {
+                    case 'Object Ref & Sample Name': {
                         for (const aPart of a.objectRefArray) {
                             for (const bPart of b.objectRefArray) {
                                 if (aPart == bPart) {
@@ -285,6 +285,13 @@ define([
                                 }
                                 return aPart - bPart;
                             }
+                        }
+                        return a.sampleName.localeCompare(b.sampleName);
+                    }
+                    case 'Object Name & Sample Name': {
+                        const objectNameComparison = a.objectName.localeCompare(b.objectName);
+                        if (objectNameComparison !== 0) {
+                            return objectNameComparison;
                         }
                         return a.sampleName.localeCompare(b.sampleName);
                     }
@@ -311,7 +318,7 @@ define([
         }
 
         renderFilterControl() {
-            const options = this.props.data.types.map((typeName) => {
+            const options = this.props.types.map((typeName) => {
                 const selected = typeName === this.state.currentFilter;
                 return html`
                     <option value=${typeName} selected=${selected}>${typeName}</option>
@@ -337,7 +344,7 @@ define([
 
         renderSortControl() {
             const sortBy = [
-                'Sample Name & Object Type', 'Object Type & Sample Name', 'Object & Sample Name'
+                'Sample Name & Object Type', 'Object Type & Sample Name', 'Object Ref & Sample Name', 'Object Name & Sample Name'
             ];
             const options = sortBy.map((sortId) => {
                 const selected = this.state.currentSort === sortId;

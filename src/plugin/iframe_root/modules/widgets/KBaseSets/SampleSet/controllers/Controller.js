@@ -9,17 +9,27 @@ define([
 ) => {
     const html = htm.bind(h);
     class Controller {
-        constructor({runtime, model, loadingMessage}) {
+        constructor({runtime, model, loadingMessage, inlineLoading}) {
             this.runtime = runtime;
             this.model = model;
             this.loadingMessage = loadingMessage;
+            this.inlineLoading = inlineLoading;
         }
 
-        render(component, loader) {
+        render(component, loader, componentKey) {
+            const key = (() => {
+                if (componentKey) {
+                    return componentKey;
+                }
+                return Date.now();
+            })();
             return html`
-                <div className="FlexCol" style=${{marginTop: '10px'}}>
-                    <${AsyncLoader} component=${component} loader=${loader} key=${Date.now()} message=${this.loadingMessage || 'Loading data...'} />
-                </div>
+                <${AsyncLoader} 
+                    component=${component} 
+                    loader=${loader} 
+                    inlineLoading=${!!this.inlineLoading}
+                    key=${key} 
+                    message=${this.loadingMessage || 'Loading data...'} />
             `;
         }
 
