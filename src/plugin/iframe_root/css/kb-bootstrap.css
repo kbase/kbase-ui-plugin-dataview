@@ -378,3 +378,17 @@
 }
 
 
+.table.kb-light-table th {
+    color: rgb(150, 150, 150);
+}
+
+.table.kb-light-table th,
+.table.kb-light-table td { 
+    border: none;
+    border-bottom: 1px solid rgba(200, 200, 200, 0.2);
+}
+
+.table.kb-light-table tr:nth-child(1) th,
+.table.kb-light-table tr:nth-child(1) td { 
+    border-top: 1px solid rgba(200, 200, 200, 0.2);
+}

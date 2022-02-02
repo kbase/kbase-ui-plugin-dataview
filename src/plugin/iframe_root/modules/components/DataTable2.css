@@ -105,6 +105,7 @@
     flex-direction: row;
     /* align-items: center; */
     /* border-bottom: 1px solid rgba(200, 200, 200, 0.5); */
+    border-bottom: 1px solid rgba(200, 200, 200, 0.2);
 }
 
 .DataTable2-grid-row:hover {

@@ -33,7 +33,7 @@ define([
                 `;
             });
             return html`
-                <table class="table table-condensed kb-bare-table" style="width: 20em;">
+                <table class="table table-condensed kb-light-table" style="width: 20em;">
                     <tbody>
                         ${rows}
                     </tbody>

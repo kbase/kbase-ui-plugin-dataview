@@ -7,7 +7,9 @@ define([], () => {
         },
         label: {
             fontWeight: 'bold',
-            color: 'rgba(150, 150, 150)'
+            color: 'rgba(150, 150, 150)',
+            // padding matches the padding in the cells of the table used to display the summary
+            padding: '5px'
         },
         typeSummary: {
             display: 'flex',

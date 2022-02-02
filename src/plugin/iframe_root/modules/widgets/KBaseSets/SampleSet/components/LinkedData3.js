@@ -6,6 +6,8 @@ define([
     'components/DataTable2',
     'components/Popover',
     'components/Nullable',
+    'components/DataPillGroup',
+    'components/DataPill',
     './LinkedData3.styles',
 
     'css!./LinkedData3.css'
@@ -17,6 +19,8 @@ define([
     DataTable2,
     Popover,
     Nullable,
+    DataPillGroup,
+    DataPill,
     styles
 ) => {
     const html = htm.bind(h);
@@ -38,7 +42,7 @@ define([
             };
             this.columns = [{
                 id: 'sampleName',
-                label: 'Sample Name/ID',
+                label: 'Sample Name',
                 display: true,
                 isSortable: true,
                 style: {
@@ -381,16 +385,14 @@ define([
 
         renderHeader() {
             return html`
-                    <div style=${styles.Header}>
-                    <div class="form-inline">
-                        <label style=${styles.Label}>Filter <span className="fa fa-arrow-right" /></label>
-                        <label for="filter-control" style=${{...styles.Label, marginLeft: '0.5em'}}>by object type</label>
-                        ${this.renderFilterControl()}
-                        <label style=${{...styles.Label, marginLeft: '2em'}}>Sort <span className="fa fa-arrow-right" /></label>
-                        <label for="sort-control" style=${{...styles.Label, marginLeft: '0.5em'}}>samples</label>
-                        ${this.renderSortControl()}
-                        ${this.renderResetButton()}
-                    </div>
+                <div style=${styles.Header}>
+                    <${DataPillGroup} title="Filter">
+                        <${DataPill} label="by object type" render=${this.renderFilterControl.bind(this)} />
+                    </>
+                    <${DataPillGroup} title="Sort" style=${{marginLeft: '2em'}}>
+                        <${DataPill} label="by object type" render=${this.renderSortControl.bind(this)} />
+                    </>
+                    ${this.renderResetButton()}
                 </div>
             `;
         }

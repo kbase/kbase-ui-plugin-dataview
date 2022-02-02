@@ -65,13 +65,14 @@ define([], () => {
             flex: '1 1 0',
             display: 'flex',
             flexDirection: 'row',
-            marginBottom: '1em'
+            padding: '0.5em 0',
+            borderBottom: '1px solid rgba(200, 200, 200, 0.2)'
         },
         LinkHeader: {
             flex: '1 1 0',
             display: 'flex',
             flexDirection: 'row',
-            marginBottom: '1em',
+            padding: '0.5em 0',
             borderBottom: '1px dashed rgb(200, 200, 200)',
             fontWeight: 'bold',
             color: 'rgb(150, 150, 150)'
@@ -85,7 +86,8 @@ define([], () => {
         LinkCol: {
             overflowX: 'hidden',
             whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis'
+            textOverflow: 'ellipsis',
+            padding: '0.1em'
         },
         LinkCol1: {
             flex: '1 1 0'
