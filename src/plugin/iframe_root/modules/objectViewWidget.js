@@ -151,7 +151,7 @@ define([
                 });
             }
 
-            preact.render(preact.h(Tabs, {tabs, paneStyle: {paddingTop: '10px'}}), document.getElementById('tabs123'));
+            preact.render(preact.h(Tabs, {tabs, paneStyle: {}}), document.getElementById('tabs123'));
         }
 
         function renderPanel() {

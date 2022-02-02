@@ -203,14 +203,11 @@ define([
         renderHeader() {
             return html`
             <div style=${styles.header}>
-                <div style=${styles.label}>
-                    View <span class="fa fa-arrow-right" />
-                </div>
                 <div class="btn-group">
                     ${this.renderViewButton('normal', 'List')}
                     ${this.renderViewButton('summary', 'Summary')}
                     ${this.renderViewButton('detail', 'Linked Data')}
-                </div>
+                </div> 
             </div>
             `;
         }

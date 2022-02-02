@@ -16,9 +16,9 @@ define([
     }
 
     class SampleLinkedData extends Component {
-        renderDataId(link) {
-            if (link.dataid) {
-                return link.dataid;
+        renderMaybe(data, key, render) {
+            if (key in data) {
+                return render(data[key]);
             }
             return html`<span style=${{color: 'rgb(150, 150, 150'}}>∅</span>`;
         }
@@ -43,7 +43,7 @@ define([
                                 <a href="/#spec/type/${objectInfo.type}" target="_blank" title=${objectInfo.type}>${objectInfo.typeName}</b>
                             </div>
                             <div style=${combineStyles(styles.LinkCol, styles.LinkCol4)}>
-                                <span title=${link}>${this.renderDataId(link)}</span>
+                                ${this.renderMaybe(link, 'dataid', (value) => html`<span title=${value}>${value}</span>`)}
                             </div>
                             <div style=${combineStyles(styles.LinkCol, styles.LinkCol5)}>
                                 <span title="${Intl.DateTimeFormat('en-us', {dateStyle: 'full', timeStyle: 'long'}).format(link.created)}" title=${link.created}>${Intl.DateTimeFormat('en-us', {}).format(link.created)}</span>

@@ -20,10 +20,36 @@ define([], () => {
             marginRight: '14px'
         },
         summaryFieldLabel: {
-            fontWeight: 'bold',
             color: 'rgba(150, 150, 150, 1)',
             marginRight: '3px'
         },
-        summaryFieldValue: {}
+        summaryFieldValue: {},
+        DataPill: {
+            display: 'flex',
+            flexDirection: 'row',
+            marginLeft: '0.5em'
+        },
+        DataPillLabel: {
+            color: 'rgba(150, 150, 150)',
+            marginRight: '0.25em'
+        },
+        DataPillValue: {
+
+        },
+        DataPillGroup: {
+            display: 'flex',
+            flexDirection: 'row'
+        },
+        DataPillGroupTitle: {
+            // border: '1px solid rgba(200, 200, 200)',
+            // borderRadius: '0.5em',
+            fontWeight: 'bold',
+            color: 'rgba(150, 150, 150)',
+            marginRight: '0.5em'
+        },
+        DataPillGroupBody: {
+            display: 'flex',
+            flexDirection: 'row'
+        },
     };
 });
