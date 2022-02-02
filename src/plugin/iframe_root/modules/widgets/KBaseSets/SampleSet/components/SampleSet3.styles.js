@@ -11,8 +11,9 @@ define([], () => {
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
-            marginTop: '0.5em',
-            marginBottom: '1em',
+            // marginTop: '0.5em',
+            // marginBottom: '1em',
+            marginBottom: '10px',
             marginLeft: '1em'
         },
         label: {

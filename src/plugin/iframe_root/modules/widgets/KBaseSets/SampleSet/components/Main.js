@@ -23,6 +23,35 @@ define([
 ) => {
     const html = htm.bind(h);
 
+    class DataPill extends Component {
+        render() {
+            return html`
+                <div style=${styles.DataPill}>
+                    <div styles=${styles.DataPillLabel}>
+                        ${this.props.label}
+                    </div>
+                    <div styles=${styles.DataPillValue}>
+                        ${this.props.value}
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    class DataPillGroup extends Component {
+        render() {
+            return html`
+                <div style=${styles.DataPillGroup}>
+                    <div styles=${styles.DataPillGroupTitle}>
+                        ${this.props.title}
+                    </div>
+                    <div styles=${styles.DataPillGroupBody}>
+                        ${this.props.children}
+                    </div>
+                </div>
+            `;
+        }
+    }
     class Main extends Component {
         renderSampleSet() {
             let truncatedMessage = '';
@@ -113,22 +142,35 @@ define([
 
         renderSummary() {
             return html`
-                <div style=${styles.summary}>
-                    <div style=${styles.summaryField}>
-                        <div style=${merge(styles.summaryFieldLabel, {textDecoration: 'underline'})}>Summary</div>
+                <div style=${merge(styles.DataPillGroup, {marginBottom: '10px', marginLeft: '1em'})}>
+                    <div style=${styles.DataPillGroupTitle}>
+                        Summary
                     </div>
-                    <div style=${styles.summaryField}>
-                        <div style=${styles.summaryFieldLabel}>Sample count:</div>
-                        <div style=${styles.summaryFieldValue}>${this.props.samples.length}</div>
-                    </div>
-                    <div style=${styles.summaryField}>
-                        <div style=${styles.summaryFieldLabel}>Field count:</div>
-                        <div style=${styles.summaryFieldValue}>${this.props.fieldKeys.size}</div>
-                    </div>
-
-                    <div style=${styles.summaryField}>
-                        <div style=${styles.summaryFieldLabel}>Description:</div>
-                        <div style=${styles.summaryFieldValue}>${this.props.sampleSet.description}</div>
+                    <div style=${styles.DataPillGroupBody}>
+                        <div style=${styles.DataPill}>
+                            <div style=${styles.DataPillLabel}>
+                                Sample count
+                            </div>
+                            <div style=${styles.DataPillValue}>
+                                ${this.props.samples.length}
+                            </div>
+                        </div>
+                        <div style=${styles.DataPill}>
+                            <div style=${styles.DataPillLabel}>
+                                Field count
+                            </div>
+                            <div style=${styles.DataPillValue}>
+                                ${this.props.fieldKeys.size}
+                            </div>
+                        </div>
+                        <div style=${styles.DataPill}>
+                            <div style=${styles.DataPillLabel}>
+                                Description
+                            </div>
+                            <div style=${styles.DataPillValue}>
+                                ${this.props.sampleSet.description}
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -262,7 +304,7 @@ define([
             return html`
                 <div style=${styles.main}>
                     ${this.renderSummary()}
-                    <${Tabs} tabs=${tabs} extra=${extra}/>
+                    <${Tabs} tabs=${tabs} paneStyle=${{paddingTop: '10px'}} extra=${extra}/>
                 </div>
             `;
         }
