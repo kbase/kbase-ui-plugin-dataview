@@ -377,6 +377,12 @@
     border: none;
 }
 
+/* Lightweight bootstrap table */
+
+.table.kb-light-table {
+    margin-bottom: 0;
+}
+
 
 .table.kb-light-table th {
     color: rgb(150, 150, 150);
