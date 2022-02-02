@@ -12,16 +12,35 @@ define([
     const html = htm.bind(h);
 
     class SampleLinkedDataSummary extends Component {
-        renderTypeSummary() {
+        renderTypeSummaryx() {
             return this.props.linksByType.map(({typeName, count}) => {
                 return html`
-                    <div style=${styles.typeSummary}>
-                        <div style=${styles.typeName}>${typeName}: </div>
-                        <div style=${styles.linkCount}>${count}</div>
+                    <div style=${styles.DataPill}>
+                        <div style=${styles.DataPillLabel}>${typeName}</div>
+                        <div style=${styles.DataPillData}>${count}</div>
                     </div>
                 `;
             });
         }
+
+        renderTypeSummary() {
+            const rows = this.props.linksByType.map(({typeName, count}) => {
+                return html`
+                    <tr>
+                        <th>${typeName}</th>
+                        <td>${count}</td>
+                    </tr>
+                `;
+            });
+            return html`
+                <table class="table table-condensed kb-bare-table" style="width: 20em;">
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+            `;
+        }
+
 
         renderNoLinks() {
             if (this.props.linksByType.length === 0) {
@@ -41,8 +60,12 @@ define([
         render() {
             return html`
                 <div style=${styles.main}>
-                    <div style=${styles.label}>Linked Data <span class="fa fa-arrow-right"/></div>
-                    ${this.renderSummary()}
+                    <div style=${styles.col1}>
+                        <div style=${styles.label}>Linked Data </div>
+                    </div>
+                    <div style=${styles.col2}>
+                        ${this.renderSummary()}
+                    </div>
                 </div>
             `;
         }

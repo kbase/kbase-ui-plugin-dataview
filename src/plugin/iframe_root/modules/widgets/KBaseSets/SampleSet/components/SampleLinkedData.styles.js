@@ -82,6 +82,11 @@ define([], () => {
             marginLeft: '1em',
             marginRight: '0.5em'
         },
+        LinkCol: {
+            overflowX: 'hidden',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis'
+        },
         LinkCol1: {
             flex: '1 1 0'
         },

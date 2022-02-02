@@ -92,7 +92,8 @@ define([], () => {
             flex: '1 1 0'
         },
         LinkCol4: {
-            flex: '1 1 0'
+            flex: '1 1 0',
+            overflow: 'hidden'
         },
         LinkCol5: {
             flex: '1 1 0'

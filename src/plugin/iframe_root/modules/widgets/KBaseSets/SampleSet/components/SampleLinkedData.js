@@ -11,6 +11,10 @@ define([
 ) => {
     const html = htm.bind(h);
 
+    function combineStyles(style1, style2) {
+        return Object.assign({}, style1, style2);
+    }
+
     class SampleLinkedData extends Component {
         renderDataId(link) {
             if (link.dataid) {
@@ -29,23 +33,23 @@ define([
                 .map(({link, objectInfo}) => {
                     return html`
                         <div style=${styles.Link}>
-                            <div style=${styles.LinkCol1}>
-                                <a href="/#dataview/${link.upa}" target="_blank">${link.upa}</a>
+                            <div style=${combineStyles(styles.LinkCol, styles.LinkCol1)}>
+                                <a href="/#dataview/${link.upa}" target="_blank" title=${link.upa}>${link.upa}</a>
                             </div>
-                            <div style=${styles.LinkCol2}>
-                                <a href="/#dataview/${link.upa}" target="_blank">${objectInfo.name}</a>
+                            <div style=${combineStyles(styles.LinkCol, styles.LinkCol2)}>
+                                <a href="/#dataview/${link.upa}" target="_blank" title=${objectInfo.name}>${objectInfo.name}</a>
                             </div>
-                            <div style=${styles.LinkCol3}>
-                                <a href="/#spec/type/${objectInfo.type}" target="_blank">${objectInfo.typeName}</b>
+                            <div style=${combineStyles(styles.LinkCol, styles.LinkCol3)}>
+                                <a href="/#spec/type/${objectInfo.type}" target="_blank" title=${objectInfo.type}>${objectInfo.typeName}</b>
                             </div>
-                            <div style=${styles.LinkCol4}>
-                                ${this.renderDataId(link)}
+                            <div style=${combineStyles(styles.LinkCol, styles.LinkCol4)}>
+                                <span title=${link}>${this.renderDataId(link)}</span>
                             </div>
-                            <div style=${styles.LinkCol5}>
-                                <span title="${Intl.DateTimeFormat('en-us', {dateStyle: 'full', timeStyle: 'long'}).format(link.created)}">${Intl.DateTimeFormat('en-us', {}).format(link.created)}</span>
+                            <div style=${combineStyles(styles.LinkCol, styles.LinkCol5)}>
+                                <span title="${Intl.DateTimeFormat('en-us', {dateStyle: 'full', timeStyle: 'long'}).format(link.created)}" title=${link.created}>${Intl.DateTimeFormat('en-us', {}).format(link.created)}</span>
                             </div>
-                            <div style=${styles.LinkCol6}>
-                                <a href="/#people/${link.createdby}" target="_blank">${link.createdby}</a>
+                            <div style=${combineStyles(styles.LinkCol, styles.LinkCol6)}>
+                                <a href="/#people/${link.createdby}" target="_blank" title=${link.createdby}>${link.createdby}</a>
                             </div>
                         </div>
                     `;
@@ -53,22 +57,22 @@ define([
             return html`
                 <div style=${styles.SampleLinks}>
                     <div style=${styles.LinkHeader} >
-                        <div style=${styles.LinkHeaderCol1} >
+                        <div style=${combineStyles(styles.LinkCol, styles.LinkHeaderCol1)} >
                             Object Ref
                         </div>
-                        <div style=${styles.LinkHeaderCol2} >
+                        <div style=${combineStyles(styles.LinkCol, styles.LinkHeaderCol2)} >
                             Name
                         </div>
-                        <div style=${styles.LinkHeaderCol3} >
+                        <div style=${combineStyles(styles.LinkCol, styles.LinkHeaderCol3)} >
                             Type
                         </div>
-                        <div style=${styles.LinkHeaderCol4} >
+                        <div style=${combineStyles(styles.LinkCol, styles.LinkHeaderCol4)} >
                             Data Id
                         </div>
-                        <div style=${styles.LinkHeaderCol5} >
+                        <div style=${combineStyles(styles.LinkCol, styles.LinkHeaderCol5)} >
                             Linked On
                         </div>
-                        <div style=${styles.LinkHeaderCol6} >
+                        <div style=${combineStyles(styles.LinkCol, styles.LinkHeaderCol6)} >
                             By
                         </div>
                     </div>

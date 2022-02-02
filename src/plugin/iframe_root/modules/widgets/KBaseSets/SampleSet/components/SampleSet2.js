@@ -107,8 +107,6 @@ define([
             }
             ];
 
-
-
             const props = {
                 columns,
                 dataSource: this.props.samples.map((sample) => {
@@ -140,13 +138,21 @@ define([
                     summary: {
                         height: 50,
                         render: (row) => {
-                            return this.props.sampleLinkedDataSummaryController.view({id: row.id, version: row.version});
+                            return html`
+                            <div style=${styles.DetailWrapper}>
+                                ${this.props.sampleLinkedDataSummaryController.view({id: row.id, version: row.version})}
+                            </div>
+                            `;
                         }
                     },
                     detail: {
                         height: 80,
                         render: (row) => {
-                            return this.props.sampleLinkedDataDetailController.view({id: row.id, version: row.version});
+                            return html`
+                            <div style=${styles.DetailWrapper}>
+                                ${this.props.sampleLinkedDataDetailController.view({id: row.id, version: row.version})}
+                            </div>
+                            `;
                         }
                     }
                 }
