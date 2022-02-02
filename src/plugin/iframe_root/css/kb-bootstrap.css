@@ -362,3 +362,19 @@
 .kbase-ui .nav-tabs>li:hover {
     cursor: pointer;
 }
+
+/* tables */
+.table.kb-bare-table {
+
+}
+
+.table.kb-bare-table th {
+    color: rgb(150, 150, 150);
+    border: none;
+}
+
+.table.kb-bare-table td {
+    border: none;
+}
+
+

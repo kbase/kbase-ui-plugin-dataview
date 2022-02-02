@@ -2,7 +2,7 @@
 define([
     'preact',
     'htm',
-    'components/Loading',
+    'components/Loading2',
     'components/SimpleError',
     './AsyncLoader.styles'
 ], (

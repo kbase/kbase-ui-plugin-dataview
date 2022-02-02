@@ -11,5 +11,8 @@ define([], () => {
             height: '100%'
             // aspectRatio: '1/1'
         },
+        Loading: {
+            backgroundColor: 'rgba(200, 200, 200, 0.3)'
+        }
     };
 });

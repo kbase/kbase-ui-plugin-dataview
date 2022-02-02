@@ -33,14 +33,6 @@ define([
         constructor(props) {
             super(props);
             this.columns = [{
-                id: 'dataid',
-                label: 'Data ID',
-                display: true,
-                isSortable: true,
-                render: (dataid) => {
-                    return dataid || '∅';
-                }
-            }, {
                 id: 'name',
                 label: 'Sample Name',
                 display: true,
@@ -51,14 +43,12 @@ define([
                 `;
                 }
             }, {
-                id: 'nodeId',
-                label: 'ID',
+                id: 'dataid',
+                label: 'Data ID',
                 display: true,
                 isSortable: true,
-                render: (nodeId, row) => {
-                    return html`
-                    <a href="/#samples/view/${row.id}/${row.version}" target="_blank">${nodeId}</a>
-                `;
+                render: (dataid) => {
+                    return dataid || '∅';
                 }
             }, {
                 id: 'savedAt',

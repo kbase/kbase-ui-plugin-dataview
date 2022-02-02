@@ -13,7 +13,12 @@ define([
         view({id, version}) {
             const loader = async () => {
                 const {linkedData, types} = await this.model.getSampleLinkedData({id, version});
-                return {linkedData, types};
+
+                const linkedDataSorted = linkedData.sort((a, b) => {
+                    return a.objectInfo.typeName.localeCompare(b.objectInfo.typeName);
+                });
+
+                return {linkedData: linkedDataSorted, types};
             };
             const key = `detail-${id}:${version}`;
             return this.render(SampleLinkedDataDetail, loader, key);

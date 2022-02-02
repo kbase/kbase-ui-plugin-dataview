@@ -3,6 +3,7 @@ define([
     'htm',
     'lib/formatters',
     'components/DataTable4',
+    'components/Container',
     './SampleLinkedDataSummary',
     './SampleLinkedDataDetail',
     './SampleSet2.styles'
@@ -11,6 +12,7 @@ define([
     htm,
     fmt,
     DataTable,
+    Container,
     SampleLinkedDataSummary,
     SampleLinkedDataDetail,
     styles
@@ -128,13 +130,23 @@ define([
                         render: null
                     },
                     summary: {
+                        height: 50,
                         render: (row) => {
-                            return this.props.sampleLinkedDataSummaryController.view({id: row.id, version: row.version});
+                            return html`
+                            <${Container}>
+                                ${this.props.sampleLinkedDataSummaryController.view({id: row.id, version: row.version})}
+                            </>
+                            `;
                         }
                     },
                     detail: {
+                        height: 80,
                         render: (row) => {
-                            return this.props.sampleLinkedDataDetailController.view({id: row.id, version: row.version});
+                            return html`
+                            <${Container}>
+                                ${this.props.sampleLinkedDataDetailController.view({id: row.id, version: row.version})}
+                            </>
+                            `;
                         }
                     }
                 }

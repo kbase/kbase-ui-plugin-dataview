@@ -19,6 +19,12 @@ define([], () => {
             fontWeight: 'bold',
             color: 'rgb(150, 150, 150)',
             marginRight: '1em'
+        },
+        DetailWrapper: {
+            border: '1px solid rgb(200, 200, 200)',
+            borderRadius: '1em',
+            // padding: '0.5em',
+            margin: '0.5em 1em 1em 1em'
         }
     };
 });

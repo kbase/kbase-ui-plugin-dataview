@@ -198,7 +198,7 @@ define([
             if (this.props.linksEnabled) {
                 tabs.unshift({
                     id: 'sampleset3',
-                    title: 'Sample Set',
+                    title: 'Samples',
                     render: () => {
                         return this.props.sampleSetController3.view();
                     }
@@ -206,7 +206,7 @@ define([
             } else {
                 tabs.unshift({
                     id: 'sampleset',
-                    title: 'Sample Set',
+                    title: 'Samples',
                     render: () => {
                         return html`
                         <div className="FlexCol" style=${{marginTop: '10px'}}>

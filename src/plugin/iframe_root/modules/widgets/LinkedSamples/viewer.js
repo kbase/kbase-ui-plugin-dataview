@@ -79,7 +79,10 @@ define([
                     if (['STOPPED', 'DETACHED'].includes(this.state.status)) {
                         return;
                     }
-                    preact.render(preact.h(LinkedSamples, {linkedSamples}), this.node);
+                    const sortedLinkedSamples = linkedSamples.sort((a, b) => {
+                        return a.sample.name.localeCompare(b.sample.name);
+                    });
+                    preact.render(preact.h(LinkedSamples, {linkedSamples: sortedLinkedSamples}), this.node);
                     this.setState({
                         status: 'STARTED'
                     });
