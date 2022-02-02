@@ -9,3 +9,10 @@
 .LinkedData3 .LinksCell:hover {
     background-color: rgba(200, 200, 200, 0.2);
 }
+
+.Header {
+    display: flex;
+    flex-direction: 'row';
+    align-items: center;
+    justify-content:center;
+}

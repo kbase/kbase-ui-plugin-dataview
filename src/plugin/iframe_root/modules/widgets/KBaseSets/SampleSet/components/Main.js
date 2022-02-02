@@ -2,56 +2,29 @@ define([
     'preact',
     'htm',
     'components/Tabs',
+    'components/DataPillGroup',
+    'components/DataPill',
     './Spreadsheet',
     './SampleMap3',
     './SampleSet',
     './SampleSet2',
     './Main.styles',
-    'lib/merge',
     '../constants'
 ], (
     {Component, Fragment, h},
     htm,
     Tabs,
+    DataPillGroup,
+    DataPill,
     Spreadsheet,
     SampleMap3,
     SampleSet,
     SampleSet2,
     styles,
-    {merge},
     {MAX_SAMPLES}
 ) => {
     const html = htm.bind(h);
 
-    class DataPill extends Component {
-        render() {
-            return html`
-                <div style=${styles.DataPill}>
-                    <div styles=${styles.DataPillLabel}>
-                        ${this.props.label}
-                    </div>
-                    <div styles=${styles.DataPillValue}>
-                        ${this.props.value}
-                    </div>
-                </div>
-            `;
-        }
-    }
-
-    class DataPillGroup extends Component {
-        render() {
-            return html`
-                <div style=${styles.DataPillGroup}>
-                    <div styles=${styles.DataPillGroupTitle}>
-                        ${this.props.title}
-                    </div>
-                    <div styles=${styles.DataPillGroupBody}>
-                        ${this.props.children}
-                    </div>
-                </div>
-            `;
-        }
-    }
     class Main extends Component {
         renderSampleSet() {
             let truncatedMessage = '';
@@ -142,36 +115,11 @@ define([
 
         renderSummary() {
             return html`
-                <div style=${merge(styles.DataPillGroup, {marginBottom: '10px', marginLeft: '1em'})}>
-                    <div style=${styles.DataPillGroupTitle}>
-                        Summary
-                    </div>
-                    <div style=${styles.DataPillGroupBody}>
-                        <div style=${styles.DataPill}>
-                            <div style=${styles.DataPillLabel}>
-                                Sample count
-                            </div>
-                            <div style=${styles.DataPillValue}>
-                                ${this.props.samples.length}
-                            </div>
-                        </div>
-                        <div style=${styles.DataPill}>
-                            <div style=${styles.DataPillLabel}>
-                                Field count
-                            </div>
-                            <div style=${styles.DataPillValue}>
-                                ${this.props.fieldKeys.size}
-                            </div>
-                        </div>
-                        <div style=${styles.DataPill}>
-                            <div style=${styles.DataPillLabel}>
-                                Description
-                            </div>
-                            <div style=${styles.DataPillValue}>
-                                ${this.props.sampleSet.description}
-                            </div>
-                        </div>
-                    </div>
+                <${DataPillGroup} title="Summary" style=${{marginBottom: '10px', marginLeft: '1em'}}>
+                    
+                <${DataPill} label="Sample count" value=${this.props.samples.length} />
+                <${DataPill} label="Field count" value=${this.props.fieldKeys.size} />
+                <${DataPill} label="Description" value=${this.props.sampleSet.description} />
                 </div>
             `;
         }
