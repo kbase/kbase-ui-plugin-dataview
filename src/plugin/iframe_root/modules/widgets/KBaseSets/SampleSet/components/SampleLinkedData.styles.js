@@ -26,7 +26,7 @@ define([], () => {
         },
         SampleLinks: {
             // borderBottom: '1px solid rgb(150, 150, 150)',
-            marginBottom: '1em',
+            // marginBottom: '1em',
             // border: '1px solid rgb(200, 200, 200)',
             // borderRadius: '1em',
             // padding: '1em'
