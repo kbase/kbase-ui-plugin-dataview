@@ -1,5 +1,5 @@
 define([
-    './Controller',
+    './VisibleController',
     '../components/SampleLinkedDataDetail',
 ], (
     Controller,
