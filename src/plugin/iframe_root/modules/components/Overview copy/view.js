@@ -3,44 +3,34 @@ define([
     'htm',
     'jquery',
     'uuid',
-    '../Row',
-    '../Col',
     '../CollapsiblePanel',
     'kb_common/utils',
     '../Panel',
 
     'bootstrap',
     'css!./style.css'
-], function (
+], (
     preact,
     htm,
     $,
     Uuid,
-    Row,
-    Col,
     CollapsiblePanel,
     Utils,
     Panel
-) {
-    'use strict';
-
+) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
     function dateFormat(dateString) {
-        var monthLookup = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const monthLookup = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         if (Utils.isBlank(dateString)) {
             return '';
         }
-        var date = Utils.iso8601ToDate(dateString);
-        return monthLookup[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+        const date = Utils.iso8601ToDate(dateString);
+        return `${monthLookup[date.getMonth()]  } ${  date.getDate()  }, ${  date.getFullYear()}`;
     }
 
     class Overview extends Component {
-        constructor(props) {
-            super(props);
-        }
-
         componentDidMount() {
             $(document).ready(() => {
                 $('[data-toggle="tooltip"]').tooltip({

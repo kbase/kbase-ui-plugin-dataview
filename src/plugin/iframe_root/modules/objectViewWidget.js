@@ -161,10 +161,7 @@ define([
                 dataKBTesthookPlugin: 'dataview'
             }, [
                 div({
-                    class: 'Col',
-                    style: {
-                        marginTop: '10px'
-                    }
+                    class: 'Col'
                 }, [
                     // div({ id: widgetSet.addWidget('kb_dataview_download') }),
                     div({
