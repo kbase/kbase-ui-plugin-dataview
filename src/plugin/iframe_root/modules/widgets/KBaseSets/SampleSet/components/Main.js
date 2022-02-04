@@ -80,7 +80,7 @@ define([
         //     `;
         // }
 
-        renderDescription() {
+        renderSummary() {
             // TODO: this description should perhaps be markdown? Or simply generate paragraphs on
             // line feeds. Currently the control is a text input not textarea
             const description = this.props.sampleSet.description.split('\n')
@@ -113,7 +113,7 @@ define([
             `;
         }
 
-        renderSummary() {
+        renderSummaryHeader() {
             return html`
                 <${DataPillGroup} title="Summary" style=${{marginBottom: '10px', marginLeft: '1em'}}>
                     
@@ -131,25 +131,47 @@ define([
 
         render() {
             const tabs = [{
-                id: 'description',
-                title: 'Description',
-                display: false,
+                id: 'summary',
+                title: 'Summary',
                 render: () => {
-                    return html`
+                    return this.props.summaryController.view();
+                }
+            }];
+
+            if (this.props.linksEnabled) {
+                tabs.push({
+                    id: 'sampleset3',
+                    title: 'Samples',
+                    render: () => {
+                        return this.props.sampleSetController3.view();
+                    }
+                });
+            } else {
+                tabs.push({
+                    id: 'sampleset',
+                    title: 'Samples',
+                    render: () => {
+                        return html`
                         <div className="FlexCol" style=${{marginTop: '10px'}}>
-                            ${this.renderDescription()}
+                            ${this.renderSampleSet()}
                         </div>
                     `;
-                }
-            }, {
+                    }
+                });
+            }
+
+
+            tabs.push({
                 id: 'map',
                 title: 'Map',
                 render: () => {
                     return this.renderMap3();
                 }
-            }, {
+            });
+
+            tabs.push({
                 id: 'spreadsheet',
-                title: 'Spreadsheet',
+                title: 'Metadata',
                 render: () => {
                     return html`
                         <div className="FlexCol" style=${{marginTop: '10px'}}>
@@ -160,16 +182,16 @@ define([
                         </div>
                     `;
                 }
-            },
-                //  {
-                //     id: 'linked-data-summary2',
-                //     title: 'Linked data summary2',
-                //     render: () => {
-                //         return this.props.linkedDataSummaryController2.view();
-                //     }
+            });
+            //  {
+            //     id: 'linked-data-summary2',
+            //     title: 'Linked data summary2',
+            //     render: () => {
+            //         return this.props.linkedDataSummaryController2.view();
+            //     }
 
             // },
-            ];
+            // ];
 
             // if (this.props.linksEnabled) {
             //     tabs.unshift({
@@ -185,27 +207,7 @@ define([
             //     });
             // }
 
-            if (this.props.linksEnabled) {
-                tabs.unshift({
-                    id: 'sampleset3',
-                    title: 'Samples',
-                    render: () => {
-                        return this.props.sampleSetController3.view();
-                    }
-                });
-            } else {
-                tabs.unshift({
-                    id: 'sampleset',
-                    title: 'Samples',
-                    render: () => {
-                        return html`
-                        <div className="FlexCol" style=${{marginTop: '10px'}}>
-                            ${this.renderSampleSet()}
-                        </div>
-                    `;
-                    }
-                });
-            }
+
 
             if (this.props.linksEnabled) {
                 // tabs.push({
@@ -251,7 +253,7 @@ define([
             `;
             return html`
                 <div style=${styles.main}>
-                    ${this.renderSummary()}
+                    ${this.renderSummaryHeader()}
                     <${Tabs} tabs=${tabs} paneStyle=${{paddingTop: '10px'}} extra=${extra}/>
                 </div>
             `;

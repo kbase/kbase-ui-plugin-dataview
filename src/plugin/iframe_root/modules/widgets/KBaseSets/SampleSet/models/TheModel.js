@@ -235,6 +235,19 @@ define([
             });
         }
 
+        getKeysForSamples(samples) {
+            const fieldKeys = new Set();
+            samples.forEach((sample) => {
+                Object.keys(sample.node_tree[0].meta_controlled).forEach((key) => {
+                    fieldKeys.add(key);
+                });
+                Object.keys(sample.node_tree[0].meta_user).forEach((key) => {
+                    fieldKeys.add(key);
+                });
+            });
+            return Array.from(fieldKeys);
+        }
+
         async getTheSheBang() {
             /******
              * Get Sample Set
@@ -267,21 +280,6 @@ define([
             const orderedSamples = sampleSet.data.samples.map((sampleSetItem) => {
                 return samplesMap[sampleSetItem.id];
             });
-
-            /******
-             * Get field keys
-             ******/
-            // Get all field keys, for fetching the field definitions.
-            const fieldKeys = new Set();
-            samples.forEach((sample) => {
-                Object.keys(sample.node_tree[0].meta_controlled).forEach((key) => {
-                    fieldKeys.add(key);
-                });
-                Object.keys(sample.node_tree[0].meta_user).forEach((key) => {
-                    fieldKeys.add(key);
-                });
-            });
-
 
             /******
              * Get data links
@@ -323,7 +321,6 @@ define([
                 userProfileMap[profile.user.username] = profile;
                 return userProfileMap;
             }, {});
-
 
             /******
              * Get types from object infos

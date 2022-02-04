@@ -11,6 +11,7 @@ define([
     './models/TheModel',
     './controllers/SampleSetController3',
     './controllers/LinkedData3',
+    './controllers/Summary',
     './constants'
 ], (
     preact,
@@ -25,6 +26,7 @@ define([
     TheModel,
     SampleSetController3,
     LinkedDataController3,
+    SummaryController,
     {MAX_SAMPLES}
 ) => {
     const html = htm.bind(preact.h);
@@ -351,6 +353,13 @@ define([
                 //     loadingMessage: 'Loading...'
                 // });
 
+                const summaryController = new SummaryController({
+                    runtime: this.runtime,
+                    model: theModel,
+                    samples,
+                    loadingMessage: 'Loading...'
+                });
+
                 const sampleSetController3 = new SampleSetController3({
                     runtime: this.runtime,
                     model: theModel,
@@ -412,6 +421,7 @@ define([
                     objectInfo,
                     columnGroups,
                     groups,
+                    summaryController,
                     // sampleSetController,
                     sampleSetController3,
                     // linkedDataController,
