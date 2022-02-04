@@ -45,11 +45,30 @@ define([
                     dataLinks,
                     objectInfos,
                     userProfiles,
-                    types
                 } = await this.model.getTheSheBang();
+
+                const samplesWithCounts = samples.map((sample, index) => {
+                    const sampleDataLinks = dataLinks[index];
+                    const workspaces = sampleDataLinks.reduce((workspaces, link) => {
+                        workspaces.add(objectInfos[link.upa].workspaceId);
+                        return workspaces;
+                    }, new Set());
+                    const workspaceCount = workspaces.size;
+
+                    return {
+                        sample,
+                        workspaceCount,
+                        linkCount: sampleDataLinks.length
+                    };
+                });
+
+                // Count total # of unique narrative workspaces
+
+
                 return {
                     sampleSet,
                     samples,
+                    samplesWithCounts,
                     totalCount: sampleCount,
                     objectInfos,
                     userProfiles,

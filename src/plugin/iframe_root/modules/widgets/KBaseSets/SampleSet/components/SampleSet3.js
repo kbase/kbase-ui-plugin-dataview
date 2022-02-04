@@ -1,20 +1,14 @@
 define([
     'preact',
     'htm',
-    'lib/formatters',
     'components/DataTable4',
     'components/Container',
-    './SampleLinkedDataSummary',
-    './SampleLinkedDataDetail',
     './SampleSet2.styles'
 ], (
     {Component, h},
     htm,
-    fmt,
     DataTable,
     Container,
-    SampleLinkedDataSummary,
-    SampleLinkedDataDetail,
     styles
 ) => {
     const html = htm.bind(h);
@@ -64,6 +58,36 @@ define([
                 render: (description) => {
                     return description;
                 }
+            }, {
+                id: 'workspaceCount',
+                label: '# Narratives',
+                display: true,
+                isSortable: true,
+                style: {
+                    flex: '0 0 10em',
+                    textAlign: 'right',
+                    paddingRight: '1em'
+                },
+                render: (workspaceCount) => {
+                    return html`
+                        <span>${Intl.NumberFormat('en-US', {useGrouping: true}).format(workspaceCount)}</span>
+                    `;
+                }
+            }, {
+                id: 'linkCount',
+                label: '# Links',
+                display: true,
+                isSortable: true,
+                style: {
+                    flex: '0 0 10em',
+                    textAlign: 'right',
+                    paddingRight: '1em'
+                },
+                render: (linkCount) => {
+                    return html`
+                        <span>${Intl.NumberFormat('en-US', {useGrouping: true}).format(linkCount)}</span>
+                    `;
+                }
             },{
                 id: 'savedAt',
                 label: 'Created',
@@ -106,12 +130,11 @@ define([
                            target="_blank">${this.props.userProfiles[savedBy].user.realname}</a>
                     `;
                 }
-            }
-            ];
+            }];
 
             const props = {
                 columns,
-                dataSource: this.props.samples.map((sample) => {
+                dataSource: this.props.samplesWithCounts.map(({sample, workspaceCount, linkCount}) => {
                     return {
                         id: sample.id,
                         name: sample.name,
@@ -121,6 +144,7 @@ define([
                         savedAt: sample.save_date,
                         savedBy: sample.user,
                         version: sample.version,
+                        workspaceCount, linkCount
                         // source: sample.sample.dataSourceDefinition.source
                     };
                 }),

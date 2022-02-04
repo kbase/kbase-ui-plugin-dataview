@@ -16,13 +16,19 @@ define([
             const rows = this.props.linksByType.map(({typeName, objectCounts}) => {
                 return html`
                     <tr>
-                        <th>${typeName}</th>
+                        <td>${typeName}</td>
                         <td>${Object.keys(objectCounts).length}</td>
                     </tr>
                 `;
             });
             return html`
                 <table class="table table-condensed kb-light-table" style="width: 20em;">
+                    <thead>
+                        <tr>
+                            <th>Object Type</th>
+                            <th>Objects Linked</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         ${rows}
                     </tbody>
