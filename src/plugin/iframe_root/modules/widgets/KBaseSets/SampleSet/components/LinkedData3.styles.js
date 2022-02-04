@@ -9,9 +9,9 @@ define([], () => {
         },
         Header: {
             // border: '1px solid rgb(200, 200, 200)',
-            padding: '0.5em',
+            paddingLeft: '1em',
             flex: '0 0 auto',
-            marginBottom: '1em',
+            marginBottom: '4px',
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center'
