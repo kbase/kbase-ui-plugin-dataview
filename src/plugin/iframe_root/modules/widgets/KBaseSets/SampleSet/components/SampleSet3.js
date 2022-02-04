@@ -213,7 +213,7 @@ define([
         }
 
         render() {
-            if (this.props.sampleSet.samples.length === 0) {
+            if (this.props.sampleSet.data.samples.length === 0) {
                 return this.renderEmptySet();
             }
             return html`
