@@ -4,6 +4,7 @@
 # Build and Developer tools.
 node_modules/
 bower_components/
+_trash/
 
 # The dist directory is created during a build and left in place; it can be used in side-by-side development with
 # kbase-ui.

@@ -35,15 +35,27 @@ define([
         }
 
         view() {
-            const loader = () => {
-                return Promise.resolve({
-                    sampleSet: this.model.sampleSet,
-                    samples: this.model.samples,
-                    totalCount: this.model.samples.length,
-                    userProfiles: this.model.userProfiles,
+            const loader = async () => {
+                const {
+                    sampleSet,
+                    samples,
+                    totals: {
+                        samples: sampleCount
+                    },
+                    dataLinks,
+                    objectInfos,
+                    userProfiles,
+                    types
+                } = await this.model.getTheSheBang();
+                return {
+                    sampleSet,
+                    samples,
+                    totalCount: sampleCount,
+                    objectInfos,
+                    userProfiles,
                     sampleLinkedDataSummaryController: this.sampleLinkedDataSummaryController(),
                     sampleLinkedDataDetailController: this.sampleLinkedDataDetailController()
-                });
+                };
             };
             return this.render(SampleSet3, loader);
         }

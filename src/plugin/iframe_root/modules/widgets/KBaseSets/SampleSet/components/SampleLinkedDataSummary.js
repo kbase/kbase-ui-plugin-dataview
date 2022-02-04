@@ -12,23 +12,12 @@ define([
     const html = htm.bind(h);
 
     class SampleLinkedDataSummary extends Component {
-        renderTypeSummaryx() {
-            return this.props.linksByType.map(({typeName, count}) => {
-                return html`
-                    <div style=${styles.DataPill}>
-                        <div style=${styles.DataPillLabel}>${typeName}</div>
-                        <div style=${styles.DataPillData}>${count}</div>
-                    </div>
-                `;
-            });
-        }
-
         renderTypeSummary() {
-            const rows = this.props.linksByType.map(({typeName, count}) => {
+            const rows = this.props.linksByType.map(({typeName, objectCounts}) => {
                 return html`
                     <tr>
                         <th>${typeName}</th>
-                        <td>${count}</td>
+                        <td>${Object.keys(objectCounts).length}</td>
                     </tr>
                 `;
             });

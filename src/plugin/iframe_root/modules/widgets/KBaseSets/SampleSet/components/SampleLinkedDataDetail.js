@@ -21,7 +21,7 @@ define([
         }
 
         render() {
-            if (this.props.linkedData.length === 0) {
+            if (this.props.dataLinks.length === 0) {
                 // return this.renderNoLinks();
                 return;
             }

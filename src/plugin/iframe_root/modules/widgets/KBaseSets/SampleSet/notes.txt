@@ -1,0 +1,24 @@
+basic strat:
+
+fetch sample set info - already done by the landing page
+
+everything below is cached
+
+fetch sample set object  (get_object2)
+
+fetch all samples in sample set (get_samples)
+
+fetch linked data for each sample 
+
+fetch object info for each unique object and object version 
+
+fetch user profile for each unique user
+
+
+this establishes the base data.
+
+then we can dynamically (or cache too, but doesn't really matter) generate derived data:
+
+- summary of sample set
+
+- summary by sample and object type

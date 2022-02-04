@@ -155,72 +155,7 @@ define([
                     `;
                 }
             }
-            // {
-            //     id: 'dataId',
-            //     label: 'Data Id',
-            //     display: true,
-            //     isSortable: true,
-            //     style: {
-            //         flex: '0 0 8em'
-            //     },
-            //     render: (dataId) => {
-            //         return html`
-            //             ${dataId}
-            //         `;
-            //     }
-            // }, {
-            //     id: 'linkedAt',
-            //     label: 'Linked',
-            //     display: true,
-            //     isSortable: true,
-            //     style: {
-            //         flex: '0 0 8em'
-            //     },
-            //     render: (linkedAt) => {
-            //         return html`
-            //             ${Intl.DateTimeFormat('en-US').format(linkedAt)}
-            //         `;
-            //     }
-            // }, {
-            //     id: 'linkedBy',
-            //     label: 'By',
-            //     display: true,
-            //     isSortable: true,
-            //     style: {
-            //         flex: '0 0 12em'
-            //     },
-            //     render: (linkedBy) => {
-            //         return html`
-            //             <a href=${`/#people/${linkedBy}`} target="_blank">${linkedBy}</a>
-            //         `;
-            //     }
-            // }
             ];
-        }
-
-        calcTable() {
-            const table = [];
-            this.props.linkedData
-                .forEach(({sample, objects}) => {
-                    for (const {objectInfo: {ref, name, type, typeName, workspaceId, id, version}, links} of Object.values(objects)) {
-                        table.push({
-                            sampleId: sample.id,
-                            sampleName: sample.name,
-                            sampleVersion: sample.version,
-                            objectRef: ref,
-                            objectName: name,
-                            objectTypeName: typeName,
-                            objectType: type,
-                            linkCount: links.length,
-                            objectRefArray: [workspaceId, id, version],
-                            links
-                            // dataId: dataid,
-                            // linkedAt: new Date(created),
-                            // linkedBy: createdby
-                        });
-                    }
-                });
-            return table;
         }
 
         renderLinkedDataTable() {
@@ -251,7 +186,7 @@ define([
         }
 
         doFilterSort(filter, sortOption) {
-            const table = this.calcTable();
+            const table = this.props.table.slice();
 
             const filteredTable = (() => {
                 if (filter === null || filter.length === 0) {

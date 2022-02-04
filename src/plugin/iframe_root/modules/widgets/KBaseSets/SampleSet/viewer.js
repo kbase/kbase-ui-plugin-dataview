@@ -8,15 +8,10 @@ define([
     'components/SimpleInfo',
     'components/Loading',
     './components/Main',
-    './models/LinkedData',
-    './models/SampleSet',
-    './controllers/SampleSetController',
+    './models/TheModel',
     './controllers/SampleSetController3',
-    './controllers/LinkedData',
-    './controllers/LinkedData2',
     './controllers/LinkedData3',
-    './controllers/LinkedDataSummary',
-    './controllers/LinkedDataSummary2',
+    './controllers/Summary',
     './constants'
 ], (
     preact,
@@ -28,15 +23,10 @@ define([
     SimpleInfo,
     Loading,
     Main,
-    LinkedDataModel,
-    SampleSetModel,
-    SampleSetController,
+    TheModel,
     SampleSetController3,
-    LinkedDataController,
-    LinkedDataController2,
     LinkedDataController3,
-    LinkedDataSummaryController,
-    LinkedDataSummaryController2,
+    SummaryController,
     {MAX_SAMPLES}
 ) => {
     const html = htm.bind(preact.h);
@@ -299,7 +289,16 @@ define([
                 objectVersion: this.objectVersion
             });
 
-            // Display the object!
+            const theModel = new TheModel({
+                runtime: this.runtime,
+                workspaceId: this.workspaceId,
+                objectId: this.objectId,
+                objectVersion: this.objectVersion
+            });
+
+            // this just warms it up ... don't need to do this here, really.
+            const shebang = await theModel.getTheSheBang();
+
 
             try {
                 const {info: objectInfo, data: sampleSet} = await model.getObject();
@@ -336,38 +335,45 @@ define([
                 // complexity here...
                 const groups = await model.getFieldGroups();
 
-                const linkedDataModel = new LinkedDataModel({
-                    runtime: this.runtime
-                });
+                // const linkedDataModel = new LinkedDataModel({
+                //     runtime: this.runtime
+                // });
 
-                const sampleSetModel = new SampleSetModel({
-                    runtime: this.runtime,
-                    sampleSet,
-                    samples,
-                    userProfiles
-                });
+                // const sampleSetModel = new SampleSetModel({
+                //     runtime: this.runtime,
+                //     sampleSet,
+                //     samples,
+                //     userProfiles
+                // });
 
-                const sampleSetController = new SampleSetController({
+                // const sampleSetController = new SampleSetController({
+                //     runtime: this.runtime,
+                //     model: sampleSetModel,
+                //     samples,
+                //     loadingMessage: 'Loading...'
+                // });
+
+                const summaryController = new SummaryController({
                     runtime: this.runtime,
-                    model: sampleSetModel,
+                    model: theModel,
                     samples,
                     loadingMessage: 'Loading...'
                 });
 
                 const sampleSetController3 = new SampleSetController3({
                     runtime: this.runtime,
-                    model: sampleSetModel,
+                    model: theModel,
                     samples,
                     loadingMessage: 'Loading...'
                 });
 
 
-                const linkedDataController = new LinkedDataController({
-                    runtime: this.runtime,
-                    model: linkedDataModel,
-                    samples,
-                    loadingMessage: 'Loading Linked Data...'
-                });
+                // const linkedDataController = new LinkedDataController({
+                //     runtime: this.runtime,
+                //     model: linkedDataModel,
+                //     samples,
+                //     loadingMessage: 'Loading Linked Data...'
+                // });
 
                 // const linkedDataController2 = new LinkedDataController2({
                 //     runtime: this.runtime,
@@ -383,7 +389,7 @@ define([
 
                 const linkedDataController3 = new LinkedDataController3({
                     runtime: this.runtime,
-                    model: linkedDataModel,
+                    model: theModel,
                     samples,
                     loadingMessage: 'Loading Linked Data...'
                 });
@@ -415,9 +421,10 @@ define([
                     objectInfo,
                     columnGroups,
                     groups,
-                    sampleSetController,
+                    summaryController,
+                    // sampleSetController,
                     sampleSetController3,
-                    linkedDataController,
+                    // linkedDataController,
                     // linkedDataController2,
                     linkedDataController3,
                     // linkedDataSummaryController,

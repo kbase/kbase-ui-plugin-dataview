@@ -23,14 +23,15 @@ define([
             return html`<span style=${{color: 'rgb(150, 150, 150'}}>∅</span>`;
         }
 
-        renderLinks(links) {
-            if (links.length === 0) {
+        renderLinks(dataLinks) {
+            if (dataLinks.length === 0) {
                 return html`
                     <${Empty} message="No data linked to this sample"/>
                 `;
             }
-            const rows =  links
-                .map(({link, objectInfo}) => {
+            const rows =  dataLinks
+                .map((link) => {
+                    const objectInfo = this.props.objectInfos[link.upa];
                     return html`
                         <div style=${styles.Link}>
                             <div style=${combineStyles(styles.LinkCol, styles.LinkCol1)}>
@@ -88,10 +89,10 @@ define([
         }
 
         render() {
-            if (this.props.linkedData.length === 0) {
+            if (this.props.dataLinks.length === 0) {
                 return this.renderNone();
             }
-            return this.renderLinks(this.props.linkedData);
+            return this.renderLinks(this.props.dataLinks);
         }
     }
 
