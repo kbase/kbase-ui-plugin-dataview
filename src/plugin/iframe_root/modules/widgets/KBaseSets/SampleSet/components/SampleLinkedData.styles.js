@@ -90,7 +90,7 @@ define([], () => {
             padding: '0.1em'
         },
         LinkCol1: {
-            flex: '1 1 0'
+            flex: '0 0 8em'
         },
         LinkCol2: {
             flex: '2 1 0'
@@ -102,13 +102,13 @@ define([], () => {
             flex: '1 1 0'
         },
         LinkCol5: {
-            flex: '1 1 0'
+            flex: '0 0 8em'
         },
         LinkCol6: {
-            flex: '1 1 0'
+            flex: '0 0 10em'
         },
         LinkHeaderCol1: {
-            flex: '1 1 0'
+            flex: '0 0 8em'
         },
         LinkHeaderCol2: {
             flex: '2 1 0'
@@ -120,10 +120,10 @@ define([], () => {
             flex: '1 1 0'
         },
         LinkHeaderCol5: {
-            flex: '1 1 0'
+            flex: '0 0 8em'
         },
         LinkHeaderCol6: {
-            flex: '1 1 0'
+            flex: '0 0 10em'
         },
     };
 });
