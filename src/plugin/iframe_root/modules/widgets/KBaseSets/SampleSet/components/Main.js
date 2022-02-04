@@ -160,7 +160,7 @@ define([
 
             tabs.push({
                 id: 'spreadsheet',
-                title: 'Metadata',
+                title: 'Sample Data',
                 render: () => {
                     return html`
                         <div className="FlexCol" style=${{marginTop: '10px'}}>
@@ -225,7 +225,7 @@ define([
                 // });
                 tabs.push({
                     id: 'linked-data3',
-                    title: 'Linked Data Objects',
+                    title: 'Linked Data',
                     render: () => {
                         return this.props.linkedDataController3.view();
                     }

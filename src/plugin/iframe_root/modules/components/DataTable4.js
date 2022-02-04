@@ -51,6 +51,17 @@ define([
     */
 
     class DataTable4 extends Component {
+        constructor(props) {
+            super(props);
+            this.state = {
+                table: this.props.dataSource.map((values) => {
+                    return {
+                        showDetail: false,
+                        values
+                    };
+                })
+            };
+        }
         renderHeader() {
             if (this.props.columns) {
                 return (() => {
@@ -72,12 +83,7 @@ define([
             })();
         }
 
-        // rowHeight() {
-        //     return this.props.heights.row + this.currentView().height;
-
-        // }
-
-        renderRowWrapper(values, index) {
+        renderRowWrapper(values, showDetail, index) {
             // Compute the style for the row wrapper, which is positioned within the overall
             // grid according to the.
             // Render actual table row
@@ -85,10 +91,6 @@ define([
             const row = html`
                 <div className="DataTable4-row" key=${index}>${rowColumns}</div>
             `;
-
-            // Render row detail, if any.
-            const detail = this.renderDetail(values);
-
 
             // Render row wrapper.
             const rowClasses = ['DataTable4-grid-row'];
@@ -99,13 +101,12 @@ define([
             return html`
                 <div 
                     className=${rowClasses.join(' ')}
-                    onDblClick=${() => {
-        this.onRowClick(values);
-    }}
+                    onDblClick=${(ev) => {this.onRowDblClick(index, ev.getModifierState('Shift'));}}
+                    
                      role="row">
                     ${row}
                     <div className="DataTable4-detail">
-                    ${detail}
+                    ${showDetail && this.props.renderDetail(values)}
                     </div>
                 </div>
             `;
@@ -141,41 +142,41 @@ define([
             });
         }
 
-        currentView() {
-            return this.props.views[this.props.view];
-        }
-
-        renderDetail(row) {
-            const view = this.currentView();
-            if (view && view.render) {
-                return view.render(row);
-            }
-        }
-
         renderRows() {
-            const table = this.props.dataSource.slice();
-            return table.map((values, index) => {
-                return this.renderRowWrapper(values, index);
+            return this.state.table.map(({values, showDetail}, index) => {
+                return this.renderRowWrapper(values, showDetail, index);
             });
         }
 
-        onRowClick(values) {
-            if (!this.props.onClick) {
-                return;
-            }
-            this.props.onClick(values);
+        onRowDblClick(clickedIndex, shiftPressed) {
+            const table = (() => {
+                if (shiftPressed) {
+                    return this.state.table.map((row) => {
+                        return {
+                            ...row,
+                            showDetail: !this.state.table[clickedIndex].showDetail
+                        };
+                    });
+                }
+                return this.state.table.map((row, index) => {
+                    if (clickedIndex !== index) {
+                        return row;
+                    }
+                    row.showDetail = !row.showDetail;
+                    return row;
+                });
+            })();
+            this.setState({
+                ...this.state,
+                table
+            });
         }
 
         renderBody() {
-            const rows = this.renderRows();
-            // const tableHeight = this.props.dataSource.length * this.rowHeight();
-            // const style = {
-            //     height: `${tableHeight}px`
-            // };
             return html`
                 <div className="DataTable4-body">
                     <div className="DataTable4-grid">
-                        ${rows}
+                        ${this.renderRows()}
                     </div>
                 </div>
             `;
