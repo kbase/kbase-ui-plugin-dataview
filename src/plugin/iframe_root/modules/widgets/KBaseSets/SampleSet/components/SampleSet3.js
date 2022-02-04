@@ -144,35 +144,17 @@ define([
                         savedAt: sample.save_date,
                         savedBy: sample.user,
                         version: sample.version,
-                        workspaceCount, linkCount
-                        // source: sample.sample.dataSourceDefinition.source
+                        workspaceCount,
+                        linkCount
                     };
                 }),
                 view: this.state.view,
-                views: {
-                    normal: {
-                        render: null
-                    },
-                    summary: {
-                        height: 50,
-                        render: (row) => {
-                            return html`
-                            <${Container}>
-                                ${this.props.sampleLinkedDataSummaryController.view({id: row.id, version: row.version})}
-                            </>
-                            `;
-                        }
-                    },
-                    detail: {
-                        height: 80,
-                        render: (row) => {
-                            return html`
-                            <${Container}>
-                                ${this.props.sampleLinkedDataDetailController.view({id: row.id, version: row.version})}
-                            </>
-                            `;
-                        }
-                    }
+                renderDetail: (row) => {
+                    return html`
+                        <${Container}>
+                            ${this.props.sampleLinkedDataDetailController.view({id: row.id, version: row.version})}
+                        </>
+                    `;
                 }
             };
 
@@ -224,25 +206,26 @@ define([
             `;
         }
 
-        renderHeader() {
-            return html`
-            <div style=${styles.header}>
-                <div class="btn-group">
-                    ${this.renderViewButton('normal', 'List')}
-                    ${this.renderViewButton('summary', 'Summary')}
-                    ${this.renderViewButton('detail', 'Linked Data')}
-                </div> 
-            </div>
-            `;
-        }
+        // renderHeader() {
+        //     return html`
+        //     <div style=${styles.header}>
+        //         <div class="btn-group">
+        //             ${this.renderViewButton('normal', 'List')}
+        //             ${this.renderViewButton('summary', 'Summary')}
+        //             ${this.renderViewButton('detail', 'Linked Data')}
+        //         </div>
+        //     </div>
+        //     `;
+        // }
 
         render() {
             if (this.props.sampleSet.data.samples.length === 0) {
                 return this.renderEmptySet();
             }
+            // ${this.renderHeader()}
             return html`
                 <div className="SampleSet" style=${styles.main}>
-                    ${this.renderHeader()}
+                    
                     ${this.renderSamplesTable()}
                 </div>
             `;
