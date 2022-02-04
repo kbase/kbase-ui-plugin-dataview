@@ -113,17 +113,6 @@ define([
             `;
         }
 
-        renderSummaryHeader() {
-            return html`
-                <${DataPillGroup} title="Summary" style=${{marginBottom: '10px', marginLeft: '1em'}}>
-                    
-                <${DataPill} label="Sample count" value=${this.props.samples.length} />
-                <${DataPill} label="Field count" value=${this.props.fieldKeys.size} />
-                <${DataPill} label="Description" value=${this.props.sampleSet.description} />
-                </div>
-            `;
-        }
-
         onRowClick(sampleRow) {
             const {id, version} = sampleRow;
             window.open(`/#samples/view/${id}/${version}`, '_blank');
@@ -253,7 +242,6 @@ define([
             `;
             return html`
                 <div style=${styles.main}>
-                    ${this.renderSummaryHeader()}
                     <${Tabs} tabs=${tabs} paneStyle=${{paddingTop: '10px'}} extra=${extra}/>
                 </div>
             `;
