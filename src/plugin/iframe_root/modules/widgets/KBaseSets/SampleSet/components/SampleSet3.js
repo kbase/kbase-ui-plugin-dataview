@@ -151,8 +151,7 @@ define([
                         <a href=${`/#user/${savedBy}`}
                            target="_blank">${this.props.userProfiles[savedBy].user.realname}</a>
                     `;
-                },
-                searchable: true
+                }
             }];
 
             const props = {
@@ -198,36 +197,36 @@ define([
             `;
         }
 
-        changeView(view) {
-            this.setState({
-                view
-            });
-        }
+        // changeView(view) {
+        //     this.setState({
+        //         view
+        //     });
+        // }
 
-        activeClassForView(view) {
-            if (this.state.view === view) {
-                return 'active';
-            }
-            return '';
-        }
+        // activeClassForView(view) {
+        //     if (this.state.view === view) {
+        //         return 'active';
+        //     }
+        //     return '';
+        // }
 
-        disableForView(view) {
-            if (this.state.view === view) {
-                return 'disable';
-            }
-            return '';
-        }
+        // disableForView(view) {
+        //     if (this.state.view === view) {
+        //         return 'disable';
+        //     }
+        //     return '';
+        // }
 
-        renderViewButton(view, label) {
-            return html`
-                <button 
-                  class="btn btn-default ${this.activeClassForView(view)}" ${this.disableForView(view)} 
-                  style=${{outline: 'none'}}
-                  onClick=${() => {this.changeView(view);}}>
-                    ${label}
-                </button>
-            `;
-        }
+        // renderViewButton(view, label) {
+        //     return html`
+        //         <button
+        //           class="btn btn-default ${this.activeClassForView(view)}" ${this.disableForView(view)}
+        //           style=${{outline: 'none'}}
+        //           onClick=${() => {this.changeView(view);}}>
+        //             ${label}
+        //         </button>
+        //     `;
+        // }
 
         // renderHeader() {
         //     return html`
@@ -241,14 +240,14 @@ define([
         //     `;
         // }
 
+
         render() {
             if (this.props.sampleSet.data.samples.length === 0) {
                 return this.renderEmptySet();
             }
-            // ${this.renderHeader()}
+            //
             return html`
                 <div className="SampleSet" style=${styles.main}>
-                    
                     ${this.renderSamplesTable()}
                 </div>
             `;
