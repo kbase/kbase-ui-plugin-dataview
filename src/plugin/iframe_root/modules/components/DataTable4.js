@@ -272,7 +272,7 @@ define([
             const row = html`
                 <div className="DataTable4-row" 
                     key=${rowIndex} 
-                    onDblClick=${(ev) => {this.onRowDblClick(rowIndex, ev.getModifierState('Shift'));}}>${rowColumns}</div>
+                    onDblClick=${(ev) => {this.onRowDblClick(rowIndex, ev.getModifierState('Alt'));}}>${rowColumns}</div>
             `;
 
             // Render row wrapper.
@@ -357,14 +357,16 @@ define([
             if (!this.props.renderDetail) {
                 return;
             }
+            const newShowDetail = !this.tableMap[clickedIndex].showDetail;
             if (shiftPressed) {
                 this.state.table
                     .map(({rowIndex}) => this.tableMap[rowIndex])
                     .forEach((row) => {
-                        row.showDetail = !this.tableMap[clickedIndex].showDetail;
+                        row.showDetail = newShowDetail;
                     });
+            } else {
+                this.tableMap[clickedIndex].showDetail = newShowDetail;
             }
-            this.tableMap[clickedIndex].showDetail = !this.tableMap[clickedIndex].showDetail;
             this.setState({
                 ...this.state,
                 // Just to trigger a table re-render
