@@ -16,19 +16,21 @@ define([
     class SampleLinkedDataDetail extends Component {
         renderNoLinks() {
             return html`
-                <div style=${styles.mpty}>∅ - no data links</div>
+                <div style=${styles.empty}>∅ - no data links</div>
             `;
         }
 
-        render() {
+        renderLinks() {
             if (this.props.dataLinks.length === 0) {
-                // return this.renderNoLinks();
-                return;
+                return this.renderNoLinks();
             }
+            return html`<${SampleLinkedData} ...${this.props} />`;
+        }
 
+        render() {
             return html`
                 <div style=${styles.main}>
-                    <${SampleLinkedData} ...${this.props} />
+                    ${this.renderLinks()}
                 </div>
             `;
         }

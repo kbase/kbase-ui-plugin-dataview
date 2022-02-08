@@ -1,9 +1,15 @@
 .DataTable4 {
+    min-height: 0;
+    min-width: 0;
+}
+
+.DataTable4-flex {
     flex: 1 1 0px;
     display: flex;
     flex-direction: column;
-    min-height: 0;
-    min-width: 0;
+}
+
+.DataTable4-bordered {
     border: 1px solid rgb(200, 200, 200); 
     border-radius: 1em;
     padding: 0.5em;
@@ -29,12 +35,37 @@
 }
 
 .DataTable4-header-col {
-    flex: 1 1 0px;
-    padding: 4px;
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: row;
+    min-width: 0;
+    user-select: none;
+    padding: 0.5em;
+}
+
+
+.DataTable4-header-col-sortable {
+    cursor: pointer;
+}
+
+.DataTable4-header-col-sortable:hover {
+    background-color: rgba(200,200, 200, 0.4);
+}
+
+.DataTable4-header-col-sorted {
+    background-color: rgba(200,200, 200, 0.2);
+}
+
+.DataTable4-header-col-label {
+    flex: 1 1 0;
     overflow-x: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+
+.DataTable4-header-col-sortable {
+    flex: 0 0 auto;
+}   
 
 .DataTable4-body {
     flex: 1 1 0px;
@@ -48,7 +79,6 @@
 }
 
 .DataTable4-grid-row {
-    padding: 0.25em 0;
     border-bottom: 1px solid rgba(200, 200, 200, 0.2);
 }
 
@@ -87,11 +117,15 @@
     flex-direction: column;
     overflow: auto;
     justify-content: center;
+    padding: 0.5em;
+}
+
+.DataTable4-col-hovered {
+    background-color: rgba(200, 200, 200, 0.2);
 }
 
 .DataTable4-col-content {
     overflow-x: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    padding: 4px;
 }

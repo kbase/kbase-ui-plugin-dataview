@@ -37,99 +37,122 @@ define([
             const columns = [{
                 id: 'name',
                 label: 'Sample Name',
-                display: true,
-                isSortable: true,
-                style: {
-                    flex: '2 0 0'
+                styles: {
+                    column: {
+                        flex: '2 0 0'
+                    }
                 },
                 render: (name, sample) => {
                     return html`
                         <a href=${`/#samples/view/${sample.id}/${sample.version}`} target="_blank">${name}</a>
                     `;
-                }
+                },
+                sortable: true,
+                searchable: true
             }, {
                 id: 'description',
                 label: 'Description',
-                display: true,
-                isSortable: true,
-                style: {
-                    flex: '2 0 0'
-                },
+                styles: {
+                    column: {
+                        flex: '2 0 0'
+                    }},
                 render: (description) => {
                     return description;
-                }
+                },
+                sortable: true,
+                searchable: true
             }, {
                 id: 'workspaceCount',
                 label: '# Narratives',
-                display: true,
-                isSortable: true,
-                style: {
-                    flex: '0 0 10em',
-                    textAlign: 'right',
-                    paddingRight: '1em'
+                styles:{
+                    column: {
+                        flex: '0 0 10em',
+                    },
+
+                    data: {
+                        textAlign: 'right',
+                        paddingRight: '7em'
+                    }
                 },
                 render: (workspaceCount) => {
                     return html`
                         <span>${Intl.NumberFormat('en-US', {useGrouping: true}).format(workspaceCount)}</span>
                     `;
-                }
+                },
+                sortable: true
             }, {
                 id: 'linkCount',
                 label: '# Links',
-                display: true,
-                isSortable: true,
-                style: {
-                    flex: '0 0 10em',
-                    textAlign: 'right',
-                    paddingRight: '1em'
+                styles:{
+                    column: {
+                        flex: '0 0 10em',
+                    },
+                    data: {
+                        textAlign: 'right',
+                        paddingRight: '7em'
+                    }
                 },
                 render: (linkCount) => {
                     return html`
                         <span>${Intl.NumberFormat('en-US', {useGrouping: true}).format(linkCount)}</span>
                     `;
-                }
+                },
+                sortable: true
             },{
                 id: 'savedAt',
                 label: 'Created',
-                display: true,
-                isSortable: true,
-                style: {
-                    flex: '0 0 6em'
+                styles: {
+                    column: {
+                        flex: '0 0 6em'
+                    }
                 },
+                // transform: (rawValue) => {
+                //     try {
+                //         return new Date(rawValue);
+                //     } catch (ex) {
+                //         console.error('Transform error!', rawValue, ex);
+                //         return '** transform error **';
+                //     }
+                // },
                 render: (savedAt) => {
                     return html`
                         <span>${Intl.DateTimeFormat('en-US').format(savedAt)}</span>
                     `;
-                }
+                },
+                sortable: true
             }, {
                 id: 'version',
                 label: 'Version',
-                display: true,
-                isSortable: true,
-                style: {
-                    flex: '0 0 7em',
-                    textAlign: 'right',
-                    paddingRight: '1em'
+                styles: {
+                    column: {
+                        flex: '0 0 7em',
+                    },
+                    data: {
+                        textAlign: 'right',
+                        paddingRight: '5em'
+                    }
                 },
                 render: (version) => {
                     return html`
                         <span>${version}</span>
                     `;
-                }
+                },
+                sortable: true
             }, {
                 id: 'savedBy',
                 label: 'By',
-                display: true,
-                isSortable: true,
-                style: {
-                    flex: '0 0 13em'
+                styles: {
+                    column: {
+                        flex: '0 0 13em'
+                    }
                 },
                 render: (savedBy) => {
                     return html`
                         <a href=${`/#user/${savedBy}`}
                            target="_blank">${this.props.userProfiles[savedBy].user.realname}</a>
                     `;
-                }
+                },
+                searchable: true
             }];
 
             const props = {
@@ -163,7 +186,7 @@ define([
             };
 
             return html`
-                <${DataTable} onClick=${onRowClick} ...${props}/>
+                <${DataTable} flex=${true} bordered=${true} onClick=${onRowClick} ...${props}/>
             `;
         }
 

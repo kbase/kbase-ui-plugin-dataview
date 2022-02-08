@@ -30,6 +30,7 @@ define([
                     result
                 });
             } catch (ex) {
+                console.error('[AsyncLoader] error: ', ex);
                 this.setState({
                     status: 'error',
                     error: {

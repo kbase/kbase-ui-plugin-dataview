@@ -286,11 +286,11 @@ define([
              ******/
 
             // Get the data links
-            const dataLinks = await this.getDataLinks(orderedSamples);
+            const rawDataLinks = await this.getDataLinks(orderedSamples);
             const samplesNLinks = samples.map((sample, index) => {
                 return {
                     sample,
-                    links: dataLinks[index]
+                    links: rawDataLinks[index]
                 };
             });
 
@@ -299,7 +299,7 @@ define([
              ******/
             // Get the upas
             const upas = new Set();
-            for (const links of dataLinks) {
+            for (const links of rawDataLinks) {
                 // extract the upas
                 for (const {upa} of links) {
                     upas.add(upa);
@@ -308,6 +308,12 @@ define([
 
             // Get object info for each upa
             const objectInfos = await this.getObjectInfos(Array.from(upas));
+
+            const dataLinks = rawDataLinks.map((links) => {
+                return links.filter(({upa}) => {
+                    return (upa in objectInfos);
+                });
+            });
 
             // Get the user profiles
             // TODO

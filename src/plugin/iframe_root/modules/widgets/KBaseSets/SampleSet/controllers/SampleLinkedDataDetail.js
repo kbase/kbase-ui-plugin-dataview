@@ -13,20 +13,24 @@ define([
         view({id, version}) {
             const loader = async () => {
 
-                const [dataLinks] = await this.model.getDataLinks([{id, version}]);
+                const [rawDataLinks] = await this.model.getDataLinks([{id, version}]);
 
-                const upas = dataLinks.reduce((upas, {upa}) => {
+                const upas = rawDataLinks.reduce((upas, {upa}) => {
                     upas.add(upa);
                     return upas;
                 }, new Set());
 
                 const objectInfos = await this.model.getObjectInfos(Array.from(upas));
 
-                const sortedDataLinks = dataLinks.sort((a, b) => {
-                    return objectInfos[a.upa].typeName.localeCompare(objectInfos[b.upa].typeName);
-                });
+                const dataLinks = rawDataLinks
+                    .filter((link) => {
+                        return (link.upa in objectInfos);
+                    })
+                    .sort((a, b) => {
+                        return objectInfos[a.upa].typeName.localeCompare(objectInfos[b.upa].typeName);
+                    });
 
-                return {dataLinks: sortedDataLinks, objectInfos};
+                return {dataLinks, objectInfos};
             };
             const key = `detail-${id}:${version}`;
             return this.render(SampleLinkedDataDetail, loader, key);
