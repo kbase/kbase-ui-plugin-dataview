@@ -1,8 +1,8 @@
 define([], () => {
     return {
         main: {
-            display: 'flex',
-            flexDirection: 'column',
+            // display: 'flex',
+            // flexDirection: 'column',
             padding: '1em'
         },
         label: {
@@ -20,7 +20,7 @@ define([], () => {
         linkCount: {
             fontFamily: 'monospace'
         },
-        Empty: {
+        empty: {
             fontStyle: 'italic',
             color: 'rgba(150, 150, 150)',
         }

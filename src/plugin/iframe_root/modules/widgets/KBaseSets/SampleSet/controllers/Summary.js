@@ -25,6 +25,7 @@ define([
                 const fieldCount = this.model.getKeysForSamples(samples).length;
 
                 // Per type links
+                // console.log('hmm', samples, dataLinks, objectInfos);
                 const objectTypeCounts = Object.entries(dataLinks.reduce((typeCounts, links) => {
                     for (const {upa} of links) {
                         const {typeName} = objectInfos[upa];

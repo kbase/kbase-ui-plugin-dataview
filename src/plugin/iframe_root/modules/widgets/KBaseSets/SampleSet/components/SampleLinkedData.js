@@ -2,18 +2,107 @@ define([
     'preact',
     'htm',
     'components/Empty',
-    './SampleLinkedData.styles'
+    'components/DataTable4'
 ], (
     {Component, h},
     htm,
     Empty,
-    styles
+    DataTable
 ) => {
     const html = htm.bind(h);
 
-    function combineStyles(style1, style2) {
-        return Object.assign({}, style1, style2);
-    }
+    const columns = [
+        {
+            id: 'objectRef',
+            label: 'Object Ref',
+            sortable: true,
+            styles: {
+                column: {
+                    flex: '0 0 8em'
+                }
+            },
+            render: (objectRef) => {
+                return html`<a href="/#dataview/${objectRef}" target="_blank" title=${objectRef}>${objectRef}</a>`;
+            },
+            sortComparator: (a, b) => {
+                if (a.values.workspaceId !== b.values.workspaceId) {
+                    return a.values.workspaceId - b.values.workspaceId;
+                }
+                if (a.values.objectId !== b.values.objectId) {
+                    return a.values.objectId - b.values.objectId;
+                }
+                return a.values.objectVersion - b.values.objectVersion;
+            }
+        },
+        {
+            id: 'objectName',
+            label: 'Name',
+            sortable: true,
+            styles: {
+                column: {
+                    flex: '2 1 0'
+                }
+            },
+            render: (objectName, {objectRef}) => {
+                return html`<a href="/#dataview/${objectRef}" target="_blank" title=${objectName}>${objectName}</a>`;
+            }
+        },
+        {
+            id: 'typeName',
+            label: 'Type',
+            sortable: true,
+            styles: {
+                column: {
+                    flex: '1 1 0'
+                }
+            },
+            render: (typeName, {type}) => {
+                return html`<a href="/#spec/type/${type}" target="_blank" title=${type}>${typeName}</b>`;
+            }
+        },
+        {
+            id: 'dataId',
+            label: 'Data Id',
+            sortable: true,
+            styles: {
+                column: {
+                    flex: '0 0 8em'
+                }
+            },
+            render: (dataId) => {
+                if (dataId === null) {
+                    return html`<span style=${{color: 'rgb(150, 150, 150'}}>∅</span>`;
+                }
+                return html`<span title=${dataId}>${dataId}</span>`;
+            }
+        },
+        {
+            id: 'linkedAt',
+            label: 'Linked On',
+            sortable: true,
+            styles: {
+                column: {
+                    flex: '0 0 8em'
+                }
+            },
+            render: (linkedAt) => {
+                return html`<span title="${Intl.DateTimeFormat('en-us', {dateStyle: 'full', timeStyle: 'long'}).format(linkedAt)}" title=${linkedAt}>${Intl.DateTimeFormat('en-us', {}).format(linkedAt)}</span>`;
+            }
+        },
+        {
+            id: 'linkedBy',
+            label: 'Linked By',
+            sortable: true,
+            styles: {
+                column: {
+                    flex: '0 0 10em'
+                }
+            },
+            render: (linkedBy) => {
+                return html`<a href="/#people/${linkedBy}" target="_blank" title=${linkedBy}>${linkedBy}</a>`;
+            }
+        }
+    ];
 
     class SampleLinkedData extends Component {
         renderMaybe(data, key, render) {
@@ -29,56 +118,27 @@ define([
                     <${Empty} message="No data linked to this sample"/>
                 `;
             }
-            const rows =  dataLinks
-                .map((link) => {
+
+            const props = {
+                columns,
+                dataSource: this.props.dataLinks.map((link) => {
                     const objectInfo = this.props.objectInfos[link.upa];
-                    return html`
-                        <div style=${styles.Link}>
-                            <div style=${combineStyles(styles.LinkCol, styles.LinkCol1)}>
-                                <a href="/#dataview/${link.upa}" target="_blank" title=${link.upa}>${link.upa}</a>
-                            </div>
-                            <div style=${combineStyles(styles.LinkCol, styles.LinkCol2)}>
-                                <a href="/#dataview/${link.upa}" target="_blank" title=${objectInfo.name}>${objectInfo.name}</a>
-                            </div>
-                            <div style=${combineStyles(styles.LinkCol, styles.LinkCol3)}>
-                                <a href="/#spec/type/${objectInfo.type}" target="_blank" title=${objectInfo.type}>${objectInfo.typeName}</b>
-                            </div>
-                            <div style=${combineStyles(styles.LinkCol, styles.LinkCol4)}>
-                                ${this.renderMaybe(link, 'dataid', (value) => html`<span title=${value}>${value}</span>`)}
-                            </div>
-                            <div style=${combineStyles(styles.LinkCol, styles.LinkCol5)}>
-                                <span title="${Intl.DateTimeFormat('en-us', {dateStyle: 'full', timeStyle: 'long'}).format(link.created)}" title=${link.created}>${Intl.DateTimeFormat('en-us', {}).format(link.created)}</span>
-                            </div>
-                            <div style=${combineStyles(styles.LinkCol, styles.LinkCol6)}>
-                                <a href="/#people/${link.createdby}" target="_blank" title=${link.createdby}>${link.createdby}</a>
-                            </div>
-                        </div>
-                    `;
-                });
+                    return {
+                        objectRef: link.upa,
+                        workspaceId: objectInfo.wsid,
+                        objectId: objectInfo.id,
+                        objectVersion: objectInfo.version,
+                        objectName: objectInfo.name,
+                        typeName: objectInfo.typeName,
+                        dataId: link.dataid,
+                        linkedAt: link.created,
+                        linkedBy: link.createdby
+                    };
+                })
+            };
+
             return html`
-                <div style=${styles.SampleLinks}>
-                    <div style=${styles.LinkHeader} >
-                        <div style=${combineStyles(styles.LinkCol, styles.LinkHeaderCol1)} >
-                            Object Ref
-                        </div>
-                        <div style=${combineStyles(styles.LinkCol, styles.LinkHeaderCol2)} >
-                            Name
-                        </div>
-                        <div style=${combineStyles(styles.LinkCol, styles.LinkHeaderCol3)} >
-                            Type
-                        </div>
-                        <div style=${combineStyles(styles.LinkCol, styles.LinkHeaderCol4)} >
-                            Data Id
-                        </div>
-                        <div style=${combineStyles(styles.LinkCol, styles.LinkHeaderCol5)} >
-                            Linked On
-                        </div>
-                        <div style=${combineStyles(styles.LinkCol, styles.LinkHeaderCol6)} >
-                            By
-                        </div>
-                    </div>
-                    ${rows}
-                </div>
+                <${DataTable} ...${props} />
             `;
         }
 
