@@ -272,7 +272,7 @@ define([
             const row = html`
                 <div className="DataTable4-row" 
                     key=${rowIndex} 
-                    onDblClick=${(ev) => {this.onRowDblClick(rowIndex, ev.getModifierState('Alt'));}}>${rowColumns}</div>
+                    onDblClick=${(ev) => {this.onRowDblClick(rowIndex, ev.getModifierState('Shift'));}}>${rowColumns}</div>
             `;
 
             // Render row wrapper.

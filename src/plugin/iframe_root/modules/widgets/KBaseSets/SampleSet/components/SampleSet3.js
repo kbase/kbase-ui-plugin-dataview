@@ -44,7 +44,9 @@ define([
                 },
                 render: (name, sample) => {
                     return html`
-                        <a href=${`/#samples/view/${sample.id}/${sample.version}`} target="_blank">${name}</a>
+                        <a href=${`/#samples/view/${sample.id}/${sample.version}`} 
+                           title=${name}
+                           target="_blank">${name}</a>
                     `;
                 },
                 sortable: true,
@@ -57,7 +59,7 @@ define([
                         flex: '2 0 0'
                     }},
                 render: (description) => {
-                    return description;
+                    return html`<span title=${description}>${description}</span>`;
                 },
                 sortable: true,
                 searchable: true
@@ -115,8 +117,12 @@ define([
                 //     }
                 // },
                 render: (savedAt) => {
+                    const detailedTimestamp = Intl.DateTimeFormat('en-US', {
+                        datestyle: 'full',
+                        timeStype: 'long'
+                    }).format(savedAt);
                     return html`
-                        <span>${Intl.DateTimeFormat('en-US').format(savedAt)}</span>
+                        <span title=${detailedTimestamp}>${Intl.DateTimeFormat('en-US').format(savedAt)}</span>
                     `;
                 },
                 sortable: true
@@ -149,7 +155,9 @@ define([
                 render: (savedBy) => {
                     return html`
                         <a href=${`/#user/${savedBy}`}
-                           target="_blank">${this.props.userProfiles[savedBy].user.realname}</a>
+                           target="_blank"
+                           title=${this.props.userProfiles[savedBy].user.realname}
+                           >${this.props.userProfiles[savedBy].user.realname}</a>
                     `;
                 }
             }];
