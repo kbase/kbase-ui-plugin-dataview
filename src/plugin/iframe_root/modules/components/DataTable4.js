@@ -55,15 +55,29 @@ define([
             super(props);
             const sortColumn = this.props.initialSortColumn || 0;
             const sortDirection = this.props.initialSortDirection || 'ascending';
-            const initialTable = this.props.dataSource.map((values) => {
-                return {
+
+            this.tableMap = this.props.dataSource.reduce((tableMap, values, rowIndex) => {
+                tableMap[rowIndex] = {
                     showDetail: false,
+                    show: true,
+                    rowIndex,
                     values
                 };
+                return tableMap;
+            }, {});
+
+            const ordered = Object.values(this.tableMap).map((values, rowIndex) => {
+                return {
+                    showDetail: false,
+                    show: true,
+                    rowIndex,
+                };
             });
-            const table = this.sortTable(initialTable, sortColumn, sortDirection);
+
+            const table = this.sortTable(ordered, sortColumn, sortDirection);
             const columnHovered = null;
             this.state = {
+                searchText: '',
                 sortColumn,
                 sortDirection,
                 columnHovered,
@@ -96,9 +110,21 @@ define([
             `;
         }
 
-        getRowValue(row, index) {
-            const columnId = this.props.columns[index].id;
-            return row.values[columnId];
+        renderSearchableIndicator(searchable) {
+            if (!searchable) {
+                return;
+            }
+            return html`
+                <span 
+                    title="This column is searchable"
+                    className="fa fa-search" 
+                    style=${{fontSize: '60%', marginRight: '1em', color: 'rgba(150, 150, 150)'}} />
+            `;
+        }
+
+        getRowValue({rowIndex}, columnIndex) {
+            const columnId = this.props.columns[columnIndex].id;
+            return this.tableMap[rowIndex].values[columnId];
         }
 
         sortTable(table, sortColumn, sortDirection) {
@@ -108,8 +134,10 @@ define([
 
             return table.slice().sort((a, b) => {
                 const comparison = (() => {
+                    const aRow = this.tableMap[a.rowIndex];
+                    const bRow = this.tableMap[b.rowIndex];
                     if (customComparator) {
-                        return customComparator(a, b);
+                        return customComparator(aRow, bRow);
                     }
                     const aValue = this.getRowValue(a, sortColumn);
                     const bValue = this.getRowValue(b, sortColumn);
@@ -218,6 +246,7 @@ define([
                                 <div className="DataTable4-header-col-label" >
                                     ${label}
                                 </div>
+                                ${this.renderSearchableIndicator(searchable)}
                                 ${this.renderSortableIndicator(sortable, index)}
                             </div>
                         `;
@@ -235,13 +264,15 @@ define([
             })();
         }
 
-        renderRowWrapper(values, showDetail, index) {
+        renderRowWrapper({values, rowIndex, showDetail}) {
             // Compute the style for the row wrapper, which is positioned within the overall
             // grid according to the.
             // Render actual table row
             const rowColumns = this.renderRow(values);
             const row = html`
-                <div className="DataTable4-row" key=${index} onDblClick=${(ev) => {this.onRowDblClick(index, ev.getModifierState('Shift'));}}>${rowColumns}</div>
+                <div className="DataTable4-row" 
+                    key=${rowIndex} 
+                    onDblClick=${(ev) => {this.onRowDblClick(rowIndex, ev.getModifierState('Shift'));}}>${rowColumns}</div>
             `;
 
             // Render row wrapper.
@@ -275,8 +306,6 @@ define([
                 columnHovered: null
             });
         }
-
-
 
         renderRow(values) {
             return this.props.columns.map((col, columnIndex) => {
@@ -316,35 +345,30 @@ define([
         }
 
         renderRows() {
-            return this.state.table.map(({values, showDetail}, index) => {
-                return this.renderRowWrapper(values, showDetail, index);
-            });
+            return this.state.table
+                .map(({rowIndex}) => this.tableMap[rowIndex])
+                .filter(({show}) => show)
+                .map((row) => {
+                    return this.renderRowWrapper(row);
+                });
         }
 
         onRowDblClick(clickedIndex, shiftPressed) {
             if (!this.props.renderDetail) {
                 return;
             }
-            const table = (() => {
-                if (shiftPressed) {
-                    return this.state.table.map((row) => {
-                        return {
-                            ...row,
-                            showDetail: !this.state.table[clickedIndex].showDetail
-                        };
+            if (shiftPressed) {
+                this.state.table
+                    .map(({rowIndex}) => this.tableMap[rowIndex])
+                    .forEach((row) => {
+                        row.showDetail = !this.tableMap[clickedIndex].showDetail;
                     });
-                }
-                return this.state.table.map((row, index) => {
-                    if (clickedIndex !== index) {
-                        return row;
-                    }
-                    row.showDetail = !row.showDetail;
-                    return row;
-                });
-            })();
+            }
+            this.tableMap[clickedIndex].showDetail = !this.tableMap[clickedIndex].showDetail;
             this.setState({
                 ...this.state,
-                table
+                // Just to trigger a table re-render
+                table: this.state.table.slice()
             });
         }
 
@@ -358,7 +382,7 @@ define([
             `;
         }
 
-        render() {
+        renderTable() {
             const classes = [
                 'DataTable4'
             ];
@@ -375,6 +399,111 @@ define([
                 </div>
             `;
         }
+
+        // Render header above table.
+        onSearchInput(ev) {
+            const searchText = ev.target.value;
+
+            this.applySearch(searchText);
+
+            this.setState({
+                table: this.state.table.slice(),
+                searchText
+            });
+        }
+
+        applySearch(searchText) {
+            if (searchText === '') {
+                this.state.table
+                    .map(({rowIndex}) => this.tableMap[rowIndex])
+                    .forEach((row) => {
+                        row.show = true;
+                    });
+            }
+            const searchRE = new RegExp(searchText, 'i');
+            this.state.table
+                .map(({rowIndex}) => this.tableMap[rowIndex])
+                .forEach((row) => {
+                    const show = (() => {
+                        for (const column of this.props.columns) {
+                            if (column.searchable) {
+                                const value = row.values[column.id];
+                                if (searchRE.test(value)) {
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    })();
+                    row.show = show;
+                });
+        }
+
+        onClearSearch() {
+            this.applySearch('');
+            this.setState({
+                table: this.state.table.slice(),
+                searchText: ''
+            });
+        }
+
+        renderSearch() {
+            const clearSearchDisabled = this.state.searchText === '';
+            return html`
+                <div className="form-inline">
+                    <div className="input-group">
+                        <input 
+                            type="search" 
+                            className="form-control" 
+                            style=${{width: '20em'}} 
+                            placeholder="Search" 
+                            value=${this.state.searchText}
+                            onInput=${this.onSearchInput.bind(this)}
+                            />
+                        <span className="input-group-addon"><span class="fa fa-search" /></span>
+                    </div>
+                    <button 
+                        type="button" 
+                        title="Clear the search input and show all rows"
+                        class="btn btn-default" 
+                        style=${{marginLeft: '1em'}}
+                        disabled=${clearSearchDisabled}
+                        onClick=${this.onClearSearch.bind(this)}>
+                        <span className="fa fa-times" />
+                    </button>
+                </div>
+            `;
+        }
+
+        searchEnabled() {
+            return (this.props.columns.some(({searchable}) => searchable));
+        }
+
+        renderToolbar() {
+            if (!this.searchEnabled()) {
+                return;
+            }
+            return html`
+                <div className="DataTable4-toolbar">
+                ${this.renderSearch()}
+                </div>
+            `;
+        }
+
+        // Render all
+        render() {
+            const classes= ['DataTable4-wrapper'];
+            if (this.props.flex) {
+                classes.push('DataTable4-flex');
+            }
+            return html`
+                <div className=${classes.join(' ')}>
+                    ${this.renderToolbar()}
+                    ${this.renderTable()}
+                </div>
+            `;
+        }
+
     }
 
     return DataTable4;
