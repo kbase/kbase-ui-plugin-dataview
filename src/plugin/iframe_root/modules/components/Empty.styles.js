@@ -12,6 +12,7 @@ define([], () => {
             backgroundColor: 'rgba(200, 200, 200, 0.3)'
         },
         wrapper: {
+            flex: '1 1 0',
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',

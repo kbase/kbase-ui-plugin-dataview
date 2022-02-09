@@ -1,0 +1,17 @@
+.IconButton {
+    padding: 4px;
+    cursor: 'pointer';
+}
+
+.IconButton:hover {
+    background-color: rgba(200, 200, 200, 0.2);
+}
+
+.IconButton-disabled {
+    color: rgb(175, 175, 175)
+}
+
+.IconButton-disabled:hover {
+    background-color: none;
+    cursor: normal;
+}
