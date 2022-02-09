@@ -23,17 +23,25 @@ define([
                 }
                 return this.props.icon;
             })();
+            const buttonClass = [
+                'IconButton'
+            ];
+            if (this.props.type) {
+                buttonClass.push(`text-${this.props.type}`);
+            }
             if (this.props.disabled) {
                 style.color = 'rgb(175, 175, 175)';
+                buttonClass.push('IconButton-disabled');
                 return html`
-                    <div class='IconButton IconButton-disabled' style=${style} 
+                    <div class=${buttonClass.join(' ')} 
+                        style=${style} 
                         title=${this.props.tooltip}>
                         <span className=${`fa fa-${icon}`} />
                     </div>
                 `;
             }
             return html`
-                <div class='IconButton' style=${style} 
+                <div class=${buttonClass.join(' ')} style=${style} 
                     title=${this.props.tooltip}
                     onClick=${this.onClick.bind(this)}>
                     <span className=${`fa fa-${icon}`} />
