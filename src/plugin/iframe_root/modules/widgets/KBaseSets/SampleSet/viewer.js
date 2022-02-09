@@ -279,7 +279,7 @@ define([
 
             // Display loading spinner...
             // this.renderProgress(0);
-            preact.render(preact.h(Loading, {message: 'Loading Sample Set and all linked datasets...'}), this.node);
+            preact.render(preact.h(Loading, {message: 'Loading Sample Set and linked datasets...'}), this.node);
 
             // Get the object from the model.
             const model = new Model({
