@@ -90,6 +90,10 @@
     cursor: pointer;
 }
 
+.DataTable4-grid-row:last-child {
+    border-bottom: none;
+}
+
 .DataTable4-grid-row:hover {
     background-color: rgba(200, 200, 200, 0.2);
 }
