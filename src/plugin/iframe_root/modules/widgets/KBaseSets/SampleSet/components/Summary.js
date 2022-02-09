@@ -80,14 +80,16 @@ define([
         render() {
             return html`
                 <div style=${styles.main}>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div style=${styles.section}>Sample Set Summary</div>
-                            ${this.renderSummaryTable()}
-                        </div>
-                        <div class="col-md-6">
-                            <div style=${styles.section}>Data Links by Object Type</div>
-                            ${this.renderTypeCountTable()}
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div style=${styles.section}>Sample Set Summary</div>
+                                ${this.renderSummaryTable()}
+                            </div>
+                            <div class="col-md-6">
+                                <div style=${styles.section}>Data Links by Object Type</div>
+                                ${this.renderTypeCountTable()}
+                            </div>
                         </div>
                     </div>
                 </div>

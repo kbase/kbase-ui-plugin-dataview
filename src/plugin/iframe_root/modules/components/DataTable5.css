@@ -1,0 +1,98 @@
+.DataTable5 {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+    border: 1px solid rgb(200, 200, 200);
+    border-radius: 1em;
+    padding: 0.5em;
+}
+
+
+
+.DataTable5-header {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+    font-weight: bold;
+    color: rgb(150, 150, 150);
+    /* border-top: 1px solid rgba(200, 200, 200, 0.5); */
+    /* border-bottom: 2px solid rgba(200, 200, 200, 0.5); */
+    /* Force scrollbar so it aligns w/body*/
+    border-bottom: 1px dashed rgb(200, 200, 200);
+    overflow-y: scroll;
+}
+
+.DataTable5-header::-webkit-scrollbar-track {
+    background-color: white;
+}
+
+.DataTable5-header::-webkit-scrollbar-thumb {
+    background-color: white;
+}
+
+.DataTable5-header-col {
+    flex: 1 1 0px;
+    padding: 4px;
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.DataTable5-body {
+    flex: 1 1 0px;
+    /* display: flex; */
+    /* flex-direction: column; */
+    min-height: 0;
+    min-width: 0;
+    overflow-y: scroll;
+}
+
+.DataTable5-grid {
+    position: relative;
+}
+
+.DataTable5-grid-row {
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    /* align-items: center; */
+    /* border-bottom: 1px solid rgba(200, 200, 200, 0.5); */
+    border-bottom: 1px solid rgba(200, 200, 200, 0.2);
+}
+
+.DataTable5-grid-row:hover {
+    background-color: rgba(200, 200, 200, 0.2);
+    cursor: pointer;
+}
+
+.DataTable5-grid-cell {
+    position: absolute;
+}
+
+.DataTable5-row {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+    border-bottom: 1px solid rgba(200, 200, 200, 0.5);
+}
+
+.DataTable5-row-highlighted {
+    background-color: rgba(200, 200, 200, 0.5);
+}
+
+.DataTable5-col {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    justify-content: center;
+}
+
+.DataTable5-col-content {
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 4px;
+}

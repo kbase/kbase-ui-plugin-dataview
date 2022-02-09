@@ -10,7 +10,7 @@ define([
     './components/Main',
     './models/TheModel',
     './controllers/SampleSetController3',
-    './controllers/LinkedData3',
+    './controllers/LinkedData4',
     './controllers/Summary',
     './constants'
 ], (
@@ -25,7 +25,7 @@ define([
     Main,
     TheModel,
     SampleSetController3,
-    LinkedDataController3,
+    LinkedDataController,
     SummaryController,
     {MAX_SAMPLES}
 ) => {
@@ -279,7 +279,7 @@ define([
 
             // Display loading spinner...
             // this.renderProgress(0);
-            preact.render(preact.h(Loading, {message: 'Loading Sample Set...'}), this.node);
+            preact.render(preact.h(Loading, {message: 'Loading Sample Set and all linked datasets...'}), this.node);
 
             // Get the object from the model.
             const model = new Model({
@@ -387,7 +387,7 @@ define([
                 //     runtime: this.runtime
                 // });
 
-                const linkedDataController3 = new LinkedDataController3({
+                const linkedDataController3 = new LinkedDataController({
                     runtime: this.runtime,
                     model: theModel,
                     samples,

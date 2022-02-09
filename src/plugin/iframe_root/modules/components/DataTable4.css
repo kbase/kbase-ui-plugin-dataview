@@ -87,11 +87,11 @@
 
 .DataTable4-grid-row {
     border-bottom: 1px solid rgba(200, 200, 200, 0.2);
+    cursor: pointer;
 }
 
 .DataTable4-grid-row:hover {
     background-color: rgba(200, 200, 200, 0.2);
-    cursor: pointer;
 }
 
 .DataTable4-grid-cell {
@@ -143,4 +143,17 @@
     flex-direction: row;
     align-items: center;
     margin-bottom: 10px;
+}
+
+.DataTable4-sort-icon {
+    color: rgb(150, 150, 150);
+}
+
+
+.DataTable4-header-col-sorted .DataTable4-sort-icon {
+    color: rgb(0,0,0);
+}
+
+.DataTable4-sort-icon-active {
+    color: rgb(0,0,0);
 }
