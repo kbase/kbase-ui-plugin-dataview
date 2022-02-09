@@ -137,7 +137,7 @@ define([
                     title: 'Samples',
                     render: () => {
                         return html`
-                        <div className="FlexCol" style=${{marginTop: '10px'}}>
+                        <div className="FlexCol">
                             ${this.renderSampleSet()}
                         </div>
                     `;
@@ -159,7 +159,7 @@ define([
                 title: 'Sample Data',
                 render: () => {
                     return html`
-                        <div className="FlexCol" style=${{marginTop: '10px'}}>
+                        <div className="FlexCol">
                             <${Spreadsheet} columns=${this.props.sampleColumns}
                                             table=${this.props.sampleTable}
                                             onRowClick=${this.onRowClick.bind(this)}

@@ -267,6 +267,8 @@ define([
                         <div className="DataTable4-header-col" style=${{flex: '0 0 2em'}}>
                             <${IconButton} 
                                 icon="filter" 
+                                activeIcon="close"
+                                active=${this.state.showFilterHeader}
                                 tooltip=${this.state.showFilterHeader ? 'Hide column filters' : 'Show column filters'}
                                 onClick=${() => {this.toggleColumnToolbar();}}/>
                         </div>
@@ -350,15 +352,23 @@ define([
                             </div>
                         `;
                     });
-                    const clearFiltersDisabled = (Object.keys(this.state.columnFilters).length === 0);
+
+                    const filterButton = (() => {
+                        const clearFiltersDisabled = (Object.keys(this.state.columnFilters).length === 0);
+                        if (!clearFiltersDisabled) {
+                            return html`
+                                <${IconButton} 
+                                    type="danger"
+                                    icon="ban" 
+                                    tooltip=${clearFiltersDisabled ? 'Clears all active filters; currently disabled since there are no active filters' : 'Clears all active filters'}
+                                    onClick=${() => {this.clearFilters();}}
+                                />
+                            `;
+                        }
+                    })();
                     header.unshift(html`
                         <div className="DataTable4-header-col" style=${{flex: '0 0 2em'}}>
-                            <${IconButton} 
-                                icon="times-circle" 
-                                tooltip=${clearFiltersDisabled ? 'Clears all active filters; currently disabled since there are no active filters' : 'Clears all active filters'}
-                                disabled=${clearFiltersDisabled}
-                                onClick=${() => {this.clearFilters();}}
-                            />
+                           ${filterButton}
                         </div>
                     `);
                     return html`
@@ -505,9 +515,9 @@ define([
                 return this.props.emptyMessage;
             }
             if (this.hasFilter()) {
-                return 'No table with this filter';
+                return 'No data matches this filter';
             }
-            return 'No table data';
+            return 'No data provided';
         }
 
         renderBody() {
@@ -665,29 +675,33 @@ define([
             return Object.keys(this.state.columnFilters).length > 0;
         }
 
-        renderToolbar() {
-            if (!this.searchEnabled()) {
-                return;
-            }
-            const clearFilterDisabled = (this.state.globalFilter.filterText === '' && Object.keys(this.state.columnFilters).length === 0);
-            return html`
-                <div className="DataTable4-toolbar">
-                    <div style=${{flex: '0 0 auto'}}>
-                        ${this.renderSearch()}
-                    </div>
-                    <div style=${{flex: '1 1 0', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
-                        <button className="btn btn-default" onClick=${this.toggleColumnToolbar.bind(this)}><span className="fa fa-filter" /></button>
-                        <button 
-                            className="btn btn-default" 
-                            style=${{marginLeft: '1em'}}
-                            disabled=${clearFilterDisabled}
-                            onClick=${this.clearFilters.bind(this)}>
-                            <span className="fa fa-times" />
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
+        // renderToolbar() {
+        //     if (!this.searchEnabled()) {
+        //         return;
+        //     }
+        //     const clearFilterDisabled = (this.state.globalFilter.filterText === '' && Object.keys(this.state.columnFilters).length === 0);
+        //     return html`
+        //         <div className="DataTable4-toolbar">
+        //             <div style=${{flex: '0 0 auto'}}>
+        //                 ${this.renderSearch()}
+        //             </div>
+        //             <div style=${{flex: '1 1 0', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
+        //                 <button
+        //                     className="btn btn-default"
+        //                     onClick=${this.toggleColumnToolbar.bind(this)}>
+        //                     <span className="fa fa-filter" />
+        //                 </button>
+        //                 <button
+        //                     className="btn btn-default"
+        //                     style=${{marginLeft: '1em'}}
+        //                     disabled=${clearFilterDisabled}
+        //                     onClick=${this.clearFilters.bind(this)}>
+        //                     <span className="fa fa-times" />
+        //                 </button>
+        //             </div>
+        //         </div>
+        //     `;
+        // }
 
         toggleColumnToolbar() {
             this.setState({
