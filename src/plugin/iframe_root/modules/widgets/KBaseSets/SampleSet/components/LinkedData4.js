@@ -1,14 +1,14 @@
 define([
     'preact',
     'htm',
-    'components/DataTable',
+    'components/DataTable4',
     'components/Popover',
     'components/Nullable',
     'components/DataPillGroup',
     'components/DataPill',
-    './LinkedData3.styles',
+    './LinkedData4.styles',
 
-    'css!./LinkedData3.css'
+    'css!./LinkedData4.css'
 ], (
     {Component, h, render: preactRender},
     htm,
@@ -27,7 +27,7 @@ define([
         return element.innerHTML;
     }
 
-    class LinkedData3 extends Component {
+    class LinkedData4 extends Component {
         constructor(props) {
             super(props);
             this.DEFAULT_SORT = 'Sample Name & Object Type';
@@ -40,9 +40,12 @@ define([
                 id: 'sampleName',
                 label: 'Sample Name',
                 display: true,
-                isSortable: true,
-                style: {
-                    flex: '1 0 0'
+                sortable: true,
+                searchable: true,
+                styles:{
+                    column: {
+                        flex: '1 0 0'
+                    }
                 },
                 render: (sampleName, row) => {
                     return html`
@@ -53,9 +56,12 @@ define([
                 id: 'objectRef',
                 label: 'Object Ref',
                 display: true,
-                isSortable: true,
-                style: {
-                    flex: '0 0 7em'
+                sortable: true,
+                searchable: true,
+                styles:{
+                    column: {
+                        flex: '0 0 9em'
+                    }
                 },
                 render: (ref) => {
                     return html`
@@ -66,9 +72,12 @@ define([
                 id: 'objectName',
                 label: 'Object Name',
                 display: true,
-                isSortable: true,
-                style: {
-                    flex: '1 0 0'
+                sortable: true,
+                searchable: true,
+                styles:{
+                    column: {
+                        flex: '1 0 0'
+                    }
                 },
                 render: (name, row) => {
                     return html`
@@ -79,9 +88,12 @@ define([
                 id: 'objectTypeName',
                 label: 'Type',
                 display: true,
-                isSortable: true,
-                style: {
-                    flex: '0 0 12em'
+                sortable: true,
+                searchable: true,
+                styles:{
+                    column: {
+                        flex: '0 0 12em'
+                    }
                 },
                 render: (typeName, row) => {
                     return html`
@@ -92,11 +104,15 @@ define([
                 id: 'linkCount',
                 label: 'Links',
                 display: true,
-                isSortable: true,
-                style: {
-                    flex: '0 0 4em',
-                    textAlign: 'right',
-                    paddingRight: '1em'
+                sortable: true,
+                styles:{
+                    column: {
+                        flex: '0 0 6em',
+                    },
+                    data: {
+                        textAlign: 'right',
+                        paddingRight: '1em'
+                    }
                 },
                 render: (linkCount, row) => {
                     const render = () => {
@@ -159,17 +175,17 @@ define([
 
             const props = {
                 columns: this.columns,
-                pageSize: 10,
-                table: [],
-                dataSource
+                dataSource,
+                bordered: true,
+                flex: true
             };
 
-            const onRowClick = (row) => {
-                window.open(`/#samples/view/${row.id}/${row.version}`, '_blank');
-            };
+            // const onRowClick = (row) => {
+            //     window.open(`/#samples/view/${row.id}/${row.version}`, '_blank');
+            // };
 
             return html`
-                <${DataTable} heights=${{row: 40, col: 40}} columnHeader=${3} onClick=${onRowClick} ...${props}/>
+                <${DataTable} ...${props}/>
             `;
         }
 
@@ -328,15 +344,104 @@ define([
             `;
         }
 
+        // // Render header above table.
+        // onSearchInput(ev) {
+        //     const searchText = ev.target.value;
+
+        //     this.applySearch(searchText);
+
+        //     this.setState({
+        //         table: this.state.table.slice(),
+        //         searchText
+        //     });
+        // }
+
+        // applySearch(searchText) {
+        //     if (searchText === '') {
+        //         this.state.table
+        //             .map(({rowIndex}) => this.tableMap[rowIndex])
+        //             .forEach((row) => {
+        //                 row.show = true;
+        //             });
+        //     }
+        //     const searchRE = new RegExp(searchText, 'i');
+        //     this.state.table
+        //         .map(({rowIndex}) => this.tableMap[rowIndex])
+        //         .forEach((row) => {
+        //             const show = (() => {
+        //                 for (const column of this.props.columns) {
+        //                     if (column.searchable) {
+        //                         const value = row.values[column.id];
+        //                         if (searchRE.test(value)) {
+        //                             return true;
+        //                         }
+        //                     }
+        //                 }
+        //                 return false;
+        //             })();
+        //             row.show = show;
+        //         });
+        // }
+
+        // onClearSearch() {
+        //     this.applySearch('');
+        //     this.setState({
+        //         table: this.state.table.slice(),
+        //         searchText: ''
+        //     });
+        // }
+
+        // renderSearch() {
+        //     const clearSearchDisabled = this.state.searchText === '';
+        //     return html`
+        //         <div className="form-inline">
+        //             <div className="input-group">
+        //                 <input
+        //                     type="search"
+        //                     className="form-control"
+        //                     style=${{width: '20em'}}
+        //                     placeholder="Search"
+        //                     value=${this.state.searchText}
+        //                     onInput=${this.onSearchInput.bind(this)}
+        //                     />
+        //                 <span className="input-group-addon"><span class="fa fa-search" /></span>
+        //             </div>
+        //             <button
+        //                 type="button"
+        //                 title="Clear the search input and show all rows"
+        //                 class="btn btn-default"
+        //                 style=${{marginLeft: '1em'}}
+        //                 disabled=${clearSearchDisabled}
+        //                 onClick=${this.onClearSearch.bind(this)}>
+        //                 <span className="fa fa-times" />
+        //             </button>
+        //         </div>
+        //     `;
+        // }
+
+        // searchEnabled() {
+        //     return (this.props.columns.some(({searchable}) => searchable));
+        // }
+
+        // renderToolbar() {
+        //     if (!this.searchEnabled()) {
+        //         return;
+        //     }
+        //     return html`
+        //         <div className="DataTable4-toolbar">
+        //         ${this.renderSearch()}
+        //         </div>
+        //     `;
+        // }
+
         render() {
             return html`
-                <div style=${styles.main} class="LinkedData3">
-                    ${this.renderHeader()}
+                <div style=${styles.main} class="LinkedData4">
                     ${this.renderLinkedDataTable()}
                 </div>
             `;
         }
     }
 
-    return LinkedData3;
+    return LinkedData4;
 });

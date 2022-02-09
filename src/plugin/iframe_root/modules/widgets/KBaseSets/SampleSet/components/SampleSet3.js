@@ -70,7 +70,6 @@ define([
                     column: {
                         flex: '0 0 10em',
                     },
-
                     data: {
                         textAlign: 'right',
                         paddingRight: '7em'

@@ -99,13 +99,13 @@ define([
                     return ['fa-sort', {}, 'This column is sortable, but not sorted'];
                 }
                 if (this.state.sortDirection === 'ascending') {
-                    return ['fa-sort-asc', {color: 'blue'}, 'The table is sorted by this column, in ascending order'];
+                    return ['fa-sort-asc', {}, 'The table is sorted by this column, in ascending order'];
                 }
-                return ['fa-sort-desc', {color: 'blue'}, 'The table is sorted by this column, in descending order'];
+                return ['fa-sort-desc', {}, 'The table is sorted by this column, in descending order'];
             })();
             return html`
                 <div className="DataTable4-header-col-sortable" title=${title}>
-                    <span className=${['fa', sortIcon].join(' ')} style=${sortStyle}/>
+                    <span className=${['fa', 'DataTable4-sort-icon', sortIcon].join(' ')} style=${sortStyle}/>
                 </div>
             `;
         }
