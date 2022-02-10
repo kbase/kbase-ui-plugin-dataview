@@ -5,7 +5,6 @@ define([], () => {
             display: 'flex',
             flexDirection: 'column',
             minHeight: '0',
-            marginTop: '10px',
         },
         Header: {
             // border: '1px solid rgb(200, 200, 200)',

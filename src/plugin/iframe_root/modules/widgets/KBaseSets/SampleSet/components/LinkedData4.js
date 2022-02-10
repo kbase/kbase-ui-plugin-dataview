@@ -53,6 +53,22 @@ define([
                     `;
                 }
             }, {
+                id: 'objectTypeName',
+                label: 'Object Type',
+                display: true,
+                sortable: true,
+                searchable: true,
+                styles:{
+                    column: {
+                        flex: '0 0 12em'
+                    }
+                },
+                render: (typeName, row) => {
+                    return html`
+                        <a href=${`/#spec/type/${row.objectType}`} target="_blank">${typeName}</a>
+                    `;
+                }
+            }, {
                 id: 'objectRef',
                 label: 'Object Ref',
                 display: true,
@@ -82,22 +98,6 @@ define([
                 render: (name, row) => {
                     return html`
                         <a href=${`/#dataview/${row.objectRef}`} target="_blank">${name}</a>
-                    `;
-                }
-            }, {
-                id: 'objectTypeName',
-                label: 'Type',
-                display: true,
-                sortable: true,
-                searchable: true,
-                styles:{
-                    column: {
-                        flex: '0 0 12em'
-                    }
-                },
-                render: (typeName, row) => {
-                    return html`
-                        <a href=${`/#spec/type/${row.objectType}`} target="_blank">${typeName}</a>
                     `;
                 }
             }, {

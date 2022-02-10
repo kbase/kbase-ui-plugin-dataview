@@ -3,13 +3,17 @@ define([
     'htm',
     'components/IconButton',
     'components/Empty',
+    'components/Popup',
+    'components/DropdownMenu',
 
     'css!./DataTable4.css'
 ], (
     preact,
     htm,
     IconButton,
-    Empty
+    Empty,
+    Popup,
+    DropdownMenu
 ) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
@@ -54,31 +58,206 @@ define([
     onClick
     */
 
+    class FilterCell extends Component {
+        constructor(props) {
+            super(props);
+            this.state = {
+                filterPopup: {
+                    isActive: false,
+                    isStickyOpen: false
+                }
+            };
+        }
+
+
+        onPopupOpen() {
+            this.setState({
+                filterPopup: {
+                    ...this.state.filterPopup,
+                    isStickyOpen: true,
+                    isActive: false
+                }
+            });
+        }
+
+        onPopupClose() {
+            this.setState({
+                filterPopup: {
+                    ...this.state.filterPopup,
+                    isStickyOpen: false
+                }
+            });
+        }
+
+        onMouseEnter() {
+            this.setState({
+                filterPopup: {
+                    ...this.state.filterPopup,
+                    isActive: true
+                }
+            });
+        }
+
+        onMouseLeave() {
+            this.setState({
+                filterPopup: {
+                    ...this.state.filterPopup,
+                    isActive: false
+                }
+            });
+        }
+        render() {
+            // const headerColClasses = [
+            //     'DataTable4-header-col'
+            // ];
+            // const column = this.props.columns[columnIndex];
+            // const isHovered = this.state.columnHovered === columnIndex;
+            // if (isHovered) {
+            //     headerColClasses.push('DataTable4-col-hovered');
+            // }
+
+            // const filterMenu = {
+            //     items: [{
+            //         title: 'Foo',
+            //         action: () => {
+            //             console.log('selected menu item');
+            //         }
+            //     }]
+            // };
+
+            // const menu = {
+            //     items: [{
+            //         title: 'Sort Ascending',
+            //         action: () => {
+            //             console.log('selected menu item');
+            //             // this.doSort('ascending');
+            //         }
+            //     }, {
+            //         title: 'Sort Descending',
+            //         action: () => {
+            //             console.log('selected menu item');
+            //             // this.doSort('descending');
+            //         }
+            //     }, {
+            //         title: 'Quick Filter',
+            //         dataMenu: filterMenu
+            //     }]
+            // };
+
+            const menu = {
+                items: this.props.filterValues.map((filterValue) => {
+                    return {
+                        title: filterValue,
+                        action: () => {
+                            this.props.onFilter(filterValue);
+                        }
+                    };
+                })
+            };
+
+            const menuStyle = {
+                flex: '0 0 auto',
+                visibility: 'hidden',
+                marginLeft: '4px'
+            };
+            if (this.state.filterPopup.isActive || this.state.filterPopup.isStickyOpen) {
+                menuStyle.visibility = 'visible';
+            }
+            const filterDropdown = html`
+                <div style=${menuStyle}>
+                    <${Popup} 
+                        overlaySelector=".DataTable4"
+                        scrollSelector=".DataTable4-filter-header"
+                        containerTop=${0}
+                        position="left"
+                        onOpen=${this.onPopupOpen.bind(this)}
+                        onClose=${this.onPopupClose.bind(this)}
+                    >
+                        <${DropdownMenu} 
+                            title="Filter on Unique Values" 
+                            menu=${menu} 
+                            onClose=${this.onPopupClose.bind(this)}/>
+                    </>
+                </div>
+            `;
+
+            return html`
+                <div style=${{flex: '1 1 0', display: 'flex', flexDirection: 'row', alignItems: 'center'}}
+                    onMouseEnter=${this.onMouseEnter.bind(this)}
+                    onMouseLeave=${this.onMouseLeave.bind(this)} >
+                    <input 
+                        className="form-control" 
+                        title=${`Filter "${this.props.column.label}" column; regular expression may be used`}
+                        onInput=${this.props.onInput} 
+                        value=${this.props.value}
+                        type="search" />
+                    ${filterDropdown}
+                </div>
+            `;
+        }
+    }
+
     class DataTable4 extends Component {
         constructor(props) {
             super(props);
             const sortColumn = this.props.initialSortColumn || 0;
             const sortDirection = this.props.initialSortDirection || 'ascending';
 
-            this.tableMap = this.props.dataSource.reduce((tableMap, values, rowIndex) => {
-                tableMap[rowIndex] = {
+            const ordered = [];
+            this.tableMap = {};
+
+            const columnValues = this.props.columns.map(() => {
+                return new Set();
+            });
+
+            this.props.dataSource.forEach((values, rowIndex) => {
+                this.tableMap[rowIndex] = {
                     showDetail: false,
                     show: true,
                     rowIndex,
                     values
                 };
-                return tableMap;
-            }, {});
 
-            const ordered = Object.values(this.tableMap).map((values, rowIndex) => {
-                return {
+                ordered.push({
                     showDetail: false,
                     show: true,
                     rowIndex,
-                };
+                });
+
+                this.props.columns.forEach((column, columnIndex) => {
+                    columnValues[columnIndex].add(values[column.id]);
+                });
             });
 
+            this.columnValues = columnValues.map((uniqueValues) => {
+                return Array.from(uniqueValues).sort();
+            });
+
+
+            // this.tableMap = this.props.dataSource.reduce((tableMap, values, rowIndex) => {
+            //     tableMap[rowIndex] = {
+            //         showDetail: false,
+            //         show: true,
+            //         rowIndex,
+            //         values
+            //     };
+            //     return tableMap;
+            // }, {});
+
+
+            // This is a parallel array of table row settings, and the subject
+            // of ordering (i.e. this array is sorted, not the original table)
+            // const ordered = Object.values(this.tableMap).map((values, rowIndex) => {
+            //     return {
+            //         showDetail: false,
+            //         show: true,
+            //         rowIndex,
+            //     };
+            // });
+
+
             const table = this.sortTable(ordered, sortColumn, sortDirection);
+
             const columnHovered = null;
             this.state = {
                 searchText: '',
@@ -90,6 +269,10 @@ define([
                 sortDirection,
                 columnHovered,
                 showFilterHeader: this.props.showFilters || false,
+                filterPopup: {
+                    isStickyOpen: false,
+                    isActive: false
+                },
                 table
             };
         }
@@ -258,21 +441,23 @@ define([
                                 <div className="DataTable4-header-col-label" >
                                     ${label}
                                 </div>
-                                
                                 ${this.renderSortableIndicator(sortable, columnIndex)}
                             </div>
                         `;
                     });
                     header.unshift(html`
                         <div className="DataTable4-header-col" style=${{flex: '0 0 2em'}}>
-                            <${IconButton} 
-                                icon="filter" 
+                            <${IconButton}
+                                icon="filter"
                                 activeIcon="close"
                                 active=${this.state.showFilterHeader}
                                 tooltip=${this.state.showFilterHeader ? 'Hide column filters' : 'Show column filters'}
                                 onClick=${() => {this.toggleColumnToolbar();}}/>
                         </div>
                     `);
+                    // header.unshift(html`
+                    //     <${FilterCell} onClick=${this.toggleColumnToolbar.bind(this)} active=${this.state.showFilterHeader} />
+                    // `);
                     return html`
                         <div className="DataTable4-header">
                             ${header}
@@ -288,10 +473,9 @@ define([
             })();
         }
 
-        onFilterInput(ev, columnIndex) {
+        onFilterInput(filterText, columnIndex) {
             // console.log('filter...', ev.target.value, index);
             const filterCol = this.props.columns[columnIndex].id;
-            const filterText = ev.target.value;
             const columnFilters = (() => {
                 const currentFilters = this.state.columnFilters;
                 if (filterText.length === 0) {
@@ -326,31 +510,102 @@ define([
             }
             if (this.props.columns) {
                 return (() => {
-                    const header = this.props.columns.map(({styles}, columnIndex) => {
+                    const header = this.props.columns.map((column, columnIndex) => {
+                        // const column = this.props.columns[columnIndex];
                         const headerColClasses = [
                             'DataTable4-header-col'
                         ];
+                        // const column = this.props.columns[columnIndex];
                         const isHovered = this.state.columnHovered === columnIndex;
                         if (isHovered) {
                             headerColClasses.push('DataTable4-col-hovered');
                         }
                         return html`
                             <div className=${headerColClasses.join(' ')} 
-                                 style=${styles.column || {}}
-                                 onMouseEnter=${() => {this.onColumnEnter(columnIndex);}}
-                                 onMouseLeave=${() => {this.onColumnLeave(columnIndex);}}
-                                 
-                                 >
-                               
-                                <input 
-                                    className="form-control" 
-                                    onInput=${(ev) => {this.onFilterInput(ev, columnIndex);}} 
+                                style=${column.styles.column || {}}
+                                onMouseEnter=${() => {this.onColumnEnter(columnIndex);}}
+                                onMouseLeave=${() => {this.onColumnLeave(columnIndex);}}>
+                                <${FilterCell} 
+                                    column=${column} 
+                                    onInput=${(ev) => {this.onFilterInput(ev.target.value, columnIndex);}} 
                                     value=${this.getColumnFilterValue(columnIndex)}
-                                    type="search" 
-                                    id=${`filter_column_${columnIndex}`}  
-                                    name=${`filter_column_${columnIndex}`}/>
+                                    filterValues=${this.columnValues[columnIndex]}
+                                    onFilter=${(filterText) => {this.onFilterInput(`^${filterText}$`, columnIndex);}}
+                                />
                             </div>
                         `;
+
+
+
+                        // const filterMenu = {
+                        //     items: [{
+                        //         title: 'Foo',
+                        //         action: () => {
+                        //             console.log('selected menu item');
+                        //         }
+                        //     }]
+                        // };
+
+                        // const menu = {
+                        //     items: [{
+                        //         title: 'Sort Ascending',
+                        //         action: () => {
+                        //             console.log('selected menu item');
+                        //             // this.doSort('ascending');
+                        //         }
+                        //     }, {
+                        //         title: 'Sort Descending',
+                        //         action: () => {
+                        //             console.log('selected menu item');
+                        //             // this.doSort('descending');
+                        //         }
+                        //     }, {
+                        //         title: 'Quick Filter',
+                        //         dataMenu: filterMenu
+                        //     }]
+                        // };
+                        // const menuStyle = {
+                        //     flex: '0 0 auto',
+                        //     visibility: 'hidden',
+                        //     marginLeft: '4px'
+                        // };
+                        // if (this.state.filterPopup.isActive || this.state.filterPopup.isStickyOpen) {
+                        //     menuStyle.visibility = 'visible';
+                        // }
+                        // const filterDropdown = html`
+                        //     <div style=${menuStyle}>
+                        //         <${Popup}
+                        //             overlaySelector=".DataTable4"
+                        //             scrollSelector=".DataTable4-filter-header"
+                        //             containerTop=${0}
+                        //             onOpen=${this.onPopupOpen.bind(this)}
+                        //             onClose=${this.onPopupClose.bind(this)}
+                        //             >
+                        //             <${DropdownMenu} menu=${menu} onClose=${this.onPopupClose.bind(this)}/>
+                        //         </>
+                        //     </div>
+                        // `;
+
+                        // return html`
+                        //     <div className=${headerColClasses.join(' ')}
+                        //          style=${styles.column || {}}
+                        //          onMouseEnter=${() => {this.onColumnEnter(columnIndex);}}
+                        //          onMouseLeave=${() => {this.onColumnLeave(columnIndex);}}
+
+                        //          >
+
+                        //         <input
+                        //             className="form-control"
+                        //             title=${`Filter "${column.label}" column; regular expression may be used`}
+                        //             onInput=${(ev) => {this.onFilterInput(ev, columnIndex);}}
+                        //             value=${this.getColumnFilterValue(columnIndex)}
+                        //             type="search"
+                        //             id=${`filter_column_${columnIndex}`}
+                        //             name=${`filter_column_${columnIndex}`} />
+
+                        //         ${filterDropdown}
+                        //     </div>
+                        // `;
                     });
 
                     const filterButton = (() => {
@@ -372,7 +627,7 @@ define([
                         </div>
                     `);
                     return html`
-                        <div className="DataTable4-header">${header}</div>
+                        <div className="DataTable4-filter-header">${header}</div>
                     `;
                 })();
             }
@@ -462,17 +717,22 @@ define([
                     }
                 })();
                 const style = Object.assign({}, col.styles.column, col.styles.data);
-                const isHovered = this.state.columnHovered === columnIndex;
+
                 const columnClasses = [
                     'DataTable4-col'
                 ];
+
+                const isHovered = this.state.columnHovered === columnIndex;
                 if (isHovered) {
                     columnClasses.push('DataTable4-col-hovered');
                 }
+
                 return html`
                     <div className=${columnClasses.join(' ')}
                             style=${style}
                             data-k-b-testhook-cell=${col.id}
+                            onMouseEnter=${() => {this.onColumnEnter(columnIndex);}}
+                            onMouseLeave=${() => {this.onColumnLeave(columnIndex);}}
                             role="cell">
                         <div className="DataTable4-col-content">
                             ${content}

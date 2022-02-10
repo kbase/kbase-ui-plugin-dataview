@@ -19,6 +19,17 @@ define([], () => {
             filter: 'blur(0px)'
         },
         wrapper: {},
+        title: {
+            padding: '4px',
+            flex: '1 1 0px',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            cursor: 'normal',
+            fontWeight: 'bold',
+            color: 'rgb(150, 150, 150)',
+            textDecoration: 'underline'
+        },
         item: {
             padding: '4px',
             flex: '1 1 0px',
