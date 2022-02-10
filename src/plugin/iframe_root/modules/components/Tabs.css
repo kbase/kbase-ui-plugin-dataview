@@ -36,6 +36,7 @@
     align-self: center;
     background-color: rgba(200, 200, 200, 0.2);
     user-select: none;
+    -webkit-user-select: none;
 }
 
 .Tabs-extra {
