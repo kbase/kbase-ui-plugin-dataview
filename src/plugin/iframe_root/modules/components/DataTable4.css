@@ -58,7 +58,9 @@
     min-width: 0;
     user-select: none;
     padding: 0.5em;
-    align-items: center
+    align-items: center;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 
@@ -71,7 +73,7 @@
 }
 
 .DataTable4-header-col-sorted {
-    background-color: rgba(200,200, 200, 0.2);
+    /* background-color: rgba(200,200, 200, 0.2); */
 }
 
 .DataTable4-header-col-label {

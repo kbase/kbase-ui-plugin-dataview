@@ -200,8 +200,8 @@ define([
     class DataTable4 extends Component {
         constructor(props) {
             super(props);
-            const sortColumn = this.props.initialSortColumn || 0;
-            const sortDirection = this.props.initialSortDirection || 'ascending';
+            // const sortColumn = this.props.initialSortColumn || 0;
+            // const sortDirection = this.props.initialSortDirection || 'ascending';
 
             const ordered = [];
             this.tableMap = {};
@@ -255,8 +255,12 @@ define([
             //     };
             // });
 
+            const sort = [{
+                column: this.props.initialSortColumn || 0,
+                direction: this.props.initialSortDirection || 'ascending'
+            }];
 
-            const table = this.sortTable(ordered, sortColumn, sortDirection);
+            const table = this.sortTable(ordered, sort);
 
             const columnHovered = null;
             this.state = {
@@ -265,8 +269,9 @@ define([
                 globalFilter: {
                     filterText: ''
                 },
-                sortColumn,
-                sortDirection,
+                sort,
+                //    sortColumn,
+                //     sort Direction,
                 columnHovered,
                 showFilterHeader: this.props.showFilters || false,
                 filterPopup: {
@@ -278,7 +283,50 @@ define([
         }
 
         isColumnSorted(sortable, columnIndex) {
-            return (sortable && columnIndex === this.state.sortColumn);
+            if (!sortable) {
+                return false;
+            }
+            const columnSort = this.state.sort.filter(({column}) => {
+                return column === columnIndex;
+            });
+            return (columnSort.length === 1);
+        }
+
+        getColumnSort(sortable, columnIndex) {
+            if (!sortable) {
+                return [null, null];
+            }
+
+            let sortIndex = 0;
+            for (const sort of this.state.sort) {
+                if (sort.column === columnIndex) {
+                    return [sort, sortIndex];
+                }
+                sortIndex += 1;
+            }
+            return [null, null];
+        }
+
+        renderSortPosition(sortIndex) {
+            if (sortIndex === null) {
+                return;
+            }
+            const rules = new Intl.PluralRules('en-US', {type: 'ordinal'});
+            const suffixes = new Map([
+                ['one',   'st'],
+                ['two',   'nd'],
+                ['few',   'rd'],
+                ['other', 'th'],
+            ]);
+            const format = (value) => {
+                const rule = rules.select(value);
+                const suffix = suffixes.get(rule);
+                return `${value}${suffix}`;
+            };
+            const title = `${format(sortIndex + 1)} sort`;
+            return html`
+                <span title=${title} style=${{fontWeight: 'normal'}}>(${sortIndex + 1})</span>
+            `;
         }
 
         renderSortableIndicator(sortable, columnIndex) {
@@ -286,18 +334,19 @@ define([
                 return;
             }
 
-            const [sortIcon, sortStyle, title] = (() => {
-                if (columnIndex !== this.state.sortColumn) {
-                    return ['fa-sort', {}, 'This column is sortable, but not sorted'];
+            const [sortIcon, sortStyle, title, sortIndex] = (() => {
+                const [sort, sortIndex] = this.getColumnSort(sortable, columnIndex);
+                if (sort === null) {
+                    return ['fa-sort', {}, 'This column is sortable, but not sorted', null];
                 }
-                if (this.state.sortDirection === 'ascending') {
-                    return ['fa-sort-asc', {}, 'The table is sorted by this column, in ascending order'];
+                if (sort.direction === 'ascending') {
+                    return ['fa-sort-asc', {}, 'The table is sorted by this column, in ascending order', sortIndex];
                 }
-                return ['fa-sort-desc', {}, 'The table is sorted by this column, in descending order'];
+                return ['fa-sort-desc', {}, 'The table is sorted by this column, in descending order', sortIndex];
             })();
             return html`
                 <div className="DataTable4-header-col-sortable" title=${title}>
-                    <span className=${['fa', 'DataTable4-sort-icon', sortIcon].join(' ')} style=${sortStyle}/>
+                    ${this.renderSortPosition(sortIndex)} <span className=${['fa', 'DataTable4-sort-icon', sortIcon].join(' ')} style=${sortStyle}/>
                 </div>
             `;
         }
@@ -319,99 +368,166 @@ define([
             return this.tableMap[rowIndex].values[columnId];
         }
 
-        sortTable(table, sortColumn, sortDirection) {
-            const directionFactor = sortDirection === 'ascending' ? 1 : -1;
-            const customComparator = this.props.columns[sortColumn].sortComparator;
-
-            return table.slice().sort((a, b) => {
-                const comparison = (() => {
-                    const aRow = this.tableMap[a.rowIndex];
-                    const bRow = this.tableMap[b.rowIndex];
-                    if (customComparator) {
-                        return customComparator(aRow, bRow);
-                    }
-                    const aValue = this.getRowValue(a, sortColumn);
-                    const bValue = this.getRowValue(b, sortColumn);
-                    switch (typeof aValue) {
+        sortTable(table, sort) {
+            const compare = (a, b, column) => {
+                const aRow = this.tableMap[a.rowIndex];
+                const bRow = this.tableMap[b.rowIndex];
+                const customComparator = this.props.columns[column].sortComparator;
+                if (customComparator) {
+                    return customComparator(aRow, bRow);
+                }
+                const aValue = this.getRowValue(a, column);
+                const bValue = this.getRowValue(b, column);
+                switch (typeof aValue) {
+                case 'string':
+                    switch (typeof bValue) {
                     case 'string':
-                        switch (typeof bValue) {
-                        case 'string':
-                            return aValue.localeCompare(bValue);
-                        case 'number':
-                            return aValue.localeCompare(String(bValue));
-                        case 'null':
-                            return 1;
-                        default:
-                            return 0;
-                        }
+                        return aValue.localeCompare(bValue);
                     case 'number':
-                        switch (typeof bValue) {
-                        case 'string':
-                            return String(aValue).localeCompare(bValue);
-                        case 'number':
-                            return aValue - bValue;
-                        case 'null':
-                            return 1;
-                        default:
-                            return 0;
-
-                        }
-                    case 'object': {
-                        if (aValue instanceof Date) {
-                            switch (typeof bValue) {
-                            case 'object':
-                                if (bValue instanceof Date) {
-                                    return aValue.getTime() - bValue.getTime();
-                                }
-                                return 0;
-                            default:
-                                return 0;
-
-                            }
-                        } else {
-                            return 0;
-                        }
-                    }
+                        return aValue.localeCompare(String(bValue));
                     case 'null':
-                        switch (typeof bValue) {
-                        case 'string':
-                            return -1;
-                        case 'number':
-                            return -1;
-                        case 'null':
-                            return 0;
-                        default:
-                            return -1;
-                        }
+                        return 1;
                     default:
                         return 0;
                     }
-                })();
-                return comparison * directionFactor;
+                case 'number':
+                    switch (typeof bValue) {
+                    case 'string':
+                        return String(aValue).localeCompare(bValue);
+                    case 'number':
+                        return aValue - bValue;
+                    case 'null':
+                        return 1;
+                    default:
+                        return 0;
+
+                    }
+                case 'object': {
+                    if (aValue instanceof Date) {
+                        switch (typeof bValue) {
+                        case 'object':
+                            if (bValue instanceof Date) {
+                                return aValue.getTime() - bValue.getTime();
+                            }
+                            return 0;
+                        default:
+                            return 0;
+
+                        }
+                    } else {
+                        return 0;
+                    }
+                }
+                case 'null':
+                    switch (typeof bValue) {
+                    case 'string':
+                        return -1;
+                    case 'number':
+                        return -1;
+                    case 'null':
+                        return 0;
+                    default:
+                        return -1;
+                    }
+                default:
+                    return 0;
+                }
+            };
+
+            return table.slice().sort((a, b) => {
+                for (const {column, direction} of sort) {
+                    const directionFactor = direction === 'ascending' ? 1 : -1;
+                    const comparison = compare(a, b, column);
+                    if (comparison !== 0) {
+                        return comparison * directionFactor;
+                    }
+                }
             });
         }
 
-        onColumnClick(sortable, sortColumn) {
-            if (!sortable) {
-                return;
-            }
+        addNewSort(sortColumn) {
+            const newSort = {
+                column: sortColumn,
+                direction: 'ascending'
+            };
 
+            const sort = this.state.sort.slice();
+            sort.push(newSort);
+
+            const table = this.sortTable(this.state.table, sort);
+
+            this.setState({
+                sort,
+                table
+            });
+        }
+
+        toggleSortDirection(sortColumn) {
+            const sort = this.state.sort.map((sort, sortIndex) => {
+                if (sort.column === sortColumn) {
+                    if (sortIndex === 0) {
+                        sort.direction = sort.direction === 'ascending' ? 'descending' : 'ascending';
+                    } else {
+                        switch (sort.direction) {
+                        case 'ascending': sort.direction = 'descending'; break;
+                        case 'descending': return null; // sort.direction = 'ascending';
+                        }
+
+                    }
+                }
+                return sort;
+            })
+                .filter((sort) => {
+                    return (sort !== null);
+                });
+            const table = this.sortTable(this.state.table, sort);
+            this.setState({table, sort});
+        }
+
+        setSingleSort(sortColumn) {
             const sortDirection = (() => {
-                if (sortColumn === this.state.sortColumn) {
+                if (sortColumn === this.state.sort[0].column) {
                     // reverse direction
-                    return this.state.sortDirection === 'ascending' ? 'descending' : 'ascending';
+                    return this.state.sort[0].direction === 'ascending' ? 'descending' : 'ascending';
                 }
                 return 'ascending';
             })();
 
+            const sort = [{
+                column: sortColumn,
+                direction: sortDirection
+            }];
 
-            const table = this.sortTable(this.state.table, sortColumn, sortDirection);
+            const table = this.sortTable(this.state.table, sort);
 
             this.setState({
-                sortDirection,
-                sortColumn,
+                sort,
                 table
             });
+        }
+
+        onColumnClick(sortable, sortColumn, shiftPressed) {
+            if (!sortable) {
+                return;
+            }
+
+            // Rules:
+            // if shift not pressed, sort only by this column
+            // if shift pressed, and this column was not already selected, add it as a
+            // new secondary sort
+            // if shift pressed, and this column was already sorted by, simply reverse the direction.
+
+            if (shiftPressed) {
+                if (this.isColumnSorted(sortable, sortColumn)) {
+                    this.toggleSortDirection(sortColumn);
+                } else {
+                    this.addNewSort(sortColumn);
+                }
+            } else {
+                this.setSingleSort(sortColumn);
+            }
+
+
         }
 
         renderHeader() {
@@ -437,7 +553,7 @@ define([
                                  style=${styles.column || {}}
                                  onMouseEnter=${() => {this.onColumnEnter(columnIndex);}}
                                  onMouseLeave=${() => {this.onColumnLeave(columnIndex);}}
-                                 onClick=${() => {this.onColumnClick(sortable, columnIndex);}}>
+                                 onClick=${(ev) => {this.onColumnClick(sortable, columnIndex, ev.getModifierState('Shift'));}}>
                                 <div className="DataTable4-header-col-label" >
                                     ${label}
                                 </div>
