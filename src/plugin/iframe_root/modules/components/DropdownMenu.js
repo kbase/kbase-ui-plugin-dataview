@@ -103,7 +103,6 @@ define([
             if (this.state.isHovered) {
                 itemStyle = {...itemStyle, ...styles.itemHover};
             }
-            // console.log('style??', itemLabelitemStyletyle, styles.itemLabel);
 
             return html`
                 <div className=${menuClass}
@@ -210,11 +209,28 @@ define([
             this.props.onClose();
         }
 
-        renderMenu() {
+        renderMenuItems() {
             return this.props.menu.items.map((item) => {
                 return html`
                     <${MenuItem} item=${item} onActionCompleted=${this.doActionCompleted.bind(this)}/>`;
             });
+        }
+
+        renderMenuTitle() {
+            if (!this.props.title) {
+                return;
+            }
+
+            return html`
+                <div style=${styles.title}>${this.props.title}</div>
+            `;
+        }
+
+        renderMenu() {
+            return html`
+                ${this.renderMenuTitle()}
+                ${this.renderMenuItems()}
+            `;
         }
 
         render() {

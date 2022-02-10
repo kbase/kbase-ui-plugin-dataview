@@ -145,7 +145,6 @@ define([
                 });
             }
 
-
             tabs.push({
                 id: 'map',
                 title: 'Map',
