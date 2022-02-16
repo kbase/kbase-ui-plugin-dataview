@@ -296,40 +296,14 @@ define([
                 objectVersion: this.objectVersion
             });
 
-            // this just warms it up ... don't need to do this here, really.
-            const shebang = await theModel.getTheSheBang();
-
-
             try {
-                const {info: objectInfo, data: sampleSet} = await model.getObject();
+                const {sampleSet, samples, fieldKeys, userProfiles} = await theModel.getTheSheBang();
 
-                const totalCount = sampleSet.samples.length;
-                sampleSet.samples = sampleSet.samples.slice(0, MAX_SAMPLES);
+                const totalCount = sampleSet.data.samples.length;
+                sampleSet.samples = sampleSet.data.samples.slice(0, MAX_SAMPLES);
 
-                const {samples, fieldKeys, userProfiles} = await model.getSamples({
-                    samples: sampleSet.samples
-                });
-
-                const samplesMap = samples.reduce((samplesMap, sample) => {
-                    samplesMap[sample.id] = sample;
-                    return samplesMap;
-                }, {});
-
-                // Created an array of samples in the same order as in the sampleset.
-                const orderedSamples = sampleSet.samples.map((sampleSetItem) => {
-                    return samplesMap[sampleSetItem.id];
-                });
-
-                if (orderedSamples.length === 0) {
-                    // TODO: see if this is even possible.
-                    preact.render(preact.h(SimpleInfo, {
-                        title: 'Sorry',
-                        message: 'No samples in this set'
-                    }), this.node);
-                    return;
-                }
-
-                const [sampleColumns, sampleTable, columnGroups] = await this.samplesToTable(model, orderedSamples, sampleSet, fieldKeys);
+                // TODO: do this on demand?
+                const [sampleColumns, sampleTable, columnGroups] = await this.samplesToTable(model, samples, sampleSet.data, fieldKeys);
 
                 // Just get the raw groups and schemas. For mapping view; should refactor to simplify the
                 // complexity here...
@@ -359,14 +333,14 @@ define([
                 const linksEnabled = this.runtime.featureEnabled('sampleset-data-links');
 
                 const params = {
-                    sampleSet,
+                    sampleSet: sampleSet.data,
                     samples,
                     totalCount,
                     fieldKeys,
                     sampleTable,
                     sampleColumns,
                     userProfiles,
-                    objectInfo,
+                    objectInfo: sampleSet.info,
                     columnGroups,
                     groups,
                     summaryController,

@@ -3,9 +3,8 @@ define([
     'htm',
     'components/Tabs',
     './Spreadsheet',
-    './SampleMap3',
+    './SampleMap',
     './SampleSet',
-    './SampleSet2',
     './Main.styles',
     '../constants'
 ], (
@@ -13,9 +12,8 @@ define([
     htm,
     Tabs,
     Spreadsheet,
-    SampleMap3,
+    SampleMap,
     SampleSet,
-    SampleSet2,
     styles,
     {MAX_SAMPLES}
 ) => {
@@ -39,25 +37,6 @@ define([
                     />
             `;
         }
-
-        renderSampleSet2x() {
-            let truncatedMessage = '';
-            if (this.props.totalCount > MAX_SAMPLES) {
-                truncatedMessage = html`
-                    <div className="alert alert-warning">The total number of results has been truncated; only the first
-                        ${MAX_SAMPLES} are displayed during this testing period.
-                    </div>`;
-            }
-            return html`
-                <${Fragment}>
-                    <${SampleSet2} sampleSet=${this.props.sampleSet} samples=${this.props.samples}
-                                  totalCount=${this.props.totalCount} userProfiles=${this.props.userProfiles}/>
-                        ${truncatedMessage}
-                    </
-                    />
-            `;
-        }
-
         renderSummary() {
             // TODO: this description should perhaps be markdown? Or simply generate paragraphs on
             // line feeds. Currently the control is a text input not textarea
@@ -87,7 +66,7 @@ define([
             });
 
             return html`
-                <${SampleMap3} samples=${this.props.samples} fieldKeys=${geolocationGroup.fields} fieldSchemas=${geolocationFields} />
+                <${SampleMap} samples=${this.props.samples} fieldKeys=${geolocationGroup.fields} fieldSchemas=${geolocationFields} />
             `;
         }
 

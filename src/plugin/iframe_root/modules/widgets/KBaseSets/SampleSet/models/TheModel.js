@@ -139,12 +139,39 @@ define([
                     token: this.runtime.service('session').getAuthToken()
                 });
 
-                for (const {id, version} of sampleLinksToFetch) {
-                    const [{links}] = await sampleService
-                        .callFunc('get_data_links_from_sample', [{id, version}]);
+                // const start = Date.now();
+                // const links = await Promise.all(sampleLinksToFetch.map(async ({id, version}) => {
+                //     const [{links}] = await sampleService
+                //         .callFunc('get_data_links_from_sample', [{id, version}]);
+                //     return {links, id, version};
+
+                // }));
+
+
+                const result = await sampleService
+                    .callFunc('get_data_links_from_sample_set', [{
+                        sample_ids: sampleLinksToFetch,
+                        effective_time: Date.now()
+                    }]);
+
+                const [{links}] = result;
+
+                links.forEach((link) => {
+                    // const {id, version} = sampleLinksToFetch[index];
+                    const {id, version} = link;
                     const key = this.sampleToRef({id, version});
-                    this.cache.dataLinksBySample[key] = links;
-                }
+                    if (!(key in this.cache.dataLinksBySample)) {
+                        this.cache.dataLinksBySample[key] = [];
+                    }
+                    this.cache.dataLinksBySample[key].push(link);
+                });
+
+                // for (const {id, version} of sampleLinksToFetch) {
+                //     const [{links}] = await sampleService
+                //         .callFunc('get_data_links_from_sample', [{id, version}]);
+                //     const key = this.sampleToRef({id, version});
+                //     this.cache.dataLinksBySample[key] = links;
+                // }
             }
             return samplesToGet.map((sample) => {
                 const key = this.sampleToRef(sample);
@@ -249,10 +276,15 @@ define([
         }
 
         async getTheSheBang() {
+            let start = Date.now();
+            const start0 = start;
             /******
              * Get Sample Set
              ******/
             const sampleSet = await this.getSampleSet();
+
+            console.log('shebang: 1: getSampleSet', Date.now() - start);
+            start = Date.now();
 
             const sampleCount = sampleSet.data.samples.length;
 
@@ -268,6 +300,19 @@ define([
                 // TODO: see if this is even possible.
                 throw new Error('no samples in this set');
             }
+
+            console.log('shebang: 2: getSamples', Date.now() - start);
+            start = Date.now();
+
+            const fieldKeys = new Set();
+            samples.forEach((sample) => {
+                Object.keys(sample.node_tree[0].meta_controlled).forEach((key) => {
+                    fieldKeys.add(key);
+                });
+                Object.keys(sample.node_tree[0].meta_user).forEach((key) => {
+                    fieldKeys.add(key);
+                });
+            });
 
             // Reform into a map of id to sample.
             // TODO: should include version in key?
@@ -294,6 +339,9 @@ define([
                 };
             });
 
+            console.log('shebang: 3: getDataLinks', Date.now() - start);
+            start = Date.now();
+
             /******
              * Get object infos from data links
              ******/
@@ -307,7 +355,10 @@ define([
             }
 
             // Get object info for each upa
+
             const objectInfos = await this.getObjectInfos(Array.from(upas));
+            console.log('shebang: 4: getObjectInfos', Date.now() - start);
+            start = Date.now();
 
             const dataLinks = rawDataLinks.map((links) => {
                 return links.filter(({upa}) => {
@@ -322,11 +373,14 @@ define([
                 return usernames;
             }, new Set());
 
+            start = Date.now();
             const userProfiles = await this.getUserProfiles(Array.from(usernames));
             const userProfileMap = userProfiles.reduce((userProfileMap, profile) => {
                 userProfileMap[profile.user.username] = profile;
                 return userProfileMap;
             }, {});
+            console.log('shebang: 5: getUserProfiles', Date.now() - start);
+            start = Date.now();
 
             /******
              * Get types from object infos
@@ -336,6 +390,8 @@ define([
                 types.add(typeName);
                 return types;
             }, new Set()));
+
+            console.log('shebang: total', Date.now() - start0);
 
             return {
                 sampleSet,
@@ -347,7 +403,8 @@ define([
                 dataLinks,
                 objectInfos,
                 userProfiles: userProfileMap,
-                types
+                types,
+                fieldKeys
             };
         }
 
