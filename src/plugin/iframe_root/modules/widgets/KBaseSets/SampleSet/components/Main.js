@@ -58,24 +58,6 @@ define([
             `;
         }
 
-        // renderSampleSet2() {
-        //     let truncatedMessage = '';
-        //     if (this.props.totalCount > MAX_SAMPLES) {
-        //         truncatedMessage = html`
-        //             <div className="alert alert-warning">The total number of results has been truncated; only the first
-        //                 ${MAX_SAMPLES} are displayed during this testing period.
-        //             </div>`;
-        //     }
-        //     return html`
-        //         <${Fragment}>
-        //             <${SampleSet2} sampleSet=${this.props.sampleSet} samples=${this.props.samples}
-        //                           totalCount=${this.props.totalCount} userProfiles=${this.props.userProfiles}/>
-        //                 ${truncatedMessage}
-        //             </
-        //             />
-        //     `;
-        // }
-
         renderSummary() {
             // TODO: this description should perhaps be markdown? Or simply generate paragraphs on
             // line feeds. Currently the control is a text input not textarea
@@ -128,7 +110,7 @@ define([
                     id: 'sampleset3',
                     title: 'Samples',
                     render: () => {
-                        return this.props.sampleSetController3.view();
+                        return this.props.sampleSetController.view();
                     }
                 });
             } else {
@@ -167,62 +149,13 @@ define([
                     `;
                 }
             });
-            //  {
-            //     id: 'linked-data-summary2',
-            //     title: 'Linked data summary2',
-            //     render: () => {
-            //         return this.props.linkedDataSummaryController2.view();
-            //     }
-
-            // },
-            // ];
-
-            // if (this.props.linksEnabled) {
-            //     tabs.unshift({
-            //         id: 'sampleset2',
-            //         title: 'Sample Set 2',
-            //         render: () => {
-            //             return html`
-            //             <div className="FlexCol" style=${{marginTop: '10px'}}>
-            //                 ${this.renderSampleSet2()}
-            //             </div>
-            //         `;
-            //         }
-            //     });
-            // }
-
-
 
             if (this.props.linksEnabled) {
-                // tabs.push({
-                //     id: 'linked-data-summary',
-                //     title: 'Linked Data Summary',
-                //     render: () => {
-                //         return this.props.linkedDataSummaryController.view();
-                //     }
-
-                // });
-                // tabs.push({
-                //     id: 'linked-data',
-                //     title: 'Linked Data',
-                //     render: () => {
-                //         return this.props.linkedDataController.view();
-                //     }
-
-                // });
-                // tabs.push({
-                //     id: 'linked-data2',
-                //     title: 'Linked Data 2',
-                //     render: () => {
-                //         return this.props.linkedDataController2.view();
-                //     }
-
-                // });
                 tabs.push({
                     id: 'linked-data3',
                     title: 'Linked Data',
                     render: () => {
-                        return this.props.linkedDataController3.view();
+                        return this.props.linkedDataController.view();
                     }
 
                 });

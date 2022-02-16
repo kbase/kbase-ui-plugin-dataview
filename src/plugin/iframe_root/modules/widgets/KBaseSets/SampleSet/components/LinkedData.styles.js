@@ -5,13 +5,15 @@ define([], () => {
             display: 'flex',
             flexDirection: 'column',
             minHeight: '0',
-            marginTop: '10px',
         },
         Header: {
             // border: '1px solid rgb(200, 200, 200)',
-            padding: '0.5em',
+            paddingLeft: '1em',
             flex: '0 0 auto',
-            marginBottom: '1em'
+            marginBottom: '4px',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center'
         },
         LinkedData: {
             flex: '1 1 0px',
@@ -81,43 +83,6 @@ define([], () => {
             color: 'rgb(150, 150, 150)',
             marginLeft: '1em',
             marginRight: '0.5em'
-        },
-        LinkCol1: {
-            flex: '1 1 0'
-        },
-        LinkCol2: {
-            flex: '2 1 0'
-        },
-        LinkCol3: {
-            flex: '1 1 0'
-        },
-        LinkCol4: {
-            flex: '1 1 0',
-            overflow: 'hidden'
-        },
-        LinkCol5: {
-            flex: '1 1 0'
-        },
-        LinkCol6: {
-            flex: '1 1 0'
-        },
-        LinkHeaderCol1: {
-            flex: '1 1 0'
-        },
-        LinkHeaderCol2: {
-            flex: '2 1 0'
-        },
-        LinkHeaderCol3: {
-            flex: '1 1 0'
-        },
-        LinkHeaderCol4: {
-            flex: '1 1 0'
-        },
-        LinkHeaderCol5: {
-            flex: '1 1 0'
-        },
-        LinkHeaderCol6: {
-            flex: '1 1 0'
-        },
+        }
     };
 });

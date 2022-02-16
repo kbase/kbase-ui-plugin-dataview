@@ -1,152 +1,192 @@
 define([
     'preact',
     'htm',
-    'components/Empty',
-    './LinkedData.styles'
+    'components/DataTable4',
+    'components/Popover',
+    'components/Nullable',
+    'components/DataPillGroup',
+    'components/DataPill',
+    './LinkedData.styles',
+
+    'css!./LinkedData.css'
 ], (
-    {Component, h},
+    {Component, h, render: preactRender},
     htm,
-    Empty,
+    DataTable,
+    Popover,
+    Nullable,
+    DataPillGroup,
+    DataPill,
     styles
 ) => {
     const html = htm.bind(h);
 
-    function combineStyles(...styles) {
-        let newStyles = {};
-        for (const style of styles) {
-            newStyles = Object.assign(newStyles, style);
-        }
-        return newStyles;
+    function htmlToString(htmContent) {
+        const element = document.createElement('div');
+        preactRender(htmContent, element);
+        return element.innerHTML;
     }
-
 
     class LinkedData extends Component {
         constructor(props) {
             super(props);
-
-            this.DEFAULT_CURRENT_SORT = 'Type';
-            this.DEFAULT_CURRENT_SORT_SAMPLE = 'Created - Newest First';
+            this.DEFAULT_SORT = 'Sample Name & Object Type';
             this.state = {
-                linkedData: props.linkedData,
+                linkedData: this.doFilterSort(null, this.DEFAULT_SORT),
                 currentFilter: null,
-                currentSort: this.DEFAULT_CURRENT_SORT,
-                currentSortSample: this.DEFAULT_CURRENT_SORT_SAMPLE
+                currentSort: this.DEFAULT_SORT
             };
-        }
-
-        componentDidMount() {
-            const {currentFilter, currentSort, currentSortSample} = this.state;
-            this.applyFilterSort(currentFilter, currentSort, currentSortSample);
-        }
-
-        renderDataId(link) {
-            if (link.dataid) {
-                return link.dataid;
-            }
-            return html`<span style=${{color: 'rgb(150, 150, 150'}}>∅</span>`;
-        }
-
-        renderLinks(links) {
-            if (links.length === 0) {
-                return html`
-                    <${Empty} message="No data linked to this sample"/>
-                `;
-            }
-            const rows =  links
-                .map(({link, objectInfo}) => {
+            this.columns = [{
+                id: 'sampleName',
+                label: 'Sample Name',
+                display: true,
+                sortable: true,
+                searchable: true,
+                styles:{
+                    column: {
+                        flex: '1 0 0'
+                    }
+                },
+                render: (sampleName, row) => {
                     return html`
-                    <div style=${styles.Link} >
-                        <div style=${styles.LinkCol1} >
-                        <a href="/#dataview/${link.upa}" target="_blank">${link.upa}</a>
-                        </div>
-                        <div style=${styles.LinkCol2}>
-                        <a href="/#dataview/${link.upa}" target="_blank">${objectInfo.name}</a>
-                        </div>
-                        <div style=${styles.LinkCol3}>
-                        <a href="/#spec/type/${objectInfo.type}" target="_blank">${objectInfo.typeName}</b>
-                        </div>
-                        <div style=${styles.LinkCol4}>
-                         ${this.renderDataId(link)}
-                        </div>
-                        <div style=${styles.LinkCol5}>
-                        <span title="${Intl.DateTimeFormat('en-us', {dateStyle: 'full', timeStyle: 'long'}).format(link.created)}">${Intl.DateTimeFormat('en-us', {}).format(link.created)}</span>
-                        </div>
-                        <div style=${styles.LinkCol6}>
-                        <a href="/#people/${link.createdby}" target="_blank">${link.createdby}</a>
-                        </div>
-                    </div>
-                `;
-                });
-            return html`
-                <div style=${styles.LinkHeader} >
-                    <div style=${styles.LinkHeaderCol1} >
-                        Object Ref
-                    </div>
-                    <div style=${styles.LinkHeaderCol2} >
-                        Name
-                    </div>
-                    <div style=${styles.LinkHeaderCol3} >
-                        Type
-                    </div>
-                    <div style=${styles.LinkHeaderCol4} >
-                        Data Id
-                    </div>
-                    <div style=${styles.LinkHeaderCol5} >
-                        Linked On
-                    </div>
-                    <div style=${styles.LinkHeaderCol6} >
-                        By
-                    </div>
-                </div>
-                ${rows}
-            `;
-        }
+                        <a href=${`/#samples/view/${row.sampleId}/${row.sampleVersion}`} target="_blank">${sampleName}</a>
+                    `;
+                }
+            }, {
+                id: 'objectTypeName',
+                label: 'Object Type',
+                display: true,
+                sortable: true,
+                searchable: true,
+                styles:{
+                    column: {
+                        flex: '0 0 12em'
+                    }
+                },
+                render: (typeName, row) => {
+                    return html`
+                        <a href=${`/#spec/type/${row.objectType}`} target="_blank">${typeName}</a>
+                    `;
+                }
+            }, {
+                id: 'objectRef',
+                label: 'Object Ref',
+                display: true,
+                sortable: true,
+                searchable: true,
+                styles:{
+                    column: {
+                        flex: '0 0 9em'
+                    }
+                },
+                render: (ref) => {
+                    return html`
+                        <a href=${`/#dataview/${ref}`} target="_blank">${ref}</a>
+                    `;
+                }
+            }, {
+                id: 'objectName',
+                label: 'Object Name',
+                display: true,
+                sortable: true,
+                searchable: true,
+                styles:{
+                    column: {
+                        flex: '1 0 0'
+                    }
+                },
+                render: (name, row) => {
+                    return html`
+                        <a href=${`/#dataview/${row.objectRef}`} target="_blank">${name}</a>
+                    `;
+                }
+            }, {
+                id: 'linkCount',
+                label: 'Links',
+                display: true,
+                sortable: true,
+                styles:{
+                    column: {
+                        flex: '0 0 6em',
+                    },
+                    data: {
+                        textAlign: 'right',
+                        paddingRight: '1em'
+                    }
+                },
+                render: (linkCount, row) => {
+                    const render = () => {
+                        const rows = row.links
+                            .sort((a, b) => {
+                                const creationOrder = (a.created - b.created);
+                                if (creationOrder === 0) {
+                                    if (a.dataid === null) {
+                                        return -1;
+                                    } else if (b.dataid === null) {
+                                        return 1;
+                                    }
+                                    return a.dataid.localeCompare(b.dataid);
 
-        grokDescription(sample) {
-            const metadata = sample.node_tree[0].meta_controlled;
-            if ('description' in metadata) {
-                return metadata['description'].value;
+                                }
+                            })
+                            .map((link) => {
+                                const {dataid, created, createdby} = link;
+                                return html`
+                                <tr>
+                                    <td>
+                                        <${Nullable} value=${dataid} />
+                                    </td>
+                                    <td>
+                                        ${Intl.DateTimeFormat('en-US').format(created)}
+                                    </td>
+                                    <td>
+                                        <a href="/#people/${createdby}" target="_blank">${createdby}</a>
+                                    </td>
+                                </tr>
+                            `;
+
+                            });
+                        const table = html`
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th style=${{color: 'rgba(150, 150, 150)'}}>Data Id</th>
+                                        <th style=${{color: 'rgba(150, 150, 150)'}}>Linked</th>
+                                        <th style=${{color: 'rgba(150, 150, 150)'}}>By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                ${rows}
+                                </tbody>
+                            </table>
+                        `;
+                        return htmlToString(table);
+                    };
+                    return html`
+                        <${Popover} render=${render} class="LinksCell">${linkCount}</Popover>
+                    `;
+                }
             }
-            return html`<i>n/a</i>`;
+            ];
         }
 
-        renderSample({sample, links}) {
-            const description = this.grokDescription(sample);
+        renderLinkedDataTable() {
+            const dataSource = this.state.linkedData;
+
+            const props = {
+                columns: this.columns,
+                dataSource,
+                bordered: true,
+                flex: true
+            };
+
+            // const onRowClick = (row) => {
+            //     window.open(`/#samples/view/${row.id}/${row.version}`, '_blank');
+            // };
 
             return html`
-                <div style=${styles.SampleLinks}>
-                    <div style=${styles.Sample}>
-                        <div style=${{...styles.Label, marginLeft: '0'}}>Sample <span className="fa fa-arrow-right" /></div>
-                        <div style=${styles.Label}>name</div>
-                        <div style=${combineStyles(styles.SampleField, styles.SampleName)}><a href="/#samples/view/${sample.id}/${sample.version}" target="_blank">${sample.name}</a></div>
-                        <div style=${styles.Label}>description</div>
-                        <div style=${combineStyles(styles.SampleField, styles.SampleDescription)}>${description}</div>
-                        <div style=${styles.Label}>created</div>
-                        <div style=${combineStyles(styles.SampleField, styles.SampleSaveDate)}>
-                            <span title="${Intl.DateTimeFormat('en-us', {dateStyle: 'full', timeStyle: 'long'}).format(sample.save_date)}">
-                                ${Intl.DateTimeFormat('en-US').format(sample.save_date)}
-                            </span>
-                        </div>
-                        <div style=${styles.Label}>version</div>
-                        <div style=${combineStyles(styles.SampleField, styles.SampleVersion)}>${sample.version}</div>
-                        <div style=${styles.Label}>owner</div>
-                        <div style=${combineStyles(styles.SampleField, styles.SampleOwner)}><a href="/#people/${sample.user}" target="_blank">${sample.user}</a></div>
-                    </div>
-                    <div style=${styles.Links}>
-                        ${this.renderLinks(links)}
-                    </div>
-                </div>
+                <${DataTable} ...${props}/>
             `;
-        }
-
-        renderLinkedData() {
-            return this.state.linkedData
-                .filter(({links}) => {
-                    return links.length > 0;
-                })
-                .map((sample) => {
-                    return this.renderSample(sample);
-                });
         }
 
         renderEmptySet() {
@@ -157,74 +197,75 @@ define([
             `;
         }
 
-        onFilterChange(ev) {
-            const filterValue = ev.target.value;
-            this.applyFilterSort(filterValue, this.state.currentSort, this.state.currentSortSample);
-        }
+        doFilterSort(filter, sortOption) {
+            const table = this.props.table.slice();
 
-        onSortChange(ev) {
-            const sortValue = ev.target.value;
-            this.applyFilterSort(this.state.currentFilter, sortValue, this.state.currentSortSample);
-        }
-
-        onSortSampleChange(ev) {
-            const sortValue = ev.target.value;
-            this.applyFilterSort(this.state.currentFilter, this.state.currentSort, sortValue);
-        }
-
-        applyFilterSort(filter, sortFilterOption, sortSampleOption) {
-            const filteredLinkedData = (() => {
+            const filteredTable = (() => {
                 if (filter === null || filter.length === 0) {
-                    return this.props.linkedData.slice();
+                    return table.slice();
                 }
-                return this.props.linkedData.map((item) => {
-                    const links = item.links.filter(({objectInfo: {typeName}}) => {
-                        return (typeName === filter);
-                    });
-                    return {
-                        ...item, links
-                    };
+                return table.filter(({objectTypeName}) => {
+                    return (objectTypeName === filter);
                 });
             })();
 
-            const sortedLinkedData = filteredLinkedData
+            return filteredTable
                 .sort((a, b) => {
-                    switch (sortSampleOption) {
-                    case 'Created - Newest First':
-                        return a.sample.save_date - b.sample.save_date;
-                    case 'Created - Oldest First':
-                        return b.sample.save_date - a.sample.save_date;
-                    case 'Name':
-                        return a.sample.name.localeCompare(b.sample.name);
-                    case 'Owner':
-                        return a.sample.user.localeCompare(b.sample.user);
-                    }
-                })
-                .map((item) => {
-                    const links = item.links.slice().sort((a, b) => {
-                        switch (sortFilterOption) {
-                        case 'Type':
-                            return a.objectInfo.typeName.localeCompare(b.objectInfo.typeName);
-                        case 'Type2':
-                            return b.objectInfo.typeName.localeCompare(a.objectInfo.typeName);
-                        case 'Linked - Newest First':
-                            return b.link.created - a.link.created;
-                        case 'Linked - Oldest First':
-                            return a.link.created - b.link.created;
+                    switch (sortOption) {
+                    case 'Sample Name & Object Type': {
+                        const nameComparison = a.sampleName.localeCompare(b.sampleName);
+                        if (nameComparison !== 0) {
+                            return nameComparison;
                         }
-                    });
+                        return a.objectTypeName.localeCompare(b.objectTypeName);
+                    }
+                    case 'Object Type & Sample Name': {
+                        const typeNameComparison = a.objectTypeName.localeCompare(b.objectTypeName);
 
-                    return {
-                        ...item, links
-                    };
+                        if (typeNameComparison !== 0) {
+                            return typeNameComparison;
+                        }
+                        return a.sampleName.localeCompare(b.sampleName);
+
+                    }
+                    case 'Object Ref & Sample Name': {
+                        for (const aPart of a.objectRefArray) {
+                            for (const bPart of b.objectRefArray) {
+                                if (aPart == bPart) {
+                                    continue;
+                                }
+                                return aPart - bPart;
+                            }
+                        }
+                        return a.sampleName.localeCompare(b.sampleName);
+                    }
+                    case 'Object Name & Sample Name': {
+                        const objectNameComparison = a.objectName.localeCompare(b.objectName);
+                        if (objectNameComparison !== 0) {
+                            return objectNameComparison;
+                        }
+                        return a.sampleName.localeCompare(b.sampleName);
+                    }
+                    }
                 });
 
+        }
+
+        applyFilterSort(filter, sortOption) {
+            const linkedData = this.doFilterSort(filter, sortOption);
+
             this.setState({
-                linkedData: sortedLinkedData,
+                linkedData,
                 currentFilter: filter,
-                currentSort: sortFilterOption,
-                currentSortSample: sortSampleOption
+                currentSort: sortOption,
             });
+        }
+
+        // Filtering
+
+        onFilterChange(ev) {
+            const filterValue = ev.target.value;
+            this.applyFilterSort(filterValue, this.state.currentSort);
         }
 
         renderFilterControl() {
@@ -244,9 +285,17 @@ define([
             `;
         }
 
+        // Sorting.
+
+        onSortChange(ev) {
+            const sortValue = ev.target.value;
+            this.applyFilterSort(this.state.currentFilter, sortValue);
+        }
+
+
         renderSortControl() {
             const sortBy = [
-                'Type', 'Type2', 'Linked - Newest First', 'Linked - Oldest First'
+                'Sample Name & Object Type', 'Object Type & Sample Name', 'Object Ref & Sample Name', 'Object Name & Sample Name'
             ];
             const options = sortBy.map((sortId) => {
                 const selected = this.state.currentSort === sortId;
@@ -261,33 +310,17 @@ define([
             `;
         }
 
-        renderSortSampleControl() {
-            const sortBy = [
-                'Name', 'Created - Newest First', 'Created - Oldest First', 'Owner'
-            ];
-            const options = sortBy.map((sortId) => {
-                const selected = this.state.currentSortSample === sortId;
-                return html`
-                    <option value=${sortId} selected=${selected}>${sortId}</option>
-                `;
-            });
-            return html`
-                <select class="form-control" id="sort-sample-control" onChange=${this.onSortSampleChange.bind(this)}>
-                    ${options}
-                </select>
-            `;
-        }
+        // Reset control
 
         onResetButton() {
-            this.applyFilterSort('', this.DEFAULT_CURRENT_SORT, this.DEFAULT_CURRENT_SORT_SAMPLE);
+            this.applyFilterSort('', this.DEFAULT_SORT);
         }
 
         renderResetButton() {
             const disabled = (() => {
                 return (
                     (this.state.currentFilter === null || this.state.currentFilter === '') &&
-                    (this.state.currentSort === this.DEFAULT_CURRENT_SORT) &&
-                    (this.state.currentSortSample === this.DEFAULT_CURRENT_SORT_SAMPLE)
+                    (this.state.currentSort === this.DEFAULT_SORT)
                 );
             })();
             return html`
@@ -295,34 +328,116 @@ define([
             `;
         }
 
+        // Header enchilada
+
         renderHeader() {
             return html`
                 <div style=${styles.Header}>
-                    <div class="form-inline">
-                        <label style=${styles.Label}>Filter <span className="fa fa-arrow-right" /></label>
-                        <label for="filter-control" style=${{...styles.Label, marginLeft: '0.5em'}}>by object type</label>
-                        ${this.renderFilterControl()}
-                        <label style=${{...styles.Label, marginLeft: '2em'}}>Sort <span className="fa fa-arrow-right" /></label>
-                        <label for="sort-control" style=${{...styles.Label, marginLeft: '0.5em'}}>samples</label>
-                        ${this.renderSortSampleControl()}
-                        <label for="sort-control" style=${{...styles.Label, marginLeft: '1em'}}>links</label>
-                        ${this.renderSortControl()}
-                        ${this.renderResetButton()}
-                    </div>
+                    <${DataPillGroup} title="Filter">
+                        <${DataPill} label="by object type" render=${this.renderFilterControl.bind(this)} />
+                    </>
+                    <${DataPillGroup} title="Sort" style=${{marginLeft: '2em'}}>
+                        <${DataPill} label="by object type" render=${this.renderSortControl.bind(this)} />
+                    </>
+                    ${this.renderResetButton()}
                 </div>
             `;
         }
 
+        // // Render header above table.
+        // onSearchInput(ev) {
+        //     const searchText = ev.target.value;
+
+        //     this.applySearch(searchText);
+
+        //     this.setState({
+        //         table: this.state.table.slice(),
+        //         searchText
+        //     });
+        // }
+
+        // applySearch(searchText) {
+        //     if (searchText === '') {
+        //         this.state.table
+        //             .map(({rowIndex}) => this.tableMap[rowIndex])
+        //             .forEach((row) => {
+        //                 row.show = true;
+        //             });
+        //     }
+        //     const searchRE = new RegExp(searchText, 'i');
+        //     this.state.table
+        //         .map(({rowIndex}) => this.tableMap[rowIndex])
+        //         .forEach((row) => {
+        //             const show = (() => {
+        //                 for (const column of this.props.columns) {
+        //                     if (column.searchable) {
+        //                         const value = row.values[column.id];
+        //                         if (searchRE.test(value)) {
+        //                             return true;
+        //                         }
+        //                     }
+        //                 }
+        //                 return false;
+        //             })();
+        //             row.show = show;
+        //         });
+        // }
+
+        // onClearSearch() {
+        //     this.applySearch('');
+        //     this.setState({
+        //         table: this.state.table.slice(),
+        //         searchText: ''
+        //     });
+        // }
+
+        // renderSearch() {
+        //     const clearSearchDisabled = this.state.searchText === '';
+        //     return html`
+        //         <div className="form-inline">
+        //             <div className="input-group">
+        //                 <input
+        //                     type="search"
+        //                     className="form-control"
+        //                     style=${{width: '20em'}}
+        //                     placeholder="Search"
+        //                     value=${this.state.searchText}
+        //                     onInput=${this.onSearchInput.bind(this)}
+        //                     />
+        //                 <span className="input-group-addon"><span class="fa fa-search" /></span>
+        //             </div>
+        //             <button
+        //                 type="button"
+        //                 title="Clear the search input and show all rows"
+        //                 class="btn btn-default"
+        //                 style=${{marginLeft: '1em'}}
+        //                 disabled=${clearSearchDisabled}
+        //                 onClick=${this.onClearSearch.bind(this)}>
+        //                 <span className="fa fa-times" />
+        //             </button>
+        //         </div>
+        //     `;
+        // }
+
+        // searchEnabled() {
+        //     return (this.props.columns.some(({searchable}) => searchable));
+        // }
+
+        // renderToolbar() {
+        //     if (!this.searchEnabled()) {
+        //         return;
+        //     }
+        //     return html`
+        //         <div className="DataTable4-toolbar">
+        //         ${this.renderSearch()}
+        //         </div>
+        //     `;
+        // }
+
         render() {
-            if (this.state.linkedData.length === 0) {
-                return this.renderEmptySet();
-            }
             return html`
-                <div style=${styles.main}>
-                    ${this.renderHeader()}
-                    <div style=${styles.LinkedData}>
-                        ${this.renderLinkedData()}
-                    </div>
+                <div style=${styles.main} class="LinkedData4">
+                    ${this.renderLinkedDataTable()}
                 </div>
             `;
         }

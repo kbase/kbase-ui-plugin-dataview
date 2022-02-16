@@ -1,6 +1,6 @@
 define([
     './Controller',
-    '../components/LinkedData3',
+    '../components/LinkedData',
 ], (
     Controller,
     LinkedDataComponent,

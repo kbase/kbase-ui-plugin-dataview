@@ -2,14 +2,14 @@ define([
     './Controller',
     './SampleLinkedDataSummary',
     './SampleLinkedDataDetail',
-    '../components/SampleSet3',
+    '../components/SampleSet',
 ], (
     Controller,
     SampleLinkedDataSummaryController,
     SampleLinkedDataDetailController,
-    SampleSet3,
+    SampleSet,
 ) => {
-    class SampleSetController3 extends Controller {
+    class SampleSetController extends Controller {
         constructor(params) {
             super(params);
             this.sampleSet = params.sampleSet;
@@ -63,8 +63,6 @@ define([
                 });
 
                 // Count total # of unique narrative workspaces
-
-
                 return {
                     sampleSet,
                     samples,
@@ -76,9 +74,9 @@ define([
                     sampleLinkedDataDetailController: this.sampleLinkedDataDetailController()
                 };
             };
-            return this.render(SampleSet3, loader);
+            return this.render(SampleSet, loader);
         }
     }
 
-    return SampleSetController3;
+    return SampleSetController;
 });

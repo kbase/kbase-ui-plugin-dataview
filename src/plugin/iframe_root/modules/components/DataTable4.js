@@ -17,17 +17,6 @@ define([
 ) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
-
-    // function outerDimensions(el) {
-    //     el.offsetHeight;
-    //     const rect = el.getBoundingClientRect();
-    //     const width = Math.ceil(rect.right - rect.left);
-    //     const height = Math.ceil(rect.bottom - rect.top);
-    //     return {
-    //         width, height
-    //     };
-    // }
-
     /*
     Dev Notes:
 
@@ -107,43 +96,6 @@ define([
             });
         }
         render() {
-            // const headerColClasses = [
-            //     'DataTable4-header-col'
-            // ];
-            // const column = this.props.columns[columnIndex];
-            // const isHovered = this.state.columnHovered === columnIndex;
-            // if (isHovered) {
-            //     headerColClasses.push('DataTable4-col-hovered');
-            // }
-
-            // const filterMenu = {
-            //     items: [{
-            //         title: 'Foo',
-            //         action: () => {
-            //             console.log('selected menu item');
-            //         }
-            //     }]
-            // };
-
-            // const menu = {
-            //     items: [{
-            //         title: 'Sort Ascending',
-            //         action: () => {
-            //             console.log('selected menu item');
-            //             // this.doSort('ascending');
-            //         }
-            //     }, {
-            //         title: 'Sort Descending',
-            //         action: () => {
-            //             console.log('selected menu item');
-            //             // this.doSort('descending');
-            //         }
-            //     }, {
-            //         title: 'Quick Filter',
-            //         dataMenu: filterMenu
-            //     }]
-            // };
-
             const menu = {
                 items: this.props.filterValues.map((filterValue) => {
                     return {
@@ -200,9 +152,6 @@ define([
     class DataTable4 extends Component {
         constructor(props) {
             super(props);
-            // const sortColumn = this.props.initialSortColumn || 0;
-            // const sortDirection = this.props.initialSortDirection || 'ascending';
-
             const ordered = [];
             this.tableMap = {};
 
@@ -233,28 +182,6 @@ define([
                 return Array.from(uniqueValues).sort();
             });
 
-
-            // this.tableMap = this.props.dataSource.reduce((tableMap, values, rowIndex) => {
-            //     tableMap[rowIndex] = {
-            //         showDetail: false,
-            //         show: true,
-            //         rowIndex,
-            //         values
-            //     };
-            //     return tableMap;
-            // }, {});
-
-
-            // This is a parallel array of table row settings, and the subject
-            // of ordering (i.e. this array is sorted, not the original table)
-            // const ordered = Object.values(this.tableMap).map((values, rowIndex) => {
-            //     return {
-            //         showDetail: false,
-            //         show: true,
-            //         rowIndex,
-            //     };
-            // });
-
             const sort = [{
                 column: this.props.initialSortColumn || 0,
                 direction: this.props.initialSortDirection || 'ascending'
@@ -270,8 +197,6 @@ define([
                     filterText: ''
                 },
                 sort,
-                //    sortColumn,
-                //     sort Direction,
                 columnHovered,
                 showFilterHeader: this.props.showFilters || false,
                 filterPopup: {
@@ -533,7 +458,7 @@ define([
         renderHeader() {
             if (this.props.columns) {
                 return (() => {
-                    const header = this.props.columns.map(({sortable, searchable, label, styles}, columnIndex) => {
+                    const header = this.props.columns.map(({sortable, label, styles}, columnIndex) => {
                         const headerColClasses = [
                             'DataTable4-header-col'
                         ];
@@ -547,7 +472,6 @@ define([
                         if (isHovered) {
                             headerColClasses.push('DataTable4-col-hovered');
                         }
-                        // ${this.renderSearchableIndicator(searchable)}
                         return html`
                             <div className=${headerColClasses.join(' ')} 
                                  style=${styles.column || {}}
@@ -571,9 +495,6 @@ define([
                                 onClick=${() => {this.toggleColumnToolbar();}}/>
                         </div>
                     `);
-                    // header.unshift(html`
-                    //     <${FilterCell} onClick=${this.toggleColumnToolbar.bind(this)} active=${this.state.showFilterHeader} />
-                    // `);
                     return html`
                         <div className="DataTable4-header">
                             ${header}
@@ -590,7 +511,6 @@ define([
         }
 
         onFilterInput(filterText, columnIndex) {
-            // console.log('filter...', ev.target.value, index);
             const filterCol = this.props.columns[columnIndex].id;
             const columnFilters = (() => {
                 const currentFilters = this.state.columnFilters;
@@ -650,78 +570,6 @@ define([
                                 />
                             </div>
                         `;
-
-
-
-                        // const filterMenu = {
-                        //     items: [{
-                        //         title: 'Foo',
-                        //         action: () => {
-                        //             console.log('selected menu item');
-                        //         }
-                        //     }]
-                        // };
-
-                        // const menu = {
-                        //     items: [{
-                        //         title: 'Sort Ascending',
-                        //         action: () => {
-                        //             console.log('selected menu item');
-                        //             // this.doSort('ascending');
-                        //         }
-                        //     }, {
-                        //         title: 'Sort Descending',
-                        //         action: () => {
-                        //             console.log('selected menu item');
-                        //             // this.doSort('descending');
-                        //         }
-                        //     }, {
-                        //         title: 'Quick Filter',
-                        //         dataMenu: filterMenu
-                        //     }]
-                        // };
-                        // const menuStyle = {
-                        //     flex: '0 0 auto',
-                        //     visibility: 'hidden',
-                        //     marginLeft: '4px'
-                        // };
-                        // if (this.state.filterPopup.isActive || this.state.filterPopup.isStickyOpen) {
-                        //     menuStyle.visibility = 'visible';
-                        // }
-                        // const filterDropdown = html`
-                        //     <div style=${menuStyle}>
-                        //         <${Popup}
-                        //             overlaySelector=".DataTable4"
-                        //             scrollSelector=".DataTable4-filter-header"
-                        //             containerTop=${0}
-                        //             onOpen=${this.onPopupOpen.bind(this)}
-                        //             onClose=${this.onPopupClose.bind(this)}
-                        //             >
-                        //             <${DropdownMenu} menu=${menu} onClose=${this.onPopupClose.bind(this)}/>
-                        //         </>
-                        //     </div>
-                        // `;
-
-                        // return html`
-                        //     <div className=${headerColClasses.join(' ')}
-                        //          style=${styles.column || {}}
-                        //          onMouseEnter=${() => {this.onColumnEnter(columnIndex);}}
-                        //          onMouseLeave=${() => {this.onColumnLeave(columnIndex);}}
-
-                        //          >
-
-                        //         <input
-                        //             className="form-control"
-                        //             title=${`Filter "${column.label}" column; regular expression may be used`}
-                        //             onInput=${(ev) => {this.onFilterInput(ev, columnIndex);}}
-                        //             value=${this.getColumnFilterValue(columnIndex)}
-                        //             type="search"
-                        //             id=${`filter_column_${columnIndex}`}
-                        //             name=${`filter_column_${columnIndex}`} />
-
-                        //         ${filterDropdown}
-                        //     </div>
-                        // `;
                     });
 
                     const filterButton = (() => {
@@ -996,18 +844,6 @@ define([
         }
 
         renderSearch() {
-            // const clearSearchDisabled = this.state.globalFilter.filterText === '';
-            /*
-             <button
-                        type="button"
-                        title="Clear the search input and show all rows"
-                        class="btn btn-default"
-                        style=${{marginLeft: '1em'}}
-                        disabled=${clearSearchDisabled}
-                        onClick=${this.onClearSearch.bind(this)}>
-                        <span className="fa fa-times" />
-                    </button>
-            */
             return html`
                 <div className="form-inline">
                     <div className="input-group">
@@ -1051,35 +887,8 @@ define([
             return Object.keys(this.state.columnFilters).length > 0;
         }
 
-        // renderToolbar() {
-        //     if (!this.searchEnabled()) {
-        //         return;
-        //     }
-        //     const clearFilterDisabled = (this.state.globalFilter.filterText === '' && Object.keys(this.state.columnFilters).length === 0);
-        //     return html`
-        //         <div className="DataTable4-toolbar">
-        //             <div style=${{flex: '0 0 auto'}}>
-        //                 ${this.renderSearch()}
-        //             </div>
-        //             <div style=${{flex: '1 1 0', display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
-        //                 <button
-        //                     className="btn btn-default"
-        //                     onClick=${this.toggleColumnToolbar.bind(this)}>
-        //                     <span className="fa fa-filter" />
-        //                 </button>
-        //                 <button
-        //                     className="btn btn-default"
-        //                     style=${{marginLeft: '1em'}}
-        //                     disabled=${clearFilterDisabled}
-        //                     onClick=${this.clearFilters.bind(this)}>
-        //                     <span className="fa fa-times" />
-        //                 </button>
-        //             </div>
-        //         </div>
-        //     `;
-        // }
-
         toggleColumnToolbar() {
+            this.clearFilters();
             this.setState({
                 showFilterHeader: !this.state.showFilterHeader
             });

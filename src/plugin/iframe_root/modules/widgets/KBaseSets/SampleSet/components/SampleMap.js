@@ -4,29 +4,21 @@ define([
     'htm',
     'leaflet',
     'uuid',
-    'components/Row',
     'components/Col',
-    'components/Table',
-    'components/DataTable',
     'components/Button',
     './SampleMapDetail',
-    'components/common',
     './common',
-    './SampleMap3.styles',
-    'css!./SampleMap3.css'
+    './SampleMap.styles',
+    'css!./SampleMap.css'
 ], (
     $,
     {Component, h, createRef},
     htm,
     leaflet,
     Uuid,
-    Row,
     Col,
-    Table,
-    DataTable,
     Button,
     Detail,
-    common,
     {constants, pluralize},
     styles
 ) => {
