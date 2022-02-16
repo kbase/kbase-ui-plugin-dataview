@@ -1,14 +1,14 @@
 define([
     'preact',
     'htm',
-    'lib/formatters',
-    'components/DataTable',
+    'components/DataTable4',
+    'components/Container',
     './SampleSet.styles'
 ], (
     {Component, h},
     htm,
-    fmt,
     DataTable,
+    Container,
     styles
 ) => {
     const html = htm.bind(h);
@@ -27,81 +27,164 @@ define([
     }
 
     class SampleSet extends Component {
+        constructor(props) {
+            super(props);
+            this.state = {
+                view: 'normal'
+            };
+        }
         renderSamplesTable() {
             const columns = [{
                 id: 'name',
-                label: 'Name/ID',
-                display: true,
-                isSortable: true,
-                style: {
-                    flex: '2 0 0'
+                label: 'Sample Name',
+                styles: {
+                    column: {
+                        flex: '2 0 0'
+                    }
                 },
                 render: (name, sample) => {
                     return html`
-                        <a href=${`/#samples/view/${sample.id}/${sample.version}`} target="_blank">${name}</a>
+                        <a href=${`/#samples/view/${sample.id}/${sample.version}`} 
+                           title=${name}
+                           target="_blank">${name}</a>
                     `;
-                }
+                },
+                sortable: true,
+                searchable: true
             }, {
+                id: 'description',
+                label: 'Description',
+                styles: {
+                    column: {
+                        flex: '2 0 0'
+                    }},
+                render: (description) => {
+                    return html`<span title=${description}>${description}</span>`;
+                },
+                sortable: true,
+                searchable: true
+            }, {
+                id: 'workspaceCount',
+                label: '# Narratives',
+                styles:{
+                    column: {
+                        flex: '0 0 10em',
+                    },
+                    data: {
+                        textAlign: 'right',
+                        paddingRight: '7em'
+                    }
+                },
+                render: (workspaceCount) => {
+                    return html`
+                        <span>${Intl.NumberFormat('en-US', {useGrouping: true}).format(workspaceCount)}</span>
+                    `;
+                },
+                sortable: true
+            }, {
+                id: 'linkCount',
+                label: '# Links',
+                styles:{
+                    column: {
+                        flex: '0 0 10em',
+                    },
+                    data: {
+                        textAlign: 'right',
+                        paddingRight: '7em'
+                    }
+                },
+                render: (linkCount) => {
+                    return html`
+                        <span>${Intl.NumberFormat('en-US', {useGrouping: true}).format(linkCount)}</span>
+                    `;
+                },
+                sortable: true
+            },{
                 id: 'savedAt',
-                label: 'Saved',
-                display: true,
-                isSortable: true,
-                style: {
-                    flex: '0 0 13em'
+                label: 'Created',
+                styles: {
+                    column: {
+                        flex: '0 0 6em'
+                    }
                 },
+                // transform: (rawValue) => {
+                //     try {
+                //         return new Date(rawValue);
+                //     } catch (ex) {
+                //         console.error('Transform error!', rawValue, ex);
+                //         return '** transform error **';
+                //     }
+                // },
                 render: (savedAt) => {
+                    const detailedTimestamp = Intl.DateTimeFormat('en-US', {
+                        datestyle: 'full',
+                        timeStype: 'long'
+                    }).format(savedAt);
                     return html`
-                        <span>${fmt.formattedDate(savedAt)}</span>
+                        <span title=${detailedTimestamp}>${Intl.DateTimeFormat('en-US').format(savedAt)}</span>
                     `;
-                }
-            }, {
-                id: 'savedBy',
-                label: 'By',
-                display: true,
-                isSortable: true,
-                style: {
-                    flex: '0 0 13em'
                 },
-                render: (savedBy) => {
-                    return html`
-                        <a href=${`/#user/${savedBy}`}
-                           target="_blank">${this.props.userProfiles[savedBy].user.realname}</a>
-                    `;
-                }
+                sortable: true
             }, {
                 id: 'version',
                 label: 'Version',
-                display: true,
-                isSortable: true,
-                style: {
-                    flex: '0 0 7em',
-                    textAlign: 'right',
-                    paddingRight: '1em'
+                styles: {
+                    column: {
+                        flex: '0 0 7em',
+                    },
+                    data: {
+                        textAlign: 'right',
+                        paddingRight: '5em'
+                    }
                 },
                 render: (version) => {
                     return html`
                         <span>${version}</span>
                     `;
+                },
+                sortable: true
+            }, {
+                id: 'savedBy',
+                label: 'By',
+                styles: {
+                    column: {
+                        flex: '0 0 13em'
+                    }
+                },
+                render: (savedBy) => {
+                    return html`
+                        <a href=${`/#user/${savedBy}`}
+                           target="_blank"
+                           title=${this.props.userProfiles[savedBy].user.realname}
+                           >${this.props.userProfiles[savedBy].user.realname}</a>
+                    `;
                 }
-            },
-            ];
+            }];
 
             const props = {
                 columns,
-                pageSize: 10,
-                table: [],
-                dataSource: this.props.samples.map((sample) => {
+                dataSource: this.props.samplesWithCounts.map(({sample, workspaceCount, linkCount}) => {
                     return {
                         id: sample.id,
                         name: sample.name,
+                        description: getMetadataValue(sample, 'description', '-'),
                         material: getMetadataValue(sample, 'material', '-'),
                         sourceId: sample.node_tree[0].id,
                         savedAt: sample.save_date,
                         savedBy: sample.user,
                         version: sample.version,
-                        // source: sample.sample.dataSourceDefinition.source
+                        workspaceCount,
+                        linkCount
                     };
-                })
+                }),
+                view: this.state.view,
+                renderDetail: (row) => {
+                    return html`
+                        <${Container}>
+                            ${this.props.sampleLinkedDataDetailController.view({id: row.id, version: row.version})}
+                        </>
+                    `;
+                }
             };
 
             const onRowClick = (row) => {
@@ -109,7 +192,7 @@ define([
             };
 
             return html`
-                <${DataTable} heights=${{row: 40, col: 40}} onClick=${onRowClick} ...${props}/>
+                <${DataTable} flex=${true} bordered=${true} onClick=${onRowClick} ...${props}/>
             `;
         }
 
@@ -122,9 +205,10 @@ define([
         }
 
         render() {
-            if (this.props.sampleSet.samples.length === 0) {
+            if (this.props.sampleSet.data.samples.length === 0) {
                 return this.renderEmptySet();
             }
+            //
             return html`
                 <div className="SampleSet" style=${styles.main}>
                     ${this.renderSamplesTable()}
