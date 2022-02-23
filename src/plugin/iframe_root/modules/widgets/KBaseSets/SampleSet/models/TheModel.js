@@ -130,23 +130,25 @@ define([
             const sampleLinksToFetch = samplesToGet.filter((sample) => {
                 const key = this.sampleToRef(sample);
                 return !(key in this.cache.dataLinksBySample);
-            });
+            })
+                .map(({id, version}) => {
+                    return {id, version};
+                });
+
+            // Seed the cache with empty link set for each sample.
+            // The data links api returns a list of links for all requested
+            // samples, not a list for each sample.
 
             if (sampleLinksToFetch.length > 0) {
+                for (const sample of sampleLinksToFetch) {
+                    this.cache.dataLinksBySample[this.sampleToRef(sample)] = [];
+                }
+
                 const sampleService = new GenericClient({
                     module: 'SampleService',
                     url: this.runtime.config('services.SampleService.url'),
                     token: this.runtime.service('session').getAuthToken()
                 });
-
-                // const start = Date.now();
-                // const links = await Promise.all(sampleLinksToFetch.map(async ({id, version}) => {
-                //     const [{links}] = await sampleService
-                //         .callFunc('get_data_links_from_sample', [{id, version}]);
-                //     return {links, id, version};
-
-                // }));
-
 
                 const result = await sampleService
                     .callFunc('get_data_links_from_sample_set', [{
@@ -157,25 +159,14 @@ define([
                 const [{links}] = result;
 
                 links.forEach((link) => {
-                    // const {id, version} = sampleLinksToFetch[index];
                     const {id, version} = link;
                     const key = this.sampleToRef({id, version});
-                    if (!(key in this.cache.dataLinksBySample)) {
-                        this.cache.dataLinksBySample[key] = [];
-                    }
                     this.cache.dataLinksBySample[key].push(link);
                 });
-
-                // for (const {id, version} of sampleLinksToFetch) {
-                //     const [{links}] = await sampleService
-                //         .callFunc('get_data_links_from_sample', [{id, version}]);
-                //     const key = this.sampleToRef({id, version});
-                //     this.cache.dataLinksBySample[key] = links;
-                // }
             }
             return samplesToGet.map((sample) => {
                 const key = this.sampleToRef(sample);
-                return this.cache.dataLinksBySample[key];
+                return this.cache.dataLinksBySample[key] || [];
             });
         }
 
@@ -331,7 +322,14 @@ define([
              ******/
 
             // Get the data links
-            const rawDataLinks = await this.getDataLinks(orderedSamples);
+            let rawDataLinks;
+            try {
+                rawDataLinks = await this.getDataLinks(orderedSamples);
+            } catch (ex) {
+                console.error('Error fetching data links', ex);
+                throw new Error(`Error fetching data links: ${  ex.message}`);
+            }
+            console.log('shebang: 3a: getDataLinks', rawDataLinks);
             const samplesNLinks = samples.map((sample, index) => {
                 return {
                     sample,
@@ -339,7 +337,7 @@ define([
                 };
             });
 
-            console.log('shebang: 3: getDataLinks', Date.now() - start);
+            console.log('shebang: 3b: getDataLinks', Date.now() - start);
             start = Date.now();
 
             /******

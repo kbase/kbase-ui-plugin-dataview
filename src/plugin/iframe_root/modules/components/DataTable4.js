@@ -741,7 +741,7 @@ define([
             if (this.hasFilter()) {
                 return 'No data matches this filter';
             }
-            return 'No data provided';
+            return 'The table is empty';
         }
 
         renderBody() {
