@@ -84,27 +84,13 @@ define([
                 }
             }];
 
-            if (this.props.linksEnabled) {
-                tabs.push({
-                    id: 'sampleset3',
-                    title: 'Samples',
-                    render: () => {
-                        return this.props.sampleSetController.view();
-                    }
-                });
-            } else {
-                tabs.push({
-                    id: 'sampleset',
-                    title: 'Samples',
-                    render: () => {
-                        return html`
-                        <div className="FlexCol">
-                            ${this.renderSampleSet()}
-                        </div>
-                    `;
-                    }
-                });
-            }
+            tabs.push({
+                id: 'sampleset3',
+                title: 'Samples',
+                render: () => {
+                    return this.props.sampleSetController.view();
+                }
+            });
 
             tabs.push({
                 id: 'map',
@@ -129,16 +115,15 @@ define([
                 }
             });
 
-            if (this.props.linksEnabled) {
-                tabs.push({
-                    id: 'linked-data3',
-                    title: 'Linked Data',
-                    render: () => {
-                        return this.props.linkedDataController.view();
-                    }
+            tabs.push({
+                id: 'linked-data3',
+                title: 'Linked Data',
+                render: () => {
+                    return this.props.linkedDataController.view();
+                }
 
-                });
-            }
+            });
+
             const extra = html`
                 <div>
                     <a className="btn btn-link" href="https://docs.kbase.us/workflows/samples-and-samplesets"
