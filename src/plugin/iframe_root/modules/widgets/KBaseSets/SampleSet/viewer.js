@@ -330,8 +330,6 @@ define([
                     loadingMessage: 'Loading Linked Data...'
                 });
 
-                const linksEnabled = this.runtime.featureEnabled('sampleset-data-links');
-
                 const params = {
                     sampleSet: sampleSet.data,
                     samples,
@@ -345,8 +343,7 @@ define([
                     groups,
                     summaryController,
                     sampleSetController,
-                    linkedDataController,
-                    linksEnabled
+                    linkedDataController
                 };
                 preact.render(preact.h(Main, params), this.node);
                 this.status = 'STARTED';

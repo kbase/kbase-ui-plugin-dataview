@@ -36,16 +36,8 @@
 
  tabs.showTab('tab_name');
  */
-/*global
- define
- */
-/*jslint
- browser: true,
- white: true
- */
-define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
-    'use strict';
 
+define(['jquery', 'kb_lib/html', './widget'], ($, html) => {
     const t = html.tag,
         a = t('a'),
         div = t('div');
@@ -53,14 +45,14 @@ define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
     $.KBWidget({
         name: 'kbTabs',
         version: '1.0.0',
-        init: function (options) {
+        init(options) {
             this._super(options);
             if (!options) {
                 options = {};
             }
-            var container = this.$elem,
+            const container = this.$elem,
                 self = this,
-                tabs = $('<ul class="nav nav-' + (options.pills ? 'pills' : 'tabs') + '">'),
+                tabs = $(`<ul class="nav nav-${  options.pills ? 'pills' : 'tabs'  }">`),
                 tab_contents = $('<div class="tab-content">');
             container.append(tabs, tab_contents);
 
@@ -69,11 +61,11 @@ define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
             // adds a single tab and content
             this.addTab = function (p) {
                 // if tab exists, don't add
-                if (tabs.find('a[data-id="' + p.name + '"]').length > 0) {
+                if (tabs.find(`a[data-id="${  p.name  }"]`).length > 0) {
                     return;
                 }
 
-                const tab = $('<li class="' + (p.active ? 'active' : '') + '">'),
+                const tab = $(`<li class="${  p.active ? 'active' : ''  }">`),
                     tab_link = $(
                         a(
                             {
@@ -99,12 +91,12 @@ define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
 
                 // add close button if needed
                 if (p.removable || options.removable) {
-                    var rm_btn = $(
+                    const rm_btn = $(
                         '<button type="button" class="close" style="margin-left: 6px; vertical-align: bottom; ">&times;</button>'
                     );
                     tab_link.append(rm_btn);
 
-                    rm_btn.click(function () {
+                    rm_btn.click(() => {
                         self.rmTab(p.name);
                     });
                 }
@@ -112,7 +104,7 @@ define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
                 // add content pane
                 const contentPane = $(
                     div({
-                        class: 'tab-pane ' + (p.active ? 'active' : ''),
+                        class: `tab-pane ${  p.active ? 'active' : ''}`,
                         dataId: p.name,
                         dataKBTesthookTabpane: p.key
                     })
@@ -135,8 +127,8 @@ define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
 
             // remove tab and tab content
             this.rmTab = function (name) {
-                const tab = tabs.find('a[data-id="' + name + '"]').parent('li');
-                const tab_content = tab_contents.children('[data-id="' + name + '"]');
+                const tab = tabs.find(`a[data-id="${  name  }"]`).parent('li');
+                const tab_content = tab_contents.children(`[data-id="${  name  }"]`);
 
                 // get previous or next tab
                 let nextTabId;
@@ -165,23 +157,23 @@ define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
 
             // returns tab
             this.tab = function (name) {
-                return tabs.children('[data-id="' + name + '"]');
+                return tabs.children(`[data-id="${  name  }"]`);
             };
 
             // returns content of tab
             this.tabContent = function (name) {
-                return tab_contents.children('[data-id="' + name + '"]');
+                return tab_contents.children(`[data-id="${  name  }"]`);
             };
 
             // adds content to existing tab pane; useful for ajax
             this.addContent = function (p) {
-                var tab = tab_contents.children('[data-id="' + p.name + '"]');
+                const tab = tab_contents.children(`[data-id="${  p.name  }"]`);
                 tab.append(p.content || '');
                 return tab;
             };
 
             this.setContent = function (p) {
-                var tab = tab_contents.children('[data-id="' + p.name + '"]');
+                const tab = tab_contents.children(`[data-id="${  p.name  }"]`);
                 tab.empty();
                 tab.append(p.content || '');
                 /* TODO: probably better to return this to support chaining... */
@@ -193,10 +185,10 @@ define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
                 this.tabHistory.push(id);
                 tabs.children('li').removeClass('active');
                 tab_contents.children('.tab-pane').removeClass('active');
-                tabs.find('a[data-id="' + id + '"]')
+                tabs.find(`a[data-id="${  id  }"]`)
                     .parent()
                     .addClass('active');
-                tab_contents.children('[data-id="' + id + '"]').addClass('active');
+                tab_contents.children(`[data-id="${  id  }"]`).addClass('active');
             };
 
             this.getTabNav = function () {
@@ -207,9 +199,9 @@ define(['jquery', 'kb_lib/html', './widget'], function ($, html) {
             // don't animate initial tabs
             if (options.tabs) {
                 options.tabs.forEach(
-                    function (tab) {
-                        this.addTab($.extend(tab, { animate: false }));
-                    }.bind(this)
+                    (tab) => {
+                        this.addTab($.extend(tab, {animate: false}));
+                    }
                 );
             }
 
