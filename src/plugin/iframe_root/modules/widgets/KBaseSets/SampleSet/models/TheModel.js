@@ -274,9 +274,6 @@ define([
              ******/
             const sampleSet = await this.getSampleSet();
 
-            console.log('shebang: 1: getSampleSet', Date.now() - start);
-            start = Date.now();
-
             const sampleCount = sampleSet.data.samples.length;
 
             /******
@@ -291,9 +288,6 @@ define([
                 // TODO: see if this is even possible.
                 throw new Error('no samples in this set');
             }
-
-            console.log('shebang: 2: getSamples', Date.now() - start);
-            start = Date.now();
 
             const fieldKeys = new Set();
             samples.forEach((sample) => {
@@ -329,16 +323,13 @@ define([
                 console.error('Error fetching data links', ex);
                 throw new Error(`Error fetching data links: ${  ex.message}`);
             }
-            console.log('shebang: 3a: getDataLinks', rawDataLinks);
+
             const samplesNLinks = samples.map((sample, index) => {
                 return {
                     sample,
                     links: rawDataLinks[index]
                 };
             });
-
-            console.log('shebang: 3b: getDataLinks', Date.now() - start);
-            start = Date.now();
 
             /******
              * Get object infos from data links
@@ -355,8 +346,6 @@ define([
             // Get object info for each upa
 
             const objectInfos = await this.getObjectInfos(Array.from(upas));
-            console.log('shebang: 4: getObjectInfos', Date.now() - start);
-            start = Date.now();
 
             const dataLinks = rawDataLinks.map((links) => {
                 return links.filter(({upa}) => {
@@ -377,8 +366,6 @@ define([
                 userProfileMap[profile.user.username] = profile;
                 return userProfileMap;
             }, {});
-            console.log('shebang: 5: getUserProfiles', Date.now() - start);
-            start = Date.now();
 
             /******
              * Get types from object infos
@@ -389,7 +376,6 @@ define([
                 return types;
             }, new Set()));
 
-            console.log('shebang: total', Date.now() - start0);
 
             return {
                 sampleSet,
