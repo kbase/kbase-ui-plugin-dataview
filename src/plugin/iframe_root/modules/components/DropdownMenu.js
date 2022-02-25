@@ -161,28 +161,16 @@ define([
             `;
         }
 
-        hoverItemOn(event) {
-            // Object.entries(styles.itemHover).forEach(([name, value]) => {
-            //     // console.log('item hover...', event.target.style.getPropertyValue('padding'), name, value);
-            //     // event.target.style.setProperty(name, value);
-
-            // });
+        hoverItemOn() {
             this.setState({
                 isHovered: true
             });
         }
 
-        hoverItemOff(event) {
+        hoverItemOff() {
             this.setState({
                 isHovered: false
             });
-            // Object.entries(styles.itemHover).forEach(([name, value]) => {
-            //     // console.log('item off', name, value);
-            //     // event.target.style.removeProperty(name);
-            //     this.setState({
-            //         isHovered: false
-            //     });
-            // });
         }
     }
 
