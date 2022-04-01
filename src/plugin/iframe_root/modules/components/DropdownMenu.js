@@ -7,7 +7,7 @@ define([
     htm,
     styles
 ) => {
-    const {Component} = preact;
+    const {Component, createRef} = preact;
     const html = htm.bind(preact.h);
 
     class MenuItem extends Component {
@@ -68,6 +68,7 @@ define([
                     // if (this.state.isHovered) {
                     //     style = {...style, ...styles.itemHover};
                     // }
+                    const dataMenuPositionStyle = this.props.position === 'right' ? styles.dataMenuPositionRight : styles.dataMenuPositionLeft;
                     const items = item.dataMenu.items.map((item) => {
                         if (item.action) {
                             return html`
@@ -88,7 +89,7 @@ define([
                         `;
                     });
                     return [html`
-                        <div style=${styles.dataMenu}>${items}</div>`, '-open'];
+                        <div style=${Object.assign({}, styles.dataMenu, dataMenuPositionStyle)}>${items}</div>`, '-open'];
                 }
                 return [null, ''];
             })();
@@ -177,11 +178,34 @@ define([
     class DropdownMenu extends Component {
         constructor(props) {
             super(props);
-            this.ref = preact.createRef();
-            this.dropdownRef = preact.createRef();
+            this.ref = createRef();
+            this.dropdownRef = createRef();
             this.state = {
-                open: false
+                open: false,
+                position: 'left'
             };
+        }
+
+        componentDidMount() {
+            // const bounds = this.dropdownRef.current.getBoundingClientRect();
+            // console.log('mounted ddref', this.dropdownRef.current.getBoundingClientRect());
+            // console.log('mounted ref', this.ref.current.getBoundingClientRect());
+            // const el = document.elementFromPoint(bounds.x, bounds.y);
+            // console.log('mounted el', el);
+            // console.log('mounted el boundds', el.getBoundingClientRect());
+            if (this.state.position === 'left' && this.isHidden()) {
+                this.setState({
+                    position: 'right'
+                });
+            }
+        }
+
+        isHidden() {
+            const bounds = this.dropdownRef.current.getBoundingClientRect();
+            const coverBounds = document.elementFromPoint(bounds.x, bounds.y).getBoundingClientRect();
+            const dropdownRight = bounds.x + bounds.width;
+            const coverRight = coverBounds.x + coverBounds.width;
+            return dropdownRight > coverRight;
         }
 
         toggleMenu() {
@@ -200,7 +224,7 @@ define([
         renderMenuItems() {
             return this.props.menu.items.map((item) => {
                 return html`
-                    <${MenuItem} item=${item} onActionCompleted=${this.doActionCompleted.bind(this)}/>`;
+                    <${MenuItem} item=${item} position=${this.state.position} onActionCompleted=${this.doActionCompleted.bind(this)}/>`;
             });
         }
 
@@ -222,9 +246,10 @@ define([
         }
 
         render() {
+            const side = this.state.position === 'left' ? styles.positionLeft : styles.positionRight;
             return html`
-                <div style=${styles.main} ref=${this.ref}>
-                    <div style=${styles.dropdown} ref=${this.dropdownRef}>
+                <div style=${styles.main} ref=${this.ref} data-testid="DropdownMenu">
+                    <div style=${Object.assign({}, styles.dropdown, side)} ref=${this.dropdownRef}>
                         <div style=${styles.wrapper}>
                             ${this.renderMenu()}
                         </div>
