@@ -40,7 +40,7 @@ define([
         // }
         render() {
             return html`
-                <div style=${this.props.style} ref=${this.ref}>
+                <div style=${this.props.style} ref=${this.ref} data-testid="content">
                     ${this.props.children}
                 </div>
             `;
@@ -115,7 +115,7 @@ define([
             document.body.addEventListener('click', this.handleAnyClick);
 
             const content = html`
-                <${Content} style=${Object.assign({}, styles.pop, {left, top})}>
+                <${Content} style=${Object.assign({}, styles.pop, {left, top})} >
                     ${this.renderContent()}
                 </>
             `;
@@ -135,7 +135,7 @@ define([
         render() {
             const icon = this.state.open ? 'times-circle' : 'chevron-circle-down';
             return html`
-                <div style=${styles.main}
+                <div style=${styles.main} data-testid="Popup"
                      onClick=${(e) => {e.stopPropagation(); this.togglePopup();}} 
                      ref=${this.ref}>
                     <span class="fa fa-${icon}" style=${styles.icon}></span>

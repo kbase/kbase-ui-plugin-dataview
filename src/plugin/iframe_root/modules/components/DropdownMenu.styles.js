@@ -12,11 +12,16 @@ define([], () => {
             border: '1px solid rgba(200, 200, 200, 1)',
             borderRadius: '4px',
             top: '100%',
-            left: '0',
             backgroundColor: 'white',
             padding: '4px',
             whiteSpace: 'nowrap',
             filter: 'blur(0px)'
+        },
+        positionLeft: {
+            left: '0'
+        },
+        positionRight: {
+            right: '0'
         },
         wrapper: {},
         title: {
@@ -43,11 +48,16 @@ define([], () => {
             overflowY: 'auto',
             position: 'absolute',
             top: '90%',
-            left: '90%',
             border: '1px solid rgba(200, 200, 200, 1)',
             borderRadius: '4px',
             padding: '4px',
             backgroundColor: 'white'
+        },
+        dataMenuPositionRight: {
+            right: '10%'
+        },
+        dataMenuPositionLeft: {
+            left: '90%'
         },
         itemLabel: {
             flex: '1 1 0px'
