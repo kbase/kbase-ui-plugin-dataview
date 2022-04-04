@@ -25,11 +25,7 @@ define([
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
-    const WIDTH = 1200;
-    // const HEIGHT = 700;
-
     const MAX_OBJECTS = 50;
-
 
     // Utility functions.
 
@@ -398,7 +394,6 @@ define([
                         graph=${graph} 
                         objRefToNodeIdx=${objRefToNodeIdx} 
                         runtime=${this.props.runtime} 
-                        width=${WIDTH} 
                         onNodeOver=${({ref, info, objdata}) => {
                             this.props.onInspectNode({ref, info, objdata}, true);
                         }}

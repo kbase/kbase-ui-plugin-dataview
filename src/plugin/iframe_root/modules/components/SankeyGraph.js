@@ -94,7 +94,6 @@ define([
         }
         componentDidMount() {
             const node = this.ref.current;
-            console.log('hmm', node, node.clientWidth);
             this.setState({
                 width: node.clientWidth
             }, () => {
@@ -143,12 +142,9 @@ define([
 
         renderGraph(graphNode) {
             const $graphNode = $(graphNode);
-            // const margin = {top: 10, right: 10, bottom: 10, left: 10};
-            // const width = this.props.width - 50 - margin.left - margin.right;
-            // const width = this.props.width;
 
-            // TODO: eliminate the "- 32" which is to ensure there is no horizontal scrolling.
-            const width = this.state.width - 31;
+            // TODO: eliminate the "- 27" which is to ensure there is no horizontal scrolling.
+            const width = this.state.width - 27;
             const {graph, objRefToNodeIdx} = this.props;
             const height = this.props.graph.nodes.length * NODE_HEIGHT;
             // TODO: eliminate the "+ 15", required to ensure bounding container does not overflow
