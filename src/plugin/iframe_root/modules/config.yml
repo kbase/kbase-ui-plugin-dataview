@@ -23,18 +23,18 @@ install:
     # - module: kb_dataview_widget_panel
     #   name: kb_dataview_panel
     #   type: factory
-    - module: provenancePanelV3
-      name: kb_dataview_provenancePanel3
+    - module: provenancePanel
+      name: kb_dataview_provenancePanel
       type: factory
-    - module: provenancePanel2
-      name: kb_dataview_provenancePanel2
-      type: factory
-    - module: widgets/provenanceWidget
-      name: kb_dataview_provenanceV3
-      type: factory
-    - module: widgets/provenanceWidgetv2
-      name: kb_dataview_provenance_v2
-      type: factory
+    # - module: provenancePanel2
+    #   name: kb_dataview_provenancePanel2
+    #   type: factory
+    # - module: widgets/provenanceWidget
+    #   name: kb_dataview_provenanceV3
+    #   type: factory
+    # - module: widgets/provenanceWidgetv2
+    #   name: kb_dataview_provenance_v2
+    #   type: factory
     - module: widgets/relatedData
       name: kb_dataview_relatedData
       type: factory
@@ -263,39 +263,39 @@ install:
       name: kb_dataview_linkedOntologyTerms
       type: es6
 
-  routes:
-    - path:
-        - dataview
-        - name: workspaceId
-        - name: objectId
-        - name: objectVersion
-          optional: true
-      queryParams:
-        sub: {}
-        subid: {}
-        viewer: {}
-      widget: kb_dataview_panel
-    - path:
-        - [objgraphview, provenance]
-        - name: workspaceId
-        - name: objectId
-        - name: objectVersion
-          optional: true
-      widget: kb_dataview_provenancePanel3
-    - path:
-        - [objgraphview2, provenance2]
-        - name: workspaceId
-        - name: objectId
-        - name: objectVersion
-          optional: true
-      widget: kb_dataview_provenancePanel2
-    - path:
-        - jsonview
-        - name: workspaceId
-        - name: objectId
-        - name: objectVersion
-          optional: true
-      widget: kb_dataview_jsonViewPanel
+  # routes:
+  #   - path:
+  #       - dataview
+  #       - name: workspaceId
+  #       - name: objectId
+  #       - name: objectVersion
+  #         optional: true
+  #     queryParams:
+  #       sub: {}
+  #       subid: {}
+  #       viewer: {}
+  #     widget: kb_dataview_panel
+  #   - path:
+  #       - [objgraphview, provenance]
+  #       - name: workspaceId
+  #       - name: objectId
+  #       - name: objectVersion
+  #         optional: true
+  #     widget: kb_dataview_provenancePanel
+  #   # - path:
+  #   #     - [objgraphview2, provenance2]
+  #   #     - name: workspaceId
+  #   #     - name: objectId
+  #   #     - name: objectVersion
+  #   #       optional: true
+  #   #   widget: kb_dataview_provenancePanel2
+  #   - path:
+  #       - jsonview
+  #       - name: workspaceId
+  #       - name: objectId
+  #       - name: objectVersion
+  #         optional: true
+  #     widget: kb_dataview_jsonViewPanel
 
   panels:
     - view: dataView
@@ -305,11 +305,11 @@ install:
       module: jsonViewPanel
       type: factory
     - view: provenanceView
-      module: provenancePanelV3
+      module: provenancePanel
       type: factory
-    - view: provenanceView2
-      module: provenancePanel2
-      type: factory
+    # - view: provenanceView2
+    #   module: provenancePanel2
+    #   type: factory
 
   types:
     # COMMUNITIES
@@ -1086,8 +1086,8 @@ views:
     module: jsonViewPanel
     type: factory
   - view: provenanceView
-    module: provenancePanelV3
+    module: provenancePanel
     type: factory
-  - view: provenanceView2
-    module: provenancePanel2
-    type: factory
+  # - view: provenanceView2
+  #   module: provenancePanel2
+  #   type: factory

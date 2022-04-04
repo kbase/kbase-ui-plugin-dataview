@@ -4,6 +4,7 @@ define([
     './view',
     'kb_lib/jsonRpc/genericClient',
     'kb_service/utils',
+    'components/Loading2',
 
     'bootstrap'
 ], (
@@ -11,7 +12,8 @@ define([
     htm,
     View,
     GenericClient,
-    APIUtils
+    APIUtils,
+    Loading
 ) => {
 
 
@@ -264,9 +266,7 @@ define([
 
         renderLoading() {
             return html`
-                <div className="well">
-                    Loading ... <span className="fa fa-spinner fa-pulse fa-fw"></span>
-                </div>
+               <${Loading} type="neutral" message="Loading object info" />
             `;
         }
 

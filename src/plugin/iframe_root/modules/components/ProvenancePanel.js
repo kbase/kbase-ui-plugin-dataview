@@ -262,7 +262,7 @@ define([
                 `;
             }
             return html`
-                <${Alert} type="info" message="No metadata" />
+                <${Alert} type="neutral" message="No metadata" />
             `;
         }
 
@@ -356,11 +356,10 @@ define([
                     <${Alert} type="info" message="Hover over graph node to display" />
                 `;
             }
-            // console.log('objdata?', this.state.nodeInfo);
             const {objdata} = this.state.selectedNode.nodeInfo;
             if (objdata.length === 0) {
                 return html`
-                    <b>No provenance data set.</b>
+                    <${Alert} type="neutral" message="No provenance data set." />
                 `;
             }
             const rows = [];
@@ -387,16 +386,18 @@ define([
                     })();
                     rows.push(...this.getProvRows(provenance, prefix));
                 });
-            } else {
-                /// LEFT OFF HERE...
-                rows.push(tableRow('', 'No provenance data set'));
+            }
+            if (rows.length > 0) {
+                return html`
+                    <table class="table table-striped table-bordered Provenance">
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                    </table>
+                `;
             }
             return html`
-                <table class="table table-striped table-bordered Provenance">
-                    <tbody>
-                        ${rows}
-                    </tbody>
-                </table>
+                <${Alert} type="neutral" message="No provenance data set." />
             `;
         }
 

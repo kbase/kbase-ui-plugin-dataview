@@ -1,6 +1,7 @@
 define([
     'preact',
-    'htm'
+    'htm',
+    'css!./Alert.css'
 ], (
     preact,
     htm
@@ -22,7 +23,7 @@ define([
         }
         render() {
             return html`
-                <div className="alert alert-${this.props.type || 'info'}">
+                <div className="Alert alert alert-${this.props.type || 'info'}">
                     ${this.renderTitle()}
                     ${this.renderContent()}
                 </div>
