@@ -13,9 +13,10 @@ define([
     function factory(config) {
         let mount,
             container,
-            runtime = config.runtime,
             theWidget,
             widgetContainer;
+
+        const runtime = config.runtime;
 
         function findMapping(type, params) {
             let mapping = runtime.getService('type').getViewer({
@@ -253,8 +254,8 @@ define([
 
         function destroy() {
             return Promise.try(() => {
-                if (theWidget && theWidget.detach) {
-                    return theWidget.detach();
+                if (theWidget && theWidget.destroy) {
+                    return theWidget.destroy();
                 }
             });
         }
@@ -270,7 +271,7 @@ define([
     }
 
     return {
-        make(config) {
+        make: (config) => {
             return factory(config);
         }
     };

@@ -118,6 +118,10 @@ define([
         }
 
         render() {
+            const paneExtraClasses = [];
+            if (this.state.selectedTab.autoScroll) {
+                paneExtraClasses.push('Tabs-pane-auto-scroll');
+            }
             return html`
                 <div className="Tabs">
                     <div className="Tabs-tabs">
@@ -126,7 +130,7 @@ define([
                         </div>
                         ${this.renderExtra()}
                     </div>
-                    <div className="Tabs-pane"
+                    <div className=${`Tabs-pane ${paneExtraClasses.join(' ')}`}
                          data-k-b-testhook-tabpane=${this.state.selectedTab.id}
                          role="tabpane"
                          style=${this.props.paneStyle || {}}>

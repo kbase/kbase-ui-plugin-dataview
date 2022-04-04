@@ -1,6 +1,4 @@
-define(['bluebird', 'kb_lib/merge'], function (Promise, merge) {
-    'use strict';
-
+define(['bluebird', 'kb_lib/merge'], (Promise, merge) => {
     class ObjectWidgetAdapter {
         constructor(config) {
             if (!config.runtime) {
@@ -23,7 +21,7 @@ define(['bluebird', 'kb_lib/merge'], function (Promise, merge) {
             return new Promise((resolve, reject) => {
                 require([this.module], (Widget) => {
                     if (!Widget) {
-                        reject(new Error('Widget module did not load properly (undefined) for ' + this.module));
+                        reject(new Error(`Widget module did not load properly (undefined) for ${  this.module}`));
                         return;
                     }
                     // NB we save the config, because the internal widget
@@ -56,12 +54,12 @@ define(['bluebird', 'kb_lib/merge'], function (Promise, merge) {
                 //var widgetConfig = config.widgetDef || params || {};
                 //_.extend(widgetConfig, initConfig);
 
-                var widgetConfig = new merge.ShallowMerger(this.initConfig)
+                const widgetConfig = new merge.ShallowMerger(this.initConfig)
                     .mergeIn({
                         container: this.container,
                         // userId: this.runtime.getService('session').getUsername(),
                         runtime: this.runtime,
-                        params: params
+                        params
                     })
                     .value();
                 return this.widget.init(widgetConfig);

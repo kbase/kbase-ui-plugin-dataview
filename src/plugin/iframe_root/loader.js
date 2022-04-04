@@ -1,4 +1,4 @@
-define([], function () {
+define([], () => {
     require.config({
         baseUrl: './modules',
         paths: {

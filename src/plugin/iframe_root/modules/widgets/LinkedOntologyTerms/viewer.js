@@ -4,11 +4,11 @@ define([
     'kb_lib/widgetUtils',
     'lib/Params',
     'lib/formatters',
-    'components/Loading',
+    'components/Loading2',
     './components/LinkedOntologyTerms',
     'components/SimpleError',
     './model'
-], function (
+], (
     Promise,
     preact,
     widgetUtils,
@@ -18,7 +18,7 @@ define([
     LinkedOntologyTerms,
     SimpleError,
     Model
-) {
+) => {
     class Viewer {
         constructor(config) {
             this.runtime = config.runtime;
@@ -48,7 +48,7 @@ define([
             });
 
             // Display loading spinner...
-            preact.render(preact.h(Loading, { }), this.node);
+            preact.render(preact.h(Loading, {message: 'Looking for linked ontology terms...'}), this.node);
 
             // // Get the object form the model.
             this.model = new Model({
@@ -66,7 +66,7 @@ define([
                     preact.render(preact.h(LinkedOntologyTerms, {linkedTerms}), this.node);
                 })
                 .catch((error) => {
-                    console.error('ERROR!', error);
+                    console.error('ERROR!', error.message);
                     preact.render(preact.h(SimpleError, {message: error.message}), this.node);
                 });
         }

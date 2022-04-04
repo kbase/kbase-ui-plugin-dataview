@@ -1,5 +1,4 @@
-require(['loader'], function () {
-    'use strict';
+require(['loader'], () => {
     require([
         'bluebird',
         'kbaseUI/integration',
@@ -10,7 +9,7 @@ require(['loader'], function () {
         'bootstrap',
         'css!font_awesome'
     ], (Promise, Integration, Dispatcher, knockoutLoader, props, pluginConfig) => {
-        const pluginConfigDB = new props.Props({ data: pluginConfig });
+        const pluginConfigDB = new props.Props({data: pluginConfig});
         Promise.try(() => {
             const integration = new Integration({
                 rootWindow: window,
@@ -54,8 +53,8 @@ require(['loader'], function () {
                     return dispatcher.start();
                 })
                 .then((dispatcher) => {
-                    integration.onNavigate(({ view, params }) => {
-                        dispatcher.dispatch({ view, params })
+                    integration.onNavigate(({view, params}) => {
+                        dispatcher.dispatch({view, params})
                             .catch((ex) => {
                                 // TODO: this should trigger an error display
                                 console.error('Dispatch Error', ex.message);

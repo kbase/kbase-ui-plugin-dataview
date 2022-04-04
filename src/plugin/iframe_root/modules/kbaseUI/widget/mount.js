@@ -1,6 +1,4 @@
-define(['bluebird'], function (Promise) {
-    'use strict';
-
+define(['bluebird'], (Promise) => {
     class WidgetMount {
         constructor(config) {
             if (!config.node) {
@@ -35,7 +33,7 @@ define(['bluebird'], function (Promise) {
                 .then((widget) => {
                     // Wrap it in a mount object to help manage it.
                     if (!widget) {
-                        throw new Error('Widget could not be created: ' + widgetId);
+                        throw new Error(`Widget could not be created: ${  widgetId}`);
                     }
                     this.mountedWidget.widget = widget;
                     return Promise.all([widget, widget.init && widget.init()]);

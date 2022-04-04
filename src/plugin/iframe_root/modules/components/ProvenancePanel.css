@@ -1,0 +1,73 @@
+
+.LegendTableContainer {
+    border: 1px solid rgba(200, 200, 200, 0.5);
+    border-radius: 0.25em;
+    padding: 0.25em;
+}
+.LegendTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0.25em;
+}
+.LegendTable td:nth-child(1) {
+    width: 2em;
+}
+.LegendTable td {
+    padding: 0.25em;
+}
+
+.ProvenanceCellData {
+
+}
+
+.ObjectDetails {
+
+}
+
+.NodeHovered {
+    /* border: 1px solid rgba(100, 100, 100, 0.5); */
+    background-color: rgba(200, 200, 200, 0.3);
+    padding: 0.125em;
+}
+
+.NodeNotHovered {
+    /* background-color: rgba(200, 200, 200, 0.3); */
+    padding: 0.125em;
+}
+
+table.ObjectDetails {
+    table-layout: fixed;
+}
+
+table.ObjectDetails tbody tr th {
+    width: 7em;
+}
+
+.ObjectMetadata table {
+    table-layout: fixed;
+}
+
+.ObjectMetadata table tbody tr th {
+    width: 20em;
+}
+
+table.Provenance {
+    table-layout: fixed;
+}
+
+table.Provenance tbody tr th {
+    width: 11.5em;
+}
+
+.CellContent {
+    white-space:nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+}
+
+.ProvenancePanel-Code {
+    max-height: 15em;
+    overflow-y: auto;
+    white-space: pre;
+    word-wrap: break-word;
+}
