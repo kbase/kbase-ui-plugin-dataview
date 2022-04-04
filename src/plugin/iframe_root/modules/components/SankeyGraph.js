@@ -147,14 +147,11 @@ define([
             // const width = this.props.width - 50 - margin.left - margin.right;
             // const width = this.props.width;
 
-            // TODO: eliminate the "- 24" which is to ensure there is no horizontal scrolling.
-            const width = this.state.width - 24;
-            console.log('width', width);
+            // TODO: eliminate the "- 32" which is to ensure there is no horizontal scrolling.
+            const width = this.state.width - 31;
             const {graph, objRefToNodeIdx} = this.props;
             const height = this.props.graph.nodes.length * NODE_HEIGHT;
-            // this.props.setHeight(height);
-            console.log('heights...', this.props.graph.nodes.length, this.props.graph.nodes.length * NODE_HEIGHT, height, this.props.graph.nodes);
-            // TODO: eliminate the "+ 11", required to ensure bounding container does not overflow
+            // TODO: eliminate the "+ 15", required to ensure bounding container does not overflow
             this.setState({
                 height: Math.min(height + 15, DEFAULT_MAX_HEIGHT)
             });
