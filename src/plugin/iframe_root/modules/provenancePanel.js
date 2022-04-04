@@ -1,25 +1,31 @@
 define([
-    'jquery',
+    'preact',
     'bluebird',
-    'kb_lib/html',
-    'kbaseUI/widget/widgetSet',
+    // 'kb_lib/html',
+    // 'kbaseUI/widget/widgetSet',
     'kb_service/utils',
-    'kb_service/client/workspace'
-], ($, Promise, html, WidgetSet, apiUtils, Workspace) => {
-    function renderBSPanel(config) {
-        const div = html.tag('div');
-        return div({class: 'panel panel-default'}, [
-            div({class: 'panel-heading'}, [div({class: 'panel-title'}, config.title)]),
-            div({class: 'panel-body'}, [config.content])
-        ]);
-    }
+    'kb_service/client/workspace',
+    'components/ProvenancePanel',
+    'css!./provenancePanel.css'
+], (preact, Promise, apiUtils, Workspace, ProvenancePanel) => {
+
+    // const html = htm.bind(preact.h);
+    // const t = htmlTags.tag,
+    //     div = t('div');
+
+    // function renderBSPanel(config) {
+    //     const div = html.tag('div');
+    //     return div({class: 'panel panel-default'}, [
+    //         div({class: 'panel-heading'}, [div({class: 'panel-title'}, config.title)]),
+    //         div({class: 'panel-body'}, [config.content])
+    //     ]);
+    // }
 
     function widget(config) {
         const runtime = config.runtime;
         const widgetSet = runtime.service('widget').newWidgetSet();
         let mount,
-            container,
-            rendered;
+            container;
 
         function getObjectInfo(params) {
             return Promise.try(() => {
@@ -53,59 +59,24 @@ define([
             });
         }
 
-        function renderPanel() {
-            const div = html.tag('div'),
-                panel = div(
-                    {
-                        class: 'kbase-view kbase-dataview-view container-fluid',
-                        'data-kbase-view': 'dataview',
-                        dataKBTesthookPlugin: 'dataview'
-                    },
-                    [
-                        div({class: 'row'}, [
-                            div({class: 'col-sm-12'}, [
-                                renderBSPanel({
-                                    title: 'Data Provenance and Reference Network',
-                                    icon: 'sitemap',
-                                    content: div({id: widgetSet.addWidget('kb_dataview_provenanceV3')})
-                                })
-                            ])
-                        ])
-                    ]
-                );
-            return {
-                title: 'Dataview',
-                content: panel
-            };
-        }
-
-        function init(config) {
-            return Promise.try(() => {
-                rendered = renderPanel();
-                return widgetSet.init(config);
-            });
+        function init() {
+            return Promise.resolve();
         }
 
         function attach(node) {
             return Promise.try(() => {
                 mount = node;
                 container = document.createElement('div');
+                container.classList = ['ProvenancePanel'];
+                console.log('HERE', container.classList);
                 mount.appendChild(container);
-                container.innerHTML = rendered.content;
-                return widgetSet.attach(node);
             });
         }
 
-        function start(params) {
-            return Promise.try(() => {
-                return getObjectInfo(params).then((objectInfo) => {
-                    params.objectInfo = objectInfo;
-
-                    runtime.send('ui', 'setTitle', `Data Provenance and Reference Network for ${  objectInfo.name}`);
-
-                    return widgetSet.start(params);
-                });
-            });
+        async function start(params) {
+            const objectInfo = await getObjectInfo(params);
+            runtime.send('ui', 'setTitle', `Data Provenance and Reference Network for ${objectInfo.name}`);
+            preact.render(preact.h(ProvenancePanel, {objectInfo, runtime}), container);
         }
 
         function run(params) {
