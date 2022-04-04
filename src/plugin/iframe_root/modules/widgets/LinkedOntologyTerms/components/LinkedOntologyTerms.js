@@ -1,18 +1,16 @@
 define([
     'preact',
-    'htm'
-], function (
+    'htm',
+    'components/Empty2'
+], (
     preact,
-    htm
-) {
+    htm,
+    Empty
+) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
     class LinkedOntologyTerms extends Component {
-        constructor(props) {
-            super(props);
-        }
-
         renderLinkedTerms() {
             const rows = this.props.linkedTerms.map(({term, feature}) => {
                 return html`
@@ -43,11 +41,7 @@ define([
         }
 
         renderNoLinkedTerms() {
-            return html`
-            <div class="alert alert-info">
-            No terms linked to this object.
-            </div>
-            `;
+            return html`<${Empty} message="No terms linked to this object" />`;
         }
 
         render() {
@@ -56,7 +50,7 @@ define([
             }
             return html`
                 <div class="LinkedOntologyTerms">
-                ${this.renderLinkedTerms()}
+                    ${this.renderLinkedTerms()}
                 </table>
             `;
         }

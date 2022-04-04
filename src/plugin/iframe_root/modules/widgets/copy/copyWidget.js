@@ -1,23 +1,19 @@
-/*global define,alert*/
-/*jslint white:true,browser:true */
 define([
     'bluebird',
     'knockout',
     'kb_common/html',
     'kb_service/client/workspace',
     'kb_service/utils'
-], function (
+], (
     Promise,
     ko,
     html,
     WorkspaceClient,
     apiUtils
-) {
-    'use strict';
+)  =>{
+
     function factory(config) {
-        var parent,
-            container,
-            runtime = config.runtime,
+        const runtime = config.runtime,
             tag = html.tag,
             div = tag('div'),
             button = tag('button'),
@@ -32,12 +28,15 @@ define([
             p = tag('p'),
             b = tag('b'),
             span = tag('span'),
-            viewModel,
-            toggleState = 'hidden',
-            toggleListener,
             workspaceClient = new WorkspaceClient(runtime.getConfig('services.workspace.url'), {
                 token: runtime.service('session').getAuthToken()
             });
+
+        let parent,
+            container,
+            viewModel,
+            toggleState = 'hidden',
+            toggleListener;
 
         function show() {
             container.firstChild.classList.remove('hidden');
@@ -61,16 +60,16 @@ define([
         }
 
         function getWritableNarratives(params) {
-            var workspaceId = params.objectInfo.wsid;
+            const workspaceId = params.objectInfo.wsid;
             return workspaceClient
                 .list_workspace_info({
                     perm: 'w'
                 })
-                .then(function (data) {
-                    var objects = data.map(function (workspaceInfo) {
+                .then((data) => {
+                    const objects = data.map((workspaceInfo) => {
                         return apiUtils.workspace_metadata_to_object(workspaceInfo);
                     });
-                    return objects.filter(function (obj) {
+                    return objects.filter((obj) => {
                         if (
                             obj.metadata.narrative &&
                             !isNaN(parseInt(obj.metadata.narrative, 10)) &&
@@ -88,31 +87,31 @@ define([
         }
 
         function makeNarrativeUrl(path) {
-            var base = runtime.getConfig('services.narrative.url');
+            const base = runtime.getConfig('services.narrative.url');
             return base + path;
         }
 
         function doCopyIntoExistingNarrative(params, narrativeInfo) {
-            var from = { ref: params.objectInfo.ref },
-                to = { wsid: narrativeInfo.objectInfo.wsid, name: params.objectInfo.name };
+            const from = {ref: params.objectInfo.ref},
+                to = {wsid: narrativeInfo.objectInfo.wsid, name: params.objectInfo.name};
             workspaceClient
                 .copy_object({
-                    from: from,
-                    to: to
+                    from,
+                    to
                 })
-                .then(function (copied) {
-                    var copiedObjectInfo = apiUtils.objectInfoToObject(copied),
+                .then((copied) => {
+                    const copiedObjectInfo = apiUtils.objectInfoToObject(copied),
                         narrativeUrl = makeNarrativeUrl(
-                            '/narrative/' +
-                            apiUtils.makeWorkspaceObjectId(
-                                narrativeInfo.workspaceInfo.id,
-                                narrativeInfo.workspaceInfo.metadata.narrative
-                            )
+                            `/narrative/${
+                                apiUtils.makeWorkspaceObjectId(
+                                    narrativeInfo.workspaceInfo.id,
+                                    narrativeInfo.workspaceInfo.metadata.narrative
+                                )}`
                         ),
                         message = div([
                             'Successfully copied this data object to the Narrative ',
                             narrativeInfo.workspaceInfo.metadata.narrative_nice_name,
-                            span({ style: { fontStyle: 'italic' } }, [
+                            span({style: {fontStyle: 'italic'}}, [
                                 a(
                                     {
                                         href: narrativeUrl,
@@ -131,59 +130,59 @@ define([
 
         function paramsToQuery(params) {
             return Object.keys(params)
-                .map(function (key) {
-                    return key + '=' + encodeURIComponent(params[key]);
+                .map((key) => {
+                    return `${key  }=${  encodeURIComponent(params[key])}`;
                 })
                 .join('&');
         }
 
         function makeUrl(path, params) {
-            var query = paramsToQuery(params),
-                url = '/#' + path + '?' + query;
+            const query = paramsToQuery(params),
+                url = `/#${  path  }?${  query}`;
 
             return url;
         }
 
         function doCopyIntoNewNarrative(params) {
-            var path = 'narrativemanager/new',
+            const path = 'narrativemanager/new',
                 redirectParams = {
                     copydata: params.objectInfo.ref
                 },
                 url = makeUrl(path, redirectParams);
-            window.open(url, 'window_' + html.genId());
+            window.open(url, `window_${  html.genId()}`);
         }
 
         function getNarrative(objectReference) {
             return workspaceClient
                 .get_object_info_new({
-                    objects: [{ ref: objectReference }],
+                    objects: [{ref: objectReference}],
                     ignoreErrors: 1
                 })
-                .then(function (info) {
+                .then((info) => {
                     if (info.length === 0) {
-                        throw new Error('No Narrative found with reference ' + objectReference);
+                        throw new Error(`No Narrative found with reference ${  objectReference}`);
                     }
                     if (info.length > 1) {
-                        throw new Error('Too many Narratives found with reference ' + objectReference);
+                        throw new Error(`Too many Narratives found with reference ${  objectReference}`);
                     }
-                    var objectInfo = apiUtils.objectInfoToObject(info[0]);
-                    return [objectInfo, workspaceClient.get_workspace_info({ id: objectInfo.wsid })];
+                    const objectInfo = apiUtils.objectInfoToObject(info[0]);
+                    return [objectInfo, workspaceClient.get_workspace_info({id: objectInfo.wsid})];
                 })
-                .spread(function (objectInfo, wsInfo) {
-                    var workspaceInfo = apiUtils.workspaceInfoToObject(wsInfo);
+                .spread((objectInfo, wsInfo) => {
+                    const workspaceInfo = apiUtils.workspaceInfoToObject(wsInfo);
                     return {
-                        objectInfo: objectInfo,
-                        workspaceInfo: workspaceInfo
+                        objectInfo,
+                        workspaceInfo
                     };
                 });
         }
 
         function renderComponent() {
-            return div({ class: 'hidden', dataPlace: 'main' }, [
-                div({ class: 'panel panel-primary' }, [
-                    div({ class: 'panel-heading' }, [span({ class: 'panel-title' }, 'Copy Object to Narrative')]),
-                    div({ class: 'panel-body' }, [
-                        div({ class: 'container-fluid' }, [
+            return div({class: 'hidden', dataPlace: 'main'}, [
+                div({class: 'panel panel-primary'}, [
+                    div({class: 'panel-heading'}, [span({class: 'panel-title'}, 'Copy Object to Narrative')]),
+                    div({class: 'panel-body'}, [
+                        div({class: 'container-fluid'}, [
                             p([
                                 'You may use this  panel to copy the ',
                                 b('data object'),
@@ -193,16 +192,16 @@ define([
                                 b('existing Narrartive'),
                                 ' which you may select from the list below.'
                             ]),
-                            div({ class: 'col-md-8' }, [
+                            div({class: 'col-md-8'}, [
                                 form([
-                                    table({ class: 'table' }, [
+                                    table({class: 'table'}, [
                                         tr([
                                             td(
                                                 input({
                                                     type: 'radio',
                                                     name: 'copyMethod',
                                                     value: 'new',
-                                                    dataBind: { checked: 'copyMethod' }
+                                                    dataBind: {checked: 'copyMethod'}
                                                 })
                                             ),
                                             td('Copy into New Narrative')
@@ -214,7 +213,7 @@ define([
                                                     type: 'radio',
                                                     name: 'copyMethod',
                                                     value: 'existing',
-                                                    dataBind: { checked: 'copyMethod' }
+                                                    dataBind: {checked: 'copyMethod'}
                                                 })
                                             ),
                                             td([
@@ -231,12 +230,12 @@ define([
                                             ])
                                         ]),
                                         '<!-- ko if: errorMessage() -->',
-                                        tr([td(['ER']), td(div({ dataBind: { text: 'errorMessage' } }))]),
+                                        tr([td(['ER']), td(div({dataBind: {text: 'errorMessage'}}))]),
                                         '<!-- /ko -->',
                                         tr([
                                             td(),
                                             td([
-                                                div({ class: 'btn-toolbar', role: 'toolbar' }, [
+                                                div({class: 'btn-toolbar', role: 'toolbar'}, [
                                                     div(
                                                         [
                                                             button(
@@ -262,34 +261,34 @@ define([
                                             ])
                                         ]),
                                         '<!-- ko if: completionMessage() -->',
-                                        tr([td(['']), td(div({ dataBind: { html: 'completionMessage' } }))]),
+                                        tr([td(['']), td(div({dataBind: {html: 'completionMessage'}}))]),
                                         '<!-- /ko -->'
                                     ])
                                 ])
                             ]),
-                            div({ class: 'col-md-4' }, [
-                                div({ class: 'panel panel-default' }, [
-                                    div({ class: 'panel-heading' }, [
-                                        div({ class: 'panel-title' }, 'Selected Narrative')
+                            div({class: 'col-md-4'}, [
+                                div({class: 'panel panel-default'}, [
+                                    div({class: 'panel-heading'}, [
+                                        div({class: 'panel-title'}, 'Selected Narrative')
                                     ]),
-                                    div({ class: 'panel-body' }, [
+                                    div({class: 'panel-body'}, [
                                         '<!-- ko if: copyMethod() === "existing" -->',
                                         p(['The data object will be copied into the following Narrative:']),
                                         '<!-- ko with: selectedNarrativeObject -->',
-                                        table({ class: 'table' }, [
-                                            tr([th('Ref'), td(div({ dataBind: { text: 'objectInfo.ref' } }))]),
+                                        table({class: 'table'}, [
+                                            tr([th('Ref'), td(div({dataBind: {text: 'objectInfo.ref'}}))]),
                                             tr([
                                                 th('Name'),
                                                 td(
                                                     div({
-                                                        dataBind: { text: 'workspaceInfo.metadata.narrative_nice_name' }
+                                                        dataBind: {text: 'workspaceInfo.metadata.narrative_nice_name'}
                                                     })
                                                 )
                                             ]),
-                                            tr([th('Owner'), td(div({ dataBind: { text: 'objectInfo.saved_by' } }))]),
+                                            tr([th('Owner'), td(div({dataBind: {text: 'objectInfo.saved_by'}}))]),
                                             tr([
                                                 th('Last saved'),
-                                                td(div({ dataBind: { text: 'objectInfo.saveDate' } }))
+                                                td(div({dataBind: {text: 'objectInfo.saveDate'}}))
                                             ])
                                         ]),
                                         '<!-- /ko -->',
@@ -320,35 +319,35 @@ define([
 
             // Methods
             this.copyMethod.subscribe(
-                function (newValue) {
+                (newValue) => {
                     switch (newValue) {
                     case 'new':
                         this.selectedNarrative([undefined]);
                         break;
                     }
-                }.bind(this)
+                }
             );
             this.selectedNarrative.subscribe(
-                function (newValue) {
-                    var vm = this;
+                (newValue) => {
+                    const vm = this;
                     if (newValue[0] === undefined) {
                         this.copyMethod('new');
                     } else {
                         this.copyMethod('existing');
                         getNarrative(newValue[0])
-                            .then(function (narrative) {
+                            .then((narrative) => {
                                 vm.selectedNarrativeObject(narrative);
                             })
-                            .catch(Error, function (err) {
+                            .catch(Error, (err) => {
                                 console.error(err);
                                 vm.errorMessage(err.message);
                             })
-                            .catch(function (err) {
+                            .catch((err) => {
                                 console.error(err);
                                 vm.errorMessage('unknown error');
                             });
                     }
-                }.bind(this)
+                }
             );
             this.handleCopy = function () {
                 this.errorMessage('');
@@ -372,7 +371,7 @@ define([
 
         // API
 
-        function init(config) { }
+        function init() { }
 
         function attach(node) {
             return Promise.try(() => {
@@ -383,14 +382,14 @@ define([
         }
 
         function start(params) {
-            toggleListener = runtime.recv('copyWidget', 'toggle', function () {
+            toggleListener = runtime.recv('copyWidget', 'toggle', () => {
                 toggle();
             });
             viewModel = new ViewModel(params);
             viewModel.copyMethod('new');
             ko.applyBindings(viewModel, container);
-            return getWritableNarratives(params).then(function (narratives) {
-                narratives.forEach(function (narrative) {
+            return getWritableNarratives(params).then((narratives) => {
+                narratives.forEach((narrative) => {
                     viewModel.narrativesById[narrative.id] = narrative;
                     viewModel.narratives.push({
                         name: narrative.metadata.narrative_nice_name,
@@ -400,7 +399,7 @@ define([
             });
         }
 
-        function run(params) {
+        function run() {
             // ??
         }
 
@@ -422,16 +421,16 @@ define([
         }
 
         return {
-            init: init,
-            attach: attach,
-            start: start,
-            stop: stop,
-            detach: detach,
-            destroy: destroy
+            init,
+            attach,
+            start,
+            stop,
+            detach,
+            destroy
         };
     }
     return {
-        make: function (config) {
+        make(config) {
             return factory(config);
         }
     };

@@ -2,11 +2,11 @@ define([
     'bluebird',
     'kb_lib/jsonRpc/genericClient',
     'kb_lib/jsonRpc/dynamicServiceClient'
-], function (
+], (
     Promise,
     GenericClient,
     DynamicServiceClient
-) {
+) => {
     class Model {
         constructor({runtime, workspaceId, objectId, objectVersion}) {
             this.runtime = runtime;
@@ -49,13 +49,12 @@ define([
             const upa = (() => {
                 if (this.objectVersion) {
                     return `${this.workspaceId}/${this.objectId}/${this.objectVersion}`;
-                } else {
-                    return `${this.workspaceId}/${this.objectId}`;
                 }
+                return `${this.workspaceId}/${this.objectId}`;
             })();
 
             return ontologyAPI
-                .callFunc('get_terms_from_ws_obj', [{
+                .callFunc('get_terms_from_ws_object', [{
                     obj_ref: upa
                 }])
                 .then(([result]) => {

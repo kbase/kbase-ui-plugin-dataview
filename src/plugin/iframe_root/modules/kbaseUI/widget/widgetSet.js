@@ -1,6 +1,4 @@
-define(['bluebird', 'kb_lib/html'], function (Promise, html) {
-    'use strict';
-
+define(['bluebird', 'kb_lib/html'], (Promise, html) => {
     function eachArrays(arrays, fun) {
         const len = arrays[0].length;
         for (let i = 0; i < len; i += 1) {
@@ -27,12 +25,12 @@ define(['bluebird', 'kb_lib/html'], function (Promise, html) {
             const widgetConfig = config || {};
             const widgetDef = this.widgetManager.getWidget(widgetId);
             const widgetMaker = this.widgetManager.makeWidget(widgetId, widgetConfig),
-                id = widgetDef.name + '_' + html.genId(),
+                id = `${widgetDef.name  }_${  html.genId()}`,
                 rec = {
-                    id: id,
+                    id,
                     name: widgetDef.name || widgetDef.id,
                     title: widgetDef.title,
-                    widgetMaker: widgetMaker
+                    widgetMaker
                 };
             this.widgets.push(rec);
             return id;
@@ -86,10 +84,10 @@ define(['bluebird', 'kb_lib/html'], function (Promise, html) {
                             type: 'WidgetError',
                             reason: 'MissingAttachmentNode',
                             message:
-                                'The widget ' +
-                                (widgetWrapper.title || widgetWrapper.name) +
-                                ' does not have a valid node at ' +
-                                widgetWrapper.id
+                                `The widget ${
+                                    widgetWrapper.title || widgetWrapper.name
+                                } does not have a valid node at ${
+                                    widgetWrapper.id}`
                         };
                     }
                     return widgetWrapper.widget.attach(widgetWrapper.node);
@@ -116,7 +114,7 @@ define(['bluebird', 'kb_lib/html'], function (Promise, html) {
                         }
                     })
                     .filter((next) => {
-                        return next ? true : false;
+                        return !!next;
                     })
             );
         }
@@ -140,7 +138,7 @@ define(['bluebird', 'kb_lib/html'], function (Promise, html) {
                         }
                     })
                     .filter((next) => {
-                        return next ? true : false;
+                        return !!next;
                     })
             );
         }

@@ -6,17 +6,16 @@ define([
     '../utils',
     './assemblySummary',
     './assemblyContigs'
-], function ($, Promise, html, BS, utils, AssemblySummary, AssemblyContigs) {
-    'use strict';
-    var t = html.tag,
+], ($, Promise, html, BS, utils, AssemblySummary, AssemblyContigs) => {
+    const t = html.tag,
         div = t('div');
 
     function factory(config) {
-        var hostNode,
-            container,
-            runtime = config.runtime;
+        let hostNode,
+            container;
+        const runtime = config.runtime;
 
-        var widgets = [
+        const widgets = [
             {
                 module: AssemblySummary,
                 id: 'summary'
@@ -26,9 +25,9 @@ define([
                 id: 'contigs'
             }
         ];
-        widgets.forEach(function (widget) {
+        widgets.forEach((widget) => {
             widget.instance = widget.module.make({
-                runtime: runtime
+                runtime
             });
         });
 
@@ -63,18 +62,18 @@ define([
             container = hostNode.appendChild(document.createElement('div'));
             container.innerHTML = layout();
             return Promise.all(
-                widgets.map(function (widget) {
-                    return widget.instance.attach(container.querySelector('[data-element="' + widget.id + '"]'));
+                widgets.map((widget) => {
+                    return widget.instance.attach(container.querySelector(`[data-element="${  widget.id  }"]`));
                 })
             );
         }
 
         function start(params) {
             // get the assembly reference
-            var assemblyRef = utils.getRef(params);
+            const assemblyRef = utils.getRef(params);
 
             return Promise.all(
-                widgets.map(function (widget) {
+                widgets.map((widget) => {
                     return widget.instance.start({
                         objectRef: assemblyRef
                     });
@@ -84,7 +83,7 @@ define([
 
         function stop() {
             return Promise.all(
-                widgets.map(function (widget) {
+                widgets.map((widget) => {
                     return widget.instance.stop();
                 })
             );
@@ -92,10 +91,10 @@ define([
 
         function detach() {
             return Promise.all(
-                widgets.map(function (widget) {
+                widgets.map((widget) => {
                     return widget.instance.detach();
                 })
-            ).then(function () {
+            ).then(() => {
                 if (hostNode && container) {
                     container.innerHTML = '';
                     hostNode.removeChild(container);
@@ -104,15 +103,15 @@ define([
         }
 
         return Object.freeze({
-            attach: attach,
-            start: start,
-            stop: stop,
-            detach: detach
+            attach,
+            start,
+            stop,
+            detach
         });
     }
 
     return {
-        make: function (config) {
+        make(config) {
             return factory(config);
         }
     };

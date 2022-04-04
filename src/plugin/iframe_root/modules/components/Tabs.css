@@ -71,6 +71,10 @@
     padding-top: 10px;
 }
 
+.Tabs-pane-auto-scroll {
+    overflow-y: auto;
+}
+
 .Tabs-pane-default-content {
     flex: 1 1 0px;
     display: flex;

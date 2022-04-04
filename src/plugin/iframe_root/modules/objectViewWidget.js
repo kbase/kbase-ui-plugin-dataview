@@ -11,6 +11,7 @@ define([
     'components/WidgetWrapper',
     'components/Overview/index',
     'components/MiniOverview/index',
+    'components/ProvenancePanel',
     'uuid',
 
     'css!./objectViewWidget.css',
@@ -28,6 +29,7 @@ define([
     WidgetWrapper,
     OverviewComponent,
     MiniOverviewComponent,
+    Provenance,
     Uuid
 ) => {
     const html = htm.bind(preact.h);
@@ -69,6 +71,7 @@ define([
                 }, {
                     id: 'overview',
                     title: 'Overview',
+                    autoScroll: true,
                     render: () => {
                         return html`
                             <${OverviewComponent}
@@ -80,17 +83,9 @@ define([
                 }, {
                     id: 'provenance',
                     title: 'Provenance',
+                    autoScroll: true,
                     render: () => {
-                        return html`
-                            <${WidgetWrapper}
-                                    id="kb_dataview_provenance"
-                                    params=${params}
-                                    runtime=${runtime}
-                                    key=${new Uuid(4).format()}
-                                    config=${{}}
-                                    scrolling=${true}
-                            />
-                        `;
+                        return html`<${Provenance} runtime=${runtime} ...${params} />`;
                     }
                 }
             ];

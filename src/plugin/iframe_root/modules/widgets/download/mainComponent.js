@@ -9,7 +9,7 @@ define([
     'kb_service/utils',
     'poller',
     'toggler'
-], function (
+], (
     numeral,
     html,
     Places,
@@ -20,12 +20,9 @@ define([
     apiUtils,
     Poller,
     Toggler
-) {
-    'use strict';
+)  => {
     function factory(config) {
-        var parent,
-            container,
-            runtime = config.runtime,
+        const  runtime = config.runtime,
             tag = html.tag,
             div = tag('div'),
             button = tag('button'),
@@ -42,11 +39,13 @@ define([
             places = Places.make({
                 root: container
             }),
-            poller = Poller.make({ interval: 1000 }),
+            poller = Poller.make({interval: 1000}),
             state = {
                 mode: 'new',
                 downloads: {}
-            },
+            };
+        let parent,
+            container,
             toggler;
 
         /*
@@ -68,27 +67,27 @@ define([
         // Renderers
 
         function renderLayout() {
-            return div({ class: 'hidden', id: places.add('main') }, [
-                div({ class: 'panel panel-primary' }, [
-                    div({ class: 'panel-heading' }, [
-                        span({ class: 'panel-title', id: places.add('title') }, 'Transform and Download Data Object')
+            return div({class: 'hidden', id: places.add('main')}, [
+                div({class: 'panel panel-primary'}, [
+                    div({class: 'panel-heading'}, [
+                        span({class: 'panel-title', id: places.add('title')}, 'Transform and Download Data Object')
                     ]),
-                    div({ class: 'panel-body' }, [
-                        div({ class: 'container-fluid' }, [
-                            div({ class: 'col-md-12' }, [
+                    div({class: 'panel-body'}, [
+                        div({class: 'container-fluid'}, [
+                            div({class: 'col-md-12'}, [
                                 p([
                                     'This tool allows you to convert this data object to one or more output formats and download the resulting file.'
                                 ]),
-                                p({ id: places.add('comment') })
+                                p({id: places.add('comment')})
                             ]),
-                            div({ class: 'col-md-12' }, [span({ id: places.add('content') })]),
-                            div({ class: 'col-md-12', style: { marginTop: '1em' } }, [
-                                div({ class: 'panel panel-default' }, [
-                                    div({ class: 'panel-heading' }, [
-                                        div({ class: 'panel-title' }, 'Requested Transforms')
+                            div({class: 'col-md-12'}, [span({id: places.add('content')})]),
+                            div({class: 'col-md-12', style: {marginTop: '1em'}}, [
+                                div({class: 'panel panel-default'}, [
+                                    div({class: 'panel-heading'}, [
+                                        div({class: 'panel-title'}, 'Requested Transforms')
                                     ]),
-                                    div({ class: 'panel-body' }, [div({ id: places.add('downloads') })]),
-                                    div({ id: places.add('downloaders') })
+                                    div({class: 'panel-body'}, [div({id: places.add('downloads')})]),
+                                    div({id: places.add('downloaders')})
                                 ])
                             ])
                         ])
@@ -96,7 +95,7 @@ define([
                 ])
             ]);
         }
-        var layout = renderLayout();
+        const layout = renderLayout();
 
         function renderElapsed(elapsed) {
             if (elapsed === undefined) {
@@ -105,31 +104,31 @@ define([
             return numeral(elapsed).format('00:00:00');
         }
 
-        function renderBugReportUrl(download) {
-            var base = runtime.config('services.doc_site.url');
-            return base + '/report-an-issue';
+        function renderBugReportUrl() {
+            const base = runtime.config('services.doc_site.url');
+            return `${base  }/report-an-issue`;
         }
 
         // Little delegated Event Listening service.
 
-        var listeners = {};
+        let listeners = {};
         function addListener(listener) {
-            listeners[listener.id + '.' + listener.type] = listener;
+            listeners[`${listener.id  }.${  listener.type}`] = listener;
         }
         function getListener(listener) {
-            return listeners[listener.id + '.' + listener.type];
+            return listeners[`${listener.id  }.${  listener.type}`];
         }
         function removeListeners() {
             listeners = {};
         }
         function eventListener(e) {
-            var listener = listeners[e.target.id + '.' + e.type];
+            const listener = listeners[`${e.target.id  }.${  e.type}`];
             if (listener) {
                 listener.handler(e);
             }
         }
         function addEventManager(eventsToListenFor) {
-            eventsToListenFor.forEach(function (eventType) {
+            eventsToListenFor.forEach((eventType) => {
                 container.addEventListener(eventType, eventListener);
             });
         }
@@ -139,18 +138,18 @@ define([
          * the call back registered with the event mechanism. They can be identified
          * by name so that code can change their state. E.g. disable, enable,
          */
-        var buttons = {};
+        const buttons = {};
         function addButton(spec) {
-            var buttonId = html.genId(),
+            const buttonId = html.genId(),
                 handler = function (e) {
                     e.preventDefault();
                     spec.handler();
                 },
-                klass = ['btn', 'btn-' + spec.type],
+                klass = ['btn', `btn-${  spec.type}`],
                 listener = {
                     id: buttonId,
                     type: 'click',
-                    handler: handler
+                    handler
                 };
 
             if (spec.disabled) {
@@ -168,11 +167,11 @@ define([
                 buttons[spec.name] = buttonId;
             }
 
-            var width = spec.width || '100%';
+            const width = spec.width || '100%';
 
             return button(
                 {
-                    style: { width: width },
+                    style: {width},
                     class: klass.join(' '),
                     id: buttonId
                 },
@@ -181,11 +180,11 @@ define([
         }
 
         function disableButton(name) {
-            var buttonId = buttons[name];
+            const buttonId = buttons[name];
             if (!buttonId) {
                 return;
             }
-            var listener = getListener({ id: buttonId, type: 'click' });
+            const listener = getListener({id: buttonId, type: 'click'});
             if (!listener) {
                 return;
             }
@@ -194,7 +193,7 @@ define([
                 return;
             }
 
-            var node = document.getElementById(buttonId);
+            const node = document.getElementById(buttonId);
             if (!node) {
                 return;
             }
@@ -208,11 +207,11 @@ define([
         }
 
         function enableButton(name) {
-            var buttonId = buttons[name];
+            const buttonId = buttons[name];
             if (!buttonId) {
                 return;
             }
-            var listener = getListener({ id: buttonId, type: 'click' });
+            const listener = getListener({id: buttonId, type: 'click'});
             if (!listener) {
                 return;
             }
@@ -220,7 +219,7 @@ define([
                 return;
             }
 
-            var node = document.getElementById(buttonId);
+            const node = document.getElementById(buttonId);
             if (!node) {
                 return;
             }
@@ -233,20 +232,20 @@ define([
 
         function removeButton(spec) {}
 
-        var checkboxes = {};
+        const checkboxes = {};
         function addCheckbox(spec) {
-            var checkboxId = html.genId(),
+            const checkboxId = html.genId(),
                 handler = function (e) {
                     e.preventDefault();
                     spec.handler();
                 },
-                klass = ['btn', 'btn-' + spec.type],
+                klass = ['btn', `btn-${  spec.type}`],
                 listener = {
                     id: checkboxId,
                     type: 'change',
-                    handler: handler
+                    handler
                 },
-                name = spec.name || 'checkbox_' + spec.value;
+                name = spec.name || `checkbox_${  spec.value}`;
 
             addListener(listener);
 
@@ -254,7 +253,7 @@ define([
                 checkboxes[name] = checkboxId;
             }
 
-            return label({ class: 'kb-checkbox-control' }, [
+            return label({class: 'kb-checkbox-control'}, [
                 input({
                     type: 'checkbox',
                     autocomplete: 'off',
@@ -266,11 +265,11 @@ define([
         }
 
         function addDownloader(url) {
-            var id = html.genId(),
+            const id = html.genId(),
                 content = iframe({
-                    id: id,
+                    id,
                     src: url,
-                    style: { border: '1px red solid', width: '40px', height: '40px' }
+                    style: {border: '1px red solid', width: '40px', height: '40px'}
                 });
             places.appendContent('downloaders', content);
             // unfortunately, there is no way to monitor the progress of this download.
@@ -300,7 +299,7 @@ define([
                     return addButton({
                         type: 'default',
                         disabled: true,
-                        handler: function () {
+                        handler() {
                             alert('Can only download once');
                         },
                         label: 'Downloaded'
@@ -308,7 +307,7 @@ define([
                 }
                 return addButton({
                     type: 'primary',
-                    handler: function () {
+                    handler() {
                         doDownload(download);
                         download.status = 'downloaded';
                         renderDownloads();
@@ -318,7 +317,7 @@ define([
             case 'ready':
                 return addButton({
                     type: 'primary',
-                    handler: function () {
+                    handler() {
                         doDownload(download);
                         download.status = 'downloaded';
                         renderDownloads();
@@ -329,7 +328,7 @@ define([
             case 'error':
                 return addButton({
                     type: 'warning',
-                    handler: function () {
+                    handler() {
                         runtime.send('app', 'redirect', {
                             url: renderBugReportUrl(download),
                             newWindow: true
@@ -341,7 +340,7 @@ define([
             case 'waiting':
                 return addButton({
                     type: 'danger',
-                    handler: function () {
+                    handler() {
                         alert('cancel ');
                     },
                     label: 'Cancel'
@@ -353,21 +352,21 @@ define([
 
         function renderDownloads() {
             // removeListeners();
-            var content = table({ class: 'table table-bordered', style: { width: '100%' } }, [
+            const content = table({class: 'table table-bordered', style: {width: '100%'}}, [
                 tr([
-                    th({ width: '10%' }, 'Format'),
-                    th({ width: '10%' }, 'Started?'),
-                    th({ width: '10%' }, 'Requested?'),
-                    th({ width: '10%' }, 'Completed?'),
-                    th({ width: '10%' }, 'Available?'),
-                    th({ width: '10%' }, 'Elapsed'),
-                    th({ width: '10%' }, 'Status'),
-                    th({ width: '10%' }, 'Next'),
-                    th({ width: '20%' }, 'Message')
+                    th({width: '10%'}, 'Format'),
+                    th({width: '10%'}, 'Started?'),
+                    th({width: '10%'}, 'Requested?'),
+                    th({width: '10%'}, 'Completed?'),
+                    th({width: '10%'}, 'Available?'),
+                    th({width: '10%'}, 'Elapsed'),
+                    th({width: '10%'}, 'Status'),
+                    th({width: '10%'}, 'Next'),
+                    th({width: '20%'}, 'Message')
                 ]),
                 Object.keys(state.downloads)
-                    .map(function (key) {
-                        var download = state.downloads[key],
+                    .map((key) => {
+                        const download = state.downloads[key],
                             formatName = state.downloadConfig[download.formatId].name;
 
                         return tr([
@@ -388,21 +387,21 @@ define([
         }
 
         function renderDownloadForm(downloadConfig) {
-            var content = form([
+            const content = form([
                     table([
                         tr([
                             td('Transform to: '),
                             td(
                                 span(
-                                    { class: 'kb-btn-group', dataToggle: 'buttons' },
+                                    {class: 'kb-btn-group', dataToggle: 'buttons'},
                                     downloadConfig
-                                        .map(function (downloader, i) {
-                                            var formatId = String(i);
+                                        .map((downloader, i) => {
+                                            const formatId = String(i);
                                             return addCheckbox({
                                                 type: 'default',
                                                 checked: false,
                                                 value: String(i),
-                                                handler: function (e) {
+                                                handler(e) {
                                                     // update the downloads list
                                                     if (e.target.checked) {
                                                         state.downloads[formatId] = {
@@ -431,12 +430,12 @@ define([
                         tr([
                             td(),
                             td([
-                                div({ class: 'btn-toolbar', role: 'toolbar' }, [
-                                    div({ class: 'btn-group', role: 'group' }, [
+                                div({class: 'btn-toolbar', role: 'toolbar'}, [
+                                    div({class: 'btn-group', role: 'group'}, [
                                         addButton({
                                             name: 'transform',
                                             type: 'primary',
-                                            handler: function () {
+                                            handler() {
                                                 doStartTransform();
                                                 disableButton('transform');
                                                 enableButton('stop');
@@ -448,7 +447,7 @@ define([
                                         addButton({
                                             name: 'stop',
                                             type: 'danger',
-                                            handler: function () {
+                                            handler() {
                                                 doStopTransform();
                                                 disableButton('stop');
                                                 enableButton('reset');
@@ -460,7 +459,7 @@ define([
                                         addButton({
                                             name: 'reset',
                                             type: 'default',
-                                            handler: function () {
+                                            handler() {
                                                 doReset();
                                                 disableButton('reset');
                                                 enableButton('transform');
@@ -479,8 +478,8 @@ define([
                     {
                         type: 'change',
                         selector: 'input',
-                        handler: function (e) {
-                            var value = e.target.value;
+                        handler(e) {
+                            const value = e.target.value;
                             if (e.target.checked) {
                                 state.downloads[value] = {
                                     formatId: parseInt(value, 10),
@@ -501,15 +500,15 @@ define([
                     }
                 ];
             return {
-                content: content,
-                events: events
+                content,
+                events
             };
         }
 
         // Downloader stuff
 
         function parseShockNode(shockNodeId) {
-            var parts = shockNodeId.split('/');
+            let parts = shockNodeId.split('/');
             if (parts.length > 1) {
                 shockNodeId = parts[parts.length - 1];
             }
@@ -521,8 +520,8 @@ define([
         }
 
         function makeDownloadUrl(ujsResults, workspaceObjectName, unzip) {
-            var shockNodeId = parseShockNode(ujsResults.shocknodes[0]),
-                url = runtime.config('services.data_import_export.url') + '/download',
+            const shockNodeId = parseShockNode(ujsResults.shocknodes[0]),
+                url = `${runtime.config('services.data_import_export.url')  }/download`,
                 query = {
                     id: shockNodeId,
                     token: runtime.service('session').getAuthToken(),
@@ -531,16 +530,16 @@ define([
             if (unzip) {
                 query.unzip = unzip;
             } else {
-                query.name = workspaceObjectName + '.zip';
+                query.name = `${workspaceObjectName  }.zip`;
             }
             if (ujsResults.remoteShockUrl) {
                 query.url = ujsResults.remoteShockUrl;
             }
-            return url + '?' + encodeQuery(query);
+            return `${url  }?${  encodeQuery(query)}`;
         }
 
         function transformAndDownload(download) {
-            var downloadSpec = state.downloadConfig[download.formatId],
+            const downloadSpec = state.downloadConfig[download.formatId],
                 args = {
                     external_type: downloadSpec.external_type,
                     kbase_type: state.type,
@@ -550,7 +549,7 @@ define([
                         transform: downloadSpec.transform_options
                     }
                 },
-                nameSuffix = '.' + downloadSpec.name.replace(/[^a-zA-Z0-9|\.\-_]/g, '_'),
+                nameSuffix = `.${  downloadSpec.name.replace(/[^a-zA-Z0-9|\.\-_]/g, '_')}`,
                 transformClient = new TransformClient(runtime.getConfig('services.transform.url'), {
                     token: runtime.service('session').getAuthToken()
                 }),
@@ -560,14 +559,14 @@ define([
             download.limit = 1;
             transformClient
                 .download(args)
-                .then(function (downloadResult) {
-                    var jobId = downloadResult[1];
+                .then((downloadResult) => {
+                    const jobId = downloadResult[1];
                     download.jobId = jobId;
                     download.requested = true;
                     download.message = 'Requested transform of this object...';
                     renderDownloads();
 
-                    var jobs = new UserAndJobState(runtime.getConfig('services.user_job_state.url'), {
+                    const jobs = new UserAndJobState(runtime.getConfig('services.user_job_state.url'), {
                         token: runtime.service('session').getAuthToken()
                     });
 
@@ -577,11 +576,11 @@ define([
 
                     poller.addTask({
                         timeout: 300000,
-                        isCompleted: function (elapsed) {
+                        isCompleted(elapsed) {
                             return jobs
                                 .get_job_status(jobId)
-                                .then(function (data) {
-                                    var status = data[2],
+                                .then((data) => {
+                                    const status = data[2],
                                         complete = data[5],
                                         wasError = data[6];
                                     if (complete === 1) {
@@ -595,14 +594,14 @@ define([
                                     renderDownloads();
                                     return false;
                                 })
-                                .catch(function (err) {
+                                .catch((err) => {
                                     throw err;
                                 });
                         },
-                        whenCompleted: function () {
-                            return jobs.get_results(jobId).then(function (ujsResults) {
+                        whenCompleted() {
+                            return jobs.get_results(jobId).then((ujsResults) => {
                                 download.completed = true;
-                                var url = makeDownloadUrl(ujsResults, workspaceObjectName, downloadSpec.unzip);
+                                const url = makeDownloadUrl(ujsResults, workspaceObjectName, downloadSpec.unzip);
                                 download.url = url;
                                 download.status = 'ready';
                                 download.available = true;
@@ -610,17 +609,17 @@ define([
                                 renderDownloads();
                             });
                         },
-                        whenTimedOut: function (elapsed) {
+                        whenTimedOut(elapsed) {
                             download.error = true;
                             (download.status = 'timedout'),
-                            (download.message = 'Timed out after ' + elapsed / 1000 + ' seconds');
+                            (download.message = `Timed out after ${  elapsed / 1000  } seconds`);
                             renderDownloads();
                         },
-                        whenError: function (err) {
+                        whenError(err) {
                             console.error(err);
                             download.status = 'error';
                             download.error = true;
-                            var msg;
+                            let msg;
                             if (err.message) {
                                 msg = err.message;
                             } else if (err.error.message) {
@@ -634,10 +633,10 @@ define([
                         }
                     });
                 })
-                .catch(function (err) {
+                .catch((err) => {
                     download.status = 'error';
                     download.error = true;
-                    var msg;
+                    let msg;
                     if (err.message) {
                         msg = err.message;
                     } else if (err.error.message) {
@@ -651,16 +650,16 @@ define([
         }
 
         function downloadFromWorkspace(workspaceName, objectName, workspaceUrl) {
-            var url = runtime.getConfig('services.data_import_export.url') + '/download',
+            const url = `${runtime.getConfig('services.data_import_export.url')  }/download`,
                 query = {
                     ws: workspaceName,
                     id: objectName,
                     token: runtime.service('session').getAuthToken(),
                     url: workspaceUrl,
-                    name: objectName + '.JSON.zip',
+                    name: `${objectName  }.JSON.zip`,
                     wszip: 1
                 },
-                downloadUrl = url + '?' + encodeQuery(query);
+                downloadUrl = `${url  }?${  encodeQuery(query)}`;
             return downloadUrl;
         }
 
@@ -670,7 +669,7 @@ define([
             download.completed = true;
             download.available = true;
             download.limit = null;
-            var url = downloadFromWorkspace(
+            const url = downloadFromWorkspace(
                 state.params.objectInfo.ws,
                 state.params.objectInfo.name,
                 runtime.getConfig('services.workspace.url')
@@ -685,8 +684,8 @@ define([
 
         function doStartTransform() {
             // gather the selected download types.
-            Object.keys(state.downloads).forEach(function (id) {
-                var download = state.downloads[id],
+            Object.keys(state.downloads).forEach((id) => {
+                const download = state.downloads[id],
                     downloadSpec = state.downloadConfig[download.formatId];
                 if (downloadSpec.name === 'JSON') {
                     justDownload(download);
@@ -707,9 +706,9 @@ define([
         // Utils
 
         function getRef(params) {
-            var ref = params.objectInfo.ws + '/' + params.objectInfo.name;
+            let ref = `${params.objectInfo.ws  }/${  params.objectInfo.name}`;
             if (params.objectInfo.version) {
-                ref += '/' + params.objectInfo.version;
+                ref += `/${  params.objectInfo.version}`;
             }
             return ref;
         }
@@ -720,9 +719,9 @@ define([
 
         function encodeQuery(query) {
             return Object.keys(query)
-                .map(function (key) {
+                .map((key) => {
                     return [key, String(query[key])]
-                        .map(function (element) {
+                        .map((element) => {
                             return encodeURIComponent(element);
                         })
                         .join('=');
@@ -735,7 +734,7 @@ define([
                 selector = node;
                 node = document;
             }
-            var result = node.querySelectorAll(selector);
+            const result = node.querySelectorAll(selector);
             if (result === null) {
                 return [];
             }
@@ -744,7 +743,7 @@ define([
 
         // API
 
-        function init(config) {}
+        function init() {}
 
         function attach(node) {
             parent = node;
@@ -762,7 +761,7 @@ define([
             });
 
             // listen for events
-            runtime.recv('downloadWidget', 'toggle', function () {
+            runtime.recv('downloadWidget', 'toggle', () => {
                 toggler.toggle();
             });
         }
@@ -774,25 +773,25 @@ define([
             // TODO: the main panel could/should already have pulled down the
             // basic object info, so in theory we could ask the parent widget
             // for the object info.
-            var workspace = new WorkspaceClient(runtime.getConfig('services.workspace.url'), {
+            const workspace = new WorkspaceClient(runtime.getConfig('services.workspace.url'), {
                     token: runtime.service('session').getAuthToken()
                 }),
                 ref = getRef(params);
             return workspace
                 .get_object_info_new({
-                    objects: [{ ref: ref }],
+                    objects: [{ref}],
                     ignoreErrors: 1
                 })
-                .then(function (objectInfoArray) {
+                .then((objectInfoArray) => {
                     if (objectInfoArray.length === 0) {
-                        throw new Error('No object found with ref ' + ref);
+                        throw new Error(`No object found with ref ${  ref}`);
                     }
                     if (objectInfoArray.length > 1) {
-                        throw new Error('Too many objects returned for ref ' + ref);
+                        throw new Error(`Too many objects returned for ref ${  ref}`);
                     }
-                    var objectInfo = apiUtils.object_info_to_object(objectInfoArray[0]),
-                        type = objectInfo.typeModule + '.' + objectInfo.typeName,
-                        typeDownloadConfig = typeSupport.types[type];
+                    const objectInfo = apiUtils.object_info_to_object(objectInfoArray[0]),
+                        type = `${objectInfo.typeModule  }.${  objectInfo.typeName}`;
+                    let typeDownloadConfig = typeSupport.types[type];
 
                     // We use a little state object to stash away things.
                     state.type = type;
@@ -805,7 +804,7 @@ define([
                         typeDownloadConfig = [];
                     }
 
-                    var downloadConfig = typeDownloadConfig.concat({
+                    const downloadConfig = typeDownloadConfig.concat({
                         name: 'JSON',
                         external_type: 'JSON.JSON',
                         transform_options: {}
@@ -813,13 +812,13 @@ define([
 
                     state.downloadConfig = downloadConfig;
 
-                    var form = renderDownloadForm(downloadConfig);
+                    const form = renderDownloadForm(downloadConfig);
 
                     places.setContent('content', form.content);
 
-                    form.events.forEach(function (event) {
-                        var nodes = qsa(places.getNode('content'), event.selector);
-                        nodes.forEach(function (node) {
+                    form.events.forEach((event) => {
+                        const nodes = qsa(places.getNode('content'), event.selector);
+                        nodes.forEach((node) => {
                             node.addEventListener(event.type, event.handler);
                         });
                     });
@@ -841,17 +840,17 @@ define([
         }
 
         return {
-            init: init,
-            attach: attach,
-            start: start,
-            run: run,
-            stop: stop,
-            detach: detach,
-            destroy: destroy
+            init,
+            attach,
+            start,
+            run,
+            stop,
+            detach,
+            destroy
         };
     }
     return {
-        make: function (config) {
+        make(config) {
             return factory(config);
         }
     };

@@ -1,10 +1,10 @@
-define(['kb_common/html'], function (html) {
-    'use strict';
+define(['kb_common/html'], (html) => {
 
-    function factory({ runtime }) {
-        var parent,
-            container,
-            div = html.tag('div'),
+    function factory({}) {
+        let parent,
+            container;
+
+        const div = html.tag('div'),
             p = html.tag('p');
 
         function attach(node) {
@@ -12,7 +12,7 @@ define(['kb_common/html'], function (html) {
             container = parent.appendChild(document.createElement('div'));
         }
 
-        function render(params) {
+        function render() {
             return div([p('This object does not have a specific visualization')]);
         }
 
@@ -23,18 +23,19 @@ define(['kb_common/html'], function (html) {
         function detach() {
             if (container) {
                 parent.removeChild(container);
+                container = null;
             }
         }
 
         return {
-            attach: attach,
-            start: start,
-            detach: detach
+            attach,
+            start,
+            detach
         };
     }
 
     return {
-        make: function (config) {
+        make: (config) => {
             return factory(config);
         }
     };

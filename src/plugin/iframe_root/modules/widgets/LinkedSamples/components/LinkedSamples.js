@@ -3,7 +3,7 @@ define([
     'htm',
     'lib/formatters',
     'components/DataTable',
-    'components/Empty',
+    'components/Empty2',
     './LinkedSamples.styles'
 ], (
     preact,
@@ -16,18 +16,18 @@ define([
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
-    function getMetadataValue(sample, name, defaultValue) {
-        const metadata = sample.node_tree[0].meta_controlled;
-        const userMetadata = sample.node_tree[0].meta_user;
+    // function getMetadataValue(sample, name, defaultValue) {
+    //     const metadata = sample.node_tree[0].meta_controlled;
+    //     const userMetadata = sample.node_tree[0].meta_user;
 
-        if (metadata[name]) {
-            return metadata[name].value;
-        }
-        if (userMetadata[name]) {
-            return userMetadata[name].value;
-        }
-        return defaultValue;
-    }
+    //     if (metadata[name]) {
+    //         return metadata[name].value;
+    //     }
+    //     if (userMetadata[name]) {
+    //         return userMetadata[name].value;
+    //     }
+    //     return defaultValue;
+    // }
 
     class LinkedSamples extends Component {
         constructor(props) {
@@ -164,7 +164,7 @@ define([
 
         renderNoLinkedSamples() {
             return html`
-            <${Empty} message="No samples are linked to this object." />
+                <${Empty} message="No samples are linked to this object." />
             `;
         }
 

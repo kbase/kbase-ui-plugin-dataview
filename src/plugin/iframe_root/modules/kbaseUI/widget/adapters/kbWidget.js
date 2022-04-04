@@ -1,24 +1,22 @@
 define(['jquery', 'bluebird', 'kb_lib/html'], ($, Promise, html) => {
-    'use strict';
-
     function createBSPanel($node, title) {
-        var id = html.genId(),
+        const id = html.genId(),
             div = html.tag('div'),
             span = html.tag('span');
         $node.html(
-            div({ class: 'panel panel-default ' }, [
-                div({ class: 'panel-heading' }, [span({ class: 'panel-title' }, title)]),
-                div({ class: 'panel-body' }, [div({ id: id })])
+            div({class: 'panel panel-default '}, [
+                div({class: 'panel-heading'}, [span({class: 'panel-title'}, title)]),
+                div({class: 'panel-body'}, [div({id})])
             ])
         );
-        return $('#' + id);
+        return $(`#${  id}`);
     }
 
     class KBWidgetAdapter {
         constructor(param) {
             const {
                 runtime,
-                widget: { module, jquery_object, panel, title }
+                widget: {module, jquery_object, panel, title}
             } = param;
             if (!param.runtime) {
                 throw {
@@ -29,7 +27,7 @@ define(['jquery', 'bluebird', 'kb_lib/html'], ($, Promise, html) => {
             }
             this.module = module;
             this.jqueryObjectName = jquery_object;
-            this.wantPanel = panel ? true : false;
+            this.wantPanel = !!panel;
             this.title = title;
             this.runtime = runtime;
 
@@ -65,7 +63,7 @@ define(['jquery', 'bluebird', 'kb_lib/html'], ($, Promise, html) => {
                 }
 
                 if (this.$container[this.jqueryObjectName] === undefined) {
-                    reject(new Error('Sorry, cannot find jquery widget ' + this.jqueryObjectName));
+                    reject(new Error(`Sorry, cannot find jquery widget ${  this.jqueryObjectName}`));
                 } else {
                     resolve();
                 }
@@ -81,7 +79,7 @@ define(['jquery', 'bluebird', 'kb_lib/html'], ($, Promise, html) => {
                 // not need a connector!
                 // not the best .. perhaps merge the params into the config
                 // better yet, rewrite the widgets in the new model...
-                var widgetConfig = Object.assign({}, params, {
+                const widgetConfig = Object.assign({}, params, {
                     // Why this?
                     wsNameOrId: params.workspaceId,
                     objNameOrId: params.objectId,

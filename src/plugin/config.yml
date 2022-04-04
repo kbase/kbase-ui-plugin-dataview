@@ -18,4 +18,4 @@ services:
       - path: provenance/:workspaceId/:objectId/:-objectVersion
         view: provenanceView
       - path: provenance2/:workspaceId/:objectId/:-objectVersion
-        view: provenanceView2
+        view: provenanceView
