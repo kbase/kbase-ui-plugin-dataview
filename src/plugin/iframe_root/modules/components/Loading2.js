@@ -1,10 +1,12 @@
 define([
     'preact',
     'htm',
+    './Alert',
     'css!./Loading2.css'
 ], (
     preact,
-    htm
+    htm,
+    Alert
 ) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
@@ -17,24 +19,24 @@ define([
     */
 
     class Loading2 extends Component {
-        render() {
-            const style = {};
-            if (this.props.inline) {
-                style.justifyContent = 'left';
-            } else {
-                style.justifyContent = 'center';
-            }
-            let message;
+        renderMessage() {
             if (this.props.message) {
-                message = html`<span>${this.props.message}</span>`;
+                return html`<span>${this.props.message}</span>`;
             }
+        }
+        renderContent() {
             return html`
-                <div className="Loading2" style=${style}>
-                    <span className="Loading2-message">${message}</span>
+                <div className="Loading2">
                     <span className="fa fa-spinner fa-pulse fa-2x fa-fw"
-                            style=${{color: 'gray'}}>
+                          style=${{color: 'gray', marginRight: '0.25em'}}>
                     </span>
+                    ${this.renderMessage()}
                 </div>
+            `;
+        }
+        render() {
+            return html`
+                <${Alert} type="neutral" render=${this.renderContent.bind(this)} />
             `;
         }
     }

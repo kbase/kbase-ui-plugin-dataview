@@ -6,7 +6,8 @@ define([
     'kb_lib/jsonRpc/genericClient',
 
     // For effect
-    'd3_sankey'
+    'd3_sankey',
+    'css!./SankeyGraph.css'
 ], (
     preact,
     htm,
@@ -16,6 +17,9 @@ define([
 ) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
+
+    const NODE_HEIGHT = 38;
+    const DEFAULT_MAX_HEIGHT = 400;
 
     const TYPES = {
         selected: {
@@ -84,10 +88,18 @@ define([
         constructor(props) {
             super(props);
             this.ref = preact.createRef();
+            this.state = {
+                height: null
+            };
         }
         componentDidMount() {
             const node = this.ref.current;
-            this.renderGraph(node);
+            console.log('hmm', node, node.clientWidth);
+            this.setState({
+                width: node.clientWidth
+            }, () => {
+                this.renderGraph(node);
+            });
         }
 
         async nodeMouseover(d) {
@@ -131,11 +143,21 @@ define([
 
         renderGraph(graphNode) {
             const $graphNode = $(graphNode);
-            const margin = {top: 10, right: 10, bottom: 10, left: 10};
-            const width = this.props.width - 50 - margin.left - margin.right;
+            // const margin = {top: 10, right: 10, bottom: 10, left: 10};
+            // const width = this.props.width - 50 - margin.left - margin.right;
+            // const width = this.props.width;
+
+            // TODO: eliminate the "- 24" which is to ensure there is no horizontal scrolling.
+            const width = this.state.width - 24;
+            console.log('width', width);
             const {graph, objRefToNodeIdx} = this.props;
-            const height = this.props.graph.nodes.length * 38 - margin.top - margin.bottom;
-            this.props.setHeight(height);
+            const height = this.props.graph.nodes.length * NODE_HEIGHT;
+            // this.props.setHeight(height);
+            console.log('heights...', this.props.graph.nodes.length, this.props.graph.nodes.length * NODE_HEIGHT, height, this.props.graph.nodes);
+            // TODO: eliminate the "+ 11", required to ensure bounding container does not overflow
+            this.setState({
+                height: Math.min(height + 15, DEFAULT_MAX_HEIGHT)
+            });
 
             if (graph.links.length === 0) {
                 // in order to render, we need at least two nodes
@@ -151,9 +173,9 @@ define([
                 graph.links.push(makeLink(0, 1, 1));
             }
 
-            if (height < 450) {
-                $graphNode.height(height + 40);
-            }
+            // if (height < 450) {
+            //     $graphNode.height(height + 40);
+            // }
             /*var zoom = d3.behavior.zoom()
                  .translate([0, 0])
                  .scale(1)
@@ -168,10 +190,10 @@ define([
             d3.select($graphNode[0]).html('');
             $graphNode.show();
             const svg = d3.select($graphNode[0]).append('svg');
-            svg.attr('width', width + margin.left + margin.right)
-                .attr('height', height + margin.top + margin.bottom)
-                .append('g')
-                .attr('transform', `translate(${  margin.left  },${  margin.top  })`);
+            svg.attr('width', width)
+                .attr('height', height)
+                .append('g');
+                // .attr('transform', `translate(${margin.left},${margin.top})`);
 
             // Set the sankey diagram properties
             const sankey = d3
@@ -350,8 +372,12 @@ define([
         }
 
         render() {
+            const style = {};
+            if (this.state.height !== null) {
+                style.height = this.state.height;
+            }
             return html`
-                <div ref=${this.ref} style=${{margin: '2em 0'}}/>
+                <div ref=${this.ref} className="SankeyGraph" style=${style} />
             `;
         }
     }

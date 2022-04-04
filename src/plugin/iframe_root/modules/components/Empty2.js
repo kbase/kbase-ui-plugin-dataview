@@ -20,7 +20,7 @@ define([
             }
             return html`
                 <div style=${styles.wrapper}>
-                    <div className="fa fa-lg fa-ban" style=${styles.icon}>
+                    <div className="fa fa-lg fa-2x fa-ban" style=${styles.icon}>
                     </div>
                     <div style=${styles.message}>${message}</div>
                 </div>

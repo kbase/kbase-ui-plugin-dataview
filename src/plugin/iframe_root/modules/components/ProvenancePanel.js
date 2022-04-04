@@ -262,7 +262,7 @@ define([
                 `;
             }
             return html`
-                <${Alert} type="info" message="No metadata" />
+                <${Alert} type="neutral" message="No metadata" />
             `;
         }
 
@@ -359,7 +359,7 @@ define([
             const {objdata} = this.state.selectedNode.nodeInfo;
             if (objdata.length === 0) {
                 return html`
-                    <${Alert} type="info" message="No provenance data set." />
+                    <${Alert} type="neutral" message="No provenance data set." />
                 `;
             }
             const rows = [];
@@ -397,7 +397,7 @@ define([
                 `;
             }
             return html`
-                <${Alert} type="info" message="No provenance data set." />
+                <${Alert} type="neutral" message="No provenance data set." />
             `;
         }
 

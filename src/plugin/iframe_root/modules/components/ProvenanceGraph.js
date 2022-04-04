@@ -28,6 +28,8 @@ define([
     const WIDTH = 1200;
     // const HEIGHT = 700;
 
+    const MAX_OBJECTS = 50;
+
 
     // Utility functions.
 
@@ -124,12 +126,11 @@ define([
 
             // (objIdentities).then((refData) => {
             for (let i = 0; i < refData.length; i++) {
-                const limit = 50;
                 for (let k = 0; k < refData[i].length; k++) {
-                    if (k >= limit) {
+                    if (k >= MAX_OBJECTS) {
                         //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
                         const nodeId = graph['nodes'].length;
-                        const nameStr = `${refData[i].length - limit  } more ...`;
+                        const nameStr = `${refData[i].length - MAX_OBJECTS  } more ...`;
                         graph['nodes'].push({
                             node: nodeId,
                             name: nameStr,
@@ -403,16 +404,6 @@ define([
                         }}
                         onNodeOut=${() => {
                             this.props.onInspectNodeLeave();
-                        }}
-                        setHeight=${(newHeight) => {
-                            const height = Math.min(newHeight, 400);
-                            console.log('set height', height);
-                            this.setState({
-                                mainStyle: {
-                                    ...this.state.mainStyle,
-                                    height
-                                }
-                            });
                         }}
                         />
             `;
