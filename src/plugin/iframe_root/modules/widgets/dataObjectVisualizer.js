@@ -3,10 +3,9 @@ define([
     'underscore',
     'kb_lib/jsonRpc/genericClient',
     'kb_lib/html',
-    'kb_lib/htmlBuilders',
     'kb_lib/htmlBootstrapBuilders',
     'kb_service/utils'
-], (Promise, _, GenericClient, html, htmlBuilders, BS, APIUtils) => {
+], (Promise, _, GenericClient, html, BS, APIUtils) => {
     const t = html.tag,
         div = t('div');
 
