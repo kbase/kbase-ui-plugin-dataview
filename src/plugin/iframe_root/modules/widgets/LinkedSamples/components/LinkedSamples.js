@@ -1,7 +1,7 @@
 define([
     'preact',
     'htm',
-    'lib/formatters',
+    'lib/format',
     'components/DataTable',
     'components/Empty2',
     './LinkedSamples.styles'

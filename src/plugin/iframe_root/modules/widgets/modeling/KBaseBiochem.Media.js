@@ -1,13 +1,11 @@
-define(['widgets/modeling/KBModeling'], function (KBModeling) {
-    'use strict';
-
+define(['widgets/modeling/KBModeling'], (KBModeling) => {
     function KBaseBiochem_Media(tabwidget) {
-        var self = this;
+        const self = this;
         this.tabwidget = tabwidget;
 
         this.setMetadata = function (data) {
             this.overview = {
-                wsid: data[7] + '/' + data[1],
+                wsid: `${data[7]}/${data[1]}`,
                 objecttype: data[2],
                 owner: data[5],
                 instance: data[4],
@@ -25,10 +23,10 @@ define(['widgets/modeling/KBModeling'], function (KBModeling) {
             this.mediacompounds = this.data.mediacompounds;
             this.reagents = this.data.reagents;
             this.cpdhash = {};
-            var cpdarray = [];
+            const cpdarray = [];
 
-            for (var i = 0; i < this.mediacompounds.length; i++) {
-                var cpd = this.mediacompounds[i];
+            for (let i = 0; i < this.mediacompounds.length; i++) {
+                const cpd = this.mediacompounds[i];
                 cpd.id = cpd.compound_ref.split('/').pop();
 
                 this.cpdhash[cpd.id] = cpd;
@@ -37,8 +35,8 @@ define(['widgets/modeling/KBModeling'], function (KBModeling) {
 
             return this.tabwidget.getBiochemCompounds(cpdarray)
                 .then((cpds) => {
-                    for (var i = 0; i < self.mediacompounds.length; i++) {
-                        var cpd = self.mediacompounds[i];
+                    for (let i = 0; i < self.mediacompounds.length; i++) {
+                        const cpd = self.mediacompounds[i];
                         if (cpds[i]) {
                             cpd.name = cpds[i].name;
                             cpd.formula = cpds[i].formula;
@@ -55,7 +53,7 @@ define(['widgets/modeling/KBModeling'], function (KBModeling) {
         };
 
         this.CompoundTab = function (info) {
-            var cpd = this.cpdhash[info.id];
+            const cpd = this.cpdhash[info.id];
             return [
                 {
                     label: 'Compound',

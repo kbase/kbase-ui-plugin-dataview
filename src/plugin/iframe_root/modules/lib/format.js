@@ -35,5 +35,11 @@ define([], () => {
         }).format(value);
     }
 
-    return Object.freeze({formattedDate, formattedInteger, timestamp, date});
+    const donorNode = document.createElement('div');
+    function domSafeText(rawContent) {
+        donorNode.innerText = rawContent;
+        return donorNode.innerHTML;
+    }
+
+    return Object.freeze({formattedDate, formattedInteger, timestamp, date, domSafeText});
 });

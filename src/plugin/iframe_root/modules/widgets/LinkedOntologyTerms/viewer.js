@@ -3,7 +3,7 @@ define([
     'preact',
     'kb_lib/widgetUtils',
     'lib/Params',
-    'lib/formatters',
+    'lib/format',
     'components/Loading2',
     './components/LinkedOntologyTerms',
     'components/SimpleError',

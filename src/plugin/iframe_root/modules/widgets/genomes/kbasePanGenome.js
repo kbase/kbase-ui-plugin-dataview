@@ -11,7 +11,7 @@ define([
     'kbaseUI/widget/legacy/authenticatedWidget',
     'kbaseUI/widget/legacy/tabs',
     'datatables_bootstrap'
-], function (
+], (
     Promise,
     $,
     preact,
@@ -19,9 +19,7 @@ define([
     DynamicServiceClient,
     Table,
     content
-) {
-    'use strict';
-
+) => {
     const html = htm.bind(preact.h);
 
     function checkObjectRef(ref) {
@@ -30,10 +28,10 @@ define([
         if (!ref) {
             return false;
         }
-        var refRegex = /^\S+\/\S+(\/\d+)?$/;
-        var refList = ref.split(';');
-        var validRef = true;
-        refList.forEach(function (r) {
+        const refRegex = /^\S+\/\S+(\/\d+)?$/;
+        const refList = ref.split(';');
+        let validRef = true;
+        refList.forEach((r) => {
             if (!refRegex.exec(r)) {
                 validRef = false;
             }
@@ -42,9 +40,9 @@ define([
     }
 
     function createError(title, error, stackTrace) {
-        var $errorPanel = $('<div>')
+        const $errorPanel = $('<div>')
             .addClass('alert alert-danger')
-            .append('<b>' + title + '</b><br>Please contact the KBase team at <a href="http://kbase.us/contact-us/">http://kbase.us/contact-us/</a> with the information below.');
+            .append(`<b>${  title  }</b><br>Please contact the KBase team at <a href="http://kbase.us/contact-us/">http://kbase.us/contact-us/</a> with the information below.`);
 
         $errorPanel.append('<br><br>');
 
@@ -55,7 +53,7 @@ define([
 
         // If it's an object, expect an error object
         else if (typeof error === 'object') {
-            var errObj = error;
+            let errObj = error;
             if (error.status && error.error && error.error.error) {
                 errObj = {
                     status: error.status,
@@ -67,8 +65,8 @@ define([
                     stackTrace = error.error.error;
                 }
             }
-            Object.keys(errObj).forEach(function (key) {
-                $errorPanel.append($('<div>').append('<b>' + key + ':</b> ' + errObj[key]));
+            Object.keys(errObj).forEach((key) => {
+                $errorPanel.append($('<div>').append(`<b>${  key  }:</b> ${  errObj[key]}`));
             });
         }
         else if (error) {
@@ -103,12 +101,12 @@ define([
         },
         token: null,
 
-        init: function (options) {
+        init(options) {
             this._super(options);
             if (this.options.name.indexOf('/') > -1) {
                 this.objRef = this.options.name;
             } else {
-                this.objRef = this.options.ws + '/' + this.options.name;
+                this.objRef = `${this.options.ws  }/${  this.options.name}`;
             }
             if (!checkObjectRef(this.objRef)) {
                 this.$elem.append(createError('Bad object.', 'PanGenome Object Unavailable.'));
@@ -117,12 +115,12 @@ define([
             return this;
         },
 
-        render: function () {
+        render() {
             if (this.isError) {
                 return;
             }
 
-            var $tabContainer = $('<div>');
+            const $tabContainer = $('<div>');
             this.$elem.append($tabContainer);
             this.tabs = $tabContainer.kbaseTabs({
                 tabPosition: top,
@@ -157,22 +155,22 @@ define([
             return this;
         },
 
-        tableRow: function (items) {
-            var $row = $('<tr>');
-            items.forEach(function (item) {
+        tableRow(items) {
+            const $row = $('<tr>');
+            items.forEach((item) => {
                 $row.append($('<td>').append(item));
             });
             return $row;
         },
 
-        loading: function (message) {
+        loading(message) {
             message = message || 'Loading...';
             return `<span><span>${message}</span><span class="fa fa-spinner fa-pulse fa-fw" style="margin-left: "6px"></span></span>`;
         },
 
-        showSummary: function () {
-            var self = this;
-            var $summaryDiv = $('<div>').append(this.loading);
+        showSummary() {
+            const self = this;
+            const $summaryDiv = $('<div>').append(this.loading);
             const pangenomeClient = new DynamicServiceClient({
                 module: 'PanGenomeAPI',
                 url: this.runtime.config('services.ServiceWizard.url'),
@@ -181,8 +179,8 @@ define([
             pangenomeClient.callFunc('compute_summary_from_pangenome', [{
                 pangenome_ref: this.objRef
             }])
-                .then(function ([data]) {
-                    var $topTable = $('<table class="table table-hover table-striped table-bordered">');
+                .then(([data]) => {
+                    const $topTable = $('<table class="table table-hover table-striped table-bordered">');
 
                     $topTable
                         .append(self.tableRow(['Pan-genome object Id', self.options.name]))
@@ -206,7 +204,7 @@ define([
                             '</b> singleton families'
                         ].join(' ')]));
 
-                    var $genomeTable = $('<table class="table table-hover table-striped table-bordered">')
+                    const $genomeTable = $('<table class="table table-hover table-striped table-bordered">')
                         .append($('<tr>')
                             .append($('<th>Genome</th>'))
                             .append($('<th># Genes</th>'))
@@ -215,8 +213,8 @@ define([
                             .append($('<th># Homolog Families</th>'))
                         );
 
-                    Object.keys(data.genomes).forEach(function (genome) {
-                        var genomeData = data.genomes[genome];
+                    Object.keys(data.genomes).forEach((genome) => {
+                        const genomeData = data.genomes[genome];
                         $genomeTable.append(self.tableRow([
                             genome,
                             content.niceNumber(genomeData.genome_genes),
@@ -228,7 +226,7 @@ define([
 
                     $summaryDiv.empty().append($topTable).append($genomeTable);
                 })
-                .catch(function (error) {
+                .catch((error) => {
                     $summaryDiv
                         .empty()
                         .append(createError('Pangenome data summary error', error.error));
@@ -236,9 +234,9 @@ define([
             return $summaryDiv;
         },
 
-        showHomologFamilies: function () {
-            var self = this;
-            var $homologDiv = $('<div>').append(this.loading());
+        showHomologFamilies() {
+            const self = this;
+            const $homologDiv = $('<div>').append(this.loading());
             const pangenomeClient = new DynamicServiceClient({
                 module: 'PanGenomeAPI',
                 url: this.runtime.config('services.ServiceWizard.url'),
@@ -247,20 +245,20 @@ define([
             pangenomeClient.callFunc('compute_summary_from_pangenome', [{
                 pangenome_ref: this.objRef
             }])
-                .then(function ([data]) {
-                    var genomeList = Object.keys(data.genomes).sort();
-                    var numGenomes = genomeList.length;
-                    var numberTable = [];
-                    var header = ['<th>Genome</th><th>Legend</th>'];
-                    for (var i=0; i<numGenomes; i++) {
-                        header.push('<th style="text-align:center"><b>G' + (i+1) + '</b></th>');
-                        var singleComp = [];
-                        singleComp.push('<b>G' + (i+1) + '</b> - ' + genomeList[i]);
+                .then(([data]) => {
+                    const genomeList = Object.keys(data.genomes).sort();
+                    const numGenomes = genomeList.length;
+                    const numberTable = [];
+                    const header = ['<th>Genome</th><th>Legend</th>'];
+                    for (let i=0; i<numGenomes; i++) {
+                        header.push(`<th style="text-align:center"><b>G${  i+1  }</b></th>`);
+                        const singleComp = [];
+                        singleComp.push(`<b>G${  i+1  }</b> - ${  genomeList[i]}`);
                         singleComp.push('# homolog families');
-                        for (var j=0; j<numGenomes; j++) {
-                            var cell = data.shared_family_map[genomeList[i]][genomeList[j]];
+                        for (let j=0; j<numGenomes; j++) {
+                            let cell = data.shared_family_map[genomeList[i]][genomeList[j]];
                             if (i === j) {
-                                cell = '<font color="#d2691e">' + cell + '</font>';
+                                cell = `<font color="#d2691e">${  cell  }</font>`;
                             }
                             singleComp.push(cell);
                         }
@@ -275,7 +273,7 @@ define([
                     }
                     $homologDiv.empty().append($prettyTable);
                 })
-                .catch(function (error) {
+                .catch((error) => {
                     $homologDiv
                         .empty()
                         .append(createError('Pangenome homolog family data error', error.error));
@@ -283,13 +281,13 @@ define([
             return $homologDiv;
         },
 
-        renderTable: function (props, $el) {
+        renderTable(props, $el) {
             $el = $el || $('<div>');
             preact.render(preact.h(Table, props), $el[0]);
             return $el;
         },
 
-        showProteinFamilies2: function () {
+        showProteinFamilies2() {
             const onIDClick = (e, id) => {
                 e.preventDefault();
                 this.addFamilyTab(this.dataCache[id]);
@@ -340,7 +338,7 @@ define([
             });
         },
 
-        addFamilyTab: function (fam) {
+        addFamilyTab(fam) {
             if (this.tabs.hasTab(fam.id)) {
                 this.tabs.showTab(fam.id);
             } else {
@@ -358,20 +356,20 @@ define([
             }
         },
 
-        createProteinFamilyTab: function (fam) {
-            var $div = $('<div>').append(this.loading());
-            var colMap = {
+        createProteinFamilyTab(fam) {
+            const $div = $('<div>').append(this.loading());
+            const colMap = {
                 genome: 0,
                 feature: 1,
                 function: 2,
                 len: 3
             };
-            var getFamilyFunctionNames = (orthologs) => {
+            const getFamilyFunctionNames = (orthologs) => {
                 // prep calls
-                var genomeToGenes = {};
-                orthologs.forEach(function (ortho) {
-                    var genome = ortho[2];
-                    var feature = ortho[0];
+                const genomeToGenes = {};
+                orthologs.forEach((ortho) => {
+                    const genome = ortho[2];
+                    const feature = ortho[0];
                     if (!genomeToGenes[genome]) {
                         genomeToGenes[genome] = [];
                     }
@@ -390,22 +388,22 @@ define([
                         .then((names) => {
                             return Promise.try(() => {
                                 return {
-                                    genome: genome,
+                                    genome,
                                     features: names[0]
                                 };
                             });
                         });
                 });
-                return Promise.all(promises).then(function (nameSets) {
-                    var res = {};
-                    nameSets.forEach(function (nameSet) {
+                return Promise.all(promises).then((nameSets) => {
+                    const res = {};
+                    nameSets.forEach((nameSet) => {
                         res[nameSet.genome] = nameSet.features;
                     });
                     return res;
                 });
             };
 
-            var getFamData = (offset, limit, query, sortColId, sortDir, genomeRefMap, geneFunctionMap) => {
+            const getFamData = (offset, limit, query, sortColId, sortDir, genomeRefMap, geneFunctionMap) => {
                 query = query.toLocaleLowerCase();
                 return Promise.try(() => {
                     const rows = fam.orthologs.map((ortho) => {
@@ -430,26 +428,26 @@ define([
 
                     // now we sort and return.
                     if (sortColId && sortDir) {
-                        rows.sort(function (a, b) {
-                            var aVal = a[colMap[sortColId]];
-                            var bVal = b[colMap[sortColId]];
+                        rows.sort((a, b) => {
+                            const aVal = a[colMap[sortColId]];
+                            const bVal = b[colMap[sortColId]];
                             if ($.isNumeric(aVal) && $.isNumeric(bVal)) {
                                 if (sortDir > 0) {
                                     return aVal > bVal ? 1 : -1;
                                 }
                                 return bVal > aVal ? 1 : -1;
                             }
-                            else {
-                                if (sortDir > 0) {
-                                    return String(aVal).localeCompare(bVal);
-                                }
-                                return String(bVal).localeCompare(aVal);
+
+                            if (sortDir > 0) {
+                                return String(aVal).localeCompare(bVal);
                             }
+                            return String(bVal).localeCompare(aVal);
+
                         });
                     }
                     return {
                         rows: rows.slice(offset, offset + limit + 1),
-                        query: query,
+                        query,
                         start: offset,
                         total: rows.length
                     };
@@ -520,13 +518,13 @@ define([
             return $div;
         },
 
-        buildError: function (error) {
+        buildError(error) {
             console.error('ERROR', error);
             return `<div><span class="alert alert-danger">ERROR: ${error.message || error.error.message}</span></div>`;
         },
 
-        searchAndCacheOrthologs: function (query, sortBy, start, limit) {
-            var self = this;
+        searchAndCacheOrthologs(query, sortBy, start, limit) {
+            const self = this;
             const pangenomeClient = new DynamicServiceClient({
                 module: 'PanGenomeAPI',
                 url: this.runtime.config('services.ServiceWizard.url'),
@@ -534,18 +532,18 @@ define([
             });
             return pangenomeClient.callFunc('search_orthologs_from_pangenome', [{
                 pangenome_ref: this.objRef,
-                query: query,
+                query,
                 sort_by: sortBy,
-                start: start,
-                limit: limit
+                start,
+                limit
             }])
-                .then(function ([results]) {
-                    var rows = [];
+                .then(([results]) => {
+                    const rows = [];
                     self.dataCache = {};
-                    results.orthologs.forEach(function (info) {
+                    results.orthologs.forEach((info) => {
                         self.dataCache[info.id] = info;
-                        var orthoGenomes = {};
-                        info.orthologs.forEach(function (ortholog) {
+                        const orthoGenomes = {};
+                        info.orthologs.forEach((ortholog) => {
                             orthoGenomes[ortholog[2]] = 1;
                         });
                         rows.push([
@@ -556,23 +554,23 @@ define([
                         ]);
                     });
                     return {
-                        rows: rows,
+                        rows,
                         query: results.query,
                         start: results.start,
                         total: results.num_found
                     };
                 })
-                .catch(function (error) {
+                .catch((error) => {
                     console.error(error);
                     throw error;
                 });
         },
 
-        showVennDiagram: function () {
+        showVennDiagram() {
             return $('<div>Venn Diagram</div>');
         },
 
-        loggedInCallback: function (event, auth) {
+        loggedInCallback(event, auth) {
             this.token = auth.token;
             this.render();
             return this;
