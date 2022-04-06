@@ -1,11 +1,8 @@
-define(['kb_common/html'], (html) => {
-
+define(['preact', 'htm', 'components/Empty2'], (preact, htm, Empty) => {
+    const html = htm.bind(preact.h);
     function factory({}) {
         let parent,
             container;
-
-        const div = html.tag('div'),
-            p = html.tag('p');
 
         function attach(node) {
             parent = node;
@@ -13,11 +10,14 @@ define(['kb_common/html'], (html) => {
         }
 
         function render() {
-            return div([p('This object does not have a specific visualization')]);
+            preact.render(
+                html`<${Empty} message="This object does not have a specific visualization" />`,
+                container
+            );
         }
 
         function start(params) {
-            container.innerHTML = render(params);
+            render(params);
         }
 
         function detach() {
