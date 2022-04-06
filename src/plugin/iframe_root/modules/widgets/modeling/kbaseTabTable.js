@@ -6,6 +6,7 @@ define([
     'kb_service/client/workspace',
     'kb_service/client/fba',
     'widgets/modeling/KBModeling',
+    'lib/format',
     'content',
 
     // for effect
@@ -20,7 +21,7 @@ define([
     //'kb_dataview_widget_modeling_genomeSet',
     'kbaseUI/widget/legacy/helpers',
     'datatables_bootstrap'
-], function (
+], (
     $,
     Promise,
     html,
@@ -28,10 +29,9 @@ define([
     Workspace,
     FBA,
     KBModeling,
+    fmt,
     content
-) {
-    'use strict';
-
+) => {
     const IMAGE_URL = 'http://bioseed.mcs.anl.gov/~chenry/jpeg/';
 
     const t = html.tag,
@@ -44,17 +44,14 @@ define([
         parent: 'kbaseAuthenticatedWidget',
         version: '1.0.0',
         options: {},
-        init: function (input) {
+        init(input) {
             this._super(input);
-            var self = this;
+            const self = this;
 
             // root url path for landing pages
-            var DATAVIEW_URL = '/#dataview';
+            const DATAVIEW_URL = '/#dataview';
 
-            var type = input.type;
-
-            // tab widget
-            var tabs;
+            const type = input.type;
 
             // base class for workspace object classes
             const kbModeling = new KBModeling({
@@ -90,7 +87,7 @@ define([
             }
 
             uiTabs[0].active = true;
-            tabs = self.$elem.kbTabs({ tabs: uiTabs });
+            const tabs = self.$elem.kbTabs({tabs: uiTabs});
 
             //
             // 3) get meta data, add any metadata tables
@@ -103,7 +100,7 @@ define([
                 };
             } else if (!isNaN(input.ws) && !isNaN(input.obj)) {
                 param = {
-                    ref: input.ws + '/' + input.obj
+                    ref: `${input.ws}/${input.obj}`
                 };
             } else {
                 throw new Error('Invalid input object reference');
@@ -154,10 +151,10 @@ define([
                     console.error('ERROR getting objects', err);
                 });
 
-            var refLookup = {};
+            const refLookup = {};
 
             function preProcessDataTable(tabSpec) {
-                return Promise.try(function () {
+                return Promise.try(() => {
                     // get refs
                     const refs = [];
                     const cols = tabSpec.columns;
@@ -165,7 +162,7 @@ define([
                     if (!cols) {
                         return;
                     }
-                    cols.forEach(function (col) {
+                    cols.forEach((col) => {
                         if ((col.type === 'tabLink' || col.type === 'wstype') && col.linkformat === 'dispWSRef') {
                             self.obj[tabSpec.key].forEach((item) => {
                                 if (refs.indexOf(item[col.key]) === -1) {
@@ -182,12 +179,12 @@ define([
                     }
 
                     // get human readable info from workspaces
-                    return self.workspaceClient.get_object_info_new({ objects: refs })
+                    return self.workspaceClient.get_object_info_new({objects: refs})
                         .then((data) => {
                             // note we are iterating over the refs fed into the ws call.
                             // that call returns object info for each ref passed in, in the same
                             // order.
-                            refs.forEach(function (ref, i) {
+                            refs.forEach((ref, i) => {
                                 const [
                                     id, name, workspaceType,
                                     , version, , workspaceId,
@@ -200,10 +197,10 @@ define([
                                     ws: workspaceName,
                                     type: workspaceType.split('-')[0],
                                     version,
-                                    ref: workspaceId + '/' + id + '/' + version,
+                                    ref: `${workspaceId  }/${  id  }/${  version}`,
                                     // note that the following (name based refs) is
                                     // deprecated and should no longer be used
-                                    link: workspaceName + '/' + name
+                                    link: `${workspaceName  }/${  name}`
                                 };
                             });
                             return null;
@@ -237,11 +234,11 @@ define([
                             // preprocess data to get workspace info on any references in class
 
                             return preProcessDataTable(tabSpec, tabPane)
-                                .then(function () {
+                                .then(() => {
                                     createDataTable(tabSpec, tabPane);
                                     return null;
                                 })
-                                .catch(function (err) {
+                                .catch((err) => {
                                     console.error('Error in preProcessDataTable', err);
                                     createErrorMessage(tabPane, err.message || err.error.message);
                                     return null;
@@ -297,7 +294,7 @@ define([
                     bAutoWidth: false,
                     language: {
                         search: '_INPUT_',
-                        searchPlaceholder: 'Search ' + tab.name
+                        searchPlaceholder: `Search ${  tab.name}`
                     }
                 };
 
@@ -312,11 +309,11 @@ define([
             };
 
             function newTabEvents(name) {
-                var ids = tabs.tabContent(name).find('.id-click');
+                const ids = tabs.tabContent(name).find('.id-click');
 
                 ids.unbind('click');
                 ids.click(function () {
-                    var info = {
+                    const info = {
                             id: $(this).data('id'),
                             type: $(this).data('type'),
                             method: $(this).data('method'),
@@ -334,17 +331,17 @@ define([
                     });
                     tabs.showTab(info.id);
 
-                    Promise.try(function () {
+                    Promise.try(() => {
                         if (info.method && info.method !== 'undefined') {
-                            return Promise.try(function () {
+                            return Promise.try(() => {
                                 contentDiv.loading();
                                 return self.obj[info.method](info);
-                            }).then(function (rows) {
+                            }).then((rows) => {
                                 contentDiv.rmLoading();
                                 if (!rows) {
-                                    contentDiv.append('<br>No data found for ' + info.id);
+                                    contentDiv.append(`<br>No data found for ${  info.id}`);
                                 } else {
-                                    var table = self.verticalTable({ rows: rows });
+                                    const table = self.verticalTable({rows});
                                     contentDiv.append(table);
                                     newTabEvents(info.id);
                                 }
@@ -356,11 +353,11 @@ define([
                                 obj: info.name
                             });
                         }
-                    }).catch(function (err) {
+                    }).catch((err) => {
                         console.error(err);
                         contentDiv.empty();
                         contentDiv
-                            .append('ERROR: ' + err.message)
+                            .append(`ERROR: ${  err.message}`)
                             .css('color', 'red')
                             .css('text-align', 'center')
                             .css('padding', '10px');
@@ -422,39 +419,39 @@ define([
                             id
                         );
                     } else if (type === 'wstype' && format === 'dispWSRef') {
-                        var ref = refLookup[d[key]];
+                        const ref = refLookup[d[key]];
                         // TODO: add testhook field here
                         if (ref && ref.ref) {
                             return (
-                                '<a href="' +
-                                DATAVIEW_URL +
-                                '/' +
-                                ref.ref +
-                                '" target="_blank" ' +
+                                `<a href="${
+                                    DATAVIEW_URL
+                                }/${
+                                    ref.ref
+                                }" target="_blank" ` +
                                 '" class="id-click"' +
-                                '" data-ws="' +
-                                ref.ws +
-                                '" data-id="' +
-                                ref.name +
-                                '" data-ref="' +
-                                d[key] +
-                                '" data-type="' +
-                                ref.type +
-                                '" data-action="openPage"' +
-                                '" data-method="' +
-                                method +
-                                '" data-name="' +
-                                ref.name +
-                                '">' +
-                                ref.name +
-                                '</a>'
+                                `" data-ws="${
+                                    ref.ws
+                                }" data-id="${
+                                    ref.name
+                                }" data-ref="${
+                                    d[key]
+                                }" data-type="${
+                                    ref.type
+                                }" data-action="openPage"` +
+                                `" data-method="${
+                                    method
+                                }" data-name="${
+                                    ref.name
+                                }">${
+                                    ref.name
+                                }</a>`
                             );
-                        } else {
-                            return 'no link';
                         }
+                        return 'no link';
+
                     }
 
-                    var value = d[key];
+                    const value = d[key];
 
                     if ($.isArray(value)) {
                         if (type === 'tabLinkArray') {
@@ -487,7 +484,7 @@ define([
             }
 
             function tabLinkArray(tabArray, method) {
-                return tabArray.map(function (d) {
+                return tabArray.map((d) => {
                     const dispid = d.dispid || d.id;
                     return a(
                         {
@@ -502,13 +499,13 @@ define([
             }
 
             this.verticalTable = function (p) {
-                var data = p.data;
-                var rows = p.rows;
+                const data = p.data;
+                const rows = p.rows;
 
-                var table = $('<table class="table table-bordered" style="margin-left: auto; margin-right: auto;">');
+                const table = $('<table class="table table-bordered" style="margin-left: auto; margin-right: auto;">');
 
-                for (var i = 0; i < rows.length; i++) {
-                    var row = rows[i],
+                for (let i = 0; i < rows.length; i++) {
+                    const row = rows[i],
                         type = row.type;
 
                     // don't display undefined things in vertical table
@@ -519,8 +516,8 @@ define([
                         continue;
                     }
 
-                    var r = $('<tr>');
-                    r.append('<td><b>' + row.label + '</b></td>');
+                    const r = $('<tr>');
+                    r.append(`<td><b>${  row.label  }</b></td>`);
 
                     // if the data is in the row definition, use it
                     if ('data' in row) {
@@ -536,20 +533,20 @@ define([
                                     },
                                     row.dispid
                                 );
-                            } else {
-                                return row.data;
                             }
+                            return row.data;
+
                         })() || content.na();
-                        r.append('<td>' + value + '</td>');
+                        r.append(`<td>${  value  }</td>`);
                     } else if ('key' in row) {
                         if (row.type === 'wstype') {
                             const ref = data[row.key];
 
-                            const cell = $('<td data-ref="' + ref + '">loading...</td>');
+                            const cell = $(`<td data-ref="${  ref  }">loading...</td>`);
                             r.append(cell);
 
                             getLink(ref)
-                                .then(function ({ref, name}) {
+                                .then(({ref, name}) => {
                                     table
                                         .find(`[data-ref="${ref}"]`)
                                         .html(`<a href="${DATAVIEW_URL}/${ref}" target="_blank">${name || content.na()}</a>`);
@@ -564,7 +561,7 @@ define([
                                 });
                         } else {
                             // Plain column
-                            r.append('<td data-k-b-testhook-field="' + row.key + '">' + data[row.key] + '</td>');
+                            r.append(`<td data-k-b-testhook-field="${row.key}">${fmt.domSafeText(data[row.key])}</td>`);
                         }
                     } else if (row.type === 'pictureEquation') {
                         r.append($('<td></td>').append(this.pictureEquation(row.data)));
@@ -577,7 +574,7 @@ define([
             };
 
             this.getBiochemReaction = function (id) {
-                var client = new DynamicServiceClient({
+                const client = new DynamicServiceClient({
                     url: this.runtime.config('services.service_wizard.url'),
                     token: this.runtime.service('session').getAuthToken(),
                     module: 'BiochemistryAPI'
@@ -588,13 +585,13 @@ define([
                             reactions: [id]
                         }
                     ])
-                    .spread(function (data) {
+                    .spread((data) => {
                         return data[0];
                     });
             };
 
             this.getBiochemCompound = function (id) {
-                var client = new DynamicServiceClient({
+                const client = new DynamicServiceClient({
                     url: this.runtime.config('services.service_wizard.url'),
                     token: this.runtime.service('session').getAuthToken(),
                     module: 'BiochemistryAPI'
@@ -605,13 +602,13 @@ define([
                             compounds: [id]
                         }
                     ])
-                    .spread(function (data) {
+                    .spread((data) => {
                         return data[0];
                     });
             };
 
             this.getBiochemCompounds = function (ids) {
-                var client = new DynamicServiceClient({
+                const client = new DynamicServiceClient({
                     url: this.runtime.config('services.service_wizard.url'),
                     token: this.runtime.service('session').getAuthToken(),
                     module: 'BiochemistryAPI'
@@ -629,9 +626,9 @@ define([
 
             this.compoundImage = function (id) {
                 return (
-                    '<img src=http://minedatabase.mcs.anl.gov/compound_images/ModelSEED/' +
-                    id.split('_')[0] +
-                    '.png style=\'height:300px !important;\'>'
+                    `<img src=http://minedatabase.mcs.anl.gov/compound_images/ModelSEED/${
+                        id.split('_')[0]
+                    }.png style='height:300px !important;'>`
                 );
             };
 
@@ -641,19 +638,13 @@ define([
 
                 for (let i = 0; i < cpds.left.length; i++) {
                     const cpd = cpds.left[i];
-                    const img_url = IMAGE_URL + cpd + '.jpeg';
+                    const img_url = `${IMAGE_URL + cpd  }.jpeg`;
                     /* TODO: this is going to fail ... there is no panel node around unless it is set globally in some dependency ... */
                     panel.append(
-                        '<div class="pull-left text-center">\
-                                    <img src="' +
-                        img_url +
-                        '" width=150 ><br>\
-                                    <div class="cpd-id" data-cpd="' +
-                        cpd +
-                        '">' +
-                        cpd +
-                        '</div>\
-                                </div>'
+                        `<div class="pull-left text-center">\
+                                    <img src="${img_url}" width=150 ><br>\
+                                    <div class="cpd-id" data-cpd="${cpd}">${cpd}</div>\
+                                </div>`
                     );
 
                     const plus = $('<div class="pull-left text-center">+</div>');
@@ -664,29 +655,21 @@ define([
                     }
                 }
 
-                var direction = $('<div class="pull-left text-center">' + '<=>' + '</div>');
+                const direction = $('<div class="pull-left text-center">' + '<=>' + '</div>');
                 direction.css('margin', '25px 0 0 0');
                 panel.append(direction);
 
                 for (let i = 0; i < cpds.right.length; i++) {
                     const cpd = cpds.right[i];
-                    const img_url = IMAGE_URL + cpd + '.jpeg';
+                    const img_url = `${IMAGE_URL + cpd  }.jpeg`;
                     panel.append(
-                        '<div class="pull-left text-center">\
-                                    <img src="' +
-                        img_url +
-                        '" data-cpd="' +
-                        cpd +
-                        '" width=150 ><br>\
-                                    <div class="cpd-id" data-cpd="' +
-                        cpd +
-                        '">' +
-                        cpd +
-                        '</div>\
-                                </div>'
+                        `<div class="pull-left text-center">\
+                                    <img src="${img_url}" data-cpd="${cpd}" width=150 ><br>\
+                                    <div class="cpd-id" data-cpd="${cpd}">${cpd}</div>\
+                                </div>`
                     );
 
-                    var plus = $('<div class="pull-left text-center">+</div>');
+                    const plus = $('<div class="pull-left text-center">+</div>');
                     plus.css('margin', '25px 0 0 0');
 
                     if (i < cpds.right.length - 1) {
@@ -694,11 +677,11 @@ define([
                     }
                 }
 
-                var cpd_ids = cpds.left.concat(cpds.right);
+                const cpd_ids = cpds.left.concat(cpds.right);
                 this.getBiochemCompounds(cpd_ids)
-                    .then(function (d) {
-                        var map = {};
-                        for (var i in d) {
+                    .then((d) => {
+                        const map = {};
+                        for (const i in d) {
                             map[d[i].id] = d[i].name;
                         }
 
@@ -707,7 +690,7 @@ define([
                         });
                         return null;
                     })
-                    .catch(function (err) {
+                    .catch((err) => {
                         console.error(err);
                     });
 
@@ -725,12 +708,12 @@ define([
 
             function getLink(ref) {
                 return self.workspaceClient.get_object_info_new({
-                    objects: [{ ref }]
+                    objects: [{ref}]
                 })
                     .then(([objectInfo]) => {
                         return {
-                            url: objectInfo[7] + '/' + objectInfo[1],
-                            ref: objectInfo[6] + '/' + objectInfo[0] + '/' + objectInfo[4],
+                            url: `${objectInfo[7]}/${objectInfo[1]}`,
+                            ref: `${objectInfo[6]}/${objectInfo[0]}/${objectInfo[4]}`,
                             name: objectInfo[1]
                         };
                     });
