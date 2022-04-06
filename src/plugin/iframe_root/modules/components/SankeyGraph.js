@@ -4,6 +4,7 @@ define([
     'jquery',
     'd3',
     'kb_lib/jsonRpc/genericClient',
+    'ResizeObserver',
 
     // For effect
     'd3_sankey',
@@ -13,12 +14,22 @@ define([
     htm,
     $,
     d3,
-    GenericClient
+    GenericClient,
+    ResizeObserver
 ) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
-    const NODE_HEIGHT = 38;
+    // The height of the graph is calculated as the product of the total # of nodes and
+    // the following factor. This roughly sizes the graph height to scale with the size of
+    // the graph. A larger factor results in a taller graph, and taller nodes.
+    const HEIGHT_CALC_NODE_FACTOR = 40;
+
+    // The graph container is resizable, with a size dynamically set to be either the actual 
+    // height of the graph or 400 if the graph is taller than 400px. The container is resizable,
+    // so the user can expand it to the full graph. The graph is scrollable inside the container.
+    // If we don't constrain the graph height like this, for a large graph, the user will not be 
+    // able to even see the detail tables below it.
     const DEFAULT_MAX_HEIGHT = 400;
 
     const TYPES = {
@@ -91,6 +102,7 @@ define([
             this.state = {
                 height: null
             };
+            this.resizeObserver = new ResizeObserver(this.onContainerResize.bind(this));
         }
         componentDidMount() {
             const node = this.ref.current;
@@ -98,7 +110,20 @@ define([
                 width: node.clientWidth
             }, () => {
                 this.renderGraph(node);
+                this.resizeObserver.observe(node);
             });
+        }
+
+        componentWillUnmount() {
+            if (this.resizeObserver && this.ref.current) {
+                this.resizeObserver.unobserve(this.ref.current);
+            }
+        }
+
+        onContainerResize() {
+            if (this.ref.current) {
+                this.setWidth(this.ref.current);
+            }
         }
 
         async nodeMouseover(d) {
@@ -140,13 +165,24 @@ define([
             this.props.onNodeOut();
         }
 
+        setWidth(element) {
+            this.setState({
+                width: element.clientWidth
+            }, () => {
+                // Crude, but works. When this is rewritten with modern
+                // d3 and a supported d3 plugin, can redress this with
+                // propery d3 updating.
+                this.renderGraph(element);
+            });
+        }
+
         renderGraph(graphNode) {
             const $graphNode = $(graphNode);
 
             // TODO: eliminate the "- 27" which is to ensure there is no horizontal scrolling.
             const width = this.state.width - 27;
             const {graph, objRefToNodeIdx} = this.props;
-            const height = this.props.graph.nodes.length * NODE_HEIGHT;
+            const height = this.props.graph.nodes.length * HEIGHT_CALC_NODE_FACTOR;
             // TODO: eliminate the "+ 15", required to ensure bounding container does not overflow
             this.setState({
                 height: Math.min(height + 15, DEFAULT_MAX_HEIGHT)
@@ -166,9 +202,9 @@ define([
                 graph.links.push(makeLink(0, 1, 1));
             }
 
-            // if (height < 450) {
-            //     $graphNode.height(height + 40);
-            // }
+
+            // TODO: This was previously disabled, not sure why. We should consider
+            // reviving it. 
             /*var zoom = d3.behavior.zoom()
                  .translate([0, 0])
                  .scale(1)
@@ -183,9 +219,13 @@ define([
             d3.select($graphNode[0]).html('');
             $graphNode.show();
             const svg = d3.select($graphNode[0]).append('svg');
+
             svg.attr('width', width)
                 .attr('height', height)
                 .append('g');
+                // removed for simplicity, not sure it really adds very much.
+                // we use the container to add padding for layout. It is fine 
+                // and preferred to have the graph start at 0,0.
                 // .attr('transform', `translate(${margin.left},${margin.top})`);
 
             // Set the sankey diagram properties
@@ -220,13 +260,13 @@ define([
             // add the link titles
             link.append('title').text((d) => {
                 if (d.source.nodeType === 'copied') {
-                    d.text = `${d.target.name  } copied from ${  d.source.name}`;
+                    d.text = `${d.target.name  } copied from ${d.source.name}`;
                 } else if (d.source.nodeType === 'core') {
-                    d.text = `${d.target.name  } is a newer version of ${  d.source.name}`;
+                    d.text = `${d.target.name  } is a newer version of ${d.source.name}`;
                 } else if (d.source.nodeType === 'ref') {
-                    d.text = `${d.source.name  } references ${  d.target.name}`;
+                    d.text = `${d.source.name  } references ${d.target.name}`;
                 } else if (d.source.nodeType === 'included') {
-                    d.text = `${d.target.name  } references ${  d.source.name}`;
+                    d.text = `${d.target.name  } references ${d.source.name}`;
                 }
                 return d.text;
             });
@@ -241,7 +281,7 @@ define([
                 .append('g')
                 .attr('class', 'sankeynode')
                 .attr('transform', (d) => {
-                    return `translate(${  d.x  },${  d.y  })`;
+                    return `translate(${d.x},${d.y})`;
                 })
                 .call(
                     d3.behavior
@@ -255,7 +295,7 @@ define([
                         .on('drag', function (d) {
                             d.x = Math.max(0, Math.min(width - d.dx, d3.event.x));
                             d.y = Math.max(0, Math.min(height - d.dy, d3.event.y));
-                            d3.select(this).attr('transform', `translate(${  d.x  },${  d.y  })`);
+                            d3.select(this).attr('transform', `translate(${d.x},${d.y})`);
                             sankey.relayout();
                             link.attr('d', path);
                         })
