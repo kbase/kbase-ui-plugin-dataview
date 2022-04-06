@@ -15,7 +15,7 @@ define([
     {Component, h, Fragment, createRef, render},
     htm,
     common,
-    ResizeObserver2,
+    ResizeObserver,
     DropdownMenu,
     Popup,
     Toolbar,
@@ -246,7 +246,7 @@ define([
             this.firstRow = null;
             this.lastRow = null;
 
-            this.observer = new ResizeObserver2(this.bodyObserver.bind(this));
+            this.observer = new ResizeObserver(this.bodyObserver.bind(this));
 
             // Just for now ... a better impl is a spreadsheet data source.
             // analyze table values...

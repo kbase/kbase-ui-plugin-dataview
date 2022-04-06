@@ -1,8 +1,6 @@
 define([
     'preact',
     'htm',
-    'jquery',
-    'd3',
     './ProvenanceGraph.styles',
     './Loading',
     './ErrorView',
@@ -14,8 +12,6 @@ define([
 ], (
     preact,
     htm,
-    $,
-    d3,
     styles,
     Loading,
     ErrorView,
@@ -388,19 +384,23 @@ define([
             }
         }
 
+        onNodeOver({ref, info, objdata}) {
+            this.props.onInspectNode({ref, info, objdata}, true);
+        }
+
+        onNodeOut() {
+            this.props.onInspectNodeLeave();
+        }
+
         renderGraph({graph, objRefToNodeIdx}) {
             return html`
                 <${SankeyGraph} 
                         graph=${graph} 
                         objRefToNodeIdx=${objRefToNodeIdx} 
                         runtime=${this.props.runtime} 
-                        onNodeOver=${({ref, info, objdata}) => {
-                            this.props.onInspectNode({ref, info, objdata}, true);
-                        }}
-                        onNodeOut=${() => {
-                            this.props.onInspectNodeLeave();
-                        }}
-                        />
+                        onNodeOver=${this.onNodeOver.bind(this)}
+                        onNodeOut=${this.onNodeOut.bind(this)}
+                />
             `;
         }
 

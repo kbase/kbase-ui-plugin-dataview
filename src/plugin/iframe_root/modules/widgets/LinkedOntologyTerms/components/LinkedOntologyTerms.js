@@ -41,7 +41,7 @@ define([
         }
 
         renderNoLinkedTerms() {
-            return html`<${Empty} message="No terms linked to this object" />`;
+            return html`<${Empty} message="No terms are linked to this object" />`;
         }
 
         render() {

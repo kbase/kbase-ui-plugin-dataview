@@ -23,37 +23,6 @@ define([
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
-    // Utils
-    function tableRow(rowTitle, rowContent) {
-        return html`
-            <tr>
-                <th>${rowTitle}</th>
-                <td>
-                    <div class="CellContent" >
-                        ${rowContent}
-                    </div>
-                </td>
-            </tr>
-        `;
-
-        // return tr([
-        //     td({style: {maxWidth: '250px'}}, [b(rowTitle)]),
-        //     td({style: {maxWidth: '300px'}}, [
-        //         div(
-        //             {
-        //                 style: {
-        //                     maxWidth: '300px',
-        //                     maxHeight: '250px',
-        //                     overflowY: 'auto',
-        //                     whiteSpace: 'pre',
-        //                     wordWrap: 'break-word'
-        //                 }
-        //             },
-        //             [rowContent]
-        //         )
-        //     ])
-        // ]);
-    }
 
     function renderRow(rowTitle, rowContent, title) {
         if (typeof title === 'undefined') {
@@ -69,24 +38,6 @@ define([
                 </td>
             </tr>
         `;
-
-        // return tr([
-        //     td({style: {maxWidth: '250px'}}, [b(rowTitle)]),
-        //     td({style: {maxWidth: '300px'}}, [
-        //         div(
-        //             {
-        //                 style: {
-        //                     maxWidth: '300px',
-        //                     maxHeight: '250px',
-        //                     overflowY: 'auto',
-        //                     whiteSpace: 'pre',
-        //                     wordWrap: 'break-word'
-        //                 }
-        //             },
-        //             [rowContent]
-        //         )
-        //     ])
-        // ]);
     }
 
     function renderLinkRow(rowTitle, url, label, title) {
@@ -458,17 +409,13 @@ define([
         render() {
             const detailClass = this.state.selectedNode.over ? 'NodeHovered' : 'NodeNotHovered';
             return html`
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-md-12">
-                        <${ProvenanceGraph} 
-                            objectRef=${this.props.objectInfo.ref} 
-                            runtime=${this.props.runtime}
-                            onInspectNode=${this.onInspectNode.bind(this)}
-                            onInspectNodeLeave=${this.onInspectNodeLeave.bind(this)}
-                        />
-                    </div>
-                </div>
+            <div class="ProvenancePanel">
+                <${ProvenanceGraph} 
+                    objectRef=${this.props.objectInfo.ref} 
+                    runtime=${this.props.runtime}
+                    onInspectNode=${this.onInspectNode.bind(this)}
+                    onInspectNodeLeave=${this.onInspectNodeLeave.bind(this)}
+                />
                 <${Row} style=${{marginBottom: '1em'}}>
                     <${Col} style=${{flex: '0 0 19em', marginRight: '0.5em'}}>
                         ${this.renderLegend()}

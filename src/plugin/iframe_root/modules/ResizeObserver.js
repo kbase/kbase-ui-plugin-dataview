@@ -1,4 +1,8 @@
 define([], () => {
+
+
+    const DEFAULT_INTERVAL = 100;
+
     function outerDimensions(el) {
         el.offsetHeight;
         const rect = el.getBoundingClientRect();
@@ -42,6 +46,8 @@ define([], () => {
                 if (this.lastWidth !== width || this.lastHeight !== height) {
                     try {
                         this.callback();
+                        this.lastWidth = width;
+                        this.lastHeight = height;
                     } catch (ex) {
                         console.error('Error in callback, stopping observation.');
                         this.unobserve();
