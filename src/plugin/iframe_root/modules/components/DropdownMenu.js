@@ -187,12 +187,6 @@ define([
         }
 
         componentDidMount() {
-            // const bounds = this.dropdownRef.current.getBoundingClientRect();
-            // console.log('mounted ddref', this.dropdownRef.current.getBoundingClientRect());
-            // console.log('mounted ref', this.ref.current.getBoundingClientRect());
-            // const el = document.elementFromPoint(bounds.x, bounds.y);
-            // console.log('mounted el', el);
-            // console.log('mounted el boundds', el.getBoundingClientRect());
             if (this.state.position === 'left' && this.isHidden()) {
                 this.setState({
                     position: 'right'

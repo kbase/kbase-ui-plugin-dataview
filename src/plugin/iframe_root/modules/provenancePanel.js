@@ -68,7 +68,6 @@ define([
                 mount = node;
                 container = document.createElement('div');
                 container.classList = ['ProvenancePanel'];
-                console.log('HERE', container.classList);
                 mount.appendChild(container);
             });
         }

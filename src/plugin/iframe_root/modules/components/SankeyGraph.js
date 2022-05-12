@@ -25,10 +25,10 @@ define([
     // the graph. A larger factor results in a taller graph, and taller nodes.
     const HEIGHT_CALC_NODE_FACTOR = 40;
 
-    // The graph container is resizable, with a size dynamically set to be either the actual 
+    // The graph container is resizable, with a size dynamically set to be either the actual
     // height of the graph or 400 if the graph is taller than 400px. The container is resizable,
     // so the user can expand it to the full graph. The graph is scrollable inside the container.
-    // If we don't constrain the graph height like this, for a large graph, the user will not be 
+    // If we don't constrain the graph height like this, for a large graph, the user will not be
     // able to even see the detail tables below it.
     const DEFAULT_MAX_HEIGHT = 400;
 
@@ -204,7 +204,7 @@ define([
 
 
             // TODO: This was previously disabled, not sure why. We should consider
-            // reviving it. 
+            // reviving it.
             /*var zoom = d3.behavior.zoom()
                  .translate([0, 0])
                  .scale(1)
@@ -224,7 +224,7 @@ define([
                 .attr('height', height)
                 .append('g');
                 // removed for simplicity, not sure it really adds very much.
-                // we use the container to add padding for layout. It is fine 
+                // we use the container to add padding for layout. It is fine
                 // and preferred to have the graph start at 0,0.
                 // .attr('transform', `translate(${margin.left},${margin.top})`);
 
@@ -326,7 +326,6 @@ define([
                         // TODO: Fix this
                         const path = `provenance/${encodeURI(`${d.info[6]}/${d.info[0]}/${d.info[4]}`)}`;
                         const url = `${window.location.origin}/#${path}`;
-                        console.log('HERE');
                         window.open(url);
                         this.props.runtime.navigate(path);
                         //}

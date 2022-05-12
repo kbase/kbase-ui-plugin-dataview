@@ -16,28 +16,6 @@ define([
             this.ref = preact.createRef();
             this.observer = null;
         }
-        // componentDidMount() {
-        //     const el = this.ref.current;
-        //     console.log('mounted!', el.offsetWidth, el.offsetHeight, el.getBoundingClientRect());
-        //     window.setTimeout(() => {
-        //         console.log('after ...', el.offsetWidth, el.offsetHeight, el.getBoundingClientRect());
-        //     }, 0);
-        //     this.observer = new MutationObserver((mutations, observer) => {
-        //         console.log('mutations', mutations);
-        //         for (const mutation of mutations) {
-        //             if (mutation.type === 'childList') {
-        //                 console.log('childlist modified');
-        //                 console.log('dimensions', el.offsetWidth, el.offsetHeight, el.getBoundingClientRect());
-        //             }
-        //         }
-        //     });
-        //     this.observer.observe(el, {attributes: true, childList: true, subtree: true});
-        // }
-        // componentWillUnmount() {
-        //     if (this.observer) {
-        //         this.observer.disconnect();
-        //     }
-        // }
         render() {
             return html`
                 <div style=${this.props.style} ref=${this.ref} data-testid="content">
