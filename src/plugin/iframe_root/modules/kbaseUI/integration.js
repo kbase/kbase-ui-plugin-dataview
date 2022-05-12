@@ -153,63 +153,13 @@ define(['./windowChannel', './runtime'], (WindowChannel, Runtime) => {
                             reject(err);
                         });
 
-                    // this.runtime = new runtime.Runtime({ config, token, username, realname, email });
-                    // this.render(ko);
-
-                    // this.rootViewModel.bus.on('set-plugin-params', ({ pluginParams }) => {
-                    //     this.hostChannel.send('set-plugin-params', { pluginParams });
-                    // });
-
-                    // this.channel.on('show-help', () => {
-                    //     this.showHelp();
-                    // });
-
-                    this.channel.on('loggedin', ({token, username, realname, email}) => {
-                        // console.log('loggedin', token, username, realname, email);
+                    this.channel.on('loggedin', () => {
                         this.runtime.send('session', 'loggedin');
-                        // this.runtime.auth({ token, username, realname, email });
-                        // this.rootViewModel.authorized(true);
-                        // this.rootViewModel.authorization({ token, username, realname, email });
-                        // really faked for now.
-                        // this.runtime.service('session').
                     });
 
                     this.channel.on('loggedout', () => {
                         this.runtime.send('session', 'loggedout');
-                        // this.runtime.unauth();
-                        // this.rootViewModel.authorized(false);
-                        // this.rootViewModel.authorization(null);
                     });
-
-                    // this.rootViewModel.bus.on('instrumentation', (payload) => {
-                    //     this.hostChannel.send('send-instrumentation', payload);
-                    // });
-
-                    // this.hostChannel.send('add-button', {
-                    //     button: {
-                    //         name: 'feedback',
-                    //         label: 'Feedback',
-                    //         style: 'default',
-                    //         icon: 'bullhorn',
-                    //         toggle: false,
-                    //         params: {
-                    //         },
-                    //         callbackMessage: ['show-feedback', null]
-                    //     }
-                    // });
-
-                    // this.hostChannel.send('add-button', {
-                    //     button: {
-                    //         name: 'help',
-                    //         label: 'Help',
-                    //         style: 'default',
-                    //         icon: 'question-circle',
-                    //         toggle: false,
-                    //         params: {
-                    //         },
-                    //         callbackMessage: ['show-help', null]
-                    //     }
-                    // });
                 });
 
                 window.document.addEventListener('click', () => {
@@ -220,7 +170,7 @@ define(['./windowChannel', './runtime'], (WindowChannel, Runtime) => {
                 // enclosing app (window) to send us messages on our very own channel.
                 // We could just use the host's channel, have all sends and receives
                 // on the same channel, with control via the channel id. However, there is a risk
-                // the the channels will listen on for the same message ... unlikely though.
+                // the channels will listen on for the same message ... unlikely though.
                 // Still, it would be odd for one window to listen for messages on another...
                 this.channel.send('ready', {});
             });

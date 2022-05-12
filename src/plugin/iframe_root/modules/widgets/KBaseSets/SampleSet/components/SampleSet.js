@@ -99,7 +99,7 @@ define([
                     `;
                 },
                 sortable: true
-            },{
+            }, {
                 id: 'savedAt',
                 label: 'Created',
                 styles: {

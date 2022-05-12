@@ -62,6 +62,30 @@ define([
             this.props.runtime.send('copyWidget', 'toggle');
         }
 
+        renderAccessIcon() {
+            const isPublic =  this.props.workspaceInfo.globalread === 'r';
+            if (isPublic) {
+                return html`
+                    <div className="MiniOverview-accessIcon"
+                         data-toggle="tooltip"
+                         data-placement="bottom"
+                         title="This object is in a public narrative; it is accessible to all KBase users and anyone else with the url; visit the Narrative (a link is in the Overview tab below) to see who it is shared with (requires login)">
+                        <div className="fa fa-2x fa-globe"/>
+                        <div>Public</div>
+                    </div>
+                `;
+            }
+            return html`
+                <div className="MiniOverview-accessIcon"
+                     data-toggle="tooltip"
+                     data-placement="bottom"
+                     title="This object is in a private Narrative; visit the Narrative (a link is in the Overview tab below) to see who it is shared with.">
+                    <div className="fa fa-2x fa-unlock" />
+                    <div>Private</div>
+                </div>
+            `;
+        }
+
         renderJSONViewButton() {
             const roles = this.props.runtime.service('session').getRoles();
             if (roles.indexOf('DevToken') === -1) {
@@ -128,6 +152,9 @@ define([
                         <a href="${`/#people/${this.props.objectInfo.saved_by}`}" target="_blank">
                             ${this.props.objectInfo.saved_by}
                         </a>
+                    </div>
+                    <div className="MiniOverview-accessCol">
+                        ${this.renderAccessIcon()}
                     </div>
                     <div className="MiniOverview-buttonsCol">
                         ${this.renderButtons()}

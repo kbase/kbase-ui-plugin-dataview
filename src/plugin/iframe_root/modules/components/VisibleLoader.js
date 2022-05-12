@@ -4,7 +4,7 @@ define([
     'htm',
     './VisibleLoader.styles'
 ], (
-    {Component, cloneElement, createRef, h},
+    {Component, createRef, h},
     htm,
     styles
 ) => {
@@ -22,7 +22,6 @@ define([
 
         async componentDidMount() {
             if (this.ref.current === null) {
-                console.log('NO REF');
                 // what to do???
             }
             const element = this.ref.current;
@@ -78,7 +77,6 @@ define([
             }
             return this.props.children;
         }
-
 
         render() {
             return html`
