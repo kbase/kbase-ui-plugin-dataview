@@ -1,15 +1,13 @@
-define(['kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'], function (html, WidgetSet, utils) {
-    'use strict';
-
+define(['kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'], (html, WidgetSet, utils) => {
     function factory(config) {
-        var runtime = config.runtime,
-            container,
-            widgetSet = runtime.service('widget').newWidgetSet(),
-            t = html.tag,
-            layout;
+        const runtime = config.runtime;
+        let container;
+        const widgetSet = runtime.service('widget').newWidgetSet();
+        const t = html.tag;
+        let layout;
 
         function renderLayout() {
-            var div = t('div');
+            const div = t('div');
             return div({
                 style: {
                     flex: '1 1 0px',
@@ -25,9 +23,9 @@ define(['kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'], function (html, Wid
                     dataKBTesthookPlugin: 'dataview'
                 },
                 [
-                    div({ class: 'row' }, [
-                        div({ class: 'col-md-8' }, [div({ id: widgetSet.addWidget('kb_dataview_jsonView') })]),
-                        div({ class: 'col-md-4' }, [div({ id: widgetSet.addWidget('kb_dataview_jsonViewOverview') })])
+                    div({class: 'row'}, [
+                        div({class: 'col-md-8'}, [div({id: widgetSet.addWidget('kb_dataview_jsonView')})]),
+                        div({class: 'col-md-4'}, [div({id: widgetSet.addWidget('kb_dataview_jsonViewOverview')})])
                     ])
                 ]
             ));
@@ -41,6 +39,7 @@ define(['kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'], function (html, Wid
 
         function attach(node) {
             container = node;
+            // safe
             container.innerHTML = layout;
             return widgetSet.attach(container);
         }
@@ -50,7 +49,7 @@ define(['kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'], function (html, Wid
                 utils.getObject(runtime, params),
                 utils.getWorkspaceInfo(runtime, params)])
                 .then(([object, workspaceInfo]) => {
-                    return widgetSet.start({ object, workspaceInfo });
+                    return widgetSet.start({object, workspaceInfo});
                 });
         }
 
@@ -60,15 +59,15 @@ define(['kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'], function (html, Wid
         }
 
         return {
-            init: init,
-            attach: attach,
-            start: start,
-            stop: stop
+            init,
+            attach,
+            start,
+            stop
         };
     }
 
     return {
-        make: function (config) {
+        make(config) {
             return factory(config);
         }
     };
