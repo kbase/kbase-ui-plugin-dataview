@@ -158,7 +158,6 @@ define([
                 div({
                     class: 'Col'
                 }, [
-                    // div({ id: widgetSet.addWidget('kb_dataview_download') }),
                     div({
                         id: widgetSet.addWidget('kb_dataview_copy'),
                         style: {
@@ -172,12 +171,6 @@ define([
                             marginBottom: '10px'
                         }
                     }),
-                    // div({
-                    //     id: overviewId,
-                    //     style: {
-                    //         flex: '0 0 auto'
-                    //     }
-                    // }),
                     div({
                         id: 'tabs123',
                         style: {
@@ -208,6 +201,7 @@ define([
             container.style['flex-direction'] = 'column';
             container.style['min-height'] = '0';
             mount.appendChild(container);
+            // safe
             container.innerHTML = layout;
         }
 
