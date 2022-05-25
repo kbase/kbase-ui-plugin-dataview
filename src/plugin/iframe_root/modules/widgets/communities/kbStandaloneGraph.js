@@ -101,17 +101,10 @@
  normalize_stacked_area (boolean)
  If set to false the stacked area chart will not normalize the values
  */
-/*global
- define
- */
-/*jslint
- browser: true,
- white: true
- */
-define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
+
+define(['jquery', 'widgets/communities/jquery.svg'], ($) => {
     // 'jquery-svg-graph-deviation', 'jquery-svg-graph-stacked-area'],
-    'use strict';
-    var standaloneGraph = {
+    const standaloneGraph = {
         about: {
             name: 'graph',
             title: 'Graph',
@@ -122,7 +115,7 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
             type: 'column', // [ column, stackedColumn, row, stackedRow, line, pie, stackedArea, deviation ]
             title: '',
             title_color: 'black',
-            title_settings: { fontSize: '15px' },
+            title_settings: {fontSize: '15px'},
             x_title: '',
             y_title: '',
             y2_title: '',
@@ -160,14 +153,14 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
                         description: 'type of the graph',
                         title: 'type',
                         options: [
-                            { value: 'column', selected: true },
-                            { value: 'stackedColumn', label: 'stacked column' },
-                            { value: 'row' },
-                            { value: 'stackedRow', label: 'stacked row' },
-                            { value: 'line' },
-                            { value: 'pie' },
-                            { value: 'stackedArea', label: 'stacked area' },
-                            { value: 'deviation', label: 'deviation' }
+                            {value: 'column', selected: true},
+                            {value: 'stackedColumn', label: 'stacked column'},
+                            {value: 'row'},
+                            {value: 'stackedRow', label: 'stacked row'},
+                            {value: 'line'},
+                            {value: 'pie'},
+                            {value: 'stackedArea', label: 'stacked area'},
+                            {value: 'deviation', label: 'deviation'}
                         ]
                     },
                     {
@@ -187,7 +180,7 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
                         type: 'select',
                         description: 'sets whether grid is displayed or not',
                         title: 'show grid',
-                        options: [{ value: 0, selected: true, label: 'no' }, { value: 1, label: 'yes' }]
+                        options: [{value: 0, selected: true, label: 'no'}, {value: 1, label: 'yes'}]
                     }
                 ]
             },
@@ -256,7 +249,7 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
                         type: 'select',
                         description: 'sets whether the legend is displayed or not',
                         title: 'show legend',
-                        options: [{ value: 0, selected: true, label: 'no' }, { value: 1, label: 'yes' }]
+                        options: [{value: 0, selected: true, label: 'no'}, {value: 1, label: 'yes'}]
                     },
                     {
                         name: 'legend_position',
@@ -264,10 +257,10 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
                         description: 'position of the legend',
                         title: 'legend position',
                         options: [
-                            { value: 'left', selected: true },
-                            { value: 'right' },
-                            { value: 'top' },
-                            { value: 'bottom' }
+                            {value: 'left', selected: true},
+                            {value: 'right'},
+                            {value: 'top'},
+                            {value: 'bottom'}
                         ]
                     }
                 ]
@@ -279,7 +272,7 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
                         type: 'select',
                         description: 'type of the scale of the y-axis',
                         title: 'y scale',
-                        options: [{ value: 'linear', selected: true }, { value: 'log' }]
+                        options: [{value: 'linear', selected: true}, {value: 'log'}]
                     },
                     {
                         name: 'x_tick_interval',
@@ -310,22 +303,22 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
                         type: 'select',
                         description: 'sets whether the axis labels should be shortened or not',
                         title: 'short axis labels',
-                        options: [{ value: 0, selected: true, label: 'no' }, { value: 1, label: 'yes' }]
+                        options: [{value: 0, selected: true, label: 'no'}, {value: 1, label: 'yes'}]
                     }
                 ]
             }
         ],
-        exampleData: function () {
+        exampleData() {
             return [
-                { name: 'IE', data: [95, 91, 78, 66] },
-                { name: 'Netscape', data: [3, 12, 18, 18] },
-                { name: 'Firefox', data: [0, 4, 8, 9] },
-                { name: 'Chrome', data: [0, 8, 18, 22] },
-                { name: 'Gecko', data: [1, 2, 3, 33] }
+                {name: 'IE', data: [95, 91, 78, 66]},
+                {name: 'Netscape', data: [3, 12, 18, 18]},
+                {name: 'Firefox', data: [0, 4, 8, 9]},
+                {name: 'Chrome', data: [0, 8, 18, 22]},
+                {name: 'Gecko', data: [1, 2, 3, 33]}
             ];
         },
-        create: function (params) {
-            var instance = {
+        create(params) {
+            const instance = {
                 settings: {},
                 index: params.index
             };
@@ -340,21 +333,22 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
 
             return instance;
         },
-        render: function () {
+        render() {
             // get the target div
-            var target = this.settings.target;
+            const target = this.settings.target;
+            // safe
             target.innerHTML = '<div class=\'graph_div\'></div>';
             target.firstChild.setAttribute(
                 'style',
-                'width: ' + this.settings.width + 'px; height: ' + this.settings.height + 'px;'
+                `width: ${  this.settings.width  }px; height: ${  this.settings.height  }px;`
             );
 
             $(target)
                 .find('.graph_div')
                 .svg();
 
-            var cmax = 0;
-            if (this.settings.type === 'deviation' && !this.settings.data[0].data.hasOwnProperty('upper')) {
+            let cmax = 0;
+            if (this.settings.type === 'deviation' && ! ('upper' in this.settings.data[0].data)) {
                 this.calculateData(this.settings.data);
                 cmax = this.cmax;
             }
@@ -367,10 +361,10 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
 
             return this;
         },
-        niceNum: function (range, round) {
-            var exponent = Math.floor(Math.log10(range)); /** exponent of range */
-            var fraction = range / Math.pow(10, exponent); /** fractional part of range */
-            var niceFraction; /** nice, rounded fraction */
+        niceNum(range, round) {
+            const exponent = Math.floor(Math.log10(range)); /** exponent of range */
+            const fraction = range / Math.pow(10, exponent); /** fractional part of range */
+            let niceFraction; /** nice, rounded fraction */
 
             if (round) {
                 if (fraction < 1.5) {
@@ -382,52 +376,50 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
                 } else {
                     niceFraction = 10;
                 }
+            } else if (fraction <= 1) {
+                niceFraction = 1;
+            } else if (fraction <= 2) {
+                niceFraction = 2;
+            } else if (fraction <= 5) {
+                niceFraction = 5;
             } else {
-                if (fraction <= 1) {
-                    niceFraction = 1;
-                } else if (fraction <= 2) {
-                    niceFraction = 2;
-                } else if (fraction <= 5) {
-                    niceFraction = 5;
-                } else {
-                    niceFraction = 10;
-                }
+                niceFraction = 10;
             }
 
             return niceFraction * Math.pow(10, exponent);
         },
         /* get a nice scale, min, max and tick interval */
-        niceScale: function (params) {
-            var minPoint = params.min;
-            var maxPoint = params.max;
-            var maxTicks = params.ticks || 10;
-            var range = this.niceNum(maxPoint - minPoint, false);
-            var tickSpacing = this.niceNum(range / (maxTicks - 1), true);
-            var niceMin = Math.floor(minPoint / tickSpacing) * tickSpacing;
-            var niceMax = Math.ceil(maxPoint / tickSpacing) * tickSpacing;
+        niceScale(params) {
+            const minPoint = params.min;
+            const maxPoint = params.max;
+            const maxTicks = params.ticks || 10;
+            const range = this.niceNum(maxPoint - minPoint, false);
+            const tickSpacing = this.niceNum(range / (maxTicks - 1), true);
+            const niceMin = Math.floor(minPoint / tickSpacing) * tickSpacing;
+            const niceMax = Math.ceil(maxPoint / tickSpacing) * tickSpacing;
 
-            return { min: niceMin, max: niceMax, space: tickSpacing };
+            return {min: niceMin, max: niceMax, space: tickSpacing};
         },
-        hover: function (title, value, event, e) {
-            var id = e.currentTarget.ownerSVGElement.ownerSVGElement.parentNode.id;
-            var index = id.substr(9);
-            var svg = $('#' + id).svg('get');
+        hover(title, value, event, e) {
+            const id = e.currentTarget.ownerSVGElement.ownerSVGElement.parentNode.id;
+            const index = id.substr(9);
+            const svg = $(`#${  id}`).svg('get');
             if (title) {
                 $(this, svg.root()).attr('fill-opacity', 0.8);
-                $(this, svg.root()).attr('title', title + ': ' + value);
+                $(this, svg.root()).attr('title', `${title  }: ${  value}`);
             } else {
                 $(this, svg.root()).attr('fill-opacity', 1);
             }
             if (event === 'click') {
-                var num = parseInt(
+                const num = parseInt(
                     this.parentElement.className.baseVal.substr(this.parentElement.className.baseVal.search(/\d+/)),
                     10
                 );
-                svg.graph.options({ explode: [num], explodeDist: 15 });
+                svg.graph.options({explode: [num], explodeDist: 15});
 
                 if (typeof this.settings.onclick === 'function') {
-                    var label = '';
-                    var i;
+                    let label = '';
+                    let i;
                     for (i = 0; i < this.parentElement.children.length; i += 1) {
                         if (this.parentElement.children[i] === this) {
                             if (this.getAttribute('r')) {
@@ -440,18 +432,18 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
                     this.settings.onclick({
                         this: index,
                         series: title,
-                        value: value,
-                        label: label,
+                        value,
+                        label,
                         item: this,
                         index: i,
                         series_index: num,
-                        svg: svg
+                        svg
                     });
                 }
             }
         },
-        drawImage: function (svg, cmax) {
-            var chartAreas = [
+        drawImage(svg, cmax) {
+            const chartAreas = [
                 [0.1, 0.1, 0.95, 0.9], // no legend
                 [0.2, 0.1, 0.95, 0.9], // legend left
                 [0.1, 0.1, 0.75, 0.9], // legend right
@@ -459,7 +451,7 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
                 [0.1, 0.1, 0.9, 0.8]
             ]; // legend bottom
 
-            var legendAreas = [
+            const legendAreas = [
                 [0.0, 0.0, 0.0, 0.0], // no legend
                 [0.005, 0.1, 0.125, 0.5], // left
                 [0.8, 0.1, 0.97, 0.5], // right
@@ -467,7 +459,7 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
                 [0.2, 0.9, 0.8, 0.995]
             ]; // bottom
 
-            var fills = [
+            const fills = [
                 'url(#fadeBlue)',
                 'url(#fadeRed)',
                 'url(#fadeGreen)',
@@ -476,21 +468,17 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
                 'url(#fadePurple)'
             ];
 
-            var defs = svg.defs(),
-                max = 0,
-                y2max = 0,
-                i,
-                h;
-            for (i = 0; i < this.settings.data.length; i += 1) {
-                for (h = 0; h < this.settings.data[i].data.length; h += 1) {
+            const defs = svg.defs();
+            let max = 0;
+            let y2max = 0;
+            for (let i = 0; i < this.settings.data.length; i += 1) {
+                for (let h = 0; h < this.settings.data[i].data.length; h += 1) {
                     if (this.settings.data[i].settings && this.settings.data[i].settings.isY2) {
                         if (parseFloat(this.settings.data[i].data[h]) > y2max) {
                             y2max = parseFloat(this.settings.data[i].data[h]);
                         }
-                    } else {
-                        if (parseFloat(this.settings.data[i].data[h]) > max) {
-                            max = parseFloat(this.settings.data[i].data[h]);
-                        }
+                    } else if (parseFloat(this.settings.data[i].data[h]) > max) {
+                        max = parseFloat(this.settings.data[i].data[h]);
                     }
                 }
             }
@@ -509,18 +497,10 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
             svg.graph.noDraw().title(this.settings.title, this.settings.title_color, this.settings.title_settings);
             svg.graph.noDraw().format('white', this.settings.show_grid ? 'gray' : 'white');
             if (this.settings.show_grid) {
-                svg.graph.noDraw().gridlines({ stroke: 'gray', strokeDashArray: '2,2' }, 'gray');
+                svg.graph.noDraw().gridlines({stroke: 'gray', strokeDashArray: '2,2'}, 'gray');
             }
 
-            for (i = 0; i < this.settings.data.length; i += 1) {
-                var series = [
-                    this.settings.data[i].name,
-                    this.settings.data[i].data,
-                    null,
-                    this.settings.data[i].lineColor || 'red',
-                    this.settings.data[i].lineWidth || this.settings.default_line_width,
-                    this.settings.data[i].settings || {}
-                ];
+            for (let i = 0; i < this.settings.data.length; i += 1) {
                 svg.graph
                     .noDraw()
                     .addSeries(
@@ -541,7 +521,7 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
                 svg.graph.xAxis.labelRotation = this.settings.x_labels_rotation;
                 svg.graph.xAxis.labels(this.settings.x_labels);
             }
-            var sy = this.niceScale({ min: 0, max: max, ticks: this.settings.y_labeled_tick_interval });
+            const sy = this.niceScale({min: 0, max, ticks: this.settings.y_labeled_tick_interval});
             svg.graph.yAxis
                 .title(this.settings.y_title, this.settings.y_title_color)
                 .ticks(
@@ -574,10 +554,10 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
             if (this.settings.y_labels.length) {
                 svg.graph.yAxis.labels(this.settings.y_labels);
             }
-            svg.graph.legend.settings({ fill: 'white', stroke: 'white' });
+            svg.graph.legend.settings({fill: 'white', stroke: 'white'});
 
-            var chartType = this.settings.type;
-            var chartLegend = 0;
+            const chartType = this.settings.type;
+            let chartLegend = 0;
             if (this.settings.show_legend) {
                 switch (this.settings.legend_position) {
                 case 'left':
@@ -594,7 +574,7 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
                     break;
                 }
             }
-            var chartOptions = { barWidth: this.settings.barWidth || 25 };
+            const chartOptions = {barWidth: this.settings.barWidth || 25};
 
             svg.graph.status(this.hover);
 
@@ -603,7 +583,7 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
                 .legend.show(this.settings.show_legend)
                 .area(this.settings.legendArea || legendAreas[chartLegend])
                 .end();
-            for (i = 0; i < this.settings.data.length; i += 1) {
+            for (let i = 0; i < this.settings.data.length; i += 1) {
                 svg.graph
                     .noDraw()
                     .series(i)
@@ -616,14 +596,13 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
                 .type(chartType, chartOptions)
                 .redraw();
         },
-        calculateData: function (data) {
-            var fivenumbers = [],
-                min = data[0].data[0],
-                max = data[0].data[0],
-                i;
+        calculateData(data) {
+            const fivenumbers = [];
+            let min = data[0].data[0];
+            let max = data[0].data[0];
 
-            for (i = 0; i < data.length; i += 1) {
-                data[i].data = data[i].data.sort(function (a, b) {
+            for (let i = 0; i < data.length; i += 1) {
+                data[i].data = data[i].data.sort((a, b) => {
                     return a - b;
                 });
                 if (data[i].data[0] < min) {
@@ -635,21 +614,20 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
                 fivenumbers[i] = [];
                 fivenumbers[i]['min'] = data[i].data[0];
                 fivenumbers[i]['max'] = data[i].data[data[i].data.length - 1];
-                var boxarray = [];
                 if (data[i].data.length % 2 === 1) {
-                    var med = parseInt(data[i].data.length / 2);
+                    const med = parseInt(data[i].data.length / 2, 10);
                     fivenumbers[i]['median'] = data[i].data[med];
                     if ((med + 1) % 2 === 1) {
-                        fivenumbers[i]['lower'] = data[i].data[parseInt((med + 1) / 2)];
-                        fivenumbers[i]['upper'] = data[i].data[med + parseInt((med + 1) / 2)];
+                        fivenumbers[i]['lower'] = data[i].data[parseInt((med + 1) / 2, 10)];
+                        fivenumbers[i]['upper'] = data[i].data[med + parseInt((med + 1) / 2, 10)];
                     } else {
                         fivenumbers[i]['lower'] = (data[i].data[(med + 1) / 2] + data[i].data[(med + 1) / 2 + 1]) / 2;
                         fivenumbers[i]['upper'] =
                             (data[i].data[med + (med + 1) / 2 - 1] + data[i].data[med + (med + 1) / 2]) / 2;
                     }
                 } else {
-                    var medup = data[i].data.length / 2;
-                    var medlow = data[i].data.length / 2 - 1;
+                    const medup = data[i].data.length / 2;
+                    const medlow = data[i].data.length / 2 - 1;
                     fivenumbers[i]['median'] = (data[i].data[medlow] + data[i].data[medup]) / 2;
                     if (medup % 2 === 1) {
                         fivenumbers[i]['lower'] = data[i].data[medlow / 2];
@@ -662,7 +640,7 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) {
                 }
             }
 
-            for (var i = 0; i < data.length; i++) {
+            for (let i = 0; i < data.length; i++) {
                 this.settings.data[i].data = [fivenumbers[i]];
             }
             this.cmax = max;
