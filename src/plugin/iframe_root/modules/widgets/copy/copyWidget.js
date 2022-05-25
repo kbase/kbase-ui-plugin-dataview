@@ -10,7 +10,7 @@ define([
     html,
     WorkspaceClient,
     apiUtils
-)  =>{
+) => {
 
     function factory(config) {
         const runtime = config.runtime,
@@ -249,8 +249,8 @@ define([
                                         tr([td(['']), td(
                                             div([
                                                 'Successfully copied this data object to the Narrative ',
-                                                span({dataBind: {text: 'completionMessage().title' }, style: {marginRight: '0.5em', fontStyle: 'italic'}}),
-                                                span({style: {fontStyle: 'italic'}}, [ 
+                                                span({dataBind: {text: 'completionMessage().title'}, style: {marginRight: '0.5em', fontStyle: 'italic'}}),
+                                                span({style: {fontStyle: 'italic'}}, [
                                                     a(
                                                         {
                                                             dataBind: {
@@ -381,6 +381,7 @@ define([
             return Promise.try(() => {
                 parent = node;
                 container = node.appendChild(document.createElement('div'));
+                // safe, component uses bindings
                 container.innerHTML = renderComponent();
             });
         }
@@ -407,10 +408,6 @@ define([
             });
         }
 
-        function run() {
-            // ??
-        }
-
         function stop() {
             if (toggleListener) {
                 runtime.drop(toggleListener);
@@ -423,18 +420,12 @@ define([
                 parent.removeChild(container);
             }
         }
-
-        function destroy() {
-            // ??
-        }
-
         return {
             init,
             attach,
             start,
             stop,
-            detach,
-            destroy
+            detach
         };
     }
     return {
