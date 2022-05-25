@@ -6,26 +6,24 @@ define([
     'components/Nullable',
     'components/DataPillGroup',
     'components/DataPill',
+    'lib/preactUtils',
     './LinkedData.styles',
 
     'css!./LinkedData.css'
 ], (
-    {Component, h, render: preactRender},
+    {Component, h},
     htm,
     DataTable,
     Popover,
     Nullable,
     DataPillGroup,
     DataPill,
+    {htmlToString},
     styles
 ) => {
     const html = htm.bind(h);
 
-    function htmlToString(htmContent) {
-        const element = document.createElement('div');
-        preactRender(htmContent, element);
-        return element.innerHTML;
-    }
+
 
     class LinkedData extends Component {
         constructor(props) {
