@@ -58,28 +58,28 @@ define([
                         // get base numbers
                         const stats = d.statistics.sequence_stats;
                         const is_rna = d.sequence_type === 'Amplicon';
-                        const raw_seqs = stats.hasOwnProperty('sequence_count_raw')
+                        const raw_seqs = 'sequence_count_raw' in stats
                             ? parseFloat(stats.sequence_count_raw)
                             : 0;
-                        const qc_rna_seqs = stats.hasOwnProperty('sequence_count_preprocessed_rna')
+                        const qc_rna_seqs = 'sequence_count_preprocessed_rna' in stats
                             ? parseFloat(stats.sequence_count_preprocessed_rna)
                             : 0;
-                        const qc_seqs = stats.hasOwnProperty('sequence_count_preprocessed')
+                        const qc_seqs = 'sequence_count_preprocessed' in stats
                             ? parseFloat(stats.sequence_count_preprocessed)
                             : 0;
-                        const rna_sims = stats.hasOwnProperty('sequence_count_sims_rna')
+                        const rna_sims = 'sequence_count_sims_rna' in stats
                             ? parseFloat(stats.sequence_count_sims_rna)
                             : 0;
-                        const r_clusts = stats.hasOwnProperty('cluster_count_processed_rna')
+                        const r_clusts = 'cluster_count_processed_rna' in stats
                             ? parseFloat(stats.cluster_count_processed_rna)
                             : 0;
-                        const r_clust_seq = stats.hasOwnProperty('clustered_sequence_count_processed_rna')
+                        const r_clust_seq = 'clustered_sequence_count_processed_rna' in stats
                             ? parseFloat(stats.clustered_sequence_count_processed_rna)
                             : 0;
-                        const ann_reads = stats.hasOwnProperty('read_count_annotated')
+                        const ann_reads = 'read_count_annotated' in stats
                             ? parseFloat(stats.read_count_annotated)
                             : 0;
-                        const aa_reads = stats.hasOwnProperty('read_count_processed_aa')
+                        const aa_reads = 'read_count_processed_aa' in stats
                             ? parseFloat(stats.read_count_processed_aa)
                             : 0;
 
@@ -355,7 +355,7 @@ define([
                         const drisee_cols = d.statistics.qc.drisee.percents.columns;
                         const drisee_data = d.statistics.qc.drisee.percents.data;
                         if (!is_rna && drisee_cols && drisee_data && drisee_cols.length > 0 && drisee_data.length > 0) {
-                            const dTabDiv = $(`<div id="${  pref  }drisee" style="width: 95%;">`);
+                            const dTabDiv = $(`<div id="${pref}drisee" style="width: 95%;">`);
                             tabPane.kbaseTabs('addTab', {
                                 tab: 'DRISEE',
                                 content: dTabDiv,
@@ -389,7 +389,7 @@ define([
                             const width = pwidth + lwidth;
                             const height = lheight > pheight ? Math.min(lheight, pheight + pheight / 2) : pheight;
                             const plotDrisee = Plot.create({
-                                target: document.getElementById(`${pref  }drisee`),
+                                target: document.getElementById(`${pref}drisee`),
                                 data: {series, points},
                                 x_titleOffset: 40,
                                 y_titleOffset: 60,
@@ -462,7 +462,7 @@ define([
                         // bp data
                         const bp_cols = d.statistics.qc.bp_profile.percents.columns;
                         const bp_data = d.statistics.qc.bp_profile.percents.data;
-                        const gTabDiv = $(`<div id="${  pref  }bp_plot" style="width: 95%;">`);
+                        const gTabDiv = $(`<div id="${pref}bp_plot" style="width: 95%;">`);
                         tabPane.kbaseTabs('addTab', {
                             tab: 'Nucleotide Histogram',
                             content: gTabDiv,
@@ -488,7 +488,7 @@ define([
                         const width = pwidth + lwidth;
                         const height = lheight > pheight ? Math.min(lheight, pheight + pheight / 2) : pheight;
                         const graphBP = Graph.create({
-                            target: document.getElementById(`${pref  }bp_plot`),
+                            target: document.getElementById(`${pref}bp_plot`),
                             data: areaData,
                             x_title: `bp ${  bp_cols[0]}`,
                             y_title: 'Percent bp',
