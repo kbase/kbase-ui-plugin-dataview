@@ -97,13 +97,12 @@ define([
 
     // For effect
     'widgets/communities/jquery.svg'
-], function (
+], (
     $,
     Uuid
-) {
+) => {
     // 'jquery-svg-graph', 'jquery-svg-plot'],
-    'use strict';
-    var plot = {
+    const plot = {
         about: {
             name: 'plot',
             title: 'Plot',
@@ -169,15 +168,15 @@ define([
             },
             {
                 text: [
-                    { name: 'title', type: 'text', description: 'title string of the plot', title: 'title' },
+                    {name: 'title', type: 'text', description: 'title string of the plot', title: 'title'},
                     {
                         name: 'title_color',
                         type: 'color',
                         description: 'color of the title string of the plot',
                         title: 'title color'
                     },
-                    { name: 'x_title', type: 'text', description: 'title of the x-axis of the plot', title: 'x title' },
-                    { name: 'y_title', type: 'text', description: 'title of the y-axis of the plot', title: 'y title' },
+                    {name: 'x_title', type: 'text', description: 'title of the x-axis of the plot', title: 'x title'},
+                    {name: 'y_title', type: 'text', description: 'title of the y-axis of the plot', title: 'y title'},
                     {
                         name: 'x_titleOffset',
                         type: 'int',
@@ -207,61 +206,61 @@ define([
                         title: 'show legend',
                         defaultTrue: true
                     },
-                    { name: 'width', type: 'int', description: 'width of the plot in pixel', title: 'width' },
-                    { name: 'height', type: 'int', description: 'height of the plot in pixel', title: 'height' },
+                    {name: 'width', type: 'int', description: 'width of the plot in pixel', title: 'width'},
+                    {name: 'height', type: 'int', description: 'height of the plot in pixel', title: 'height'},
                     {
                         name: 'legend_position',
                         type: 'select',
                         description: 'position of the legend',
                         title: 'legend position',
                         options: [
-                            { value: 'left', selected: true },
-                            { value: 'right' },
-                            { value: 'top' },
-                            { value: 'bottom' }
+                            {value: 'left', selected: true},
+                            {value: 'right'},
+                            {value: 'top'},
+                            {value: 'bottom'}
                         ]
                     }
                 ]
             },
             {
                 axes: [
-                    { name: 'x_min', type: 'int', description: 'minimum value of the x-axis', title: 'x min' },
-                    { name: 'x_max', type: 'int', description: 'maximum value of the x-axis', title: 'x max' },
-                    { name: 'y_min', type: 'int', description: 'minimum value of the y-axis', title: 'y min' },
-                    { name: 'y_max', type: 'int', description: 'maximum value of the y-axis', title: 'y max' },
+                    {name: 'x_min', type: 'int', description: 'minimum value of the x-axis', title: 'x min'},
+                    {name: 'x_max', type: 'int', description: 'maximum value of the x-axis', title: 'x max'},
+                    {name: 'y_min', type: 'int', description: 'minimum value of the y-axis', title: 'y min'},
+                    {name: 'y_max', type: 'int', description: 'maximum value of the y-axis', title: 'y max'},
                     {
                         name: 'y_scale',
                         type: 'select',
                         description: 'type of the scale of the y-axis',
                         title: 'y scale',
-                        options: [{ value: 'linear', selected: true }, { value: 'log' }]
+                        options: [{value: 'linear', selected: true}, {value: 'log'}]
                     },
                     {
                         name: 'x_scale',
                         type: 'select',
                         description: 'type of the scale of the x-axis',
                         title: 'x scale',
-                        options: [{ value: 'linear', selected: true }, { value: 'log' }]
+                        options: [{value: 'linear', selected: true}, {value: 'log'}]
                     }
                 ]
             }
         ],
-        exampleData: function () {
+        exampleData() {
             return {
                 series: [
-                    { name: 'cool', color: 'blue', shape: 'circle' },
-                    { name: 'uncool', color: 'red', shape: 'square' },
-                    { name: 'semi-cool', color: 'orange', shape: 'triangle' }
+                    {name: 'cool', color: 'blue', shape: 'circle'},
+                    {name: 'uncool', color: 'red', shape: 'square'},
+                    {name: 'semi-cool', color: 'orange', shape: 'triangle'}
                 ],
                 points: [
-                    [{ x: 0.5, y: 7 }, { x: 0.15, y: 5 }, { x: 0.5, y: 15 }],
-                    [{ x: 0, y: 0 }, { x: 0.25, y: 35 }, { x: 0.35, y: 90 }],
-                    [{ x: 0.8, y: 80 }, { x: 0.49, y: 50 }, { x: 0.15, y: 10 }]
+                    [{x: 0.5, y: 7}, {x: 0.15, y: 5}, {x: 0.5, y: 15}],
+                    [{x: 0, y: 0}, {x: 0.25, y: 35}, {x: 0.35, y: 90}],
+                    [{x: 0.8, y: 80}, {x: 0.49, y: 50}, {x: 0.15, y: 10}]
                 ]
             };
         },
-        create: function (params) {
-            var instance = {
+        create(params) {
+            const instance = {
                 settings: {},
                 index: params.index
             };
@@ -277,13 +276,14 @@ define([
 
             return instance;
         },
-        render: function () {
+        render() {
             // get the target div
-            var target = this.settings.target;
+            const target = this.settings.target;
+            // safe
             target.innerHTML = '<div class=\'plot_div\'></div>';
             target.firstChild.setAttribute(
                 'style',
-                'width: ' + this.settings.width + 'px; height: ' + this.settings.height + 'px;'
+                `width: ${  this.settings.width  }px; height: ${  this.settings.height  }px;`
             );
             /* TODO: re-enable
                  $('#plot_div' + this.settings.id).svg().bind('dragstart', function (event) {
@@ -311,10 +311,10 @@ define([
 
             return this;
         },
-        niceNum: function (range, round) {
-            var exponent = Math.floor(Math.log10(range)); /** exponent of range */
-            var fraction = range / Math.pow(10, exponent); /** fractional part of range */
-            var niceFraction; /** nice, rounded fraction */
+        niceNum(range, round) {
+            const exponent = Math.floor(Math.log10(range)); /** exponent of range */
+            const fraction = range / Math.pow(10, exponent); /** fractional part of range */
+            let niceFraction; /** nice, rounded fraction */
 
             if (round) {
                 if (fraction < 1.5) {
@@ -326,42 +326,40 @@ define([
                 } else {
                     niceFraction = 10;
                 }
+            } else if (fraction <= 1) {
+                niceFraction = 1;
+            } else if (fraction <= 2) {
+                niceFraction = 2;
+            } else if (fraction <= 5) {
+                niceFraction = 5;
             } else {
-                if (fraction <= 1) {
-                    niceFraction = 1;
-                } else if (fraction <= 2) {
-                    niceFraction = 2;
-                } else if (fraction <= 5) {
-                    niceFraction = 5;
-                } else {
-                    niceFraction = 10;
-                }
+                niceFraction = 10;
             }
 
             return niceFraction * Math.pow(10, exponent);
         },
         /* get a nice scale, min, max and tick interval */
-        niceScale: function (params) {
-            var minPoint = params.min;
-            var maxPoint = params.max;
-            var maxTicks = params.ticks || 10;
-            var range = this.niceNum(maxPoint - minPoint, false);
-            var tickSpacing = this.niceNum(range / (maxTicks - 1), true);
-            var niceMin = Math.floor(minPoint / tickSpacing) * tickSpacing;
+        niceScale(params) {
+            const minPoint = params.min;
+            const maxPoint = params.max;
+            const maxTicks = params.ticks || 10;
+            const range = this.niceNum(maxPoint - minPoint, false);
+            const tickSpacing = this.niceNum(range / (maxTicks - 1), true);
+            const niceMin = Math.floor(minPoint / tickSpacing) * tickSpacing;
 
-            var niceMax = Math.ceil(maxPoint / tickSpacing) * tickSpacing;
+            const niceMax = Math.ceil(maxPoint / tickSpacing) * tickSpacing;
 
-            return { min: niceMin, max: niceMax, space: tickSpacing };
+            return {min: niceMin, max: niceMax, space: tickSpacing};
         },
-        drawImage: function (svg) {
-            var chartAreas = [
+        drawImage(svg) {
+            const chartAreas = [
                 [0.1, 0.1, 0.95, 0.9],
                 [0.2, 0.1, 0.95, 0.9],
                 [0.1, 0.1, 0.8, 0.9],
                 [0.1, 0.25, 0.9, 0.9],
                 [0.1, 0.1, 0.9, 0.8]
             ];
-            var legendAreas = [
+            const legendAreas = [
                 [0.0, 0.0, 0.0, 0.0],
                 [0.005, 0.1, 0.125, 0.5],
                 [0.85, 0.1, 0.97, 0.5],
@@ -379,11 +377,11 @@ define([
             // ];
 
             if (this.settings.x_min === undefined) {
-                var x_min = undefined;
-                var x_max = undefined;
-                var y_min = undefined;
-                var y_max = undefined;
-                var i, h;
+                let x_min;
+                let x_max;
+                let y_min;
+                let y_max;
+                let i, h;
                 for (i = 0; i < this.settings.data.points.length; i++) {
                     for (h = 0; h < this.settings.data.points[i].length; h++) {
                         if (x_min === undefined || this.settings.data.points[i][h].x < x_min) {
@@ -400,10 +398,10 @@ define([
                         }
                     }
                 }
-                var sx = this.niceScale({ min: x_min, max: x_max });
+                const sx = this.niceScale({min: x_min, max: x_max});
                 this.settings.x_min = sx.min;
                 this.settings.x_max = sx.max;
-                var sy = this.niceScale({ min: y_min, max: y_max });
+                const sy = this.niceScale({min: y_min, max: y_max});
                 this.settings.y_min = sy.min;
                 this.settings.y_max = sy.max;
             }
@@ -429,7 +427,7 @@ define([
             svg.plot
                 .noDraw()
                 .format('white', 'gray')
-                .gridlines({ stroke: 'gray', strokeDashArray: '2,2' }, 'gray');
+                .gridlines({stroke: 'gray', strokeDashArray: '2,2'}, 'gray');
 
             svg.plot.xAxis
                 .scale(this.settings.x_min, this.settings.x_max, this.settings.x_scale)
@@ -451,9 +449,9 @@ define([
                     this.settings.y_scale
                 )
                 .title(this.settings.y_title, this.settings.y_titleOffset);
-            svg.plot.legend.settings({ fill: 'white', stroke: 'gray' });
+            svg.plot.legend.settings({fill: 'white', stroke: 'gray'});
 
-            var plotLegend = 0;
+            let plotLegend = 0;
             if (this.settings.show_legend) {
                 switch (this.settings.legend_position) {
                 case 'left':
