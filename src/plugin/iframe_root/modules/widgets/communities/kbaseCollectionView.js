@@ -5,11 +5,11 @@ define([
     'jquery',
     'kb_service/client/workspace',
     'kb_common/html',
-    // no parameters
+    'lib/domUtils',
+    // for effect
     'datatables_bootstrap',
     'kbaseUI/widget/legacy/authenticatedWidget'
-], function ($, Workspace, html) {
-    'use strict';
+], ($, Workspace, html, {domSafeText, domSafeValue}) => {
     $.KBWidget({
         name: 'CollectionView',
         parent: 'kbaseAuthenticatedWidget',
@@ -18,71 +18,74 @@ define([
             id: null,
             ws: null
         },
-        init: function (options) {
-            var div = html.tag('div'),
+        init(options) {
+            const div = html.tag('div'),
                 titleId = html.genId(),
                 bodyId = html.genId();
             this._super(options);
+            // safe
             this.$elem.html(
                 html.makePanel({
-                    title: div({ id: titleId }),
-                    content: div({ id: bodyId })
+                    title: div({id: titleId}),
+                    content: div({id: bodyId})
                 })
             );
-            this.$title = $('#' + titleId);
-            this.$body = $('#' + bodyId);
+            this.$title = $(`#${  titleId}`);
+            this.$body = $(`#${  bodyId}`);
             return this;
         },
-        showError: function (error) {
-            var message;
+        showError(error) {
+            let message;
             try {
                 if (typeof error === 'string') {
                     message = error;
+                } else if (error.error) {
+                    message = error.error.message;
+                } else if (error.message) {
+                    message = error.message;
                 } else {
-                    if (error.error) {
-                        message = error.error.message;
-                    } else if (error.message) {
-                        message = error.message;
-                    } else {
-                        message = 'Unknown error: ' + error;
-                    }
+                    message = `Unknown error: ${  error}`;
                 }
             } catch (ex) {
-                message = 'Unknown error processing another error: ' + ex;
+                message = `Unknown error processing another error: ${  ex}`;
             }
+            // safe
             this.$title.html('Error');
-            this.$body.html(message);
+            // safe
+            this.$body.html(domSafeText(message));
             console.error('ERROR in kbaseCollectionView.js');
             console.error(error);
         },
-        render: function () {
-            var self = this;
+        render() {
+            const self = this;
             if (!this.runtime.service('session').getAuthToken()) {
                 this.showError('You are not logged in');
                 return;
             }
+            // safe
             this.$title.html('Metagenome Collection');
+            // safe
             this.$body.html(html.loading('loading data...'));
 
-            var workspace = new Workspace(this.runtime.config('services.workspace.url'), { token: this.token }),
-                title;
+            const workspace = new Workspace(this.runtime.config('services.workspace.url'), {token: this.token});
+            let title;
             workspace
-                .get_objects([{ ref: self.options.ws + '/' + self.options.id }])
-                .then(function (data) {
+                .get_objects([{ref: `${self.options.ws  }/${  self.options.id}`}])
+                .then((data) => {
                     if (data.length === 0) {
                         throw new Error(
-                            'Object ' + self.options.id + ' does not exist in workspace ' + self.options.ws
+                            `Object ${  self.options.id  } does not exist in workspace ${  self.options.ws}`
                         );
                     }
                     /* TODO: resolve this issue
                      * Some objects have an "actual" URL - surprise! */
-                    var collectionObject = data[0].data,
-                        idList = collectionObject.members.map(function (member) {
+                    const collectionObject = data[0].data,
+                        idList = collectionObject.members.map((member) => {
                             if (member.URL.match(/^http/)) {
                                 console.error(member);
                                 throw new Error('Invalid Collection Object');
                             }
-                            return { ref: member.URL };
+                            return {ref: member.URL};
                         });
                     title = collectionObject.name;
                     if (idList.length > 0) {
@@ -90,8 +93,8 @@ define([
                     }
                     throw new Error('Collection is empty');
                 })
-                .then(function (resData) {
-                    var rows = resData.map(function (item) {
+                .then((resData) => {
+                    const rows = resData.map((item) => {
                             return [
                                 item.data.id,
                                 item.data.name,
@@ -102,7 +105,7 @@ define([
                                 item.data.mixs.seq_method,
                                 item.data.statistics.sequence_stats.bp_count_raw,
                                 item.data.created
-                            ];
+                            ].map((value) => {return domSafeValue(value);});
                         }),
                         options = {
                             columns: [
@@ -116,25 +119,27 @@ define([
                                 'bp Count',
                                 'Created'
                             ],
-                            rows: rows,
+                            rows,
                             classes: ['table', 'table-striped']
                         },
                         table = html.makeTable(options);
-                    self.$title.html('Metagenome Collection ' + title);
+                    // safe
+                    self.$title.html(`Metagenome Collection ${domSafeText(title)}`);
+                    // safe 
                     self.$body.html(table);
-                    $('#' + options.generated.id).dataTable();
+                    $(`#${options.generated.id}`).dataTable();
                 })
-                .catch(function (err) {
+                .catch((err) => {
                     self.showError(err);
                 });
             return self;
         },
-        loggedInCallback: function (event, auth) {
+        loggedInCallback(event, auth) {
             this.token = auth.token;
             this.render();
             return this;
         },
-        loggedOutCallback: function (event, auth) {
+        loggedOutCallback() {
             this.token = null;
             this.render();
             return this;
