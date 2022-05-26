@@ -38,6 +38,7 @@ define([], () => {
     const donorNode = document.createElement('div');
     function domSafeText(rawContent) {
         donorNode.innerText = rawContent;
+        // safe
         return donorNode.innerHTML;
     }
 
