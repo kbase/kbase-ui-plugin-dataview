@@ -51,16 +51,8 @@
  data (array of array of float)
  normalized value matrix
  */
-/*global
- define
- */
-/*jslint
- browser: true,
- white: true
- */
-define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-svg-graph-deviation', 'jquery-svg-graph-stacked-area'],
-    'use strict';
-    var standaloneHeatmap = {
+define(['jquery', 'widgets/communities/jquery.svg'], ($) => {
+    const standaloneHeatmap = {
         about: {
             name: 'heatmap',
             title: 'Heatmap',
@@ -107,8 +99,8 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
             },
             {
                 layout: [
-                    { name: 'height', type: 'int', description: 'height of the plot', title: 'height' },
-                    { name: 'width', type: 'int', description: 'width of the plot', title: 'width' },
+                    {name: 'height', type: 'int', description: 'height of the plot', title: 'height'},
+                    {name: 'width', type: 'int', description: 'width of the plot', title: 'width'},
                     {
                         name: 'tree_height',
                         type: 'int',
@@ -121,12 +113,12 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
                         description: 'width of the dendogram',
                         title: 'dendogram width'
                     },
-                    { name: 'legend_height', type: 'int', description: 'height of the legend', title: 'legend height' },
-                    { name: 'legend_width', type: 'int', description: 'width of the legend', title: 'legend width' }
+                    {name: 'legend_height', type: 'int', description: 'height of the legend', title: 'legend height'},
+                    {name: 'legend_width', type: 'int', description: 'width of the legend', title: 'legend width'}
                 ]
             }
         ],
-        exampleData: function () {
+        exampleData() {
             return {
                 columns: ['4441619.3', '4441656.4', '4441620.3'],
                 rows: ['Eukaryota', 'unassigned', 'Bacteria', 'Archaea'],
@@ -138,8 +130,8 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
                 ]
             };
         },
-        create: function (params) {
-            var instance = {
+        create(params) {
+            const instance = {
                 settings: {}
             };
             // Create new graph instance, copying this instance into it.
@@ -153,15 +145,15 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
 
             return instance;
         },
-        render: function () {
-            var min_height =
+        render() {
+            const min_height =
                 this.settings.data.rows.length * this.settings.min_cell_height +
                 this.settings.tree_height +
                 this.settings.legend_height;
             if (this.settings.height < min_height) {
                 this.settings.height = min_height;
             }
-            var min_width =
+            const min_width =
                 this.settings.data.columns.length * this.settings.min_cell_height +
                 this.settings.tree_width +
                 this.settings.legend_width;
@@ -170,43 +162,44 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
             }
 
             // get the target div
-            var target = this.settings.target;
+            const target = this.settings.target;
+            // safe
             target.innerHTML = '<div class=\'heatmap-container\'><div class=\'heatmap_div\'></div></div>';
-            var heatmap = $(target).find('.heatmap_div');
-            heatmap.attr('style', 'width: ' + this.settings.width + 'px; height: ' + this.settings.height + 'px;');
+            const heatmap = $(target).find('.heatmap_div');
+            heatmap.attr('style', `width: ${  this.settings.width  }px; height: ${  this.settings.height  }px;`);
 
             // not pretty, but add event handlers here.
-            var that = this;
+            const that = this;
             $(target)
                 .find('.heatmap-container')
                 .on('click', '[data-type="label"]', function () {
-                    var row = parseInt($(this).attr('data-row'), 10);
-                    var dir = parseInt($(this).attr('data-dir'), 10);
+                    const row = parseInt($(this).attr('data-row'), 10);
+                    const dir = parseInt($(this).attr('data-dir'), 10);
                     that.toggleSelected(row, dir);
                 });
 
             $(target)
                 .find('.heatmap-container')
                 .on('click', '[data-type="cell"]', function () {
-                    var row = parseInt($(this).attr('data-row'), 10);
-                    var col = parseInt($(this).attr('data-col'), 10);
-                    var value = parseFloat($(this).attr('data-value'));
+                    const row = parseInt($(this).attr('data-row'), 10);
+                    const col = parseInt($(this).attr('data-col'), 10);
+                    const value = parseFloat($(this).attr('data-value'));
                     that.cellClick(row, col, value, this);
                 });
             $(target)
                 .find('.heatmap-container')
                 .on('mouseover', '[data-type="cell"]', function () {
-                    var row = parseInt($(this).attr('data-row'), 10);
-                    var col = parseInt($(this).attr('data-col'), 10);
-                    var value = parseFloat($(this).attr('data-value'));
+                    const row = parseInt($(this).attr('data-row'), 10);
+                    const col = parseInt($(this).attr('data-col'), 10);
+                    const value = parseFloat($(this).attr('data-value'));
                     that.cellHover(1, row, col, value, this);
                 });
             $(target)
                 .find('.heatmap-container')
                 .on('mouseout', '[data-type="cell"]', function () {
-                    var row = parseInt($(this).attr('data-row'), 10);
-                    var col = parseInt($(this).attr('data-col'), 10);
-                    var value = parseFloat($(this).attr('data-value'));
+                    const row = parseInt($(this).attr('data-row'), 10);
+                    const col = parseInt($(this).attr('data-col'), 10);
+                    const value = parseFloat($(this).attr('data-value'));
                     that.cellHover(0, row, col, value, this);
                 });
 
@@ -215,47 +208,44 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
 
             return this;
         },
-        drawImage: function (svg) {
+        drawImage(svg) {
             // initialize shortcut variables
-            var numrows = this.settings.data.rows.length;
-            var numcols = this.settings.data.columns.length;
-            var boxwidth = parseInt(
+            const numrows = this.settings.data.rows.length;
+            const numcols = this.settings.data.columns.length;
+            const boxwidth = parseInt(
                 (this.settings.width - this.settings.legend_width - this.settings.tree_width - 5) / numcols,
                 10
             );
             this.settings.boxwidth = boxwidth;
-            var boxheight = parseInt(
+            const boxheight = parseInt(
                 (this.settings.height - this.settings.legend_height - this.settings.tree_height - 5) / numrows,
                 10
             );
             this.settings.boxheight = boxheight;
-            var displaywidth = parseInt(
+            const displaywidth = parseInt(
                 this.settings.width - this.settings.legend_width - this.settings.tree_width - 5,
                 10
             );
-            var displayheight = parseInt(
-                this.settings.height - this.settings.legend_height - this.settings.tree_height - 5,
-                10
-            );
 
-            var x = 0;
-            var y = 0;
-            var rx = 0;
-            var ry = 0;
-            var width = 0;
-            var height = 0;
-            var settings = { fill: 'red', strokeWidth: 1, stroke: 'black' };
-            if (this.settings.data.hasOwnProperty('coldend') && this.settings.data.hasOwnProperty('colindex')) {
+
+            let x = 0;
+            let y = 0;
+            const rx = 0;
+            const ry = 0;
+            let width = 0;
+            let height = 0;
+            const settings = {fill: 'red', strokeWidth: 1, stroke: 'black'};
+            if ('coldend' in this.settings.data && 'colindex' in this.settings.data) {
                 this.settings.data.colcluster = this.settings.data.coldend;
             } else {
-                var col_result = this.cluster(this.transpose(this.settings.data.data));
+                const col_result = this.cluster(this.transpose(this.settings.data.data));
                 this.settings.data.colcluster = col_result[0];
                 this.settings.data.colindex = col_result[1];
             }
-            if (this.settings.data.hasOwnProperty('rowdend') && this.settings.data.hasOwnProperty('rowindex')) {
+            if ('rowdend' in this.settings.data && 'rowindex' in this.settings.data) {
                 this.settings.data.rowcluster = this.settings.data.rowdend;
             } else {
-                var row_result = this.cluster(this.settings.data.data);
+                const row_result = this.cluster(this.settings.data.data);
                 this.settings.data.rowcluster = row_result[0];
                 this.settings.data.rowindex = row_result[1];
             }
@@ -263,32 +253,32 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
             this.drawDendogram(svg, 1);
 
             // draw the heatmap
-            for (var i = 0; i < this.settings.data.data.length; i++) {
+            for (let i = 0; i < this.settings.data.data.length; i++) {
                 // draw row text
-                var textx = this.settings.tree_width + displaywidth + 5;
-                var texty =
+                const textx = this.settings.tree_width + displaywidth + 5;
+                const texty =
                     this.settings.tree_height +
                     this.settings.legend_height +
                     (boxheight * (i + 1) - parseInt((boxheight - this.settings.row_text_size) / 2)) -
                     2;
-                var fontColor = 'black';
+                let fontColor = 'black';
                 if (this.settings.selectedRows[i]) {
                     fontColor = 'blue';
                 }
 
                 /* TODO: rewire as delegated events on the container ... */
-                svg.text(null, textx, texty, '' + this.settings.data.rows[this.settings.data.rowindex[i] - 1], {
+                svg.text(null, textx, texty, `${  this.settings.data.rows[this.settings.data.rowindex[i] - 1]}`, {
                     fill: fontColor,
-                    fontSize: this.settings.row_text_size + 'px',
+                    fontSize: `${this.settings.row_text_size  }px`,
                     'data-type': 'label',
                     'data-row': String(i),
                     'data-dir': '0',
                     cursor: 'pointer'
                 });
 
-                svg.text(null, textx, texty, '' + this.settings.data.rows[this.settings.data.rowindex[i] - 1], {
+                svg.text(null, textx, texty, `${  this.settings.data.rows[this.settings.data.rowindex[i] - 1]}`, {
                     fill: fontColor,
-                    fontSize: this.settings.row_text_size + 'px',
+                    fontSize: `${this.settings.row_text_size  }px`,
                     'data-type': 'label',
                     'data-row': String(i),
                     'data-dir': '0',
@@ -297,23 +287,23 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
                 this.settings.cells.push([]);
 
                 // draw cells
-                for (var h = 0; h < this.settings.data.data[i].length; h++) {
+                for (let h = 0; h < this.settings.data.data[i].length; h++) {
                     // draw column text
                     if (i === 0) {
-                        var ctextx =
+                        const ctextx =
                             this.settings.tree_width +
                             boxwidth * h +
-                            parseInt((boxwidth - this.settings.col_text_size) / 2) +
+                            parseInt((boxwidth - this.settings.col_text_size) / 2, 10) +
                             12;
-                        var ctexty = this.settings.legend_height - 5;
+                        const ctexty = this.settings.legend_height - 5;
                         fontColor = 'black';
                         if (this.settings.selectedColumns[h]) {
                             fontColor = 'blue';
                         }
                         svg.text(null, ctextx, ctexty, this.settings.data.columns[this.settings.data.colindex[h] - 1], {
                             fill: fontColor,
-                            fontSize: this.settings.col_text_size + 'px',
-                            transform: 'rotate(-90, ' + ctextx + ', ' + ctexty + ')',
+                            fontSize: `${this.settings.col_text_size  }px`,
+                            transform: `rotate(-90, ${  ctextx  }, ${  ctexty  })`,
                             'data-type': 'label',
                             'data-row': String(h),
                             'data-dir': '1',
@@ -328,18 +318,18 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
                     height = boxheight;
 
                     // calculate box color
-                    var color = 'black';
-                    var adjusted_value =
+                    let color = 'black';
+                    const adjusted_value =
                         this.settings.data.data[this.settings.data.rowindex[i] - 1][
                             this.settings.data.colindex[h] - 1
                         ] *
                             2 -
                         1;
-                    var cval = parseInt(255 * Math.abs(adjusted_value));
+                    const cval = parseInt(255 * Math.abs(adjusted_value), 10);
                     if (adjusted_value < 0) {
-                        color = 'rgb(' + cval + ',0,0)';
+                        color = `rgb(${  cval  },0,0)`;
                     } else {
-                        color = 'rgb(0,' + cval + ',0)';
+                        color = `rgb(0,${  cval  },0)`;
                     }
                     settings.fill = color;
 
@@ -353,116 +343,110 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
                 }
             }
         },
-        drawDendogram: function (svg, rotation) {
-            var height = rotation ? this.settings.tree_width : this.settings.tree_height;
-            var data = rotation ? this.settings.data.rowcluster : this.settings.data.colcluster;
-            var cell_w = rotation ? this.settings.boxheight : this.settings.boxwidth;
-            var xshift = rotation ? this.settings.tree_height : this.settings.tree_width;
-            var yshift = this.settings.legend_height + this.settings.tree_height;
-            var interval = parseInt(height / data.depth);
-            var path = '';
+        drawDendogram(svg, rotation) {
+            const height = rotation ? this.settings.tree_width : this.settings.tree_height;
+            const data = rotation ? this.settings.data.rowcluster : this.settings.data.colcluster;
+            const cell_w = rotation ? this.settings.boxheight : this.settings.boxwidth;
+            let xshift = rotation ? this.settings.tree_height : this.settings.tree_width;
+            let yshift = this.settings.legend_height + this.settings.tree_height;
+            const interval = parseInt(height / data.depth, 10);
+            let path = '';
             if (rotation) {
                 xshift++;
-                for (var i = 0; i < data.depth; i++) {
-                    var curr_shift = 0 + yshift;
-                    for (var h = 0; h < data[i].length; h++) {
-                        var cluster = data[i][h];
+                for (let i = 0; i < data.depth; i++) {
+                    let curr_shift = 0 + yshift;
+                    for (let h = 0; h < data[i].length; h++) {
+                        const cluster = data[i][h];
                         path +=
-                            'M' +
-                            xshift +
-                            ',' +
-                            parseInt(curr_shift + (cell_w * cluster.a) / 2) +
-                            'l-' +
-                            parseInt(interval) +
-                            ',0';
-                        if (cluster.hasOwnProperty('b')) {
+                            `M${
+                                xshift
+                            },${
+                                parseInt(curr_shift + (cell_w * cluster.a) / 2)
+                            }l-${
+                                parseInt(interval)
+                            },0`;
+                        if ('b' in cluster) {
                             path +=
-                                'l0,' +
-                                parseInt(cell_w * (cluster.a / 2) + cell_w * (cluster.b / 2)) +
-                                'l' +
-                                parseInt(interval) +
-                                ',0';
+                                `l0,${
+                                    parseInt(cell_w * (cluster.a / 2) + cell_w * (cluster.b / 2), 10)
+                                }l${
+                                    parseInt(interval, 10)
+                                },0`;
                         }
                         curr_shift += cluster.b ? (cluster.a + cluster.b) * cell_w : cluster.a * cell_w;
                     }
                     xshift -= interval;
                 }
             } else {
-                for (var i = 0; i < data.depth; i++) {
-                    var curr_shift = 0 + xshift;
-                    for (var h = 0; h < data[i].length; h++) {
-                        var cluster = data[i][h];
+                for (let i = 0; i < data.depth; i++) {
+                    let curr_shift = 0 + xshift;
+                    for (let h = 0; h < data[i].length; h++) {
+                        const cluster = data[i][h];
                         path +=
-                            'M' +
-                            parseInt(curr_shift + (cell_w * cluster.a) / 2) +
-                            ',' +
-                            yshift +
-                            'l0,-' +
-                            parseInt(interval);
-                        if (cluster.hasOwnProperty('b')) {
+                            `M${
+                                parseInt(curr_shift + (cell_w * cluster.a) / 2, 10)
+                            },${
+                                yshift
+                            }l0,-${
+                                parseInt(interval, 10)}`;
+                        if ('b' in cluster) {
                             path +=
-                                'l' +
-                                parseInt(cell_w * (cluster.a / 2) + cell_w * (cluster.b / 2)) +
-                                ',0l0,' +
-                                parseInt(interval);
+                                `l${
+                                    parseInt(cell_w * (cluster.a / 2) + cell_w * (cluster.b / 2), 10)
+                                },0l0,${
+                                    parseInt(interval, 10)}`;
                         }
                         curr_shift += cluster.b ? (cluster.a + cluster.b) * cell_w : cluster.a * cell_w;
                     }
                     yshift -= interval;
                 }
             }
-            svg.path(null, path, { fill: 'none', stroke: 'black' });
+            svg.path(null, path, {fill: 'none', stroke: 'black'});
         },
-        toggleSelected: function (row, dir) {
+        toggleSelected(row, dir) {
             if (dir) {
                 if (typeof this.settings.colClicked === 'function') {
                     this.settings.colClicked({
                         col: row,
                         label: this.settings.data.cols[this.settings.data.colindex[row] - 1]
                     });
+                } else if (this.settings.selectedColumns[row]) {
+                    this.settings.selectedColumns[row] = 0;
                 } else {
-                    if (this.settings.selectedColumns[row]) {
-                        this.settings.selectedColumns[row] = 0;
-                    } else {
-                        this.settings.selectedColumns[row] = 1;
-                    }
+                    this.settings.selectedColumns[row] = 1;
                 }
+            } else if (typeof this.settings.rowClicked === 'function') {
+                this.settings.rowClicked({
+                    row,
+                    label: this.settings.data.rows[this.settings.data.rowindex[row] - 1]
+                });
+            } else if (this.settings.selectedRows[row]) {
+                this.settings.selectedRows[row] = 0;
             } else {
-                if (typeof this.settings.rowClicked === 'function') {
-                    this.settings.rowClicked({
-                        row: row,
-                        label: this.settings.data.rows[this.settings.data.rowindex[row] - 1]
-                    });
-                } else {
-                    if (this.settings.selectedRows[row]) {
-                        this.settings.selectedRows[row] = 0;
-                    } else {
-                        this.settings.selectedRows[row] = 1;
-                    }
-                }
+                this.settings.selectedRows[row] = 1;
             }
 
             this.render();
         },
 
-        cellClick: function (row, col, value, cell) {
+        cellClick(row, col, value, cell) {
             if (typeof this.settings.cellClicked === 'function') {
                 this.settings.cellClicked({
-                    row: row,
-                    col: col,
-                    value: value,
-                    cell: cell
+                    row,
+                    col,
+                    value,
+                    cell
                 });
             }
         },
-        cellHover: function (over, row, col, value, cell) {
+        cellHover(over, row, col, value, cell) {
             if (typeof this.settings.cellHovered === 'function') {
                 this.settings.cellHovered({
-                    over: over,
-                    row: row,
-                    col: col,
-                    value: value,
-                    cell: cell
+                    over,
+                    row,
+                    col,
+                    value,
+                    cell
                 });
             }
         },
@@ -492,21 +476,21 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
                 return normdata;
             },
             */
-        clustsort: function (a, b) {
+        clustsort(a, b) {
             return a.amin - b.amin;
         },
-        distance: function (data) {
-            var distances = {};
-            for (var i = 0; i < data.length; i++) {
+        distance(data) {
+            const distances = {};
+            for (let i = 0; i < data.length; i++) {
                 distances[i] = {};
             }
-            for (var i = 0; i < data.length; i++) {
-                for (var h = 0; h < data.length; h++) {
+            for (let i = 0; i < data.length; i++) {
+                for (let h = 0; h < data.length; h++) {
                     if (i >= h) {
                         continue;
                     }
-                    var dist = 0;
-                    for (var j = 0; j < data[i].data[0].length; j++) {
+                    let dist = 0;
+                    for (let j = 0; j < data[i].data[0].length; j++) {
                         dist += Math.pow(data[i].data[0][j] - data[h].data[0][j], 2);
                     }
                     distances[i][h] = Math.pow(dist, 0.5);
@@ -514,10 +498,10 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
             }
             return distances;
         },
-        transpose: function (data) {
-            var result = [];
-            for (var i = 0; i < data.length; i++) {
-                for (var h = 0; h < data[i].length; h++) {
+        transpose(data) {
+            const result = [];
+            for (let i = 0; i < data.length; i++) {
+                for (let h = 0; h < data[i].length; h++) {
                     if (i === 0) {
                         result.push([]);
                     }
@@ -526,27 +510,27 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
             }
             return result;
         },
-        cluster: function (data) {
-            var num_avail = data.length;
-            var avail = {};
-            var clusters = [];
-            for (var i = 0; i < data.length; i++) {
-                clusters.push({ points: [i], data: [data[i]], basepoints: [i], level: [0] });
+        cluster(data) {
+            let num_avail = data.length;
+            const avail = {};
+            const clusters = [];
+            for (let i = 0; i < data.length; i++) {
+                clusters.push({points: [i], data: [data[i]], basepoints: [i], level: [0]});
                 avail[i] = true;
             }
 
             // get the initial distances between all nodes
-            var distances = this.distance(clusters);
+            const distances = this.distance(clusters);
 
             // calculate clusters
-            var min;
-            var coords;
+            let min;
+            let coords;
             while (num_avail > 1) {
-                var found = false;
-                for (var i in distances) {
-                    if (distances.hasOwnProperty(i)) {
-                        for (var h in distances[i]) {
-                            if (distances[i].hasOwnProperty(h) && avail[i] && avail[h]) {
+                let found = false;
+                for (const i in distances) {
+                    if (i in distances) {
+                        for (const h in distances[i]) {
+                            if (h in distances[i] && avail[i] && avail[h]) {
                                 min = distances[i][h];
                                 coords = [i, h];
                                 found = true;
@@ -558,10 +542,10 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
                         }
                     }
                 }
-                for (var i in distances) {
-                    if (distances.hasOwnProperty(i)) {
-                        for (var h in distances[i]) {
-                            if (distances[i].hasOwnProperty(h)) {
+                for (const i in distances) {
+                    if (i in distances) {
+                        for (const h in distances[i]) {
+                            if (h in distances[i]) {
                                 if (avail[i] && avail[h] && distances[i][h] < min) {
                                     coords = [i, h];
                                     min = distances[i][h];
@@ -575,10 +559,10 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
                 num_avail--;
                 avail[clusters.length] = true;
 
-                var sumpa = 0;
-                var sumpb = 0;
-                for (var h = 0; h < 2; h++) {
-                    for (var i = 0; i < clusters[coords[h]].data.length; i++) {
+                let sumpa = 0;
+                let sumpb = 0;
+                for (let h = 0; h < 2; h++) {
+                    for (let i = 0; i < clusters[coords[h]].data.length; i++) {
                         if (h === 0) {
                             sumpa += clusters[coords[h]].data[i];
                         } else {
@@ -586,10 +570,10 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
                         }
                     }
                 }
-                var pdata = [];
-                var bpoints = [];
-                for (var h = 0; h < 2; h++) {
-                    var j = h;
+                const pdata = [];
+                const bpoints = [];
+                for (let h = 0; h < 2; h++) {
+                    let j = h;
                     if (sumpa > sumpb) {
                         if (h === 0) {
                             j = 1;
@@ -597,22 +581,22 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
                             j = 0;
                         }
                     }
-                    for (var i = 0; i < clusters[coords[j]].data.length; i++) {
+                    for (let i = 0; i < clusters[coords[j]].data.length; i++) {
                         pdata.push(clusters[coords[j]].data[i]);
                     }
-                    for (var i = 0; i < clusters[coords[j]].basepoints.length; i++) {
+                    for (let i = 0; i < clusters[coords[j]].basepoints.length; i++) {
                         bpoints.push(clusters[coords[j]].basepoints[i]);
                     }
                 }
-                var coord_a = coords[0];
-                var coord_b = coords[1];
+                let coord_a = coords[0];
+                let coord_b = coords[1];
                 if (sumpa > sumpb) {
-                    var triangle = coord_a;
+                    const triangle = coord_a;
                     coord_a = coord_b;
                     coord_b = triangle;
                 }
-                coord_a = parseInt(coord_a);
-                coord_b = parseInt(coord_b);
+                coord_a = parseInt(coord_a, 10);
+                coord_b = parseInt(coord_b, 10);
 
                 clusters.push({
                     points: [coord_a, coord_b],
@@ -624,10 +608,10 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
                     ]
                 });
 
-                var row_a = [];
-                for (var h = 0; h < 2; h++) {
-                    for (var i = 0; i < clusters[coords[h]].data.length; i++) {
-                        for (var j = 0; j < clusters[coords[h]].data[i].length; j++) {
+                const row_a = [];
+                for (let h = 0; h < 2; h++) {
+                    for (let i = 0; i < clusters[coords[h]].data.length; i++) {
+                        for (let j = 0; j < clusters[coords[h]].data[i].length; j++) {
                             if (h === 0 && i === 0) {
                                 row_a[j] = 0;
                             }
@@ -635,26 +619,26 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
                         }
                     }
                 }
-                for (var i = 0; i < row_a.length; i++) {
+                for (let i = 0; i < row_a.length; i++) {
                     row_a[i] = row_a[i] / (clusters[coord_a].data.length + clusters[coord_b].data.length);
                 }
-                var index = clusters.length - 1;
+                const index = clusters.length - 1;
                 distances[index] = {};
-                for (var h = 0; h < index; h++) {
-                    var row_b = [];
-                    for (var i = 0; i < clusters[h].data.length; i++) {
-                        for (var j = 0; j < clusters[h].data[i].length; j++) {
+                for (let h = 0; h < index; h++) {
+                    const row_b = [];
+                    for (let i = 0; i < clusters[h].data.length; i++) {
+                        for (let j = 0; j < clusters[h].data[i].length; j++) {
                             if (i === 0) {
                                 row_b[j] = 0;
                             }
                             row_b[j] += clusters[h].data[i][j];
                         }
                     }
-                    for (var i = 0; i < row_b.length; i++) {
+                    for (let i = 0; i < row_b.length; i++) {
                         row_b[i] = row_b[i] / clusters[h].data.length;
                     }
-                    var dist = 0;
-                    for (var i = 0; i < row_a.length; i++) {
+                    let dist = 0;
+                    for (let i = 0; i < row_a.length; i++) {
                         dist += Math.pow(row_a[i] - row_b[i], 2);
                     }
                     distances[h][index] = Math.pow(dist, 0.5);
@@ -662,20 +646,20 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
             }
 
             // record the row order after clustering
-            var rowindex = [];
-            var cind = clusters.length - 1;
-            for (var i = 0; i < clusters[cind].basepoints.length; i++) {
+            const rowindex = [];
+            const cind = clusters.length - 1;
+            for (let i = 0; i < clusters[cind].basepoints.length; i++) {
                 rowindex.push(clusters[cind].basepoints[i] + 1);
             }
 
             // record the reverse row order for lookup
-            var roworder = {};
-            for (var i = 0; i < rowindex.length; i++) {
+            const roworder = {};
+            for (let i = 0; i < rowindex.length; i++) {
                 roworder[rowindex[i]] = i;
             }
 
             // get the depth
-            var depth = 0;
+            let depth = 0;
             for (var i = 0; i < clusters.length; i++) {
                 if (clusters[i].level[0] && clusters[i].level[0] > depth) {
                     depth = clusters[i].level[0];
@@ -686,13 +670,13 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
             }
 
             // format the cluster data for visualization
-            var clusterdata = { depth: depth };
-            for (var i = 0; i < clusterdata.depth; i++) {
+            const clusterdata = {depth};
+            for (let i = 0; i < clusterdata.depth; i++) {
                 clusterdata[i] = [];
             }
-            for (var i = data.length; i < clusters.length; i++) {
+            for (let i = data.length; i < clusters.length; i++) {
                 // get the level this cluster is at
-                var level = Math.max.apply(null, clusters[i].level) - 1;
+                const level = Math.max.apply(null, clusters[i].level) - 1;
 
                 clusterdata[level].push({
                     a: clusters[clusters[i].points[0]].data.length,
@@ -702,11 +686,11 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
 
                 // draw single lines until we reach the next root
                 if (clusters[i].level[0] !== clusters[i].level[1]) {
-                    var n = 0;
+                    let n = 0;
                     if (clusters[i].level[1] < clusters[i].level[0]) {
                         n = 1;
                     }
-                    for (var h = 0; h < Math.abs(clusters[i].level[0] - clusters[i].level[1]); h++) {
+                    for (let h = 0; h < Math.abs(clusters[i].level[0] - clusters[i].level[1]); h++) {
                         clusterdata[level - (h + 1)].push({
                             a: clusters[clusters[i].points[n]].data.length,
                             amin: roworder[Math.min.apply(null, clusters[clusters[i].points[n]].basepoints) + 1]
@@ -716,8 +700,8 @@ define(['jquery', 'widgets/communities/jquery.svg'], function ($) { // 'jquery-s
             }
 
             // sort the clusterdata
-            for (var i in clusterdata) {
-                if (clusterdata.hasOwnProperty(i) && !isNaN(i)) {
+            for (const i in clusterdata) {
+                if (i in clusterdata && !isNaN(i)) {
                     clusterdata[i].sort(this.clustsort);
                 }
             }
