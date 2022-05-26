@@ -3,12 +3,13 @@ define([
     './colorbrewer/colorbrewer', // new dep
     'kb_service/client/workspace',
     'uuid',
+    'lib/domUtils',
+
+    // For effect
     'datatables_bootstrap',
     'kbaseUI/widget/legacy/authenticatedWidget',
     'kbaseUI/widget/legacy/kbaseTable'
-], function ($, colorbrewer, Workspace, Uuid) {
-    'use strict';
-
+], ($, colorbrewer, Workspace, Uuid, {htmlSafeErrorMessage}) => {
     $.KBWidget({
         name: 'KBaseOntologyTranslation',
         parent: 'kbaseAuthenticatedWidget',
@@ -40,27 +41,27 @@ define([
             this.colors = colorbrewer.Set2[8];
             this.colorMap = {};
 
-            var $self = this;
+            const $self = this;
 
-            var ws = new Workspace(this.runtime.config('services.workspace.url'), {
+            const ws = new Workspace(this.runtime.config('services.workspace.url'), {
                 token: this.runtime.service('session').getAuthToken()
             });
 
             ws.get_objects([objectIdentity])
-                .then(function (data) {
+                .then((data) => {
                     data = data[0].data;
 
-                    var $metaElem = $self.data('metaElem');
+                    const $metaElem = $self.data('metaElem');
 
                     $metaElem.empty();
 
-                    var comments = {};
+                    const comments = {};
 
-                    var $commentsTable;
-                    data.comment.split(/\n/).forEach(function (v) {
-                        var tmp = v.split(/:/);
+                    let $commentsTable;
+                    data.comment.split(/\n/).forEach((v) => {
+                        let tmp = v.split(/:/);
                         if (tmp.length > 2) {
-                            var tail = tmp.slice(1, tmp.length).join(':');
+                            const tail = tmp.slice(1, tmp.length).join(':');
                             tmp = [tmp[0], tail];
                         }
                         if (tmp.length === 2) {
@@ -85,7 +86,7 @@ define([
                         });
                     }
 
-                    var dict_links = {
+                    const dict_links = {
                         ncbi: 'KBaseOntology/1',
                         po: 'KBaseOntology/2',
                         go: 'KBaseOntology/3',
@@ -96,24 +97,24 @@ define([
                         eo: 'KBaseOntology/11'
                     };
 
-                    var $metaTable = $.jqElem('div').kbaseTable({
+                    const $metaTable = $.jqElem('div').kbaseTable({
                         allowNullRows: false,
                         structure: {
                             keys: [
-                                { value: 'ontology1', label: 'Ontology 1' },
-                                { value: 'ontology2', label: 'Ontology 2' },
-                                { value: 'comment', label: 'Comment' }
+                                {value: 'ontology1', label: 'Ontology 1'},
+                                {value: 'ontology2', label: 'Ontology 2'},
+                                {value: 'comment', label: 'Comment'}
                             ],
                             rows: {
                                 ontology1: dict_links[data.ontology1]
                                     ? $.jqElem('a')
-                                        .attr('href', '/#dataview/' + dict_links[data.ontology1])
+                                        .attr('href', `/#dataview/${  dict_links[data.ontology1]}`)
                                         .attr('target', '_blank')
                                         .append(data.ontology1)
                                     : data.ontology1,
                                 ontology2: dict_links[data.ontology2]
                                     ? $.jqElem('a')
-                                        .attr('href', '/#dataview/' + dict_links[data.ontology2])
+                                        .attr('href', `/#dataview/${  dict_links[data.ontology2]}`)
                                         .attr('target', '_blank')
                                         .append(data.ontology2)
                                     : data.ontology2,
@@ -124,25 +125,25 @@ define([
 
                     $metaElem.append($metaTable.$elem);
 
-                    var table_data = [];
+                    const table_data = [];
 
-                    $.each(Object.keys(data.translation).sort(), function (i, k) {
-                        var v = data.translation[k];
-                        $.each(v.equiv_terms, function (j, e) {
+                    $.each(Object.keys(data.translation).sort(), (i, k) => {
+                        const v = data.translation[k];
+                        $.each(v.equiv_terms, (j, e) => {
                             table_data.push([k, e.equiv_name, e.equiv_term]);
                         });
                     });
 
-                    var equivalent_dictionary = dict_links[data.ontology2];
+                    const equivalent_dictionary = dict_links[data.ontology2];
 
-                    var $dt = $self.data('tableElem').DataTable({
+                    const $dt = $self.data('tableElem').DataTable({
                         columns: [
-                            { title: 'Term ID', class: 'ontology-top' },
-                            { title: 'Equivalent Name' },
-                            { title: 'Equivalent Term' }
+                            {title: 'Term ID', class: 'ontology-top'},
+                            {title: 'Equivalent Name'},
+                            {title: 'Equivalent Term'}
                         ],
-                        createdRow: function (row, data) {
-                            var $linkCell = $('td', row).eq(2);
+                        createdRow(row, data) {
+                            const $linkCell = $('td', row).eq(2);
                             $linkCell.empty();
 
                             $linkCell.append($self.termLink(data[2], equivalent_dictionary));
@@ -154,9 +155,10 @@ define([
                     $self.data('loaderElem').hide();
                     $self.data('globalContainerElem').show();
                 })
-                .catch(function (d) {
+                .catch((err) => {
                     $self.$elem.empty();
-                    $self.$elem.addClass('alert alert-danger').html('Could not load object : ' + d.error.message);
+                    // safe
+                    $self.$elem.addClass('alert alert-danger').html(`Could not load object : ${htmlSafeErrorMessage(err)}`);
                 });
 
             this.appendUI(this.$elem);
@@ -164,15 +166,15 @@ define([
             return this;
         },
 
-        termLink: function (term_id, dictionary) {
+        termLink(term_id, dictionary) {
             if (dictionary != undefined) {
                 return $.jqElem('a')
                     .attr('target', '_blank')
-                    .attr('href', '/#dataview/' + dictionary + '?term_id=' + term_id)
+                    .attr('href', `/#dataview/${dictionary}?term_id=${  term_id}`)
                     .append(term_id);
-            } else {
-                return term_id;
             }
+            return term_id;
+
         },
 
         appendUI: function appendUI($elem) {
@@ -183,9 +185,9 @@ define([
 
             $elem.append($.jqElem('style').text('.ontology-top { vertical-align : top }'));
 
-            var $self = this;
+            const $self = this;
 
-            var $loaderElem = $.jqElem('div')
+            const $loaderElem = $.jqElem('div')
                 .append(
                     '<br>&nbsp;Loading data...<br>&nbsp;please wait...<br>&nbsp;Data parsing may take upwards of 30 seconds, during which time this page may be unresponsive.'
                 )
@@ -203,41 +205,41 @@ define([
             $self.data('loaderElem', $loaderElem);
             $elem.append($loaderElem);
 
-            var $globalContainer = $self.data('globalContainerElem', $.jqElem('div').css('display', 'none'));
+            const $globalContainer = $self.data('globalContainerElem', $.jqElem('div').css('display', 'none'));
             $elem.append($globalContainer);
 
-            var $metaElem = $self.data('metaElem', $.jqElem('div'));
+            const $metaElem = $self.data('metaElem', $.jqElem('div'));
 
-            var $metaContainerElem = $self.createContainerElem('Translation Information', [$metaElem]);
+            const $metaContainerElem = $self.createContainerElem('Translation Information', [$metaElem]);
 
             $self.data('metaContainerElem', $metaContainerElem);
             $globalContainer.append($metaContainerElem);
 
-            var $tableElem = $.jqElem('table')
+            const $tableElem = $.jqElem('table')
                 .addClass('display')
-                .css({ width: '100%', border: '1px solid #ddd' });
+                .css({width: '100%', border: '1px solid #ddd'});
 
             $self.data('tableElem', $tableElem);
             $self.data('colorMapElem', $.jqElem('div'));
 
-            var $containerElem = $self.createContainerElem('Translation Dictionary', [$tableElem]);
+            const $containerElem = $self.createContainerElem('Translation Dictionary', [$tableElem]);
 
             $self.data('containerElem', $containerElem);
             $globalContainer.append($containerElem);
 
             return $elem;
         },
-        createContainerElem: function (name, content, display) {
+        createContainerElem(name, content, display) {
             const panelHeadingId = new Uuid(4).format();
             const panelCollapseId = new Uuid(4).format();
 
-            var $panelBody = $.jqElem('div').addClass('panel-body collapse in');
+            const $panelBody = $.jqElem('div').addClass('panel-body collapse in');
 
-            $.each(content, function (i, v) {
+            $.each(content, (i, v) => {
                 $panelBody.append(v);
             });
 
-            var $containerElem = $.jqElem('div')
+            const $containerElem = $.jqElem('div')
                 .addClass('panel panel-default')
                 .css('display', display)
                 .append(
@@ -259,9 +261,9 @@ define([
                                 .append(
                                     $.jqElem('span')
                                         .attr('data-toggle', 'collapse')
-                                        .attr('data-target', '#' + panelCollapseId)
+                                        .attr('data-target', `#${  panelCollapseId}`)
                                         .attr('aria-expanded', 'true')
-                                        .attr('aria-controls', '#' + panelCollapseId)
+                                        .attr('aria-controls', `#${  panelCollapseId}`)
                                         .css('cursor', 'pointer')
                                         .append(
                                             $.jqElem('span')
