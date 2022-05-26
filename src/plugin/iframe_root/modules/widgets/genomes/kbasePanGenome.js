@@ -4,8 +4,10 @@ define([
     'preact',
     'htm',
     'kb_lib/jsonRpc/dynamicServiceClient',
+    'kb_lib/jsonRpc/exceptions',
     'components/Table',
     'content',
+    'lib/domUtils',
 
     'kbaseUI/widget/legacy/kbaseTabs',
     'kbaseUI/widget/legacy/authenticatedWidget',
@@ -17,8 +19,10 @@ define([
     preact,
     htm,
     DynamicServiceClient,
+    exceptions,
     Table,
-    content
+    content,
+    {domSafeText}
 ) => {
     const html = htm.bind(preact.h);
 
@@ -39,38 +43,26 @@ define([
         return validRef;
     }
 
-    function createError(title, error, stackTrace) {
+    function createError(title, error) {
         const $errorPanel = $('<div>')
             .addClass('alert alert-danger')
-            .append(`<b>${  title  }</b><br>Please contact the KBase team at <a href="http://kbase.us/contact-us/">http://kbase.us/contact-us/</a> with the information below.`);
+            .append(`<b>${title}</b><br>Please contact the KBase team at <a href="http://kbase.us/contact-us/">http://kbase.us/contact-us/</a> with the information below.`);
 
         $errorPanel.append('<br><br>');
 
         // If it's a string, just dump the string.
         if (typeof error === 'string') {
-            $errorPanel.append(error);
-        }
-
-        // If it's an object, expect an error object
-        else if (typeof error === 'object') {
-            let errObj = error;
-            if (error.status && error.error && error.error.error) {
-                errObj = {
-                    status: error.status,
-                    code: error.error.code,
-                    message: error.error.message,
-                    name: error.error.name
-                };
-                if (!stackTrace) {
-                    stackTrace = error.error.error;
-                }
+            $errorPanel.append(domSafeText(error));
+        } else if (error instanceof Error) {
+            if (error instanceof exceptions.JsonRpcError) {
+                $errorPanel.append(domSafeText(error.originalError.message || error.originalError.name));
+            } else {
+                $errorPanel.append(domSafeText(error.message || error.name));
             }
-            Object.keys(errObj).forEach((key) => {
-                $errorPanel.append($('<div>').append(`<b>${  key  }:</b> ${  errObj[key]}`));
-            });
-        }
-        else if (error) {
+        } else if (error) {
             $errorPanel.append('No other information available. Sorry!');
+        } else {
+            $errorPanel.append('An unknown error occurred.');
         }
         // TODO: restore
         // if (stackTrace) {
@@ -135,11 +127,6 @@ define([
                     canDelete: false,
                     showContentCallback: this.showHomologFamilies.bind(this)
                 },
-                // {
-                //     tab: 'Families',
-                //     canDelete: false,
-                //     showContentCallback: this.showProteinFamilies.bind(this)
-                // },
                 {
                     tab: 'Families',
                     canDelete: false,
@@ -229,7 +216,7 @@ define([
                 .catch((error) => {
                     $summaryDiv
                         .empty()
-                        .append(createError('Pangenome data summary error', error.error));
+                        .append(createError('Pangenome data summary error', error));
                 });
             return $summaryDiv;
         },
@@ -276,7 +263,7 @@ define([
                 .catch((error) => {
                     $homologDiv
                         .empty()
-                        .append(createError('Pangenome homolog family data error', error.error));
+                        .append(createError('Pangenome homolog family data error', error));
                 });
             return $homologDiv;
         },
@@ -459,7 +446,7 @@ define([
                 url: this.runtime.config('services.ServiceWizard.url'),
                 token: this.runtime.service('session').getAuthToken()
             });
-            pangenomeClient.callFunc('compute_summary_from_pangenome', [{
+            pangenomeClient.callFunc('compute_summary_from_pangenomex', [{
                 pangenome_ref: this.objRef
             }])
                 .then(([results]) => {
@@ -513,14 +500,10 @@ define([
                         });
                 })
                 .catch((err) => {
-                    $div.html(this.buildError(err));
+                    // safe
+                    $div.html(createError('Error fetching family features', err));
                 });
             return $div;
-        },
-
-        buildError(error) {
-            console.error('ERROR', error);
-            return `<div><span class="alert alert-danger">ERROR: ${error.message || error.error.message}</span></div>`;
         },
 
         searchAndCacheOrthologs(query, sortBy, start, limit) {
