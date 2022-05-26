@@ -54,6 +54,7 @@ define(['kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'], (html, WidgetSet, u
         }
 
         function stop() {
+            // safe
             container.innerHTML = '';
             return widgetSet.stop();
         }

@@ -95,6 +95,7 @@ define([
         stop() {}
 
         detach() {
+            // safe
             this.node.innerHTML = '';
         }
     }
