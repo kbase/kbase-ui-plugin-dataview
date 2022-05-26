@@ -101,6 +101,7 @@ define([
                     })
                     .catch((err) => {
                         const tdElem = $(`#${self.pref}job`);
+                        // safe
                         tdElem.html(`Error accessing comparison object: ${domSafeErrorMessage(err)}`);
                     });
             };
@@ -332,6 +333,7 @@ define([
                     })
                     .catch((err) => {
                         const tdElem = $(`#${self.pref}job`);
+                        // safe
                         tdElem.html(`Error accessing genome objects: ${domSafeErrorMessage(err)}`);
                     });
             };
