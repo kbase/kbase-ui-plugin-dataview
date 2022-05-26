@@ -453,7 +453,7 @@ define([
                                 }" data-name="${
                                     ref.name
                                 }">${
-                                    ref.name
+                                    domSafeText(ref.name)
                                 }</a>`
                             );
                         }
@@ -527,7 +527,7 @@ define([
                     }
 
                     const r = $('<tr>');
-                    r.append(`<td><b>${  row.label  }</b></td>`);
+                    r.append(`<td><b>${domSafeText(row.label)}</b></td>`);
 
                     // if the data is in the row definition, use it
                     if ('data' in row) {
@@ -545,14 +545,13 @@ define([
                                 );
                             }
                             return row.data;
-
                         })() || content.na();
-                        r.append(`<td>${  value  }</td>`);
+                        r.append(`<td>${value}</td>`);
                     } else if ('key' in row) {
                         if (row.type === 'wstype') {
                             const ref = data[row.key];
 
-                            const cell = $(`<td data-ref="${  ref  }">loading...</td>`);
+                            const cell = $(`<td data-ref="${ref}">loading...</td>`);
                             r.append(cell);
 
                             getLink(ref)
@@ -655,7 +654,7 @@ define([
                     panel.append(
                         `<div class="pull-left text-center">\
                                     <img src="${img_url}" width=150 ><br>\
-                                    <div class="cpd-id" data-cpd="${cpd}">${cpd}</div>\
+                                    <div class="cpd-id" data-cpd="${cpd}">${domSafeText(cpd)}</div>\
                                 </div>`
                     );
 
@@ -690,6 +689,7 @@ define([
                 }
 
                 const cpd_ids = cpds.left.concat(cpds.right);
+                console.log('here');
                 this.getBiochemCompounds(cpd_ids)
                     .then((d) => {
                         const map = {};
