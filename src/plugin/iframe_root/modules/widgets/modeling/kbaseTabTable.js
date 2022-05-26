@@ -689,15 +689,15 @@ define([
                 }
 
                 const cpd_ids = cpds.left.concat(cpds.right);
-                console.log('here');
                 this.getBiochemCompounds(cpd_ids)
                     .then((d) => {
                         const map = {};
                         for (const i in d) {
-                            map[d[i].id] = d[i].name;
+                            map[d[i].id] = domSafeText(d[i].name);
                         }
 
                         $('.cpd-id').each(function () {
+                            // safe - I think
                             $(this).html(map[$(this).data('cpd')]);
                         });
                         return null;
