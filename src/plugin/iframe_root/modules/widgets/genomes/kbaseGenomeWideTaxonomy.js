@@ -17,15 +17,14 @@ define([
     'kb_common/jsonRpc/dynamicServiceClient',
     'kb_service/utils',
     'lib/post',
+    'lib/domUtils',
 
     'kbaseUI/widget/legacy/widget',
     'widgets/genomes/kbaseGenomeLineage',
     'widgets/genomes/kbaseGenomeRELineage',
     'widgets/trees/kbaseTree'
-], function ($, html, GenericClient, DynamicServiceClient, serviceUtils, post) {
-    'use strict';
-
-    var t = html.tag,
+], ($, html, GenericClient, DynamicServiceClient, serviceUtils, post, {domSafeText}) => {
+    const t = html.tag,
         div = t('div'),
         a = t('a'),
         button = t('button'),
@@ -57,13 +56,13 @@ define([
         currentTree: null,
         objectRef: null,
         genomeInfo: null,
-        init: function (options) {
+        init(options) {
             this._super(options);
             this.genomeInfo = this.options.genomeInfo;
             this.render();
             return this;
         },
-        render: function () {
+        render() {
             const $row = $('<div class="row">');
 
             const $taxonomyColumn = $('<div class="col-md-5">');
@@ -194,16 +193,16 @@ define([
 
             this.$elem.append($row);
 
-            this.$treeNode = $('#' + treeNodeId);
-            this.$treeMessageNode = $('#' + treeMessageNodeId);
+            this.$treeNode = $(`#${  treeNodeId}`);
+            this.$treeMessageNode = $(`#${  treeMessageNodeId}`);
 
             // COMMENTED OUT: new narrative button
             // this.$newTreeButtonNode = $('#' + newTreeButtonNodeId);
 
-            this.$buttonsNode = $('#' + buttonsNodeId);
-            this.$messageNode = $('#' + messageNodeId);
-            this.$prevButtonNode = $('#' + prevButtonNodeId);
-            this.$nextButtonNode = $('#' + nextButtonNodeId);
+            this.$buttonsNode = $(`#${  buttonsNodeId}`);
+            this.$messageNode = $(`#${  messageNodeId}`);
+            this.$prevButtonNode = $(`#${  prevButtonNodeId}`);
+            this.$nextButtonNode = $(`#${  nextButtonNodeId}`);
 
             this.$prevButtonNode.click(() => {
                 if (!this.trees) {
@@ -256,13 +255,15 @@ define([
                 })
                 .catch((error) => {
                     console.error(error);
-                    var err = '<b>Sorry!</b>  Error retreiveing species trees info';
+                    let err;
                     if (typeof error === 'string') {
-                        err += ': ' + error;
+                        err += `: ${error}`;
                     } else if (error.error && error.error.message) {
-                        err += ': ' + error.error.message;
+                        err += `: ${error.error.message}`;
+                    } else {
+                        err = 'Error retrieving species trees info';
                     }
-                    this.setMessage(err);
+                    this.setMessage(domSafeText(err));
                 });
         },
         // SpeciesTreeBuilder/insert_set_of_genomes_into_species_tree
@@ -273,8 +274,8 @@ define([
         //     appparam: [1, 'param0', scope.id].join(',')
         // };
         // buildUrl = html.makeUrl
-        makeNarrativePath: function (wsId, objId) {
-            return this.runtime.getConfig('services.narrative.url') + '/narrative/ws.' + wsId + '.obj.' + objId;
+        makeNarrativePath(wsId, objId) {
+            return `${this.runtime.getConfig('services.narrative.url')  }/narrative/ws.${  wsId  }.obj.${  objId}`;
         },
 
         // createNewNarrative: function (arg) {
@@ -332,7 +333,7 @@ define([
             Simply calls to the workspace to resolve an object name in a
             given workspace to an object info structure.
         */
-        resolveObjectNameToInfo: function (workspaceId, objectName) {
+        resolveObjectNameToInfo(workspaceId, objectName) {
             const workspace = new GenericClient({
                 module: 'Workspace',
                 url: this.runtime.config('services.workspace.url'),
@@ -362,7 +363,7 @@ define([
                 });
         },
 
-        createTreeBuildingNarrative: function (narrativeWindow, kbaseSecret) {
+        createTreeBuildingNarrative(narrativeWindow, kbaseSecret) {
             const initialContent = [
                 '# Tree-Building Narrative',
                 '',
@@ -378,7 +379,7 @@ define([
             const param = {
                 importData: [this.genomeInfo.objectInfo.ref],
                 markdown: initialContent,
-                title: 'New tree-building Narrative for ' + this.genomeInfo.objectInfo.name,
+                title: `New tree-building Narrative for ${  this.genomeInfo.objectInfo.name}`,
                 includeIntroCell: 0
             };
             const narrativeService = new DynamicServiceClient({
@@ -390,7 +391,7 @@ define([
             return narrativeService
                 .callFunc('create_new_narrative', [param])
                 .spread((info) => {
-                    var wsId = info.narrativeInfo.wsid,
+                    const wsId = info.narrativeInfo.wsid,
                         objId = info.narrativeInfo.id,
                         path = this.makeNarrativePath(wsId, objId);
 
@@ -419,7 +420,7 @@ define([
                             const payload = {
                                 appId: 'SpeciesTreeBuilder/insert_set_of_genomes_into_species_tree',
                                 tag: 'release',
-                                kbaseSecret: kbaseSecret,
+                                kbaseSecret,
                                 params: {
                                     param0: [objectInfo.ref],
                                     genomeSetName: 'output_genome_set',
@@ -461,14 +462,14 @@ define([
         //         this.options.genomeID
         //     ].join('');
         // },
-        fetchTrees: function () {
-            var workspace = new GenericClient({
+        fetchTrees() {
+            const workspace = new GenericClient({
                 module: 'Workspace',
                 url: this.runtime.getConfig('services.workspace.url'),
                 token: this.runtime.service('session').getAuthToken()
             });
-            var objectIdentity = {
-                ref: this.options.workspaceID + '/' + this.options.genomeID
+            const objectIdentity = {
+                ref: `${this.options.workspaceID  }/${  this.options.genomeID}`
             };
             return workspace.callFunc('list_referencing_objects', [[objectIdentity]]).spread((data) => {
                 const referencingTrees = data[0]
@@ -494,27 +495,28 @@ define([
         // setButtonText: function (text) {
         //     this.$newTreeButtonNode.text(text);
         // },
-        clearButtons: function () {
+        clearButtons() {
             this.$buttonsNode.empty();
         },
-        addButton: function (markup) {
+        addButton(markup) {
             this.$buttonsNode.append(markup);
         },
-        hideNavButtons: function () {
+        hideNavButtons() {
             this.$prevButtonNode.hide();
             this.$nextButtonNode.hide();
         },
-        showNavButtons: function () {
+        showNavButtons() {
             this.$prevButtonNode.show();
             this.$nextButtonNode.show();
         },
-        setTreeMessage: function (html) {
-            this.$treeMessageNode.html(html);
-        },
-        setMessage: function (message) {
+        // setTreeMessage(html) {
+        //     this.$treeMessageNode.html(html);
+        // },
+        setMessage(message) {
+            // safe - checked all usages below
             this.$messageNode.html(message);
         },
-        renderTree: function () {
+        renderTree() {
             const trees = this.trees;
             if (!this.trees) {
                 return;
@@ -545,7 +547,7 @@ define([
                 this.displayTree();
             }
         },
-        displayTree: function () {
+        displayTree() {
             // Message changes
             if (this.trees.length === 0) {
                 this.setMessage('Showing 1 phylogenetic tree for this genome');
@@ -622,7 +624,7 @@ define([
                 runtime: this.runtime
             });
         },
-        getData: function () {
+        getData() {
             return {
                 type: 'Genome Taxonomy',
                 id: this.options.genomeID,
