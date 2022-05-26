@@ -8,12 +8,18 @@ define([
     'kb_common/html',
     'widgets/communities/kbStandaloneGraph',
     'widgets/communities/kbStandalonePlot',
+    'lib/domUtils',
 
     // these don't need a parameter
     'kbaseUI/widget/legacy/authenticatedWidget',
     'kbaseUI/widget/legacy/kbaseTabs',
     'datatables_bootstrap'
-], ($, GooglePalette, Workspace, html, Graph, Plot) => {
+], ($, GooglePalette, Workspace, html, Graph, Plot, {domSafeValue}) => {
+
+    function formatNumber(value) {
+        return Intl.NumberFormat('en-us', {useGrouping: true}).format(value);
+    }
+
     $.KBWidget({
         name: 'MetagenomeView',
         parent: 'kbaseAuthenticatedWidget',
@@ -147,66 +153,27 @@ define([
                         let overviewTable = '<h4>Info</h4>';
                         overviewTable += '<p><table class="table table-striped table-bordered" style="width: 50%;">';
                         overviewTable +=
-                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Metagenome ID</b></td><td>${
-                                d.id
-                            }</td></tr>`;
+                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Metagenome ID</b></td><td>${domSafeValue(d.id)}</td></tr>`;
                         overviewTable +=
-                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Metagenome Name</b></td><td>${
-                                d.name
-                            }</td></tr>`;
+                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Metagenome Name</b></td><td>${domSafeValue(d.name)}</td></tr>`;
                         overviewTable +=
-                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Project ID</b></td><td>${
-                                d.metadata.project.id
-                            }</td></tr>`;
+                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Project ID</b></td><td>${domSafeValue(d.metadata.project.id)}</td></tr>`;
                         overviewTable +=
-                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Project Name</b></td><td>${
-                                d.metadata.project.name
-                            }</td></tr>`;
+                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Project Name</b></td><td>${domSafeValue(d.metadata.project.name)}</td></tr>`;
                         overviewTable +=
-                            `<tr><td style="padding-right: 25px; width: 165px;"><b>PI</b></td><td>${
-                                d.metadata.project.data.PI_firstname
-                            } ${
-                                d.metadata.project.data.PI_lastname
-                            }</td></tr>`;
+                            `<tr><td style="padding-right: 25px; width: 165px;"><b>PI</b></td><td>${domSafeValue(d.metadata.project.data.PI_firstname)} ${domSafeValue(d.metadata.project.data.PI_lastname)}</td></tr>`;
                         overviewTable +=
-                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Organization</b></td><td>${
-                                d.metadata.project.data.PI_organization
-                            }</td></tr>`;
+                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Organization</b></td><td>${domSafeValue(d.metadata.project.data.PI_organization)}</td></tr>`;
                         overviewTable +=
-                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Sequence Type</b></td><td>${
-                                d.sequence_type
-                            }</td></tr>`;
+                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Sequence Type</b></td><td>${domSafeValue(d.sequence_type)}</td></tr>`;
                         overviewTable += '</table></p>';
                         overviewTable += '<h4>Summary</h4>';
                         overviewTable +=
-                            `<p>The dataset ${
-                                d.name
-                            } was uploaded on ${
-                                d.created
-                            } and contains ${
-                                stats.sequence_count_raw
-                            } sequences totaling ${
-                                stats.bp_count_raw
-                            } basepairs with an average length of ${
-                                stats.average_length_raw
-                            } bps.</p>`;
+                            `<p>The dataset ${domSafeValue(d.name)} was uploaded on ${domSafeValue(d.created)} and contains ${domSafeValue(stats.sequence_count_raw)} sequences totaling ${domSafeValue(stats.bp_count_raw)} basepairs with an average length of ${stats.average_length_raw} bps.</p>`;
                         const ptext =
-                            ` Of the remainder, ${
-                                ann_aa_reads
-                            } sequences (${
-                                ((ann_aa_reads / raw_seqs) * 100).toFixed(2)
-                            }%) contain predicted proteins with known functions and ${
-                                unkn_aa_reads
-                            } sequences (${
-                                ((unkn_aa_reads / raw_seqs) * 100).toFixed(2)
-                            }%) contain predicted proteins with unknown function.`;
+                            ` Of the remainder, ${ann_aa_reads} sequences (${((ann_aa_reads / raw_seqs) * 100).toFixed(2)}%) contain predicted proteins with known functions and ${unkn_aa_reads} sequences (${((unkn_aa_reads / raw_seqs) * 100).toFixed(2)}%) contain predicted proteins with unknown function.`;
                         const ftext =
-                            ` ${
-                                unknown_all
-                            } sequences (${
-                                ((unknown_all / raw_seqs) * 100).toFixed(2)
-                            }%) have no rRNA genes${
-                                is_rna ? '.' : ' or predicted proteins'}`;
+                            ` ${unknown_all} sequences (${((unknown_all / raw_seqs) * 100).toFixed(2)}%) have no rRNA genes${is_rna ? '.' : ' or predicted proteins'}`;
                         overviewTable +=
                             `<p>${
                                 qc_fail_seqs
@@ -223,7 +190,7 @@ define([
                         $(`#${  pref  }overview`).append(overviewTable);
 
                         // metadata tab
-                        const mTabDiv = $(`<div id="${  pref  }metadata" style="width: 95%;">`);
+                        const mTabDiv = $(`<div id="${pref}metadata" style="width: 95%;">`);
                         tabPane.kbaseTabs('addTab', {
                             tab: 'Metadata',
                             content: mTabDiv,
@@ -231,23 +198,24 @@ define([
                             show: true
                         });
 
-                        const mdata = [];
+                        const rows = [];
                         const cats = ['project', 'sample', 'library', 'env_package'];
                         for (const c in cats) {
                             if (d.metadata[cats[c]]) {
                                 for (const key in d.metadata[cats[c]].data) {
-                                    mdata.push([cats[c], key, d.metadata[cats[c]].data[key]]);
+                                    rows.push([domSafeValue(cats[c]), domSafeValue(key), domSafeValue(d.metadata[cats[c]].data[key])]);
                                 }
                             }
                         }
                         const tableOptions = {
                             columns: ['Category', 'Field', 'Value'],
-                            rows: mdata,
+                            rows,
                             class: 'table table-striped'
                         };
                         const table = html.makeTable(tableOptions);
-                        $(`#${  pref  }metadata`).html(table);
-                        $(`#${  tableOptions.generated.id}`).dataTable();
+                        // safe - table row values made safe above
+                        $(`#${pref}metadata`).html(table);
+                        $(`#${tableOptions.generated.id}`).dataTable();
 
                         /*
                      var tlen = 0;
@@ -286,11 +254,11 @@ define([
                         let statsTable = '<p><table class="table table-striped table-bordered" style="width: 65%;">';
                         statsTable +=
                             `<tr><td style="padding-right: 25px; width: 325px;"><b>Upload: bp Count</b></td><td>${
-                                stats.bp_count_raw
+                                formatNumber(stats.bp_count_raw)
                             } bp</td></tr>`;
                         statsTable +=
                             `<tr><td style="padding-right: 25px; width: 325px;"><b>Upload: Sequences Count</b></td><td>${
-                                stats.sequence_count_raw
+                                formatNumber(stats.sequence_count_raw)
                             }</td></tr>`;
                         statsTable +=
                             `<tr><td style="padding-right: 25px; width: 325px;"><b>Upload: Mean Sequence Length</b></td><td>${
@@ -306,15 +274,15 @@ define([
                             } %</td></tr>`;
                         statsTable +=
                             `<tr><td style="padding-right: 25px; width: 325px;"><b>Artificial Duplicate Reads: Sequence Count</b></td><td>${
-                                stats.sequence_count_dereplication_removed
+                                formatNumber(stats.sequence_count_dereplication_removed)
                             }</td></tr>`;
                         statsTable +=
                             `<tr><td style="padding-right: 25px; width: 325px;"><b>Post QC: bp Count</b></td><td>${
-                                stats.bp_count_preprocessed
+                                formatNumber(stats.bp_count_preprocessed)
                             }</td></tr>`;
                         statsTable +=
                             `<tr><td style="padding-right: 25px; width: 325px;"><b>Post QC: Sequences Count</b></td><td>${
-                                stats.sequence_count_preprocessed
+                                formatNumber(stats.sequence_count_preprocessed)
                             }</td></tr>`;
                         statsTable +=
                             `<tr><td style="padding-right: 25px; width: 325px;"><b>Post QC: Mean Sequence Length</b></td><td>${
@@ -330,23 +298,23 @@ define([
                             } %</td></tr>`;
                         statsTable +=
                             `<tr><td style="padding-right: 25px; width: 325px;"><b>Processed: Predicted Protein Features</b></td><td>${
-                                stats.sequence_count_processed_aa
+                                formatNumber(stats.sequence_count_processed_aa)
                             }</td></tr>`;
                         statsTable +=
                             `<tr><td style="padding-right: 25px; width: 325px;"><b>Processed: Predicted rRNA Features</b></td><td>${
-                                stats.sequence_count_processed_rna
+                                formatNumber(stats.sequence_count_processed_rna)
                             }</td></tr>`;
                         statsTable +=
                             `<tr><td style="padding-right: 25px; width: 325px;"><b>Alignment: Identified Protein Features</b></td><td>${
-                                stats.sequence_count_sims_aa
+                                formatNumber(stats.sequence_count_sims_aa)
                             }</td></tr>`;
                         statsTable +=
                             `<tr><td style="padding-right: 25px; width: 325px;"><b>Alignment: Identified rRNA Features</b></td><td>${
-                                stats.sequence_count_sims_rna
+                                formatNumber(stats.sequence_count_sims_rna)
                             }</td></tr>`;
                         statsTable +=
                             `<tr><td style="padding-right: 25px; width: 325px;"><b>Annotation: Identified Functional Categories</b></td><td>${
-                                stats.sequence_count_ontology
+                                formatNumber(stats.sequence_count_ontology)
                             }</td></tr>`;
                         statsTable += '</table></p>';
                         $(`#${  pref  }stats`).append(statsTable);
@@ -420,16 +388,16 @@ define([
                                 canDelete: false,
                                 show: true
                             });
-                            var xy = [];
-                            var x_all = [];
-                            var y_all = [];
-                            for (var i = 0; i < kmer_data.length; i += 2) {
+                            const xy = [];
+                            const x_all = [];
+                            const y_all = [];
+                            for (let i = 0; i < kmer_data.length; i += 2) {
                                 xy.push({x: parseFloat(kmer_data[i][3]), y: parseFloat(kmer_data[i][0])});
                                 x_all.push(parseFloat(kmer_data[i][3]));
                                 y_all.push(parseFloat(kmer_data[i][0]));
                             }
-                            var pwidth = 750;
-                            var pheight = 300;
+                            const pwidth = 750;
+                            const pheight = 300;
                             let ymax = Math.max.apply(Math, y_all);
                             ymax = ymax + 0.25 * ymax;
                             let pot = ymax.toString().indexOf('.') || ymax.toString.length;
@@ -481,8 +449,8 @@ define([
                                 areaData[j - 1].data.push(parseFloat(bp_data[i][j]));
                             }
                         }
-                        pwidth = 750;
-                        pheight = 300;
+                        const pwidth = 750;
+                        const pheight = 300;
                         const lwidth = 15;
                         const lheight = areaData.length * 23;
                         const width = pwidth + lwidth;
