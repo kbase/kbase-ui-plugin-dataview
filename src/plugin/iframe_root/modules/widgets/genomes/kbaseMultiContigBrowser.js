@@ -160,7 +160,7 @@ define([
             $maindiv.append($contigViewPanelWrapper);
 
             // panel where feature info is displayed
-            // safe usage of html()
+            // safe usage of html
             this.$featureInfoPanel = $('<div class="col-md-3"/>').html('<b>Click on a feature to view details</b>');
             $maindiv.append(this.$featureInfoPanel);
 

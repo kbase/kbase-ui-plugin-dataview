@@ -280,7 +280,7 @@ define([
             this.view.panels.forEach((panel) => {
                 that.makeWidgetPanel(panel.outer_div, panel.label, panel.name, panel.inner_div);
                 that.$elem.append(panel.outer_div);
-                // safe usage of html()
+                // safe usage of html
                 panel.inner_div.html(html.loading('Loading...'));
             });
         },

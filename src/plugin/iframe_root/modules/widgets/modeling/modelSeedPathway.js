@@ -1323,7 +1323,7 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
         // }
 
         function drawMap() {
-            // safe usage of html()
+            // safe usage of html
             container.html('');
 
             svg = d3
