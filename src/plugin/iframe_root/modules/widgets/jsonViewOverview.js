@@ -15,15 +15,17 @@ define(['kb_common/html'], (html) => {
         function renderOverview(object) {
             const ref = objectRef(object);
             return table({class: 'table table-striped'}, [
-                tr([td('Dataview'), td(a({href: `/#dataview/${  ref}`, target: '_parent'}, ref))])
+                tr([td('Dataview'), td(a({href: `/#dataview/${ref}`, target: '_parent'}, ref))])
             ]);
         }
 
         function attach(node) {
             container = node;
+            // safe
             container.innerHTML = div({class: 'well'}, html.loading('Loading object overview...'));
         }
         function start(params) {
+            // safe
             container.innerHTML = div({class: 'well'}, renderOverview(params.object));
         }
 

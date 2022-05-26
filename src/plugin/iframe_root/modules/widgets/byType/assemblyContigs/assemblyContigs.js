@@ -7,6 +7,7 @@ define([
     'kb_lib/html',
     'kb_lib/htmlBuilders',
     'kb_lib/htmlBootstrapBuilders',
+    'lib/format',
     '../table',
     'content',
 
@@ -21,6 +22,7 @@ define([
     html,
     build,
     BS,
+    {domSafeText},
     TableComponent,
     content
 ) => {
@@ -194,6 +196,7 @@ define([
         function attach(node) {
             return Promise.try(() => {
                 container = node;
+                // safe
                 container.innerHTML = div([
                     div(
                         {
@@ -216,10 +219,11 @@ define([
         }
 
         function renderError(err) {
+            // safe
             container.innerHTML = BS.buildPanel({
                 type: 'danger',
                 title: 'Error',
-                body: err.message || err.error.message
+                body: domSafeText(err.message) || domSafeText(err.error.message)
             });
         }
 

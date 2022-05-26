@@ -47,9 +47,6 @@ define([
                     title: 'Contigs',
                     body: div({
                         dataElement: 'contigs'
-                        // style: {
-                        //     marginTop: '20px'
-                        // }
                     })
                 })
             ]);
@@ -60,6 +57,7 @@ define([
         function attach(node) {
             hostNode = node;
             container = hostNode.appendChild(document.createElement('div'));
+            // safe
             container.innerHTML = layout();
             return Promise.all(
                 widgets.map((widget) => {
@@ -96,6 +94,7 @@ define([
                 })
             ).then(() => {
                 if (hostNode && container) {
+                    // safe
                     container.innerHTML = '';
                     hostNode.removeChild(container);
                 }

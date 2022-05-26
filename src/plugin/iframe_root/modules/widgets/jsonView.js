@@ -287,6 +287,7 @@ define([
 
         function render() {
             events.detachEvents();
+            // safe - text protected in rendered content
             container.innerHTML = div({class: 'container-fluid'}, [
                 div({class: 'row'}, [
                     div({class: 'col-md-12'}, [

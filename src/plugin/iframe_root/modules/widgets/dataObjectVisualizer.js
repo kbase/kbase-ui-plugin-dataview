@@ -4,8 +4,9 @@ define([
     'kb_lib/jsonRpc/genericClient',
     'kb_lib/html',
     'kb_lib/htmlBootstrapBuilders',
-    'kb_service/utils'
-], (Promise, _, GenericClient, html, BS, APIUtils) => {
+    'kb_service/utils',
+    'lib/format'
+], (Promise, _, GenericClient, html, BS, APIUtils, {domSafeText}) => {
     const t = html.tag,
         div = t('div');
 
@@ -156,9 +157,10 @@ define([
             } else {
                 content = 'Unknown Error';
             }
+            // safe
             container.innerHTML = BS.buildPanel({
                 title: 'Error',
-                body: content,
+                body: domSafeText(content),
                 type: 'danger'
             });
         }
@@ -187,10 +189,11 @@ define([
                         const temp = container.appendChild(document.createElement('div')),
                             widgetParentId = html.genId();
 
+                        // safe
                         temp.innerHTML = BS.buildPanel({
                             name: 'data-view',
                             type: 'default',
-                            title: result.mapping.title || 'Data View',
+                            title: domSafeText(result.mapping.title) || 'Data View',
                             body: div({id: widgetParentId})
                         });
                         // These are global.
