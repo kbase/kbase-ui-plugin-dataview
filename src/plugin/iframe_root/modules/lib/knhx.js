@@ -1174,8 +1174,10 @@ define(['lib/canvastext', 'lib/popit'], function (CanvasTextFunctions, popmenu) 
                     } else {
                         kn_actions.move();
                     }
-                } //else popmenu.show(ev, menu_html());   // Don't show menu
-            } //else popmenu.show(ev, menu_html());
+                }
+                //else popmenu.show(ev, menu_html());   // Don't show menu
+            }
+            //else popmenu.show(ev, menu_html());
         }
 
         if (canvas.addEventListener) {
