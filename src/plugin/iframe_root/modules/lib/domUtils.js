@@ -99,5 +99,23 @@ define(['kb_common/utils'], (Utils) => {
         };
     }
 
-    return {objectInfoToObject, workspaceInfoToObject, domSafeText, domSafeValue};
+    function domSafeErrorMessage(error) {
+        const text = (() => {
+            try {
+                if (typeof error === 'string') {
+                    return error;
+                } else if (error.message) {
+                    return error.message;
+                } else if (error.error) {
+                    return error.error.message;
+                }
+                return 'Unknown error';
+            } catch (ex) {
+                return `Unknown error processing another error: ${ex.message}`;
+            }
+        })();
+        return domSafeText(text);
+    }
+
+    return {objectInfoToObject, workspaceInfoToObject, domSafeText, domSafeValue, domSafeErrorMessage};
 });
