@@ -12,7 +12,7 @@ define([
 
     // for effect
     'datatables_bootstrap'
-], function (
+], (
     Promise,
     numeral,
     ko,
@@ -23,14 +23,13 @@ define([
     BS,
     TableComponent,
     content
-) {
-    'use strict';
-    var t = html.tag,
+) => {
+    const t = html.tag,
         div = t('div');
 
     function factory(config) {
-        var runtime = config.runtime;
-        var container;
+        const runtime = config.runtime;
+        let container;
         // var queryService = QueryService({
         //     runtime: runtime
         // });
@@ -56,13 +55,13 @@ define([
             // };
             // return queryService.query(query);
 
-            var AssemblyClient = new DynamicServiceClient({
+            const AssemblyClient = new DynamicServiceClient({
                 url: runtime.config('services.service_wizard.url'),
                 token: runtime.service('session').getAuthToken(),
                 module: 'AssemblyAPI'
             });
 
-            var dataCalls = [
+            const dataCalls = [
                 // AssemblyClient.callFunc('get_contig_lengths', [objectRef, null]).then(function (result) {
                 //     return result[0];
                 // }),
@@ -134,7 +133,7 @@ define([
                         label: 'Contig Length (bp)',
                         type: 'number',
                         width: '35%',
-                        format: function (value) {
+                        format(value) {
                             return numeral(value).format('0,0');
                         },
                         style: {
@@ -150,7 +149,7 @@ define([
                         label: 'GC (%)',
                         type: 'number',
                         width: '30%',
-                        format: function (value) {
+                        format(value) {
                             if (value === null) {
                                 return content.na();
                             }
@@ -170,6 +169,7 @@ define([
 
         function renderTable(table) {
             const node = container.querySelector('[data-element="summary"]');
+            // safe - just inserts a component
             node.innerHTML = div({
                 dataBind: {
                     component: {
@@ -192,7 +192,7 @@ define([
         // LIFECYCLE API
 
         function attach(node) {
-            return Promise.try(function () {
+            return Promise.try(() => {
                 container = node;
                 container.innerHTML = div([
                     div(
@@ -226,7 +226,7 @@ define([
         function start({workspaceId, objectId, objectVersion}) {
             const ref = [workspaceId, objectId, objectVersion].join('/');
             return fetchData(ref)
-                .then(function (data) {
+                .then((data) => {
                     const table = makeContigTable(data);
                     renderTable(table);
                 })
@@ -236,26 +236,26 @@ define([
         }
 
         function stop() {
-            return Promise.try(function () {
+            return Promise.try(() => {
                 return null;
             });
         }
 
         function detach() {
-            return Promise.try(function () {
+            return Promise.try(() => {
                 return null;
             });
         }
         return {
-            attach: attach,
-            start: start,
-            stop: stop,
-            detach: detach
+            attach,
+            start,
+            stop,
+            detach
         };
     }
 
     return {
-        make: function (config) {
+        make(config) {
             return factory(config);
         }
     };
