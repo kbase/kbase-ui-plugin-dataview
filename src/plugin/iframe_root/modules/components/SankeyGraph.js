@@ -4,6 +4,7 @@ define([
     'jquery',
     'd3',
     'kb_lib/jsonRpc/genericClient',
+    'lib/domUtils',
     'ResizeObserver',
 
     // For effect
@@ -15,6 +16,7 @@ define([
     $,
     d3,
     GenericClient,
+    {objectInfoToObject},
     ResizeObserver
 ) => {
     const {Component} = preact;
@@ -216,6 +218,7 @@ define([
                  });
                  */
             // append the svg canvas to the page
+            // safe
             d3.select($graphNode[0]).html('');
             $graphNode.show();
             const svg = d3.select($graphNode[0]).append('svg');
@@ -223,10 +226,10 @@ define([
             svg.attr('width', width)
                 .attr('height', height)
                 .append('g');
-                // removed for simplicity, not sure it really adds very much.
-                // we use the container to add padding for layout. It is fine
-                // and preferred to have the graph start at 0,0.
-                // .attr('transform', `translate(${margin.left},${margin.top})`);
+            // removed for simplicity, not sure it really adds very much.
+            // we use the container to add padding for layout. It is fine
+            // and preferred to have the graph start at 0,0.
+            // .attr('transform', `translate(${margin.left},${margin.top})`);
 
             // Set the sankey diagram properties
             const sankey = d3
@@ -289,9 +292,11 @@ define([
                         .origin((d) => {
                             return d;
                         })
-                        .on('dragstart', function () {
-                            this.parentNode.appendChild(this);
-                        })
+                        // Disabled - when enabled prevents click or dblclick.
+                        // Does not seem to affect the operation of the drag and drop behavior.
+                        // .on('dragstart', function () {
+                        //     this.parentNode.appendChild(this);
+                        // })
                         .on('drag', function (d) {
                             d.x = Math.max(0, Math.min(width - d.dx, d3.event.x));
                             d.y = Math.max(0, Math.min(height - d.dy, d3.event.y));
@@ -300,11 +305,7 @@ define([
                             link.attr('d', path);
                         })
                 )
-                .on('click', (d) => {
-                    console.log('CLICKY');
-                })
                 .on('dblclick', (d) => {
-                    console.log('dbl clicky');
                     if (d3.event.defaultPrevented) {
                         return;
                     }
@@ -319,16 +320,9 @@ define([
                         // Oh, no!
                         alert('Cannot expand this node.');
                     } else {
-                        //if (d.info[1].indexOf(' ') >= 0) {
-                        //    // TODO: Fix this
-                        //    window.location.href = "#provenance/" + encodeURI(d.info[7] + "/" + d.info[0]);
-                        //} else {
-                        // TODO: Fix this
                         const path = `provenance/${encodeURI(`${d.info[6]}/${d.info[0]}/${d.info[4]}`)}`;
                         const url = `${window.location.origin}/#${path}`;
                         window.open(url);
-                        this.props.runtime.navigate(path);
-                        //}
                     }
                 })
                 .on('mouseover', this.nodeMouseover.bind(this))
@@ -351,36 +345,22 @@ define([
                 })
                 .append('title')
                 .html((d) => {
-                    //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
-                    const info = d.info;
+                    const objectInfo = objectInfoToObject(d.info);
                     let text =
-                        `${info[1]
-                        } (${
-                            info[6]
-                        }/${
-                            info[0]
-                        }/${
-                            info[4]
-                        })\n` +
+                        `${objectInfo.name} (${objectInfo.ref})\n` +
                         '--------------\n' +
-                        `  type:  ${
-                            info[2]
-                        }\n` +
-                        `  saved on:  ${
-                            getTimeStampStr(info[3])
-                        }\n` +
-                        `  saved by:  ${
-                            info[5]
-                        }\n`;
-                    let found = false;
-                    const metadata = '  metadata:\n';
-                    for (const m in info[10]) {
-                        text += `     ${  m  } : ${  info[10][m]  }\n`;
-                        found = true;
+                        `  type:  ${objectInfo.type}\n` +
+                        `  saved on:  ${getTimeStampStr(objectInfo.save_date)}\n` +
+                        `  saved by:  ${objectInfo.saved_by}\n`;
+                    text += '  metadata:\n';
+                    if (Object.keys(objectInfo.metadata).length > 0) {
+                        for (const [key, value] of Object.entries(objectInfo.metadata)) {
+                            text += `     ${key} : ${value}\n`;
+                        }
+                    } else {
+                        text += '     none';
                     }
-                    if (found) {
-                        text += metadata;
-                    }
+
                     return text;
                 });
 
