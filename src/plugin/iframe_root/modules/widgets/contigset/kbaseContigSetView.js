@@ -90,11 +90,13 @@ define([
                             tabNames = ['Overview', 'Contigs'],
                             tabIds = ['overview', 'contigs'],
                             tabs = $(`<ul id="${pref}table-tabs" class="nav nav-tabs"/>`);
+                        // safe
                         tabs.append(
                             `<li class="active"><a href="#${pref}${tabIds[0]
                             }" data-toggle="tab" >${tabNames[0]}</a></li>`
                         );
                         for (let i = 1; i < tabIds.length; i += 1) {
+                            // safe
                             tabs.append(
                                 `<li><a href="#${pref}${tabIds[i]  }" data-toggle="tab">${tabNames[i]}</a></li>`
                             );
@@ -107,6 +109,7 @@ define([
                         // safe
                         tab_pane.append(`<div class="tab-pane in active" id="${pref}${tabIds[0]}"/>`);
                         for (let i = 1; i < tabIds.length; i += 1) {
+                            // safe
                             tab_pane.append($(`<div class="tab-pane in" id="${pref}${tabIds[i]}"/>`));
                         }
                         // safe
