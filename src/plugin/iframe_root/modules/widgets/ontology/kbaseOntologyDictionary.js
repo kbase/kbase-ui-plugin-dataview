@@ -263,6 +263,7 @@ define([
                     } else if (err.error) {
                         message = err.error.message;
                     }
+                    // safe usage of html
                     this.$elem.addClass('alert alert-danger').html(`Could not load object : ${domSafeText(message)}`);
                 });
 
@@ -465,6 +466,7 @@ define([
                             message = d.error.message;
                         }
                         this.$elem.empty();
+                        // safe usage of html
                         this.$elem.addClass('alert alert-danger').html(`Could not load object : ${domSafeText(message)}`);
                     });
             } else {
