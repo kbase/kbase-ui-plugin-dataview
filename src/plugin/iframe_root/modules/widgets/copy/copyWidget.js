@@ -10,7 +10,7 @@ define([
     html,
     WorkspaceClient,
     apiUtils
-)  =>{
+) => {
 
     function factory(config) {
         const runtime = config.runtime,
@@ -107,23 +107,8 @@ define([
                                     narrativeInfo.workspaceInfo.id,
                                     narrativeInfo.workspaceInfo.metadata.narrative
                                 )}`
-                        ),
-                        message = div([
-                            'Successfully copied this data object to the Narrative ',
-                            narrativeInfo.workspaceInfo.metadata.narrative_nice_name,
-                            span({style: {fontStyle: 'italic'}}, [
-                                a(
-                                    {
-                                        href: narrativeUrl,
-                                        class: 'btn btn-default',
-                                        target: '_blank'
-                                    },
-                                    'Open this Narrative'
-                                )
-                            ])
-                        ]);
-
-                    viewModel.completionMessage(message);
+                        );
+                    viewModel.completionMessage({title: narrativeInfo.workspaceInfo.metadata.narrative_nice_name, url: narrativeUrl});
                     return copiedObjectInfo;
                 });
         }
@@ -261,7 +246,26 @@ define([
                                             ])
                                         ]),
                                         '<!-- ko if: completionMessage() -->',
-                                        tr([td(['']), td(div({dataBind: {html: 'completionMessage'}}))]),
+                                        tr([td(['']), td(
+                                            div([
+                                                'Successfully copied this data object to the Narrative ',
+                                                span({dataBind: {text: 'completionMessage().title'}, style: {marginRight: '0.5em', fontStyle: 'italic'}}),
+                                                span({style: {fontStyle: 'italic'}}, [
+                                                    a(
+                                                        {
+                                                            dataBind: {
+                                                                attr: {
+                                                                    href: 'completionMessage().url'
+                                                                }
+                                                            },
+                                                            class: 'btn btn-default',
+                                                            target: '_blank'
+                                                        },
+                                                        'Open this Narrative'
+                                                    )
+                                                ])
+                                            ])
+                                        )]),
                                         '<!-- /ko -->'
                                     ])
                                 ])
@@ -377,6 +381,7 @@ define([
             return Promise.try(() => {
                 parent = node;
                 container = node.appendChild(document.createElement('div'));
+                // safe, component uses bindings
                 container.innerHTML = renderComponent();
             });
         }
@@ -389,18 +394,18 @@ define([
             viewModel.copyMethod('new');
             ko.applyBindings(viewModel, container);
             return getWritableNarratives(params).then((narratives) => {
-                narratives.forEach((narrative) => {
-                    viewModel.narrativesById[narrative.id] = narrative;
-                    viewModel.narratives.push({
-                        name: narrative.metadata.narrative_nice_name,
-                        value: [String(narrative.id), narrative.metadata.narrative].join('/')
+                narratives
+                    .sort((a, b) => {
+                        return a.metadata.narrative_nice_name.localeCompare(b.metadata.narrative_nice_name);
+                    })
+                    .forEach((narrative) => {
+                        viewModel.narrativesById[narrative.id] = narrative;
+                        viewModel.narratives.push({
+                            name: narrative.metadata.narrative_nice_name,
+                            value: [String(narrative.id), narrative.metadata.narrative].join('/')
+                        });
                     });
-                });
             });
-        }
-
-        function run() {
-            // ??
         }
 
         function stop() {
@@ -415,18 +420,12 @@ define([
                 parent.removeChild(container);
             }
         }
-
-        function destroy() {
-            // ??
-        }
-
         return {
             init,
             attach,
             start,
             stop,
-            detach,
-            destroy
+            detach
         };
     }
     return {

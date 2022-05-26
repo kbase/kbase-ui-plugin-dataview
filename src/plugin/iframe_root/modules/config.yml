@@ -10,38 +10,21 @@ source:
   ## sources are relative to build/plugins/PACKAGE/source/javascript
   ## NB: need to quote file names, otherwise
   modules:
-  # - module: kb_dataview_widget_panel
-  #   file: panelWidget
-  # -
-  #     module: kb_dataview_widget_genomes_genomeComparison
-  #     file: widgets/protcmp/kbaseGenomeComparisonViewer
+
   styles:
     - file: dataview
     - file: sankeystyle
 install:
   widgets:
-    # - module: kb_dataview_widget_panel
-    #   name: kb_dataview_panel
-    #   type: factory
+
     - module: provenancePanel
       name: kb_dataview_provenancePanel
       type: factory
-    # - module: provenancePanel2
-    #   name: kb_dataview_provenancePanel2
-    #   type: factory
-    # - module: widgets/provenanceWidget
-    #   name: kb_dataview_provenanceV3
-    #   type: factory
-    # - module: widgets/provenanceWidgetv2
-    #   name: kb_dataview_provenance_v2
-    #   type: factory
+
     - module: widgets/relatedData
       name: kb_dataview_relatedData
       type: factory
-    - module: widgets/download/downloadWidget
-      name: kb_dataview_download
-      type: factory
-      css: true
+
     - module: widgets/copy/copyWidget
       name: kb_dataview_copy
       type: factory
@@ -123,9 +106,6 @@ install:
       type: kbwidget
 
     # KBASE GENOME ANNOTATIONS
-    - module: widgets/taxon/taxon
-      name: kb_dataview_taxon
-      type: factory
     - module: widgets/byType/assembly/assembly
       name: kb_dataview_assembly
       type: factory
@@ -263,40 +243,6 @@ install:
       name: kb_dataview_linkedOntologyTerms
       type: es6
 
-  # routes:
-  #   - path:
-  #       - dataview
-  #       - name: workspaceId
-  #       - name: objectId
-  #       - name: objectVersion
-  #         optional: true
-  #     queryParams:
-  #       sub: {}
-  #       subid: {}
-  #       viewer: {}
-  #     widget: kb_dataview_panel
-  #   - path:
-  #       - [objgraphview, provenance]
-  #       - name: workspaceId
-  #       - name: objectId
-  #       - name: objectVersion
-  #         optional: true
-  #     widget: kb_dataview_provenancePanel
-  #   # - path:
-  #   #     - [objgraphview2, provenance2]
-  #   #     - name: workspaceId
-  #   #     - name: objectId
-  #   #     - name: objectVersion
-  #   #       optional: true
-  #   #   widget: kb_dataview_provenancePanel2
-  #   - path:
-  #       - jsonview
-  #       - name: workspaceId
-  #       - name: objectId
-  #       - name: objectVersion
-  #         optional: true
-  #     widget: kb_dataview_jsonViewPanel
-
   panels:
     - view: dataView
       module: panelWidget
@@ -307,9 +253,7 @@ install:
     - view: provenanceView
       module: provenancePanel
       type: factory
-    # - view: provenanceView2
-    #   module: provenancePanel2
-    #   type: factory
+
 
   types:
     # COMMUNITIES
@@ -628,29 +572,6 @@ install:
               to: objVer
               optional: true
 
-    - type:
-        module: KBaseGenomeAnnotations
-        name: Taxon
-        version: any
-      icon:
-        type: fontAwesome
-        classes: ["fa-list"]
-      viewers:
-        - # if set true, this will be set as the default vis widget for this type.
-          # note that we do not have a way of selecting one from amongst multiple widgets
-          default: true
-          # This the title for the widget if a wrapper panel is requested
-          title: "Data View"
-          panel: false
-          scrolling: true
-          # This is the widget id name as specified in the plugin
-          # it should follow standard namespacing. It should also be
-          # defined above in the modules.
-          # module: kb_widget_dataview_communities_collection
-          # This is the registered widget id. The mapping of widget
-          # to module is probably made above.
-          widget:
-            name: kb_dataview_taxon
 
     - type:
         module: KBaseGenomeAnnotations

@@ -1,12 +1,11 @@
 define([
     'kb_common/html',
     'kb_common/domEvent',
+    'lib/format',
     'highlight',
     'numeral',
     'bootstrap'
-], function (html, domEvent, highlight, numeral) {
-    'use strict';
-
+], (html, domEvent, {domSafeText}, highlight, numeral) => {
     const t = html.tag,
         table = t('table'),
         tbody = t('tbody'),
@@ -21,10 +20,12 @@ define([
         p = t('p'), pre = t('pre'), code = t('code');
 
     function factory() {
-        var container,
-            workspaceInfo, theObject, showLargeObject = false,
-            events = domEvent.make();
+        let container,
+            workspaceInfo, theObject;
 
+        let showLargeObject = false;
+
+        const events = domEvent.make();
 
         function toggleLargeObject() {
             if (showLargeObject) {
@@ -145,7 +146,7 @@ define([
                             width: '11em'
                         }
                     }, k),
-                    td(v)
+                    td(domSafeText(v))
                 ]);
             })));
         }
@@ -201,7 +202,7 @@ define([
             ]));
         }
         function renderJSONRaw(data) {
-            var jsString = JSON.stringify(data, true, 4);
+            const jsString = JSON.stringify(data, true, 4);
             return pre(code(highlight.highlight('json', jsString).value));
         }
         function renderWorkspaceInfo(data) {
@@ -246,12 +247,12 @@ define([
         }
 
         function renderProvenance(data) {
-            var jsString = JSON.stringify(data, true, 4);
+            const jsString = JSON.stringify(data, true, 4);
             return pre(code(highlight.highlight('json', jsString).value));
         }
 
         function renderObject(data) {
-            var jsString = JSON.stringify(data, true, 4), comment, formatOutput = true;
+            let jsString = JSON.stringify(data, true, 4), comment, formatOutput = true;
 
             if (jsString.length > 10000) {
                 if (showLargeObject) {
@@ -286,6 +287,7 @@ define([
 
         function render() {
             events.detachEvents();
+            // safe - text protected in rendered content
             container.innerHTML = div({class: 'container-fluid'}, [
                 div({class: 'row'}, [
                     div({class: 'col-md-12'}, [
@@ -313,6 +315,7 @@ define([
 
         function attach(node) {
             container = node;
+            // safe
             container.innerHTML = div({class: 'container-fluid'}, [
                 div({class: 'row'}, [
                     div({class: 'col-md-12'}, div({class: 'well'}, html.loading('Loading object...')))
@@ -331,13 +334,13 @@ define([
         }
 
         return {
-            attach: attach,
-            start: start,
-            detach: detach
+            attach,
+            start,
+            detach
         };
     }
     return {
-        make: function (config) {
+        make(config) {
             return factory(config);
         }
     };

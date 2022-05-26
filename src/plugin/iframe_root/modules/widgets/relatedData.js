@@ -2,19 +2,16 @@ define([
     'kb_lib/html',
     'collapsiblePanel',
     'kb_lib/jsonRpc/dynamicServiceClient'
-],
-function (
+], (
     html,
     collapsiblePanel,
     DynamicServiceClient
-) {
-    'use strict';
-
+) => {
     const t = html.tag;
     const iframe = t('iframe');
 
     class Widget {
-        constructor({ runtime }) {
+        constructor({runtime}) {
             this.runtime = runtime;
             // Both of the props below are assigned in the attach method
             this.hostNode = null;
@@ -37,10 +34,10 @@ function (
             // TODO use a dynamic service here
             const src = 'https://kbaseincubator.github.io/object_relations_ui/';
             return iframe({
-                src: src,
+                src,
                 width: '100%',
                 height: '600px',
-                style: { border: 'none' }
+                style: {border: 'none'}
             });
         }
 
@@ -49,7 +46,7 @@ function (
             this.container = node.appendChild(document.createElement('div'));
         }
 
-        start({ workspaceId, objectId, objectVersion, objectInfo }) {
+        start({workspaceId, objectId, objectVersion}) {
             // In the relation engine, we use ':' as the delimiter
             const upa = [workspaceId, objectId, objectVersion || '1'].join(':');
             // this.container.innerHTML = collapsiblePanel({
@@ -58,6 +55,7 @@ function (
             //     icon: 'copy',
             //     collapsed: true
             // });
+            // safe
             this.container.innerHTML = this.dataLayout();
             const iframeElm = this.container.querySelector('iframe');
             const config = {
@@ -80,7 +78,7 @@ function (
                     iframeElm.contentWindow.postMessage(
                         JSON.stringify({
                             method: 'setConfig',
-                            params: { config }
+                            params: {config}
                         }),
                         '*'
                     );
@@ -99,7 +97,7 @@ function (
     }
 
     return {
-        make: function (config) {
+        make(config) {
             return new Widget(config);
         }
     };

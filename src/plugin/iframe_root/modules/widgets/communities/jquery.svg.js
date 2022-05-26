@@ -8,6 +8,7 @@
  MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses. 
  Please attribute the author if you use it. 
  */
+// TODO: remove 
 define([
     'jquery'
 ], function (jQuery) {
@@ -115,10 +116,12 @@ define([
                         container.id = 'svg' + (this._uuid++);
                     }
                     this._settings[container.id] = settings;
+                    // safe
                     container.innerHTML = '<embed type="image/svg+xml" width="100%" ' +
                         'height="100%" src="' + (settings.initPath || '') + 'blank.svg" ' +
                         'pluginspage="http://www.adobe.com/svg/viewer/install/main.html"/>';
                 } else {
+                    // safe ish
                     container.innerHTML = '<p class="svg_error">' +
                         this.local.notSupportedText + '</p>';
                 }

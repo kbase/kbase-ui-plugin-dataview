@@ -6,9 +6,7 @@ define([
     'kb_lib/htmlBuilders',
     './components/main',
     './model'
-], function (Promise, ko, widgetUtils, html, htmlBuilders, MainComponent, Model) {
-    'use strict';
-
+], (Promise, ko, widgetUtils, html, htmlBuilders, MainComponent, Model) => {
     const t = html.tag,
         div = t('div');
 
@@ -28,6 +26,7 @@ define([
         }
 
         loadRootComponent() {
+            // safe, uses bindings
             this.node.innerHTML = div({
                 dataBind: {
                     component: {
@@ -69,6 +68,7 @@ define([
             this.vm.objectId = this.objectId;
             this.vm.objectVersion = this.objectVersion;
 
+            // safe
             this.node.innerHTML = htmlBuilders.loading();
 
             this.model = new Model({
@@ -95,6 +95,7 @@ define([
         stop() {}
 
         detach() {
+            // safe
             this.node.innerHTML = '';
         }
     }

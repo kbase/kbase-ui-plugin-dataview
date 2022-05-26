@@ -6,8 +6,9 @@ define([
     'kb_lib/html',
     'kb_lib/htmlBuilders',
     'kb_lib/htmlBootstrapBuilders',
+    'lib/format',
     '../table'
-], function (
+], (
     Promise,
     numeral,
     ko,
@@ -15,9 +16,9 @@ define([
     html,
     build,
     BS,
+    {domSafeText},
     TableComponent
-) {
-    'use strict';
+) => {
     const t = html.tag,
         div = t('div');
 
@@ -25,7 +26,7 @@ define([
         const runtime = config.runtime;
         let container;
         const queryService = QueryService({
-            runtime: runtime
+            runtime
         });
 
         //
@@ -42,7 +43,7 @@ define([
             })
                 .then((result) => {
                     const contig_id_list = result.assembly.contig_ids;
-                    var query = {
+                    const query = {
                         assembly: {
                             _args: {
                                 ref: objectRef,
@@ -90,7 +91,7 @@ define([
                     return [id, contigLength, gc];
                 });
             return {
-                rows: rows,
+                rows,
                 columns: [
                     {
                         name: 'id',
@@ -107,7 +108,7 @@ define([
                         label: 'Contig Length (bp)',
                         type: 'number',
                         width: '35%',
-                        format: function (value) {
+                        format(value) {
                             return numeral(value).format('0,0');
                         },
                         style: {
@@ -123,7 +124,7 @@ define([
                         label: 'GC (%)',
                         type: 'number',
                         width: '30%',
-                        format: function (value) {
+                        format(value) {
                             return (value * 100).toFixed(2);
                         },
                         style: {
@@ -139,7 +140,8 @@ define([
         }
 
         function renderTable(tableData) {
-            var node = container.querySelector('[data-element="summary"]');
+            const node = container.querySelector('[data-element="summary"]');
+            // safe
             node.innerHTML = div({
                 dataBind: {
                     component: {
@@ -160,18 +162,20 @@ define([
         }
 
         function renderError(err) {
+            // safe
             container.innerHTML = BS.buildPanel({
                 type: 'danger',
                 title: 'Error',
-                body: err.message
+                body: domSafeText(err.message)
             });
         }
 
         // LIFECYCLE API
 
         function attach(node) {
-            return Promise.try(function () {
+            return Promise.try(() => {
                 container = node;
+                // safe
                 container.innerHTML = div([
                     div(
                         {
@@ -195,8 +199,8 @@ define([
 
         function start(params) {
             return fetchData(params.objectRef)
-                .then(function (data) {
-                    var table = makeContigTable(data);
+                .then((data) => {
+                    const table = makeContigTable(data);
                     renderTable(table);
                 })
                 .catch((err) => {
@@ -205,26 +209,26 @@ define([
         }
 
         function stop() {
-            return Promise.try(function () {
+            return Promise.try(() => {
                 return null;
             });
         }
 
         function detach() {
-            return Promise.try(function () {
+            return Promise.try(() => {
                 return null;
             });
         }
         return {
-            attach: attach,
-            start: start,
-            stop: stop,
-            detach: detach
+            attach,
+            start,
+            stop,
+            detach
         };
     }
 
     return {
-        make: function (config) {
+        make(config) {
             return factory(config);
         }
     };
