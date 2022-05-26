@@ -18,12 +18,20 @@
  * @author Mike Sneddon [mwsneddon@lbl.gov]
  * @author Dylan Chivian [dcchivian@lbl.gov]
  */
-define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widget/legacy/widget'], function (
+define([
+    'jquery',
+    'kb_common/html',
+    'kb_service/client/workspace',
+    'lib/domUtils',
+
+    // For effect
+    'kbaseUI/widget/legacy/widget'
+], (
     $,
     html,
-    Workspace
-) {
-    'use strict';
+    Workspace,
+    {domSafeText}
+) => {
     $.KBWidget({
         name: 'KBaseWikiDescription',
         parent: 'kbaseWidget',
@@ -51,7 +59,7 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
          * Initialize the widget.
          * @return {object} the initialized widget
          */
-        init: function (options) {
+        init(options) {
             this._super(options);
 
             if (this.options.featureID === null) {
@@ -86,17 +94,17 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
          * list that gets passed here.
          * @public
          */
-        renderFromTaxonomy: function (taxonomy) {
-            var searchTerms = taxonomy;
-            var strainName = taxonomy[0];
+        renderFromTaxonomy(taxonomy) {
+            const searchTerms = taxonomy;
+            const strainName = taxonomy[0];
             this.wikipediaLookup(
                 searchTerms,
                 $.proxy(function (desc) {
-                    var $taxonDescription = $('<div>');
-                    var $taxonImage = $('<div>');
+                    const $taxonDescription = $('<div>');
+                    const $taxonImage = $('<div>');
 
                     // If we've found something, desc.description will exist and be non-null
-                    if (desc.hasOwnProperty('description') && desc.description !== null) {
+                    if ('description' in desc && desc.description !== null) {
                         /* the viz is set up like this:
                          * 1. Description Tab
                          *
@@ -113,10 +121,10 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                          * Image
                          */
                         if (desc.searchTerm) {
-                            var $descDiv = $(
-                                '<div style="text-align:justify; max-height: ' +
-                                    this.options.maxTextHeight +
-                                    'px; overflow-y:auto; padding-right:5px">'
+                            const $descDiv = $(
+                                `<div style="text-align:justify; max-height: ${
+                                    this.options.maxTextHeight
+                                }px; overflow-y:auto; padding-right:5px">`
                             ).append(desc.description);
 
                             var $descHeader = $('<div>');
@@ -126,17 +134,17 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                                 $descHeader = $(this.notFoundHeader(strainName, desc.searchTerm, desc.redirectFrom));
                             }
 
-                            var $descFooter = $(
-                                '<p>[<a href="' + desc.wikiUri + '" target="_new">more at Wikipedia</a>]</p>'
+                            const $descFooter = $(
+                                `<p>[<a href="${  desc.wikiUri  }" target="_new">more at Wikipedia</a>]</p>`
                             );
 
-                            var imageHtml =
-                                'Unable to find an image. If you have one, you might consider <a href="' +
-                                desc.wikiUri +
-                                '" target="_new">adding it to Wikipedia</a>.';
+                            let imageHtml =
+                                `Unable to find an image. If you have one, you might consider <a href="${
+                                    desc.wikiUri
+                                }" target="_new">adding it to Wikipedia</a>.`;
                             if (desc.imageUri !== null) {
-                                imageHtml = '<img src="' + desc.imageUri + '"';
-                                if (this.options.width) imageHtml += 'style="width:' + this.options.width + 'px;"';
+                                imageHtml = `<img src="${  desc.imageUri  }"`;
+                                if (this.options.width) imageHtml += `style="width:${  this.options.width  }px;"`;
                                 imageHtml += '/>';
                             }
                             $taxonDescription
@@ -175,20 +183,20 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
          * passes it along to renderTaxonomy
          * @public
          */
-        renderWorkspace: function () {
-            var self = this;
+        renderWorkspace() {
+            const self = this;
             this.searchedOnce = false;
             this.showMessage(html.loading('loading...'));
-            var obj = this.buildObjectIdentity(this.options.workspaceID, this.options.genomeID);
+            const obj = this.buildObjectIdentity(this.options.workspaceID, this.options.genomeID);
 
             obj.included = ['/taxonomy', '/scientific_name'];
 
             function onDataLoad(genome) {
                 if (genome['taxonomy']) {
-                    var tax = genome['taxonomy'];
-                    var taxList = [];
-                    var nameTokens = genome['scientific_name'].split(/\s+/);
-                    for (var i = nameTokens.length; i > 0; i--) {
+                    const tax = genome['taxonomy'];
+                    let taxList = [];
+                    const nameTokens = genome['scientific_name'].split(/\s+/);
+                    for (let i = nameTokens.length; i > 0; i--) {
                         taxList.push(nameTokens.slice(0, i).join(' '));
                     }
                     if (taxList && taxList !== 'Unknown') {
@@ -197,9 +205,9 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                     }
                     self.renderFromTaxonomy(taxList);
                 } else if (genome['scientific_name']) {
-                    var taxList = [];
-                    var nameTokens = genome['scientific_name'].split(/\s+/);
-                    for (var i = nameTokens.length; i > 0; i--) {
+                    const taxList = [];
+                    const nameTokens = genome['scientific_name'].split(/\s+/);
+                    for (let i = nameTokens.length; i > 0; i--) {
                         taxList.push(nameTokens.slice(0, i).join(' '));
                     }
                     self.renderFromTaxonomy(taxList);
@@ -211,22 +219,22 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
             } else {
                 self.workspaceClient.get_object_subset(
                     [obj],
-                    function (data) {
+                    (data) => {
                         if (data[0]) {
                             onDataLoad(data[0]['data']);
                         }
                     },
-                    function (error) {
-                        var obj = self.buildObjectIdentity(self.options.workspaceID, self.options.genomeID);
+                    () => {
+                        const obj = self.buildObjectIdentity(self.options.workspaceID, self.options.genomeID);
                         obj.included = ['/scientific_name'];
                         self.workspaceClient.get_object_subset(
                             [obj],
-                            function (data) {
+                            (data) => {
                                 if (data[0]) {
                                     onDataLoad(data[0]['data']);
                                 }
                             },
-                            function (error) {
+                            (error) => {
                                 self.renderError(error);
                             }
                         );
@@ -247,8 +255,8 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
          * @property {string} objId.name - the name of the object (if a string given)
          * @private
          */
-        buildObjectIdentity: function (workspaceID, objectID) {
-            var obj = {};
+        buildObjectIdentity(workspaceID, objectID) {
+            const obj = {};
             if (/^\d+$/.exec(workspaceID)) obj['wsid'] = workspaceID;
             else obj['workspace'] = workspaceID;
 
@@ -263,9 +271,9 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
          * @returns {string} a randomized id string
          * @public
          */
-        uid: function () {
-            var id = '';
-            for (var i = 0; i < 32; i++)
+        uid() {
+            let id = '';
+            for (let i = 0; i < 32; i++)
                 id += Math.floor(Math.random() * 16)
                     .toString(16)
                     .toUpperCase();
@@ -283,18 +291,18 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
          * @return {string} an HTML string with the parameters rendered nicely.
          * @private
          */
-        notFoundHeader: function (strainName, term, redirectFrom) {
-            var underscoredName = strainName.replace(/\s+/g, '_');
-            var str =
-                '<p><b>"<i>' +
-                strainName +
-                '</i>" not found in Wikipedia. Add a description on <a href=\'http://en.wikipedia.org/wiki/' +
-                underscoredName +
-                '\' target=\'_new\'>Wikipedia</a>.</b></p>';
+        notFoundHeader(strainName, term, redirectFrom) {
+            const underscoredName = strainName.replace(/\s+/g, '_');
+            let str =
+                `<p><b>"<i>${
+                    strainName
+                }</i>" not found in Wikipedia. Add a description on <a href='http://en.wikipedia.org/wiki/${
+                    underscoredName
+                }' target='_new'>Wikipedia</a>.</b></p>`;
             if (term) {
-                str += '<p><b>Showing description for <i>' + term + '</i></b>';
+                str += `<p><b>Showing description for <i>${  term  }</i></b>`;
                 if (redirectFrom) {
-                    str += '<br>redirected from <i>' + redirectFrom + '</i>';
+                    str += `<br>redirected from <i>${  redirectFrom  }</i>`;
                 }
                 str += '</p>';
             }
@@ -311,16 +319,16 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
          * @return {string} an HTML string with the parameters rendered nicely.
          * @private
          */
-        redirectHeader: function (strainName, redirectFrom, term) {
-            var underscoredName = redirectFrom.replace(/\s+/g, '_');
-            var str =
+        redirectHeader(strainName, redirectFrom, term) {
+            const underscoredName = redirectFrom.replace(/\s+/g, '_');
+            const str =
                 '<p><b>' +
-                'Showing description for <i>' +
-                term +
-                '</i></b>' +
-                '<br>redirected from <i>' +
-                underscoredName +
-                '</i>' +
+                `Showing description for <i>${
+                    term
+                }</i></b>` +
+                `<br>redirected from <i>${
+                    underscoredName
+                }</i>` +
                 '</p>';
 
             return str;
@@ -331,8 +339,8 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
          * @param {string} message - the message to show (can be HTML)
          * @private
          */
-        showMessage: function (message) {
-            var span = $('<span>').append(message);
+        showMessage(message) {
+            const span = $('<span>').append(message);
 
             this.$messagePane.append(span);
             this.$messagePane.removeClass('kbwidget-hide-message');
@@ -342,7 +350,7 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
          * Hides a previously shown message in the widget
          * @private
          */
-        hideMessage: function () {
+        hideMessage() {
             this.$messagePane.addClass('kbwidget-hide-message');
             this.$messagePane.empty();
         },
@@ -354,7 +362,7 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
          * This is mostly deprecated now.
          * @public
          */
-        getData: function () {
+        getData() {
             return {
                 type: 'Description',
                 id: this.options.genomeID,
@@ -370,16 +378,16 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
          * @param error.error.message - if this exists, then this is the error string.
          * @private
          */
-        renderError: function (error) {
-            var errString =
+        renderError(error) {
+            let errString =
                 'Sorry, an unknown error occured. Wikipedia.org may be down or your browser may be blocking an http request to Wikipedia.org.';
             if (typeof error === 'string') errString = error;
             else if (error && error.error && error.error.message) errString = error.error.message;
 
-            var $errorDiv = $('<div>')
+            const $errorDiv = $('<div>')
                 .addClass('alert alert-danger')
                 .append('<b>Error:</b>')
-                .append('<br>' + errString);
+                .append(`<br>${  errString}`);
             this.$elem.empty();
             this.$elem.append($errorDiv);
         },
@@ -413,7 +421,7 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
          * @param {function} errorCallback - callback to invoke when an error occurs during execution.
          * @private
          */
-        wikipediaLookup: function (termList, successCallback, errorCallback) {
+        wikipediaLookup(termList, successCallback, errorCallback) {
             if (!termList || Object.prototype.toString.call(termList) !== '[object Array]' || termList.length === 0) {
                 if (errorCallback && !this.searchedOnce) {
                     errorCallback('No search term given');
@@ -421,15 +429,15 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
             }
             this.searchedOnce = true;
             // take the first term off the list, so we can pass the rest of it if we need to re-call this functionk
-            var searchTerm = termList.shift();
+            const searchTerm = termList.shift();
 
-            var requestUrl =
-                '//en.wikipedia.org/w/api.php?action=parse&format=json&prop=text|pageimages&section=0&redirects=&callback=?&page=' +
-                searchTerm;
-            var imageLookupUrl =
-                '//en.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&pithumbsize=' +
-                this.options.width +
-                '&callback=?&titles=';
+            const requestUrl =
+                `//en.wikipedia.org/w/api.php?action=parse&format=json&prop=text|pageimages&section=0&redirects=&callback=?&page=${
+                    searchTerm}`;
+            const imageLookupUrl =
+                `//en.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&pithumbsize=${
+                    this.options.width
+                }&callback=?&titles=`;
 
             $.ajax({
                 type: 'GET',
@@ -438,20 +446,22 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                 async: true,
                 dataType: 'json'
             }).then(
-                $.proxy(function (data, status) {
+                $.proxy(function (data) {
                     if (data.error) {
                         // do the next one in the list.
                         this.wikipediaLookup(termList, successCallback, errorCallback);
                     } else if (data.parse) {
                         // If we have valid text in the output, parse it how we want it.
                         if (data.parse.text) {
-                            var hit = { searchTerm: searchTerm };
+                            const hit = {searchTerm};
 
                             // Our abstract is the whole text part.
-                            var $abstract = $('<div>').html(data.parse.text['*']);
+                            // safe - as long as we trust WikiPedia
+                            const $abstract = $('<div>').html(data.parse.text['*']);
 
                             // Remove active links to avoid confusion
                             $abstract.find('a').each(function () {
+                                // safe
                                 $(this).replaceWith($(this).html());
                             });
                             // Remove Wiki page references
@@ -463,12 +473,18 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
 
                             // This is a trick to just get all of the 'p' fields, and concatenate the
                             // jQuery nodes together as a single HTML text blob.
-                            $abstract.children('p').each(function (idx, val) {
-                                hit['description'] += '<p>' + $(val).html() + '</p>';
-                            });
+                            // Top level child is a div wrapper.
+                            if ($abstract.children().length === 1) {
+                                $abstract.children().children('p').each((idx, val) => {
+                                    // safe
+                                    hit['description'] += `<p>${$(val).html()}</p>`;
+                                });
+                            } else {
+                                hit['description'] += '<div class="alert alert-warning">No information could be extracted from the WikiPedia entry.</div>';
+                            }
 
                             // The title is the actual Wikipedia page link, so put that here.
-                            hit['wikiUri'] = '//www.wikipedia.org/wiki/' + data.parse.title;
+                            hit['wikiUri'] = `//www.wikipedia.org/wiki/${data.parse.title}`;
 
                             // If we have a redirect, record it.
                             if (data.parse.redirects && data.parse.redirects.length > 0) {
@@ -483,7 +499,7 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                                 async: true,
                                 dataType: 'json'
                             }).then(
-                                function (imageData, imageStatus) {
+                                (imageData, imageStatus) => {
                                     // If this is truthy, then we have a successful API call.
                                     if (imageStatus) {
                                         hit['imageUri'] = null;
@@ -496,17 +512,18 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                                             Object.keys(imageData.query.pages).length > 0
                                         ) {
                                             // joys of Javascript!
-                                            var page = Object.keys(imageData.query.pages)[0];
+                                            const page = Object.keys(imageData.query.pages)[0];
                                             if (imageData.query.pages[page].thumbnail)
                                                 hit['imageUri'] = imageData.query.pages[page].thumbnail.source;
                                         }
                                     }
                                     // Finally, pass the finished result to successCallback
+                                    console.log('hit!', hit, data);
                                     if (successCallback) {
                                         successCallback(hit);
                                     }
                                 },
-                                function (error) {
+                                (error) => {
                                     if (errorCallback) {
                                         errorCallback(error);
                                     }
@@ -515,7 +532,7 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                         }
                     }
                 }, this),
-                function (error) {
+                (error) => {
                     if (errorCallback) {
                         errorCallback(error);
                     }
@@ -539,53 +556,50 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
          * successCallback, or it triggers errorCallback.
          * @public
          */
-        dbpediaLookup: function (termList, successCallback, errorCallback, redirectFrom) {
+        dbpediaLookup(termList, successCallback, errorCallback, redirectFrom) {
             if (!termList || Object.prototype.toString.call(termList) !== '[object Array]' || termList.length === 0) {
                 if (errorCallback) {
                     errorCallback('No search term given');
                 }
             }
 
-            var searchTerm = termList.shift();
-            var usTerm = searchTerm.replace(/\s+/g, '_');
+            const searchTerm = termList.shift();
+            const usTerm = searchTerm.replace(/\s+/g, '_');
 
-            var resourceKey = 'http://dbpedia.org/resource/' + usTerm;
-            var abstractKey = 'http://dbpedia.org/ontology/abstract';
-            var languageKey = 'en';
-            var imageKey = 'http://xmlns.com/foaf/0.1/depiction';
-            var wikiLinkKey = 'http://xmlns.com/foaf/0.1/isPrimaryTopicOf';
-            var wikipediaUri = 'http://en.wikipedia.org/wiki';
-            var redirectKey = 'http://dbpedia.org/ontology/wikiPageRedirects';
+            const resourceKey = `http://dbpedia.org/resource/${  usTerm}`;
+            const abstractKey = 'http://dbpedia.org/ontology/abstract';
+            const languageKey = 'en';
+            const imageKey = 'http://xmlns.com/foaf/0.1/depiction';
+            const wikiLinkKey = 'http://xmlns.com/foaf/0.1/isPrimaryTopicOf';
+            const redirectKey = 'http://dbpedia.org/ontology/wikiPageRedirects';
 
-            var requestUrl = 'http://dbpedia.org/data/' + usTerm + '.json';
+            const requestUrl = `http://dbpedia.org/data/${  usTerm  }.json`;
             $.get(requestUrl).then(
-                $.proxy(function (data, status) {
-                    var processedHit = {
-                        searchTerm: searchTerm
+                $.proxy(function (data) {
+                    const processedHit = {
+                        searchTerm
                     };
 
                     if (data[resourceKey]) {
-                        var resource = data[resourceKey];
+                        const resource = data[resourceKey];
                         if (!resource[wikiLinkKey] || !resource[abstractKey]) {
                             if (resource[redirectKey]) {
-                                var tokens = resource[redirectKey][0]['value'].split('/');
+                                const tokens = resource[redirectKey][0]['value'].split('/');
                                 this.dbpediaLookup(
                                     [tokens[tokens.length - 1]],
                                     successCallback,
                                     errorCallback,
                                     searchTerm
                                 );
-                            } else {
-                                if (termList.length > 0) this.dbpediaLookup(termList, successCallback, errorCallback);
-                                else successCallback(processedHit);
-                            }
+                            } else if (termList.length > 0) this.dbpediaLookup(termList, successCallback, errorCallback);
+                            else successCallback(processedHit);
                         } else {
                             if (resource[wikiLinkKey]) {
                                 processedHit['wikiUri'] = resource[wikiLinkKey][0]['value'];
                             }
                             if (resource[abstractKey]) {
-                                var abstracts = resource[abstractKey];
-                                for (var i = 0; i < abstracts.length; i++) {
+                                const abstracts = resource[abstractKey];
+                                for (let i = 0; i < abstracts.length; i++) {
                                     if (abstracts[i]['lang'] === languageKey)
                                         processedHit['description'] = abstracts[i]['value'];
                                 }
@@ -598,16 +612,14 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                             }
                             successCallback(processedHit);
                         }
+                    } else if (termList.length > 0) {
+                        this.dbpediaLookup(termList, successCallback, errorCallback);
                     } else {
-                        if (termList.length > 0) {
-                            this.dbpediaLookup(termList, successCallback, errorCallback);
-                        } else {
-                            successCallback(processedHit);
-                        }
+                        successCallback(processedHit);
                     }
                     return processedHit;
                 }, this),
-                function (error) {
+                (error) => {
                     if (errorCallback) errorCallback(error);
                 }
             );
