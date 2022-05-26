@@ -315,6 +315,7 @@ define([
 
         function attach(node) {
             container = node;
+            // safe
             container.innerHTML = div({class: 'container-fluid'}, [
                 div({class: 'row'}, [
                     div({class: 'col-md-12'}, div({class: 'well'}, html.loading('Loading object...')))
