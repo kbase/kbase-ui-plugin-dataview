@@ -42,8 +42,7 @@ define([
     'kb_common/html',
     'kbaseUI/widget/legacy/widget',
     'widgets/genomes/kbaseContigBrowserButtons'
-], function ($, d3, html) {
-    'use strict';
+], ($, d3, html) => {
     $.KBWidget({
         name: 'KBaseMultiContigBrowser',
         parent: 'kbaseWidget',
@@ -108,10 +107,10 @@ define([
         $selectPanel: null,
         $contigViewPanel: null,
         $featureInfoPanel: null,
-        init: function (options) {
+        init(options) {
             this._super(options);
 
-            var self = this;
+            const self = this;
 
             // 1. Check that needed options are present (basically contig)
             if (this.options.contig === null) {
@@ -122,19 +121,19 @@ define([
             this.$elem.append(this.$messagePane);
             this.showMessage(html.loading('loading contig details'));
 
-            var $maindiv = $('<div class="row"/>');
+            const $maindiv = $('<div class="row"/>');
 
             // panel with contig selector
             this.$contigSelect = $('<select>')
                 .addClass('form-control')
-                .css({ width: '60%', 'margin-right': '5px' })
+                .css({width: '60%', 'margin-right': '5px'})
                 .append(
                     $('<option>')
                         .attr('value', this.noContigs)
                         .append(this.noContigs)
                 );
             this.$contigSelect.change(function () {
-                var contigId = $(this).val();
+                const contigId = $(this).val();
                 if (contigId !== self.noContigs) {
                     self.contig = contigId;
                     self.options.contig = contigId;
@@ -151,16 +150,17 @@ define([
             $maindiv.append(this.$selectPanel);
 
             // panel where contig browser is defined
-            var $contigViewPanelWrapper = $('<div class="col-md-6"/>');
-            this.$contigViewPanel = $('<div id="contigmainview" align="center"/>').css({ overflow: 'auto' });
+            const $contigViewPanelWrapper = $('<div class="col-md-6"/>');
+            this.$contigViewPanel = $('<div id="contigmainview" align="center"/>').css({overflow: 'auto'});
             $contigViewPanelWrapper
                 .append(this.$contigViewPanel)
                 .append('<div>')
-                .KBaseContigBrowserButtons({ browser: self });
+                .KBaseContigBrowserButtons({browser: self});
 
             $maindiv.append($contigViewPanelWrapper);
 
             // panel where feature info is displayed
+            // safe usage of html()
             this.$featureInfoPanel = $('<div class="col-md-3"/>').html('<b>Click on a feature to view details</b>');
             $maindiv.append(this.$featureInfoPanel);
 
@@ -169,20 +169,20 @@ define([
             if (!this.options.onClickFunction) {
                 this.options.onClickFunction = function (svgobj, d) {
                     self.$featureInfoPanel.empty();
-                    var $infoTable = $('<table>').addClass('table table-striped table-bordered');
+                    const $infoTable = $('<table>').addClass('table table-striped table-bordered');
                     if (d.id) {
                         $infoTable.append(
                             self.addInfoRow(
                                 'Feature ID',
-                                '<a href="/#dataview/' +
-                                    self.options.workspaceID +
-                                    '/' +
-                                    self.options.genomeID +
-                                    '?sub=Feature&subid=' +
-                                    d.id +
-                                    '" target="_blank">' +
-                                    d.id +
-                                    '</a>'
+                                `<a href="/#dataview/${
+                                    self.options.workspaceID
+                                }/${
+                                    self.options.genomeID
+                                }?sub=Feature&subid=${
+                                    d.id
+                                }" target="_blank">${
+                                    d.id
+                                }</a>`
                             )
                         );
                     }
@@ -198,13 +198,13 @@ define([
             }
             return this;
         },
-        showData: function (genome, $maindiv) {
-            var self = this;
+        showData(genome, $maindiv) {
+            const self = this;
             self.genome = genome;
-            var contigsToLengths = {};
+            const contigsToLengths = {};
             if (genome.contig_ids && genome.contig_ids.length > 0) {
-                for (var i = 0; i < genome.contig_ids.length; i++) {
-                    var len = 'Unknown';
+                for (let i = 0; i < genome.contig_ids.length; i++) {
+                    let len = 'Unknown';
                     if (genome.contig_lengths && genome.contig_lengths[i]) {
                         len = genome.contig_lengths[i];
                     }
@@ -217,8 +217,8 @@ define([
                  * OMG THIS SUCKS THAT I HAVE TO DO THIS UNTIL FBA MODEL SERVICES IS FIXED!
                  * LOUD NOISES!
                  ************/
-                for (var i = 0; i < genome.features.length; i++) {
-                    var f = genome.features[i];
+                for (let i = 0; i < genome.features.length; i++) {
+                    const f = genome.features[i];
                     if (f.location && f.location[0][0]) {
                         contigsToLengths[f.location[0][0]] = 'Unknown';
                     }
@@ -237,15 +237,15 @@ define([
                 self.render();
             }
         },
-        addInfoRow: function (a, b) {
-            return '<tr><th>' + a + '</th><td>' + b + '</td></tr>';
+        addInfoRow(a, b) {
+            return `<tr><th>${  a  }</th><td>${  b  }</td></tr>`;
         },
         /**
          *
          */
-        render: function () {
+        render() {
             this.loading(false);
-            var self = this;
+            const self = this;
             self.$contigViewPanel.empty();
 
             // tooltip inspired from
@@ -279,7 +279,7 @@ define([
             this.axisSvg = this.svg
                 .append('g')
                 .attr('class', 'kbcb-axis')
-                .attr('transform', 'translate(0, ' + this.options.topMargin + ')')
+                .attr('transform', `translate(0, ${  this.options.topMargin  })`)
                 .call(this.xAxis);
 
             // load SEED info
@@ -287,10 +287,10 @@ define([
 
             return this;
         },
-        wait_for_seed_load: function () {
+        wait_for_seed_load() {
             this.assignSeedColors(this.seedTermsUniq);
 
-            var self = this;
+            const self = this;
 
             this.setWorkspaceContig(self.options.workspaceID, self.options.genomeID, self.options.contig);
 
@@ -301,7 +301,7 @@ define([
 
             return true;
         },
-        populateContigSelector: function (contigsToLengths) {
+        populateContigSelector(contigsToLengths) {
             this.$contigSelect.empty();
             if (!contigsToLengths || contigsToLengths.length === 0)
                 this.$contigSelect.append(
@@ -309,11 +309,11 @@ define([
                         .attr('value', this.noContigs)
                         .append(this.noContigs)
                 );
-            for (var contig in contigsToLengths) {
+            for (const contig in contigsToLengths) {
                 this.$contigSelect.append(
                     $('<option>')
                         .attr('value', contig)
-                        .append(contig + ' - ' + contigsToLengths[contig] + ' bp')
+                        .append(`${contig  } - ${  contigsToLengths[contig]  } bp`)
                 );
             }
         },
@@ -324,8 +324,8 @@ define([
          *
          * This is only used internally to shuffle the features and avoid visual overlapping.
          */
-        track: function () {
-            var that = {};
+        track() {
+            const that = {};
 
             that.regions = [];
             that.min = Number.POSITIVE_INFINITY;
@@ -333,12 +333,12 @@ define([
             that.numRegions = 0;
 
             that.addRegion = function (feature_location) {
-                for (var i = 0; i < feature_location.length; i++) {
-                    var start = Number(feature_location[i][1]);
-                    var length = Number(feature_location[i][3]);
-                    var end = feature_location[i][2] === '+' ? start + length - 1 : start - length + 1;
+                for (let i = 0; i < feature_location.length; i++) {
+                    let start = Number(feature_location[i][1]);
+                    const length = Number(feature_location[i][3]);
+                    let end = feature_location[i][2] === '+' ? start + length - 1 : start - length + 1;
                     if (start > end) {
-                        var x = end;
+                        const x = end;
                         end = start;
                         start = x;
                     }
@@ -355,14 +355,14 @@ define([
             };
 
             that.hasOverlap = function (feature_location) {
-                for (var i = 0; i < feature_location.length; i++) {
-                    var start = Number(feature_location[i][1]);
-                    var length = Number(feature_location[i][3]);
-                    var end = feature_location[i][2] === '+' ? start + length - 1 : start - length + 1;
+                for (let i = 0; i < feature_location.length; i++) {
+                    let start = Number(feature_location[i][1]);
+                    const length = Number(feature_location[i][3]);
+                    let end = feature_location[i][2] === '+' ? start + length - 1 : start - length + 1;
 
                     // double check the orientation
                     if (start > end) {
-                        var x = end;
+                        const x = end;
                         end = start;
                         start = x;
                     }
@@ -374,8 +374,8 @@ define([
                      * less simple:
                      *  look over all regions
                      */
-                    for (var ii = 0; ii < this.regions.length; ii++) {
-                        var region = this.regions[ii];
+                    for (let ii = 0; ii < this.regions.length; ii++) {
+                        const region = this.regions[ii];
                         if (!((start <= region[0] && end <= region[0]) || (start >= region[1] && end >= region[1])))
                             return true;
                     }
@@ -385,10 +385,10 @@ define([
 
             return that;
         },
-        calcFeatureRange: function (loc) {
-            var calcLocRange = function (loc) {
-                var firstBase = Number(loc[1]);
-                var lastBase = Number(loc[1]) + Number(loc[3]) - 1;
+        calcFeatureRange(loc) {
+            const calcLocRange = function (loc) {
+                let firstBase = Number(loc[1]);
+                let lastBase = Number(loc[1]) + Number(loc[3]) - 1;
                 if (loc[2] === '-') {
                     lastBase = firstBase;
                     firstBase -= Number(loc[3]) + 1;
@@ -396,17 +396,17 @@ define([
                 return [firstBase, lastBase];
             };
 
-            var range = calcLocRange(loc[0]),
-                nextRange;
-            for (var i = 1; i < loc.length; i++) {
+            const range = calcLocRange(loc[0]);
+            let nextRange;
+            for (let i = 1; i < loc.length; i++) {
                 nextRange = calcLocRange(loc[i]);
                 if (nextRange[0] < range[0]) range[0] = nextRange[0];
                 if (nextRange[1] > range[1]) range[1] = nextRange[1];
             }
             return range;
         },
-        setWorkspaceContig: function (workspaceID, genomeID, contigId) {
-            var self = this;
+        setWorkspaceContig(workspaceID, genomeID, contigId) {
+            const self = this;
             if (contigId && this.options.contig !== contigId) {
                 this.options.centerFeature = null;
                 this.operonFeatures = [];
@@ -419,7 +419,7 @@ define([
             // but the list of features is just that - a list. we'll need an api call, eventually, that
             // can fetch the list of features in some range.
 
-            var genome = self.genome;
+            const genome = self.genome;
 
             this.contigLength = -1; // LOLOLOL.
 
@@ -441,8 +441,8 @@ define([
             // indexed by first position.
             // takes into account direction and such.
             this.wsFeatureSet = {};
-            for (var i = 0; i < genome.features.length; i++) {
-                var f = genome.features[i];
+            for (let i = 0; i < genome.features.length; i++) {
+                const f = genome.features[i];
                 if (!f.location) {
                     continue;
                 }
@@ -453,7 +453,7 @@ define([
                 if (f.location[0][0] !== contigId) {
                     continue;
                 }
-                var range = this.calcFeatureRange(f.location);
+                const range = this.calcFeatureRange(f.location);
                 // store the range in the feature!
                 // this HURTS MY SOUL to do, but we need to make workspace features look like CDMI features.
                 f.feature_id = f.id;
@@ -461,7 +461,6 @@ define([
                 f.feature_location = f.location;
                 f.range = range;
                 f.feature_function = f.function;
-                f.subsystem_data = f.subsystem_data;
                 this.wsFeatureSet[f.id] = f;
 
                 if (range[1] > this.contigLength) {
@@ -479,7 +478,7 @@ define([
             }
         },
 
-        setRange: function (start, length) {
+        setRange(start, length) {
             // set range and re-render
             this.options.start = start;
             this.options.length = length;
@@ -488,16 +487,16 @@ define([
         /*
          * Figures out which track each feature should be on, based on starting point and length.
          */
-        processFeatures: function (features) {
-            var tracks = [];
+        processFeatures(features) {
+            const tracks = [];
             tracks[0] = this.track(); //init with one track.
 
             // First, transform features into an array instead of an object.
             // eg., take it from {'fid' : <feature object>, 'fid' : <feature object> }
             // to [<feature object>, <feature object> ... ]
 
-            var feature_arr = [];
-            var fid;
+            const feature_arr = [];
+            let fid;
             for (fid in features) {
                 feature_arr.push(features[fid]);
             }
@@ -505,20 +504,20 @@ define([
             features = feature_arr;
 
             // First, sort the features by their start location (first pass = features[fid].feature_location[0][1], later include strand)
-            features.sort(function (a, b) {
+            features.sort((a, b) => {
                 return a.feature_location[0][1] - b.feature_location[0][1];
             });
 
             // Foreach feature...
-            for (var j = 0; j < features.length; j++) {
-                var feature = features[j];
+            for (let j = 0; j < features.length; j++) {
+                const feature = features[j];
 
                 // Look for an open spot in each track, fill it in the first one we get to, and label that feature with the track.
                 // var start = Number(feature.feature_location[0][1]);
                 // var length = Number(feature.feature_location[0][3]);
                 // var end;
 
-                for (var i = 0; i < tracks.length; i++) {
+                for (let i = 0; i < tracks.length; i++) {
                     if (!tracks[i].hasOverlap(feature.feature_location)) {
                         tracks[i].addRegion(feature.feature_location);
                         feature.track = i;
@@ -528,7 +527,7 @@ define([
                 // if our feature doesn't have a track yet, then they're all full in that region.
                 // So make a new track and this feature to it!
                 if (feature.track === undefined) {
-                    var next = tracks.length;
+                    const next = tracks.length;
                     tracks[next] = this.track();
                     tracks[next].addRegion(feature.feature_location);
                     feature.track = next;
@@ -538,28 +537,28 @@ define([
             this.numTracks = tracks.length;
             return features;
         },
-        update: function (useCenter) {
-            var self = this;
+        update(useCenter) {
+            const self = this;
 
             if (self.options.workspaceID && self.options.genomeID) {
-                var region = [self.options.start, self.options.start + self.options.length - 1];
+                let region = [self.options.start, self.options.start + self.options.length - 1];
 
                 if (self.options.centerFeature && useCenter) {
                     // make a region around the center and use it.
-                    var f = this.wsFeatureSet[self.options.centerFeature];
+                    const f = this.wsFeatureSet[self.options.centerFeature];
                     if (f) {
                         self.options.start = Math.max(
                             0,
                             Math.floor(
-                                parseInt(f.location[0][1]) + parseInt(f.location[0][3]) / 2 - self.options.length / 2
+                                parseInt(f.location[0][1], 10) + parseInt(f.location[0][3], 10) / 2 - self.options.length / 2
                             )
                         );
                         region = [self.options.start, self.options.start + self.options.length - 1];
                     }
                 }
-                var featureList = {};
+                const featureList = {};
                 // Search across all features (I know...) and pull out those that map to the given range.
-                for (var fid in this.wsFeatureSet) {
+                for (const fid in this.wsFeatureSet) {
                     if (this.rangeOverlap(region, this.wsFeatureSet[fid].range)) {
                         featureList[fid] = this.wsFeatureSet[fid];
                     }
@@ -571,7 +570,7 @@ define([
          * Compares two numerical ranges, r1 and r2, as ordered integers. r1[0] <= r1[1] and r2[0] <= r2[1].
          * Returns true if they overlap, false otherwise.
          */
-        rangeOverlap: function (x, y) {
+        rangeOverlap(x, y) {
             /* cases
              * 1: No overlap
              * x0-------x1
@@ -601,8 +600,8 @@ define([
             if ((x[0] < y[0] && x[1] > y[0]) || (y[0] < x[0] && y[1] > x[0])) return true;
             return false;
         },
-        adjustHeight: function () {
-            var neededHeight =
+        adjustHeight() {
+            const neededHeight =
                 this.numTracks * (this.options.trackThickness + this.options.trackMargin) +
                 this.options.topMargin +
                 this.options.trackMargin;
@@ -611,15 +610,15 @@ define([
                 this.svg.attr('height', neededHeight);
             }
         },
-        renderFromRange: function (features) {
+        renderFromRange(features) {
             features = this.processFeatures(features);
 
             // expose 'this' to d3 anonymous functions through closure
-            var self = this;
+            const self = this;
 
             if (this.options.allowResize) this.adjustHeight();
 
-            var trackSet = this.trackContainer.selectAll('path').data(features, function (d) {
+            const trackSet = this.trackContainer.selectAll('path').data(features, (d) => {
                 return d.feature_id;
             });
 
@@ -627,31 +626,31 @@ define([
                 .enter()
                 .append('path')
                 .classed('kbcb-feature', true) // incl feature_type later (needs call to get_entity_Feature?)
-                .classed('kbcb-operon', function (d) {
+                .classed('kbcb-operon', (d) => {
                     return self.isOperonFeature(d);
                 })
-                .classed('kbcb-center', function (d) {
+                .classed('kbcb-center', (d) => {
                     return self.isCenterFeature(d);
                 })
-                .style('fill', function (d) {
+                .style('fill', (d) => {
                     return self.calcFillColorByProtAnnot(d, 0);
                 })
-                .attr('id', function (d) {
+                .attr('id', (d) => {
                     return d.feature_id;
                 })
                 .on('mouseover', function (d) {
                     d3.select(this).style('fill', d3.rgb(d3.select(this).style('fill')).darker());
-                    self.tooltip = self.tooltip.text(d.feature_id + ': ' + d.feature_function);
+                    self.tooltip = self.tooltip.text(`${d.feature_id  }: ${  d.feature_function}`);
                     return self.tooltip.style('visibility', 'visible');
                 })
                 .on('mouseout', function () {
                     d3.select(this).style('fill', d3.rgb(d3.select(this).style('fill')).brighter());
                     return self.tooltip.style('visibility', 'hidden');
                 })
-                .on('mousemove', function () {
+                .on('mousemove', () => {
                     return self.tooltip
-                        .style('top', d3.event.pageY + 15 + 'px')
-                        .style('left', d3.event.pageX - 10 + 'px');
+                        .style('top', `${d3.event.pageY + 15  }px`)
+                        .style('left', `${d3.event.pageX - 10  }px`);
                 })
                 .on('click', function (d) {
                     if (self.options.onClickFunction) {
@@ -663,7 +662,7 @@ define([
 
             trackSet.exit().remove();
 
-            trackSet.attr('d', function (d) {
+            trackSet.attr('d', (d) => {
                 return self.featurePath(d);
             });
 
@@ -676,137 +675,113 @@ define([
             self.resize();
             this.loading(true);
         },
-        featurePath: function (feature) {
-            var path = '';
+        featurePath(feature) {
+            let path = '';
 
-            var coords = [];
+            const coords = [];
 
             // draw an arrow for each location.
-            for (var i = 0; i < feature.feature_location.length; i++) {
-                var location = feature.feature_location[i];
+            for (let i = 0; i < feature.feature_location.length; i++) {
+                const location = feature.feature_location[i];
 
-                var left = this.calcXCoord(location);
-                var top = this.calcYCoord(location, feature.track);
-                var height = this.calcHeight(location);
-                var width = this.calcWidth(location);
+                const left = this.calcXCoord(location);
+                const top = this.calcYCoord(location, feature.track);
+                const height = this.calcHeight(location);
+                const width = this.calcWidth(location);
 
                 coords.push([left, left + width]);
 
-                if (location[2] === '+') path += this.featurePathRight(left, top, height, width) + ' ';
-                else path += this.featurePathLeft(left, top, height, width) + ' ';
+                if (location[2] === '+') path += `${this.featurePathRight(left, top, height, width)} `;
+                else path += `${this.featurePathLeft(left, top, height, width)} `;
             }
 
             // if there's more than one path, connect the arrows with line segments
             if (feature.feature_location.length > 1) {
                 // sort them
-                coords.sort(function (a, b) {
+                coords.sort((a, b) => {
                     return a[0] - b[0];
                 });
 
-                var mid =
+                const mid =
                     this.calcYCoord(feature.feature_location[0], feature.track) +
                     this.calcHeight(feature.feature_location[0]) / 2;
 
-                for (var i = 0; i < coords.length - 1; i++) {
-                    path += 'M' + coords[i][1] + ' ' + mid + ' L' + coords[i + 1][0] + ' ' + mid + ' Z ';
+                for (let i = 0; i < coords.length - 1; i++) {
+                    path += `M${  coords[i][1]  } ${  mid  } L${  coords[i + 1][0]  } ${  mid  } Z `;
                 }
                 // connect the dots
             }
             return path;
         },
-        featurePathRight: function (left, top, height, width) {
+        featurePathRight(left, top, height, width) {
             // top left
-            var path = 'M' + left + ' ' + top;
+            let path = `M${  left  } ${  top}`;
 
             if (width > this.options.arrowSize) {
                 // line to arrow top-back
                 path +=
-                    ' L' +
-                    (left + (width - this.options.arrowSize)) +
-                    ' ' +
-                    top +
-                    // line to arrow tip
-                    ' L' +
-                    (left + width) +
-                    ' ' +
-                    (top + height / 2) +
-                    // line to arrow bottom-back
-                    ' L' +
-                    (left + (width - this.options.arrowSize)) +
-                    ' ' +
-                    (top + height) +
-                    // line to bottom-left edge
-                    ' L' +
-                    left +
-                    ' ' +
-                    (top + height) +
-                    ' Z';
+                    ` L${left + (width - this.options.arrowSize)} ${top /* line to arrow tip */} 
+                      L${left + width } ${top + height / 2 /*line to arrow bottom-back*/} 
+                      L${left + (width - this.options.arrowSize)} ${top + height /* line to bottom-left edge*/} 
+                      L${left} ${top + height} Z`;
             } else {
                 // line to arrow tip
                 path +=
-                    ' L' +
-                    (left + width) +
-                    ' ' +
-                    (top + height / 2) +
-                    // line to arrow bottom
-                    ' L' +
-                    left +
-                    ' ' +
-                    (top + height) +
-                    ' Z';
+                    ` L${left + width} ${top + height / 2 /* line to arrow bottom */} 
+                      L${left} ${top + height} Z`;
             }
             return path;
         },
-        featurePathLeft: function (left, top, height, width) {
+        featurePathLeft(left, top, height, width) {
             // top right
-            var path = 'M' + (left + width) + ' ' + top;
+            let path = `M${  left + width  } ${  top}`;
 
             if (width > this.options.arrowSize) {
                 // line to arrow top-back
                 path +=
-                    ' L' +
-                    (left + this.options.arrowSize) +
-                    ' ' +
-                    top +
+                    ` L${
+                        left + this.options.arrowSize
+                    } ${
+                        top
                     // line to arrow tip
-                    ' L' +
-                    left +
-                    ' ' +
-                    (top + height / 2) +
+                    } L${
+                        left
+                    } ${
+                        top + height / 2
                     // line to arrow bottom-back
-                    ' L' +
-                    (left + this.options.arrowSize) +
-                    ' ' +
-                    (top + height) +
+                    } L${
+                        left + this.options.arrowSize
+                    } ${
+                        top + height
                     // line to bottom-right edge
-                    ' L' +
-                    (left + width) +
-                    ' ' +
-                    (top + height) +
-                    ' Z';
+                    } L${
+                        left + width
+                    } ${
+                        top + height
+                    } Z`;
             } else {
                 // line to arrow tip
                 path +=
-                    ' L' +
-                    left +
-                    ' ' +
-                    (top + height / 2) +
+                    ` L${
+                        left
+                    } ${
+                        top + height / 2
                     // line to arrow bottom
-                    ' L' +
-                    (left + width) +
-                    ' ' +
-                    (top + height) +
-                    ' Z';
+                    } L${
+                        left + width
+                    } ${
+                        top + height
+                    } Z`;
             }
             return path;
         },
-        calcXCoord: function (location) {
-            var x = location[1];
+        calcXCoord(location) {
+            let x = location[1];
             if (location[2] === '-') x = location[1] - location[3] + 1;
 
             return ((x - this.options.start) / this.options.length) * this.options.svgWidth; // + this.options.leftMargin;
         },
-        calcYCoord: function (location, track) {
+        calcYCoord(location, track) {
             return (
                 this.options.topMargin +
                 this.options.trackMargin +
@@ -814,25 +789,25 @@ define([
                 this.options.trackThickness * track
             );
         },
-        calcWidth: function (location) {
+        calcWidth(location) {
             return Math.floor(((location[3] - 1) / this.options.length) * this.options.svgWidth);
         },
-        calcHeight: function (location) {
+        calcHeight() {
             return this.options.trackThickness;
         },
-        isCenterFeature: function (feature) {
+        isCenterFeature(feature) {
             return feature.feature_id === this.options.centerFeature;
         },
-        isOperonFeature: function (feature) {
+        isOperonFeature(feature) {
             return feature.isInOperon;
         },
-        calcFillColor: function (feature) {
+        calcFillColor(feature) {
             if (feature.feature_id === this.options.centerFeature) return '#00F';
             if (feature.isInOperon === 1) return '#0F0';
             return '#F00';
             // should return color based on feature type e.g. CDS vs. PEG vs. RNA vs. ...
         },
-        calcFillColorByProtAnnot: function (feature, annot_num) {
+        calcFillColorByProtAnnot(feature, annot_num) {
             if (feature.feature_type !== 'CDS')
                 // only paint protein coding
                 return '#000';
@@ -845,7 +820,7 @@ define([
             this.options.annot_level = 3; // should be input param
             return this.colorByAnnot(feature, this.options.annot_namespace, this.options.annot_level, annot_num);
         },
-        colorByAnnot: function (feature, namespace, level, annot_num) {
+        colorByAnnot(feature, namespace, level /*, annot_num */) {
             if (namespace === 'SEED') {
                 //if (! feature.subsystem_data)
                 if (!feature.feature_function) {
@@ -854,7 +829,7 @@ define([
                 //typedef tuple<string subsystem, string variant, string role> subsystem_data;
                 //var seed_role_pos = 2;
                 //return this.seedColorLookup (feature.subsystem_data[annot_num][seed_role_pos], level);
-                var first_feature_function = feature.feature_function.replace(/\s+\/.+/, '').replace(/\s+\#.*/, '');
+                const first_feature_function = feature.feature_function.replace(/\s+\/.+/, '').replace(/\s+#.*/, '');
 
                 return this.seedColorLookup(first_feature_function, level);
             }
@@ -868,16 +843,15 @@ define([
 
             return '#CCC';
         },
-        seedColorLookup: function (annot, level) {
-            var self = this;
-            var alt_class_i;
+        seedColorLookup(annot, level) {
+            const self = this;
 
             // take first classification rather than go through list (save that fight for another day when we have multi-colored arrows)
-            alt_class_i = 0;
+            const alt_class_i = 0;
             //for (var alt_class_i=0; alt_class_i < this.seedOntology[annot][level].length; alt_class_i++) {
 
             if (self.seedOntology[annot] === undefined) return '#CCC';
-            var seedClassification = self.seedOntology[annot][level][alt_class_i];
+            const seedClassification = self.seedOntology[annot][level][alt_class_i];
             //}
 
             return self.seedColors[level][seedClassification];
@@ -901,30 +875,30 @@ define([
 
          loadSeedOntology() function will parse file and populate the seedOntology and seedTermsUniq data structures
          */
-        loadSeedOntology: function (wait_for_seed_load) {
-            var seedOntology = this.seedOntology;
-            var seedTermsUniq = this.seedTermsUniq;
-            var self = this;
-            var seedTermSeen = [];
-            var ROLE_INDEX = 3;
+        loadSeedOntology(/* wait_for_seed_load */) {
+            const seedOntology = this.seedOntology;
+            const seedTermsUniq = this.seedTermsUniq;
+            const self = this;
+            const seedTermSeen = [];
+            const ROLE_INDEX = 3;
             //var PARENT_DEPTH = 3;
-            var ONTOLOGY_DEPTH = 4;
+            const ONTOLOGY_DEPTH = 4;
 
             // init seed term structures
             //seedTermSeen[ROLE_INDEX] = [];
             //seedTermsUniq[ROLE_INDEX] = [];
             //for (var j=0; j < PARENT_DEPTH; j++) {
-            for (var j = 0; j < ONTOLOGY_DEPTH; j++) {
+            for (let j = 0; j < ONTOLOGY_DEPTH; j++) {
                 seedTermSeen[j] = [];
                 seedTermsUniq[j] = [];
             }
 
             // read subsys.txt into seedOntology and seedTermsUniq objs
-            d3.text(this.runtime.pluginResourcePath + '/data/subsys.txt', function (text) {
-                var data = d3.tsv.parseRows(text);
+            d3.text(`${this.runtime.pluginResourcePath}/data/subsys.txt`, (text) => {
+                const data = d3.tsv.parseRows(text);
 
-                var seedRole = '';
-                for (var i = 0; i < data.length; i++) {
+                let seedRole = '';
+                for (let i = 0; i < data.length; i++) {
                     if (data[i][ROLE_INDEX] === '') continue;
                     seedRole = data[i][ROLE_INDEX];
                     if (seedOntology[seedRole] === undefined) seedOntology[seedRole] = [];
@@ -933,14 +907,14 @@ define([
                         seedTermsUniq[ROLE_INDEX].push(seedRole);
                     }
                     //for (j = 0; j < PARENT_DEPTH; j++) {
-                    for (j = 0; j < ONTOLOGY_DEPTH; j++) {
+                    for (let j = 0; j < ONTOLOGY_DEPTH; j++) {
                         if (seedOntology[seedRole][j] === undefined) {
                             seedOntology[seedRole][j] = [];
                         }
 
                         // some node names are an empty string "".
                         // set to a modified version of their parent
-                        data[i][j] = data[i][j] === '' ? '--- ' + data[i][j - 1] + ' ---' : data[i][j];
+                        data[i][j] = data[i][j] === '' ? `--- ${  data[i][j - 1]  } ---` : data[i][j];
 
                         seedOntology[seedRole][j].push(data[i][j]);
 
@@ -960,10 +934,10 @@ define([
         /*
          assign colors to seed ontology
          */
-        assignSeedColors: function (seedTermsUniq) {
-            var seedColors = this.seedColors;
+        assignSeedColors(seedTermsUniq) {
+            const seedColors = this.seedColors;
             // there are 30 top level SEED categories.  Need 30 colors
-            var colorWheel = [
+            const colorWheel = [
                 '#F00', // red              # carb
                 '#900', // dark red         # respiration
                 '#C30', // light brown      # nucleosides
@@ -994,43 +968,43 @@ define([
                 '#F66', // dark coral       # motility
                 '#909' // deep purple      # virulence
             ];
-            var maxColor = colorWheel.length;
-            var SEED_LEVELS = 4; // parents (3) + subsystem role col (1)
+            const maxColor = colorWheel.length;
+            const SEED_LEVELS = 4; // parents (3) + subsystem role col (1)
 
-            for (var j = 0; j < SEED_LEVELS; j++) {
+            for (let j = 0; j < SEED_LEVELS; j++) {
                 if (seedColors[j] === undefined) seedColors[j] = [];
-                for (var i = 0; i < seedTermsUniq[j].length; i++) {
+                for (let i = 0; i < seedTermsUniq[j].length; i++) {
                     seedColors[j][seedTermsUniq[j][i]] = colorWheel[i % maxColor];
                 }
             }
 
             return true;
         },
-        highlight: function (element, feature) {
+        highlight(element, feature) {
             // unhighlight others - only highlight one at a time.
             // if ours is highlighted, recenter on it.
 
             this.recenter(feature);
             return; // skip the rest for now.
         },
-        recenter: function (feature) {
+        recenter(feature) {
             // var centerFeature = feature.feature_id;
             if (this.options.onClickUrl) this.options.onClickUrl(feature.feature_id);
             else this.update(true);
         },
-        resize: function () {
-            var newWidth = Math.min(this.$elem.parent().width(), this.options.svgWidth);
+        resize() {
+            const newWidth = Math.min(this.$elem.parent().width(), this.options.svgWidth);
             this.svg.attr('width', newWidth);
         },
-        moveLeftEnd: function () {
+        moveLeftEnd() {
             this.options.start = 0;
             this.update();
         },
-        moveLeftStep: function () {
+        moveLeftStep() {
             this.options.start = Math.max(0, this.options.start - Math.ceil(this.options.length / 2));
             this.update();
         },
-        zoomIn: function () {
+        zoomIn() {
             this.options.start = Math.min(
                 this.contigLength - Math.ceil(this.options.length / 2),
                 this.options.start + Math.ceil(this.options.length / 4)
@@ -1038,7 +1012,7 @@ define([
             this.options.length = Math.max(1, Math.ceil(this.options.length / 2));
             this.update();
         },
-        zoomOut: function () {
+        zoomOut() {
             this.options.length = Math.min(this.contigLength, this.options.length * 2);
             this.options.start = Math.max(0, this.options.start - Math.ceil(this.options.length / 4));
             if (this.options.start + this.options.length > this.contigLength) {
@@ -1046,7 +1020,7 @@ define([
             }
             this.update();
         },
-        moveRightStep: function () {
+        moveRightStep() {
             this.options.start = Math.min(
                 this.options.start + Math.ceil(this.options.length / 2),
                 this.contigLength - this.options.length
@@ -1058,31 +1032,31 @@ define([
          * current view window size.
          * @method
          */
-        moveRightEnd: function () {
+        moveRightEnd() {
             this.options.start = this.contigLength - this.options.length;
             this.update();
         },
-        loading: function (doneLoading) {
+        loading(doneLoading) {
             if (doneLoading) {
                 this.hideMessage();
             } else {
                 this.showMessage(html.loading());
             }
         },
-        showMessage: function (message) {
+        showMessage(message) {
             // kbase panel now does this for us, should probably remove this
-            var span = $('<span/>').append(message);
+            const span = $('<span/>').append(message);
 
             this.$messagePane
                 .empty()
                 .append(span)
                 .show();
         },
-        hideMessage: function () {
+        hideMessage() {
             // kbase panel now does this for us, should probably remove this
             this.$messagePane.hide();
         },
-        getData: function () {
+        getData() {
             return {
                 type: 'Contig',
                 id: this.options.contig,
@@ -1090,20 +1064,20 @@ define([
                 title: 'Contig Browser'
             };
         },
-        renderError: function (error) {
-            var errString = 'Sorry, an unknown error occurred';
+        renderError(error) {
+            let errString = 'Sorry, an unknown error occurred';
             if (typeof error === 'string') errString = error;
             else if (error.error && error.error.message) errString = error.error.message;
 
-            var $errorDiv = $('<div>')
+            const $errorDiv = $('<div>')
                 .addClass('alert alert-danger')
                 .append('<b>Error:</b>')
-                .append('<br>' + errString);
+                .append(`<br>${  errString}`);
             this.$elem.empty();
             this.$elem.append($errorDiv);
         },
-        buildObjectIdentity: function (workspaceID, objectId) {
-            var obj = {};
+        buildObjectIdentity(workspaceID, objectId) {
+            const obj = {};
             if (/^\d+$/.exec(workspaceID)) obj['wsid'] = workspaceID;
             else obj['workspace'] = workspaceID;
 
