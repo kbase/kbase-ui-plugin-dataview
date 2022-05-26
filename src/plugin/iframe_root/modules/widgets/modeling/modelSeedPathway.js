@@ -887,16 +887,6 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                 });
             });
 
-            // event for highlighting elements
-            /*svg.selectAll('g').on('mouseover', function(){
-             d3.select(this).attr('stroke', 'green')
-             .attr('stroke-width', 5);
-             edit_opts.find('#ele-type').html(d3.select(this))
-             }).on('mouseout', function() {
-             d3.select(this).attr('stroke', stroke_color)
-             .attr('stroke-width', stroke_width);
-             })*/
-
             // drag event
             const drag = d3.behavior
                 .drag()
