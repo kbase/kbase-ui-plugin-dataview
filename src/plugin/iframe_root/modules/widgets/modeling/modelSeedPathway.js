@@ -15,74 +15,67 @@
  * 		ModelSeedVizConfig.js - configuration file things such as colors
  *
  */
-/*global
- define
- */
-/*jslint
- browser: true,
- white: true
- */
-define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSeedVizConfig'], function (
+
+define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSeedVizConfig'], (
     $,
     d3,
     Workspace,
     ModelSeedVizConfig
-) {
-    'use strict';
-
+) => {
     function ModelSeedPathway(params) {
-        var container;
+        let container;
         try {
-            container = $('#' + params.elem);
+            container = $(`#${  params.elem}`);
         } catch (e) {
             console.error('Pathway widget requires element ("elem") in params');
             return;
         }
 
-        var self = this;
+        const self = this;
 
         self.models = params.models || null;
         self.fbas = params.fbas || null;
 
-        var runtime = params.runtime;
+        const runtime = params.runtime;
 
         this.workspaceClient = new Workspace(runtime.config('services.workspace.url'), {
             token: runtime.service('session').getAuthToken()
         });
 
-        var usingImage = params.usingImage || false,
+        const usingImage = params.usingImage || false,
             useAbsFlux = params.absFlux || false;
 
-        var config = new ModelSeedVizConfig();
+        const config = new ModelSeedVizConfig();
 
         // globals
-        var mapData = params.mapData;
-        var groups = mapData.groups, // groups of reactions
+        const mapData = params.mapData;
+        const groups = mapData.groups, // groups of reactions
             rxns = mapData.reactions, // reactions
             cpds = mapData.compounds, // compounds
             mapLinks = mapData.linkedmaps; // lines from reactions to maps and visa versa
 
-        var oset = 12, // off set for arrows
-            r = 12, // radial offset from circle.  Hooray for math degrees.
-            max_x = 0, // used to compute canvas size (width) based on data
+        // const oset = 12, // off set for arrows
+        //     r = 12; // radial offset from circle.  Hooray for math degrees.
+        const c_pad = 50; // padding around max_x/max_y
+        let max_x = 0, // used to compute canvas size (width) based on data
             max_y = 0, // used to compute canvas size (height) based on data
-            c_pad = 50, // padding around max_x/max_y
             svg; // svg element for map
 
         // draw reactions
         function drawReactions() {
-            var count = self.models ? self.models.length : 1;
+            const count = self.models ? self.models.length : 1;
 
             // for each rxn on the map
-            for (var i = 0; i < rxns.length; i++) {
-                var color = '#fff',
-                    lightLabel = undefined;
+            for (let i = 0; i < rxns.length; i++) {
+                // Not used, disabled
+                // const color = '#fff';
+                let lightLabel = false;
 
                 // reaction object listed in map
-                var rxn = rxns[i];
+                const rxn = rxns[i];
 
                 // adjust boxes
-                var x = rxn.x - rxn.w / 2 - 1,
+                const x = rxn.x - rxn.w / 2 - 1,
                     y = rxn.y - rxn.h / 2 - 1.5,
                     w = rxn.w + 3,
                     h = rxn.h + 2;
@@ -91,7 +84,7 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                 if (x > max_x) max_x = x + 2 * w + c_pad;
                 if (y > max_y) max_y = y + 2 * h + c_pad;
 
-                var group = svg.append('g').attr('class', 'rect');
+                const group = svg.append('g').attr('class', 'rect');
 
                 // draw enzymes (rectangles)
                 /*var outer_rect = group.append('rect')
@@ -101,24 +94,24 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                  .attr('width', w)
                  .attr('height', h);*/
 
-                var found_rxns = getModelRxns(rxn.rxns);
+                const found_rxns = getModelRxns(rxn.rxns);
 
                 // divide box for number of models being displayed
                 if (self.models) {
-                    var w = rxn.w / count;
+                    const w = rxn.w / count;
 
-                    for (var j = 0; j < found_rxns.length; j++) {
-                        var found_rxn = found_rxns[j];
+                    for (let j = 0; j < found_rxns.length; j++) {
+                        const found_rxn = found_rxns[j];
 
-                        var rect = group
+                        const rect = group
                             .append('rect')
                             .attr('class', 'rxn-divider-stroke')
-                            .attr('x', function () {
+                            .attr('x', () => {
                                 if (j === 0) return x + w * j + 1;
                                 return x + w * j;
                             })
                             .attr('y', y + 1)
-                            .attr('width', function () {
+                            .attr('width', () => {
                                 if (j === count) return w;
                                 return w + 2;
                             })
@@ -132,17 +125,15 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                             rect.attr('stroke', config.strokeDark);
                         }
 
-                        var title =
-                            '<h5>' +
-                            self.models[j].name +
-                            '<br>' +
-                            '<small>' +
-                            self.models[j].source_id +
-                            '</small></h5>';
-                        tooltip(rect.node(), title, rxn);
+                        // Tooltip rendering has been disabled (for some reason?), so don't even
+                        // bother initializing them.
+                        // const title =
+                        //     `<h5>${self.models[j].data.name}<br>` +
+                        //     `<small>${self.models[j].data.source_id}</small></h5>`;
+                        // tooltip(rect.node(), title, rxn);
                     }
                 } else {
-                    var rect = group
+                    group
                         .append('rect')
                         .attr('class', 'rxn')
                         .attr('x', x)
@@ -153,34 +144,36 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
 
                 // determine if fba results should be added for the map reaction
 
+                let addFBAResults = false;
+                let fba_rxns = [];
                 if (self.fbas) {
-                    var fba_rxns = getFbaRxns(rxn.rxns);
+                    fba_rxns = getFbaRxns(rxn.rxns);
 
                     if ([].concat.apply([], fba_rxns).length === 0) {
-                        var addFBAResults = false;
+                        addFBAResults = false;
                     } else {
-                        var addFBAResults = true;
+                        addFBAResults = true;
                     }
                 }
 
                 // color flux depending on rxns found for each fba
                 if (addFBAResults) {
-                    var w = rxn.w / self.fbas.length;
+                    const w = rxn.w / self.fbas.length;
 
                     // for each fba result
-                    for (var j = 0; j < fba_rxns.length; j++) {
-                        var found_rxn = fba_rxns[j];
-                        var rect = group
+                    for (let j = 0; j < fba_rxns.length; j++) {
+                        const found_rxn = fba_rxns[j];
+                        const rect = group
                             .append('rect')
                             .attr('class', 'rxn-divider-stroke')
-                            .attr('x', function () {
+                            .attr('x', () => {
                                 if (j === 0) {
                                     return x + w * j + 1;
                                 }
                                 return x + w * j;
                             })
                             .attr('y', y + 1)
-                            .attr('width', function () {
+                            .attr('width', () => {
                                 if (j === count) {
                                     return w;
                                 }
@@ -188,23 +181,25 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                             })
                             .attr('height', h - 1.5);
 
-                        var flux;
+                        let flux;
 
                         // there may be more than one fba result on a box,
                         // so find the largest magnitude flux
                         if (found_rxn.length > 0) {
-                            var flux = found_rxn[0].value;
-                            for (var k = 1; k < found_rxn.length; k++) {
+                            flux = found_rxn[0].value;
+                            for (let k = 1; k < found_rxn.length; k++) {
                                 if (Math.abs(found_rxn[k].value) > Math.abs(flux)) {
                                     flux = found_rxn[k].value;
                                 }
                             }
 
-                            if (Math.abs(flux) > 499) lightLabel = true;
+                            if (Math.abs(flux) > 499) {
+                                lightLabel = true;
+                            }
                         }
 
                         if (typeof flux !== 'undefined') {
-                            var color = config.getColor(flux, useAbsFlux);
+                            const color = config.getColor(flux, useAbsFlux);
                             if (color) {
                                 rect.attr('fill', color);
                             } else {
@@ -212,130 +207,125 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                             }
                         }
 
+
+                        // Tooltip rendering has been disabled (for some reason?), so don't even
+                        // bother initializing them.
                         //var title = self.fbas[i].info[1];
-                        var title =
-                            '<h5>' +
-                            self.models[j].name +
-                            '<br>' +
-                            '<small>' +
-                            self.models[j].source_id +
-                            '</small></h5>';
-                        tooltip(rect.node(), title, rxn, flux, self.fbas[j]);
+                        // const title =
+                        //     `<h5>${self.models[j].data.name}<br>` +
+                        //     `<small>${self.models[j].data.source_id}</small></h5>`;
+                        // tooltip(rect.node(), title, rxn, flux, self.fbas[j]);
                     }
                 } // end fbas rects
 
-                var text = group
+                group
                     .append('text')
                     .attr('x', x + 2)
                     .attr('y', y + h / 2 + 6)
                     .text(rxn.name)
                     .attr('class', lightLabel ? 'rxn-label-light' : 'rxn-label');
 
-                $(group.node()).hover(
-                    function () {
-                        $(this)
-                            .find('text')
-                            .hide();
-                    },
-                    function () {
-                        $(this)
-                            .find('text')
-                            .show();
-                    }
-                );
+                // Disabled, it doesn't do anything but strangely hide the text on a node
+                // when hovered over...
+                // $(group.node()).hover(
+                //     function () {
+                //         $(this)
+                //             .find('text')
+                //             .hide();
+                //     },
+                //     function () {
+                //         $(this)
+                //             .find('text')
+                //             .show();
+                //     }
+                // );
             } // end loop
         }
 
-        function tooltip(container, title, mapRxn, flux, obj) {
-            // get substrates and products
-            var subs = [];
-            for (var i in mapRxn.substrate_refs) {
-                subs.push(mapRxn.substrate_refs[i].compound_ref);
-            }
-            var prods = [];
-            for (var i in mapRxn.product_refs) {
-                prods.push(mapRxn.product_refs[i].compound_ref);
-            }
+        // function tooltip(container, title, mapRxn, flux) {
+        //     // get substrates and products
+        //     const subs = [];
+        //     for (const i in mapRxn.substrate_refs) {
+        //         subs.push(mapRxn.substrate_refs[i].compound_ref);
+        //     }
+        //     const prods = [];
+        //     for (const i in mapRxn.product_refs) {
+        //         prods.push(mapRxn.product_refs[i].compound_ref);
+        //     }
 
-            //content for tooltip
-            var content =
-                '<table class="table table-condensed">' +
-                (typeof flux !== 'undefined' ? '<tr><td><b>Flux</b></td><td>' + flux + '</td></tr>' : '') +
-                '<tr><td><b>Map RXN ID</b></td><td>' +
-                mapRxn.id +
-                '</td></tr>' +
-                '<tr><td><b>Rxns</b></td><td>' +
-                mapRxn.rxns.join(', ') +
-                '</td></tr>' +
-                '<tr><td><b>Substrates</b></td><td>' +
-                subs.join(', ') +
-                '</td></tr>' +
-                '<tr><td><b>Products</b></td><td>' +
-                prods.join(', ') +
-                '</td></tr>' +
-                '</table>';
+        //     //content for tooltip
+        //     const content =
+        //         `<table class="table table-condensed">
+        //             ${typeof flux !== 'undefined' ? `<tr><td><b>Flux</b></td><td>${flux}</td></tr>` : ''}
+        //             <tr><td><b>Map RXN ID</b></td><td>${mapRxn.id}</td></tr>
+        //             <tr><td><b>Rxns</b></td><td>${mapRxn.rxns.join(', ')}</td></tr>
+        //             <tr><td><b>Substrates</b></td><td>${subs.join(', ')}</td></tr>
+        //             <tr><td><b>Products</b></td><td>${prods.join(', ')}</td></tr>
+        //          </table>`;
 
-            //$(container).popover({html: true, content: content, animation: false, title: title,
-            //                      container: 'body', trigger: 'hover'});
-        }
 
-        function drawCompounds() {
-            for (var i in cpds) {
-                var cpd = cpds[i];
-                var r = cpd.w;
-                var g = svg.append('g').attr('class', 'circle');
-                var circle = g
-                    .append('circle')
-                    .attr('class', 'cpd')
-                    .attr('cx', cpd.x)
-                    .attr('cy', cpd.y)
-                    .attr('r', r);
+        //     // $(container).popover({html: true, content, animation: false, title, container: 'body', trigger: 'hover'});
+        // }
 
-                var content = 'ID: ' + cpd.id + '<br>' + 'kegg id: ' + cpd.name;
-                //$(circle.node()).popover({html: true, content: content, animation: false,
-                //                        container: 'body', trigger: 'hover'});
-            }
-        }
+        // Unused, disable
+        // function drawCompounds() {
+        //     for (const i in cpds) {
+        //         const cpd = cpds[i];
+        //         const r = cpd.w;
+        //         const g = svg.append('g').attr('class', 'circle');
+        //         const circle = g
+        //             .append('circle')
+        //             .attr('class', 'cpd')
+        //             .attr('cx', cpd.x)
+        //             .attr('cy', cpd.y)
+        //             .attr('r', r);
+
+        //         const content = `ID: ${  cpd.id  }<br>` + `kegg id: ${  cpd.name}`;
+        //         //$(circle.node()).popover({html: true, content: content, animation: false,
+        //         //                        container: 'body', trigger: 'hover'});
+        //     }
+        // }
 
         function drawConnections() {
-            var node_ids = [];
-            var nodes = [];
-            var links = [];
+            const node_ids = [];
+            const nodes = [];
+            const links = [];
 
             // draw connections from substrate to products
-            for (var j in groups) {
-                var group = groups[j];
-                var group_rxn_ids = group.rxn_ids;
-                var x = group.x;
-                var y = group.y;
+            for (const j in groups) {
+                const group = groups[j];
+                const group_rxn_ids = group.rxn_ids;
+                const x = group.x;
+                const y = group.y;
+                let rxn;
 
                 // get all model rxn objects for each rxn id in map
-                var model_rxns = [];
-                for (var i in rxns) {
+                let model_rxns = [];
+                for (const i in rxns) {
                     if (group_rxn_ids.indexOf(rxns[i].id) !== -1) {
-                        var rxn = rxns[i];
+                        rxn = rxns[i];
                         model_rxns = model_rxns.concat(rxn.rxns);
                     }
                 }
 
                 // only need rxn object to get product_refs and substrate_refs
                 // since there are groups of reactions
-                var prods = rxn.product_refs;
-                var subs = rxn.substrate_refs;
+                const prods = rxn.product_refs;
+                const subs = rxn.substrate_refs;
 
                 // create substrate line (links)
-                for (var i in subs) {
-                    var sub_id = subs[i].id;
+                for (const i in subs) {
+                    const sub_id = subs[i].id;
 
                     // find associated compound (for position)
-                    for (var k in cpds) {
-                        var cpd = cpds[k];
+                    for (const k in cpds) {
+                        const cpd = cpds[k];
 
                         if (cpd.id !== sub_id) {
                             continue;
                         }
 
-                        var id = cpd.id;
+                        const id = cpd.id;
 
                         // if node has already been created,
                         // create link from that node.  Otherwise, create new node and link.
@@ -354,7 +344,7 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                             // if there is a special path to draw the line on,
                             // draw nodes and links along path.
                             if (group.substrate_path) {
-                                var path = group.substrate_path;
+                                const path = group.substrate_path;
                                 links.push({
                                     source: nodes.length,
                                     target: nodes.length + 1,
@@ -364,12 +354,12 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                                     rxns: model_rxns,
                                     line_type: 'substrate'
                                 });
-                                for (var k = 1; k < path.length; k++) {
-                                    nodes.push({ x: path[k][0], y: path[k][1], fixed: true, style: 'point' });
+                                for (let k = 1; k < path.length; k++) {
+                                    nodes.push({x: path[k][0], y: path[k][1], fixed: true, style: 'point'});
                                     node_ids.push('null');
                                 }
                             } else {
-                                nodes.push({ x: x, y: y, fixed: true, style: 'point' });
+                                nodes.push({x, y, fixed: true, style: 'point'});
                                 node_ids.push('null');
                             }
                         } else {
@@ -393,7 +383,7 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                                 label_x: cpd.label_x,
                                 label_y: cpd.label_y
                             });
-                            nodes.push({ x: x, y: y, fixed: true, style: 'reaction' });
+                            nodes.push({x, y, fixed: true, style: 'reaction'});
                             node_ids.push(id);
                             node_ids.push('null');
                         }
@@ -401,17 +391,17 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                 }
 
                 // create product lines (links)
-                for (var i in prods) {
-                    var prod_id = prods[i].id;
+                for (const i in prods) {
+                    const prod_id = prods[i].id;
 
-                    for (var k in cpds) {
-                        var cpd = cpds[k];
+                    for (const k in cpds) {
+                        const cpd = cpds[k];
 
                         if (cpd.id !== prod_id) {
                             continue;
                         }
 
-                        var id = cpd.id;
+                        const id = cpd.id;
 
                         // if there is a special path to draw the line on,
                         // draw nodes and links along path.
@@ -428,7 +418,7 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                             });
 
                             if (group.product_path) {
-                                var path = group.product_path;
+                                const path = group.product_path;
                                 links.push({
                                     source: nodes.length - 1,
                                     target: nodes.length,
@@ -438,12 +428,12 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                                     line_type: 'product',
                                     rxns: model_rxns
                                 });
-                                for (var k = 1; k < path.length; k++) {
-                                    nodes.push({ x: path[k][0], y: path[k][1], fixed: true, style: 'point' });
+                                for (let k = 1; k < path.length; k++) {
+                                    nodes.push({x: path[k][0], y: path[k][1], fixed: true, style: 'point'});
                                     node_ids.push('null');
                                 }
                             } else {
-                                nodes.push({ x: x, y: y, fixed: true, style: 'point' });
+                                nodes.push({x, y, fixed: true, style: 'point'});
                                 node_ids.push('null');
                             }
                         } else {
@@ -457,7 +447,7 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                                 line_type: 'product',
                                 rxns: model_rxns
                             });
-                            nodes.push({ x: x, y: y, fixed: true, style: 'reaction' });
+                            nodes.push({x, y, fixed: true, style: 'reaction'});
                             nodes.push({
                                 x: cpd.x,
                                 y: cpd.y,
@@ -476,7 +466,7 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
             }
 
             // the following does all the drawing
-            var force = d3.layout
+            const force = d3.layout
                 .force()
                 .nodes(nodes)
                 .links(links)
@@ -486,7 +476,7 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                 .start();
 
             // define connections between compounds and reactions (nodes)
-            var link = svg
+            const link = svg
                 .selectAll('.link')
                 .data(links)
                 .enter()
@@ -525,7 +515,7 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
              }
              })*/
 
-            var node = svg
+            const node = svg
                 .selectAll('.node')
                 .data(nodes)
                 .enter()
@@ -541,63 +531,63 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                 .attr('x', 10)
                 .attr('dy', '.35em')
                 .style('font-size', '8pt')
-                .attr('transform', function (d) {
-                    if (d.label_x || d.label_y) return 'translate(' + d.label_x + ',' + d.label_y + ')';
+                .attr('transform', (d) => {
+                    if (d.label_x || d.label_y) return `translate(${  d.label_x  },${  d.label_y  })`;
                 })
-                .text(function (d) {
+                .text((d) => {
                     return d.name;
                 });
 
             function tick() {
-                link.attr('x1', function (d) {
+                link.attr('x1', (d) => {
                     return d.source.x;
                 })
-                    .attr('y1', function (d) {
+                    .attr('y1', (d) => {
                         return d.source.y;
                     })
-                    .attr('x2', function (d) {
+                    .attr('x2', (d) => {
                         return d.target.x;
                     })
-                    .attr('y2', function (d) {
+                    .attr('y2', (d) => {
                         return d.target.y;
                     })
-                    .attr('marker-end', function (d) {
+                    .attr('marker-end', (d) => {
                         if (d.type === 'arrow') {
                             return 'url(#end-arrow)';
-                        } else {
-                            return '';
                         }
+                        return '';
+
                     });
 
-                node.attr('transform', function (d) {
-                    return 'translate(' + d.x + ',' + d.y + ')';
+                node.attr('transform', (d) => {
+                    return `translate(${  d.x  },${  d.y  })`;
                 });
 
                 // size the circles depending on kind of point
-                node.select('circle').attr('r', function (d) {
+                node.select('circle').attr('r', (d) => {
                     if (d.style === 'point') return 0;
                     else if (d.style === 'reaction') return 1;
-                    else return 7;
+                    return 7;
                 });
             }
         } // end draw connections
 
         function drawMapLinks() {
-            for (var i = 0; i < mapLinks.length; i++) {
-                var map = mapLinks[i];
+            for (let i = 0; i < mapLinks.length; i++) {
+                const map = mapLinks[i];
 
-                var x = map.x - map.w / 2,
+                const x = map.x - map.w / 2,
                     y = map.y - map.h / 2,
-                    w = parseInt(map.w) + 2,
-                    h = parseInt(map.h) + 2;
+                    w = parseInt(map.w, 10) + 2,
+                    h = parseInt(map.h, 10) + 2;
 
                 if (x > max_x) max_x = x + w + c_pad;
                 if (y > max_y) max_y = y + h + c_pad;
 
-                var group = svg.append('g');
+                const group = svg.append('g');
 
                 // draw reactions (rectangles)
-                var rect = group
+                group
                     .append('rect')
                     .attr('class', 'map')
                     .attr('x', x)
@@ -605,7 +595,7 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                     .attr('width', w)
                     .attr('height', h);
 
-                var text = group
+                group
                     .append('text')
                     .attr('class', 'map-label')
                     .style('font-size', '8pt')
@@ -618,26 +608,24 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
 
         function wrap(text, width) {
             //var dy = 3;
-            var dy = 0;
+            const dy = 0;
 
             text.each(function () {
-                var text = d3.select(this),
+                const text = d3.select(this),
                     words = text
                         .text()
                         .split(/\s+/)
                         .reverse(),
-                    word,
-                    line = [],
-                    lineNumber = 0,
                     lineHeight = 1.1, // ems
                     y = text.attr('y'),
-                    x = text.attr('x'),
-                    tspan = text
-                        .text(null)
-                        .append('tspan')
-                        .attr('x', x)
-                        .attr('y', y)
-                        .attr('dy', dy + 'em');
+                    x = text.attr('x');
+                let tspan = text
+                    .text(null)
+                    .append('tspan')
+                    .attr('x', x)
+                    .attr('y', y)
+                    .attr('dy', `${dy  }em`);
+                let word, line = [], lineNumber = 0;
 
                 while ((word = words.pop())) {
                     line.push(word);
@@ -650,7 +638,7 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                             .append('tspan')
                             .attr('x', x)
                             .attr('y', y)
-                            .attr('dy', ++lineNumber * lineHeight + dy + 'em')
+                            .attr('dy', `${++lineNumber * lineHeight + dy  }em`)
                             .text(word);
                     }
                 }
@@ -663,17 +651,17 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
 
             // this is a list of lists, where is list are rxnobjs
             // for each model for a given set of rxn_ids.  phew.
-            var found_rxns = [];
+            const found_rxns = [];
 
             // for each model, look for model data
-            for (var j in self.models) {
-                var model = self.models[j];
-                var rxn_objs = model.modelreactions;
+            for (const j in self.models) {
+                const model = self.models[j];
+                const rxn_objs = model.modelreactions;
 
                 // see if we can find the rxn in that model's list of reactions
-                var found_rxn = [];
-                for (var i in rxn_objs) {
-                    var rxn_obj = rxn_objs[i];
+                const found_rxn = [];
+                for (const i in rxn_objs) {
+                    const rxn_obj = rxn_objs[i];
                     if (rxn_ids.indexOf(rxn_obj.id.split('_')[0]) !== -1) {
                         found_rxn.push(rxn_obj);
                     }
@@ -688,19 +676,19 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
         function getFbaRxns(rxn_ids) {
             // get a list of fba arrays (or undefined)
             // for each model supplied
-            var found_rxns = [];
+            const found_rxns = [];
 
             // for each fba, look for model data
-            for (var j = 0; j < self.fbas.length; j++) {
-                var fba = self.fbas[j];
+            for (let j = 0; j < self.fbas.length; j++) {
+                const fba = self.fbas[j];
                 //if (!fba) continue;
-                var fba_objs = fba.FBAReactionVariables;
+                const fba_objs = fba.FBAReactionVariables;
 
                 // see if we can find the rxn in that fbas's list of reactions
-                var found_rxn = [];
+                const found_rxn = [];
 
-                for (var i in fba_objs) {
-                    var fba_obj = fba_objs[i];
+                for (const i in fba_objs) {
+                    const fba_obj = fba_objs[i];
 
                     // yeeeeep...
                     if (
@@ -719,156 +707,158 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
             return found_rxns;
         }
 
-        function zoom() {
-            var margin = { top: -5, right: -5, bottom: -5, left: -5 },
-                width = 960 - margin.left - margin.right,
-                height = 500 - margin.top - margin.bottom;
+        // Not used, disabled
+        // function zoom() {
+        //     const margin = {top: -5, right: -5, bottom: -5, left: -5},
+        //         width = 960 - margin.left - margin.right,
+        //         height = 500 - margin.top - margin.bottom;
 
-            var zoom = d3.behavior
-                .zoom()
-                .scaleExtent([1, 10])
-                .on('zoom', zoomed);
+        //     const zoom = d3.behavior
+        //         .zoom()
+        //         .scaleExtent([1, 10])
+        //         .on('zoom', zoomed);
 
-            var drag = d3.behavior
-                .drag()
-                .origin(function (d) {
-                    return d;
-                })
-                .on('dragstart', dragstarted)
-                .on('drag', dragged)
-                .on('dragend', dragended);
+        //     d3.behavior
+        //         .drag()
+        //         .origin((d) => {
+        //             return d;
+        //         })
+        //         .on('dragstart', dragstarted)
+        //         .on('drag', dragged)
+        //         .on('dragend', dragended);
 
-            //var svg = d3.select("body").append("svg")
-            //    .attr("width", width + margin.left + margin.right)
-            //   .attr("height", height + margin.top + margin.bottom)
-            //  .append("g")
-            //    .attr("transform", "translate(" + margin.left + "," + margin.right + ")")
-            //   .call(zoom);
-            svg.call(zoom);
+        //     //var svg = d3.select("body").append("svg")
+        //     //    .attr("width", width + margin.left + margin.right)
+        //     //   .attr("height", height + margin.top + margin.bottom)
+        //     //  .append("g")
+        //     //    .attr("transform", "translate(" + margin.left + "," + margin.right + ")")
+        //     //   .call(zoom);
+        //     svg.call(zoom);
 
-            var rect = svg
-                .append('rect')
-                .attr('width', width)
-                .attr('height', height)
-                .style('fill', 'none')
-                .style('pointer-events', 'all');
+        //     svg
+        //         .append('rect')
+        //         .attr('width', width)
+        //         .attr('height', height)
+        //         .style('fill', 'none')
+        //         .style('pointer-events', 'all');
 
-            var container = svg.append('g');
+        //     const container = svg.append('g');
 
-            container
-                .append('g')
-                .attr('class', 'x axis')
-                .selectAll('line')
-                .data(d3.range(0, width, 10))
-                .enter()
-                .append('line')
-                .attr('x1', function (d) {
-                    return d;
-                })
-                .attr('y1', 0)
-                .attr('x2', function (d) {
-                    return d;
-                })
-                .attr('y2', height);
+        //     container
+        //         .append('g')
+        //         .attr('class', 'x axis')
+        //         .selectAll('line')
+        //         .data(d3.range(0, width, 10))
+        //         .enter()
+        //         .append('line')
+        //         .attr('x1', (d) => {
+        //             return d;
+        //         })
+        //         .attr('y1', 0)
+        //         .attr('x2', (d) => {
+        //             return d;
+        //         })
+        //         .attr('y2', height);
 
-            container
-                .append('g')
-                .attr('class', 'y axis')
-                .selectAll('line')
-                .data(d3.range(0, height, 10))
-                .enter()
-                .append('line')
-                .attr('x1', 0)
-                .attr('y1', function (d) {
-                    return d;
-                })
-                .attr('x2', width)
-                .attr('y2', function (d) {
-                    return d;
-                });
+        //     container
+        //         .append('g')
+        //         .attr('class', 'y axis')
+        //         .selectAll('line')
+        //         .data(d3.range(0, height, 10))
+        //         .enter()
+        //         .append('line')
+        //         .attr('x1', 0)
+        //         .attr('y1', (d) => {
+        //             return d;
+        //         })
+        //         .attr('x2', width)
+        //         .attr('y2', (d) => {
+        //             return d;
+        //         });
 
-            /*
-             d3.tsv("dots.tsv", dottype, function(error, dots) {
-             dot = container.append("g")
-             .attr("class", "dot")
-             .selectAll("circle")
-             .data(dots)
-             .enter().append("circle")
-             .attr("r", 5)
-             .attr("cx", function(d) { return d.x; })
-             .attr("cy", function(d) { return d.y; })
-             .call(drag);
-             });*/
+        //     /*
+        //      d3.tsv("dots.tsv", dottype, function(error, dots) {
+        //      dot = container.append("g")
+        //      .attr("class", "dot")
+        //      .selectAll("circle")
+        //      .data(dots)
+        //      .enter().append("circle")
+        //      .attr("r", 5)
+        //      .attr("cx", function(d) { return d.x; })
+        //      .attr("cy", function(d) { return d.y; })
+        //      .call(drag);
+        //      });*/
 
-            function dottype(d) {
-                d.x = +d.x;
-                d.y = +d.y;
-                return d;
-            }
+        //     // unused, disabled
+        //     // function dottype(d) {
+        //     //     d.x = +d.x;
+        //     //     d.y = +d.y;
+        //     //     return d;
+        //     // }
 
-            function zoomed() {
-                container.attr('transform', 'translate(' + d3.event.translate + ')scale(' + d3.event.scale + ')');
-            }
+        //     function zoomed() {
+        //         container.attr('transform', `translate(${  d3.event.translate  })scale(${  d3.event.scale  })`);
+        //     }
 
-            function dragstarted(d) {
-                d3.event.sourceEvent.stopPropagation();
-                d3.select(this).classed('dragging', true);
-            }
+        //     function dragstarted(d) {
+        //         d3.event.sourceEvent.stopPropagation();
+        //         d3.select(this).classed('dragging', true);
+        //     }
 
-            function dragged(d) {
-                d3.select(this)
-                    .attr('cx', (d.x = d3.event.x))
-                    .attr('cy', (d.y = d3.event.y));
-            }
+        //     function dragged(d) {
+        //         d3.select(this)
+        //             .attr('cx', (d.x = d3.event.x))
+        //             .attr('cy', (d.y = d3.event.y));
+        //     }
 
-            function dragended(d) {
-                d3.select(this).classed('dragging', false);
-            }
-        }
+        //     function dragended(d) {
+        //         d3.select(this).classed('dragging', false);
+        //     }
+        // }
 
         function editable() {
-            var edit_opts = $(
-                '<div class="map-opts pull-left">\
-                              <!--<button class="btn btn-primary btn-edit-map">Edit Map</button>-->\
-                              <button class="btn btn-default btn-map-opts">Options <div class="caret"></div></button>\
-                              <!--<button class="btn btn-default btn-map-cancel">Done</button>-->\
-                              <button class="btn btn-default btn-map-save">Save</button>\
-                           </div>\
-                           <span class="mouse-pos pull-right">\
-                                <span id="ele-type"></span>\
-                               x: <span id="x-pos">0</span>\
-                               y: <span id="y-pos">0</span>\
-                           </span>\
-                           <br><br>'
+            const edit_opts = $(
+                `<div class="map-opts pull-left">
+                              <!--<button class="btn btn-primary btn-edit-map">Edit Map</button>-->
+                              <button class="btn btn-default btn-map-opts">Options <div class="caret"></div></button>
+                              <!--<button class="btn btn-default btn-map-cancel">Done</button>-->
+                              <button class="btn btn-default btn-map-save">Save</button>
+                           </div>
+                           <span class="mouse-pos pull-right">
+                                <span id="ele-type"></span>
+                               x: <span id="x-pos">0</span>
+                               y: <span id="y-pos">0</span>
+                           </span>
+                           <br><br>`
             );
 
-            var opts = $(
-                '<div class="opts-dd">Display:\
-                    <div class="checkbox">\
-                        <label><input type="checkbox" data-type="rxn-label" checked="checked">Enzymes Labels</label>\
-                    </div>\
-                    <div class="checkbox">\
-                        <label><input type="checkbox" data-type="rect" value="" checked="checked">Enzymes</label>\
-                    </div>\
-                    <div class="checkbox">\
-                        <label><input type="checkbox" data-type="circle" checked="checked">Compounds</label>\
-                    </div>\
-                    <div class="checkbox">\
-                        <label><input type="checkbox" data-type="line" checked="checked">Lines</label>\
-                    </div>\
-                    <div class="checkbox">\
-                        <label><input type="checkbox" data-type="cpd-label" checked="checked">Compound Labels</label>\
-                    </div>\
-                    </div>'
+            const opts = $(
+                `<div class="opts-dd">Display:
+                    <div class="checkbox">
+                        <label><input type="checkbox" data-type="rxn-label" checked="checked">Enzymes Labels</label>
+                    </div>
+                    <div class="checkbox">
+                        <label><input type="checkbox" data-type="rect" value="" checked="checked">Enzymes</label>
+                    </div>
+                    <div class="checkbox">
+                        <label><input type="checkbox" data-type="circle" checked="checked">Compounds</label>
+                    </div>
+                    <div class="checkbox">
+                        <label><input type="checkbox" data-type="line" checked="checked">Lines</label>
+                    </div>
+                    <div class="checkbox">
+                        <label><input type="checkbox" data-type="cpd-label" checked="checked">Compound Labels</label>
+                    </div>
+                    </div>`
             );
 
             // display x, y coordinates (on top left)
             svg.on('mousemove', function () {
-                var c = d3.mouse(this);
-                var x = c[0];
-                var y = c[1];
-                $('#x-pos').html(x);
-                $('#y-pos').html(y);
+                const c = d3.mouse(this);
+                const x = c[0];
+                const y = c[1];
+                $('#x-pos').text(x);
+                $('#y-pos').text(y);
             });
             container.prepend(edit_opts);
 
@@ -881,17 +871,17 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                 trigger: 'click',
                 placement: 'bottom'
             });
-            $('.btn-map-opts').click(function () {
+            $('.btn-map-opts').click(() => {
                 opts.find('input').unbind('change');
                 opts.find('input').change(function () {
-                    var type = $(this).data('type');
-                    var checked = $(this).attr('checked') === 'checked' ? true : false;
+                    const type = $(this).data('type');
+                    const checked = $(this).attr('checked') === 'checked';
 
                     if (checked) {
-                        svg.selectAll('.' + type).style('display', 'none');
+                        svg.selectAll(`.${  type}`).style('display', 'none');
                         $(this).attr('checked', false);
                     } else {
-                        svg.selectAll('.' + type).style('display', 'block');
+                        svg.selectAll(`.${  type}`).style('display', 'block');
                         $(this).attr('checked', true);
                     }
                 });
@@ -908,9 +898,9 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
              })*/
 
             // drag event
-            var drag = d3.behavior
+            const drag = d3.behavior
                 .drag()
-                .on('dragstart', function () {
+                .on('dragstart', () => {
                     d3.event.sourceEvent.stopPropagation();
                 })
                 .on('drag', function () {
@@ -929,21 +919,21 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                 edit_opts.find('.btn-map-save').addClass('btn-primary');
             });
 
-            edit_opts.find('.btn-map-cancel').click(function () {
+            edit_opts.find('.btn-map-cancel').click(() => {
                 //$('.first, .second, .middle').remove()
             });
 
-            edit_opts.find('.btn-map-save').click(function () {
+            edit_opts.find('.btn-map-save').click(() => {
                 saveMap();
             });
 
             function editLabel(label) {
-                var label = d3.select(label).call(drag);
+                label = d3.select(label).call(drag);
                 label.attr('fill', config.highlight).attr('class', 'edited-label');
             }
 
             function editLine(line) {
-                var line = d3.select(line);
+                line = d3.select(line);
 
                 // highlight line
                 line.attr('stroke', config.highlight)
@@ -951,17 +941,17 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                     .attr('stroke-width', 2);
 
                 // getting start and end of line
-                var x1 = line.attr('x1'),
+                const x1 = line.attr('x1'),
                     y1 = line.attr('y1'),
                     x2 = line.attr('x2'),
                     y2 = line.attr('y2');
-                var g = line.node().parentNode;
+                const g = line.node().parentNode;
 
                 // start, draggalbe circle
-                var start = d3
+                d3
                     .select(g)
                     .append('g')
-                    .attr('transform', 'translate(' + x1 + ',' + y1 + ')')
+                    .attr('transform', `translate(${  x1  },${  y1  })`)
                     .attr('class', 'first')
                     .call(drag)
                     .append('circle')
@@ -975,10 +965,10 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                     .attr('r', 8);
 
                 // end, dragable circle
-                var end = d3
+                d3
                     .select(g)
                     .append('g')
-                    .attr('transform', 'translate(' + x2 + ',' + y2 + ')')
+                    .attr('transform', `translate(${  x2  },${  y2  })`)
                     .attr('class', 'last')
                     .call(drag)
                     .append('circle')
@@ -998,16 +988,16 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
 
                     d3.event.stopPropagation();
                     // get position of new circle
-                    var x = d3.mouse(this)[0];
-                    var y = d3.mouse(this)[1];
+                    const x = d3.mouse(this)[0];
+                    const y = d3.mouse(this)[1];
 
-                    var type = d3.select(this).data()[0].type;
+                    const type = d3.select(this).data()[0].type;
 
                     // remove old line
                     d3.select(this).remove();
 
                     // add new lines
-                    var line1 = d3
+                    d3
                         .select(g)
                         .append('line')
                         .attr('class', 'line1')
@@ -1016,7 +1006,7 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                         .attr('x2', x)
                         .attr('y2', y);
 
-                    var line2 = d3
+                    const line2 = d3
                         .select(g)
                         .append('line')
                         .attr('class', 'line2')
@@ -1030,13 +1020,14 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                     }
 
                     // to be stored
-                    var wayPoints = [[x1, y1], [x, y], [x2, y2]];
+                    // Not used, disabled
+                    // const wayPoints = [[x1, y1], [x, y], [x2, y2]];
 
                     // mid, draggable circle
-                    var mid = d3
+                    d3
                         .select(g)
                         .append('g')
-                        .attr('transform', 'translate(' + x + ',' + y + ')')
+                        .attr('transform', `translate(${  x  },${  y  })`)
                         .attr('class', 'middle')
                         .call(drag)
                         .append('circle')
@@ -1053,28 +1044,29 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
         }
 
         function saveMap() {
-            var new_map = $.extend({}, self.map_data),
+            const new_map = $.extend({}, self.map_data),
                 self = this;
 
             // get data on edited lines
-            var g = svg.selectAll('.edited-line');
-            g.each(function (d, i) {
-                var l1 = d3.select(this).select('.line1');
-                var l2 = d3.select(this).select('.line2');
-                var cpd_id = l1.data()[0].cpd_id;
-                var group_index = l1.data()[0].group_index;
-                var line_type = l1.data()[0].line_type;
+            const g = svg.selectAll('.edited-line');
+            g.each(function () {
+                const l1 = d3.select(this).select('.line1');
+                const l2 = d3.select(this).select('.line2');
+                // Not used, disabled
+                // const cpd_id = l1.data()[0].cpd_id;
+                const group_index = l1.data()[0].group_index;
+                const line_type = l1.data()[0].line_type;
 
-                var x1 = parseInt(l1.attr('x1'));
-                var y1 = parseInt(l1.attr('y1'));
-                var x = parseInt(l1.attr('x2'));
-                var y = parseInt(l1.attr('y2'));
-                var x2 = parseInt(l2.attr('x2'));
-                var y2 = parseInt(l2.attr('y2'));
+                const x1 = parseInt(l1.attr('x1'), 10);
+                const y1 = parseInt(l1.attr('y1'), 10);
+                const x = parseInt(l1.attr('x2'), 10);
+                const y = parseInt(l1.attr('y2'), 10);
+                const x2 = parseInt(l2.attr('x2'), 10);
+                const y2 = parseInt(l2.attr('y2'), 10);
 
-                var path = [[x1, y1], [x, y], [x2, y2]];
+                const path = [[x1, y1], [x, y], [x2, y2]];
 
-                var groups = new_map.groups;
+                const groups = new_map.groups;
                 if (line_type === 'substrate') {
                     groups[group_index]['substrate_path'] = path;
                 } else if (line_type === 'product') {
@@ -1083,22 +1075,22 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
             });
 
             // get data on edited compound labels
-            var labels = svg.selectAll('.edited-label');
-            labels.each(function (d, i) {
-                var l = d3.select(this);
+            const labels = svg.selectAll('.edited-label');
+            labels.each(function () {
+                const l = d3.select(this);
 
-                var transform = l.attr('transform');
+                const transform = l.attr('transform');
 
                 // if label hasn't been moved, don't save
                 if (!transform) {
                     return;
                 }
 
-                var x = parseInt(transform.split(',')[0].split('(')[1]);
-                var y = parseInt(transform.split(',')[1].split(')')[0]);
-                var cpd_index = l.data()[0].cpd_index;
+                const x = parseInt(transform.split(',')[0].split('(')[1], 10);
+                const y = parseInt(transform.split(',')[1].split(')')[0], 10);
+                const cpd_index = l.data()[0].cpd_index;
 
-                var cpds = new_map.compounds;
+                const cpds = new_map.compounds;
                 cpds[cpd_index].label_x = x;
                 cpds[cpd_index].label_y = y;
             });
@@ -1111,19 +1103,19 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                         name: self.map_name
                     }
                 ])
-                .then(function (data) {
-                    var metadata = data[0][10];
+                .then((data) => {
+                    const metadata = data[0][10];
                     // saving object to workspace
                     return self.workspaceClient.save_object({
                         workspace: self.workspace,
                         data: new_map,
                         id: self.map_name,
                         type: 'KBaseBiochem.MetabolicMap',
-                        metadata: metadata
+                        metadata
                     });
                 })
-                .then(function (d) {
-                    var msg = $('<div class="alert alert-success pull-left">Saved.</div>');
+                .then(() => {
+                    const msg = $('<div class="alert alert-success pull-left">Saved.</div>');
                     msg.css('padding', '7px'); // one exception for putting this in js
                     msg.css('margin-left', '10px');
                     msg.css('margin-bottom', 0);
@@ -1134,16 +1126,16 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                     self.drawMap();
                     return null;
                 })
-                .catch(function (e) {
-                    container.prepend('<div class="alert alert-danger">' + e.error.message + '</div>');
+                .catch((e) => {
+                    container.prepend(`<div class="alert alert-danger">${  e.error.message  }</div>`);
                 });
         }
 
         //Drag handler
         function dragmove(d) {
-            var x = d3.event.x;
-            var y = d3.event.y;
-            d3.select(d).attr('transform', 'translate(' + x + ',' + y + ')');
+            const x = d3.event.x;
+            const y = d3.event.y;
+            d3.select(d).attr('transform', `translate(${  x  },${  y  })`);
 
             if (d3.select(d).attr('class') === 'first') {
                 d3.select(d.parentNode)
@@ -1175,165 +1167,167 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
             }
         }
 
-        function splines() {
-            var width = 960,
-                height = 500;
+        // Not used, disabled
+        // function splines() {
+        //     const width = 960,
+        //         height = 500;
 
-            var points = d3.select('line').each(function () {
-                var x1 = d3.select(this).attr('x1');
-                var y1 = d3.select(this).attr('y1');
-                svg.append();
-                d3.select(this).attr('class', 'special');
-                return [x1, y1];
-            });
+        //     const points = d3.select('line').each(function () {
+        //         const x1 = d3.select(this).attr('x1');
+        //         const y1 = d3.select(this).attr('y1');
+        //         svg.append();
+        //         d3.select(this).attr('class', 'special');
+        //         return [x1, y1];
+        //     });
 
-            /*
-             var points = d3.range(1, 5).map(function(i) {
-             return [i * width / 5, 50 + Math.random() * (height - 100)];
-             });*/
+        //     /*
+        //      var points = d3.range(1, 5).map(function(i) {
+        //      return [i * width / 5, 50 + Math.random() * (height - 100)];
+        //      });*/
 
-            var dragged = null,
-                selected = points[0];
+        //     let dragged = null,
+        //         selected = points[0];
 
-            var line = d3.select('line');
+        //     const line = d3.select('line');
 
-            /*
-             var svg = d3.select('.panel-body').append("svg")
-             .attr("width", width)
-             .attr("height", height)
-             .attr("tabindex", 1);
-             */
-            svg.append('rect')
-                .attr('fill', 'none')
-                .attr('width', width)
-                .attr('height', height)
-                .on('mousedown', mousedown);
+        //     /*
+        //      var svg = d3.select('.panel-body').append("svg")
+        //      .attr("width", width)
+        //      .attr("height", height)
+        //      .attr("tabindex", 1);
+        //      */
+        //     svg.append('rect')
+        //         .attr('fill', 'none')
+        //         .attr('width', width)
+        //         .attr('height', height)
+        //         .on('mousedown', mousedown);
 
-            svg.append('path')
-                .datum(points)
-                .attr('class', 'line')
-                .attr('fill', 'none')
-                .attr('stroke', 'steelblue')
-                .attr('stroke-width', 2)
-                .call(redraw);
+        //     svg.append('path')
+        //         .datum(points)
+        //         .attr('class', 'line')
+        //         .attr('fill', 'none')
+        //         .attr('stroke', 'steelblue')
+        //         .attr('stroke-width', 2)
+        //         .call(redraw);
 
-            d3.select(window)
-                .on('mousemove', mousemove)
-                .on('mouseup', mouseup)
-                .on('keydown', keydown);
+        //     d3.select(window)
+        //         .on('mousemove', mousemove)
+        //         .on('mouseup', mouseup)
+        //         .on('keydown', keydown);
 
-            d3.select('#interpolate')
-                .on('change', change)
-                .selectAll('option')
-                .data([
-                    'linear',
-                    'step-before',
-                    'step-after',
-                    'basis',
-                    'basis-open',
-                    'basis-closed',
-                    'cardinal',
-                    'cardinal-open',
-                    'cardinal-closed',
-                    'monotone'
-                ])
-                .enter()
-                .append('option')
-                .attr('value', function (d) {
-                    return d;
-                })
-                .text(function (d) {
-                    return d;
-                });
+        //     d3.select('#interpolate')
+        //         .on('change', change)
+        //         .selectAll('option')
+        //         .data([
+        //             'linear',
+        //             'step-before',
+        //             'step-after',
+        //             'basis',
+        //             'basis-open',
+        //             'basis-closed',
+        //             'cardinal',
+        //             'cardinal-open',
+        //             'cardinal-closed',
+        //             'monotone'
+        //         ])
+        //         .enter()
+        //         .append('option')
+        //         .attr('value', (d) => {
+        //             return d;
+        //         })
+        //         .text((d) => {
+        //             return d;
+        //         });
 
-            svg.node().focus();
+        //     svg.node().focus();
 
-            function redraw() {
-                svg.select('path').attr('d', line);
+        //     function redraw() {
+        //         svg.select('path').attr('d', line);
 
-                var circle = svg.selectAll('.special').data(points, function (d) {
-                    return d;
-                });
+        //         const circle = svg.selectAll('.special').data(points, (d) => {
+        //             return d;
+        //         });
 
-                circle
-                    .enter()
-                    .append('circle')
-                    .attr('r', 1e-6)
-                    .on('mousedown', function (d) {
-                        selected = dragged = d;
-                        redraw();
-                    })
-                    .transition()
-                    .duration(750)
-                    .ease('elastic')
-                    .attr('r', 6.5);
+        //         circle
+        //             .enter()
+        //             .append('circle')
+        //             .attr('r', 1e-6)
+        //             .on('mousedown', (d) => {
+        //                 selected = dragged = d;
+        //                 redraw();
+        //             })
+        //             .transition()
+        //             .duration(750)
+        //             .ease('elastic')
+        //             .attr('r', 6.5);
 
-                circle
-                    .classed('selected', function (d) {
-                        return d === selected;
-                    })
-                    .attr('cx', function (d) {
-                        return d[0];
-                    })
-                    .attr('cy', function (d) {
-                        return d[1];
-                    });
+        //         circle
+        //             .classed('selected', (d) => {
+        //                 return d === selected;
+        //             })
+        //             .attr('cx', (d) => {
+        //                 return d[0];
+        //             })
+        //             .attr('cy', (d) => {
+        //                 return d[1];
+        //             });
 
-                circle.exit().remove();
+        //         circle.exit().remove();
 
-                if (d3.event) {
-                    d3.event.preventDefault();
-                    d3.event.stopPropagation();
-                }
-            }
+        //         if (d3.event) {
+        //             d3.event.preventDefault();
+        //             d3.event.stopPropagation();
+        //         }
+        //     }
 
-            function change() {
-                line.interpolate(this.value);
-                redraw();
-            }
+        //     function change() {
+        //         line.interpolate(this.value);
+        //         redraw();
+        //     }
 
-            function mousedown() {
-                points.push((selected = dragged = d3.mouse(svg.node())));
-                redraw();
-            }
+        //     function mousedown() {
+        //         points.push((selected = dragged = d3.mouse(svg.node())));
+        //         redraw();
+        //     }
 
-            function mousemove() {
-                if (!dragged) {
-                    return;
-                }
-                var m = d3.mouse(svg.node());
-                dragged[0] = Math.max(0, Math.min(width, m[0]));
-                dragged[1] = Math.max(0, Math.min(height, m[1]));
-                redraw();
-            }
+        //     function mousemove() {
+        //         if (!dragged) {
+        //             return;
+        //         }
+        //         const m = d3.mouse(svg.node());
+        //         dragged[0] = Math.max(0, Math.min(width, m[0]));
+        //         dragged[1] = Math.max(0, Math.min(height, m[1]));
+        //         redraw();
+        //     }
 
-            function mouseup() {
-                if (!dragged) return;
-                mousemove();
-                dragged = null;
-            }
+        //     function mouseup() {
+        //         if (!dragged) return;
+        //         mousemove();
+        //         dragged = null;
+        //     }
 
-            function keydown() {
-                if (!selected) return;
-                switch (d3.event.keyCode) {
-                case 8: // backspace
-                case 46: {
-                    // delete
-                    var i = points.indexOf(selected);
-                    points.splice(i, 1);
-                    selected = points.length ? points[i > 0 ? i - 1 : 0] : null;
-                    redraw();
-                    break;
-                }
-                }
-            }
-        }
+        //     function keydown() {
+        //         if (!selected) return;
+        //         switch (d3.event.keyCode) {
+        //         case 8: // backspace
+        //         case 46: {
+        //             // delete
+        //             const i = points.indexOf(selected);
+        //             points.splice(i, 1);
+        //             selected = points.length ? points[i > 0 ? i - 1 : 0] : null;
+        //             redraw();
+        //             break;
+        //         }
+        //         }
+        //     }
+        // }
 
         function drawMap() {
+            // safe usage of html()
             container.html('');
 
             svg = d3
-                .select('#' + params.elem)
+                .select(`#${  params.elem}`)
                 .append('svg')
                 .attr('width', 800)
                 .attr('height', 1000);
