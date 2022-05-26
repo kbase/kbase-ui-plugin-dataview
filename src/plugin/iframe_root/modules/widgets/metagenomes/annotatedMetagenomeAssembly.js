@@ -15,8 +15,7 @@ define([
     'kbaseUI/widget/legacy/widget',
     'widgets/metagenomes/annotatedMetagenomeAssemblyWideOverview',
     'widgets/metagenomes/annotatedMetagenomeAssembly_AssemblyandAnnotationTab'
-], function ($, Uuid, html, Workspace, serviceUtils, DynamicServiceClient) {
-    'use strict';
+], ($, Uuid, html, Workspace, serviceUtils, DynamicServiceClient) => {
     $.KBWidget({
         name: 'AnnotatedMetagenomeAssembly',
         parent: 'kbaseWidget',
@@ -26,7 +25,7 @@ define([
             workspaceId: null,
             objectVersion: null
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
             this.init_view();
             this.fetchMetagenome();
@@ -39,15 +38,13 @@ define([
             });
             return this;
         },
-        fetchMetagenome: function () {
-            var _this = this,
+        fetchMetagenome() {
+            const _this = this,
                 scope = {
                     ws: this.options.workspaceId,
                     id: this.options.objectId,
                     ver: this.options.objectVersion
                 },
-                objId = scope.ws + '/' + scope.id,
-
                 metagenome_fields = [
                     'dna_size',
                     'source_id',
@@ -57,9 +54,12 @@ define([
                     'assembly_ref',
                     'gc_content',
                     'environment'
-                ],
+                ];
 
-                feature_fields = ['type', 'id', 'contig_id', 'location', 'function', 'functions'];
+            let objId = `${scope.ws  }/${  scope.id}`;
+
+            // disabled, not used
+            // feature_fields = ['type', 'id', 'contig_id', 'location', 'function', 'functions'];
 
             this.metagenomeAPI = new DynamicServiceClient({
                 url: this.runtime.getConfig('services.service_wizard.url'),
@@ -71,7 +71,7 @@ define([
             });
 
             if (this.options.objectVersion) {
-                objId += '/' + this.options.objectVersion;
+                objId += `/${this.options.objectVersion}`;
             }
 
             this.metagenomeAPI
@@ -81,7 +81,7 @@ define([
                         included_fields: metagenome_fields
                     }
                 ])
-                .spread(function (result) {
+                .spread((result) => {
                     const metagenomeObject = result.genomes[0];
                     let assembly_ref = null;
                     const metagenome = metagenomeObject.data;
@@ -109,19 +109,19 @@ define([
                         return (
                             _this.assemblyAPI
                                 .callFunc('get_stats', [assembly_ref])
-                                .spread(function (stats) {
+                                .spread((stats) => {
                                     add_stats(metagenome, stats.dna_size, stats.gc_content, stats.num_contigs);
                                     _this.render(metagenomeObject);
                                     return null;
                                 })
-                                .catch(function (error) {
+                                .catch((error) => {
                                     assembly_error(metagenome, error);
                                 })
                         );
                     }
                     return null;
                 })
-                .catch(function (error) {
+                .catch((error) => {
                     console.error('Error loading genome subdata');
                     console.error(error);
                     _this.showError(_this.view.panels[0].inner_div, error);
@@ -130,9 +130,9 @@ define([
                 });
         },
 
-        init_view: function () {
-            var cell_html = '<div>';
-            var body = '<div data-element="body">';
+        init_view() {
+            const cell_html = '<div>';
+            const body = '<div data-element="body">';
 
             this.view = {
                 panels: [
@@ -151,15 +151,16 @@ define([
                     }
                 ]
             };
-            var that = this;
-            this.view.panels.forEach(function (panel) {
+            const that = this;
+            this.view.panels.forEach((panel) => {
                 that.makeWidgetPanel(panel.outer_div, panel.label, panel.name, panel.inner_div);
                 that.$elem.append(panel.outer_div);
+                // safe
                 panel.inner_div.html(html.loading('Loading...'));
             });
         },
-        render: function (genomeInfo) {
-            var _this = this,
+        render(genomeInfo) {
+            const _this = this,
                 scope = {
                     ws: this.options.workspaceID,
                     id: this.options.metagenomeID,
@@ -175,7 +176,7 @@ define([
                 _this.view.panels[0].inner_div.annotatedMetagenomeAssemblyWideOverview({
                     metagenomeID: scope.id,
                     workspaceID: scope.ws,
-                    genomeInfo: genomeInfo,
+                    genomeInfo,
                     runtime: _this.runtime
                 });
             } catch (e) {
@@ -187,7 +188,7 @@ define([
                     genomeID: scope.id,
                     workspaceID: scope.ws,
                     ver: scope.ver,
-                    genomeInfo: genomeInfo,
+                    genomeInfo,
                     runtime: _this.runtime
                 });
             } catch (e){
@@ -200,49 +201,49 @@ define([
             // );
         },
         // TODO: This is
-        makeWidgetPanel: function ($panel, title, name, $widgetDiv) {
-            var id = new Uuid(4).format();
+        makeWidgetPanel($panel, title, name, $widgetDiv) {
+            const id = new Uuid(4).format();
             $panel.append(
                 $(
-                    '<div class="panel-group" id="accordion_' +
-                        id +
-                        '" role="tablist" aria-multiselectable="true" data-panel="' +
-                        name +
-                        '">'
+                    `<div class="panel-group" id="accordion_${
+                        id
+                    }" role="tablist" aria-multiselectable="true" data-panel="${
+                        name
+                    }">`
                 ).append(
                     $('<div class="panel panel-default kb-widget">')
                         .append(
                             '' +
-                                '<div class="panel-heading" role="tab" id="heading_' +
-                                id +
-                                '">' +
+                                `<div class="panel-heading" role="tab" id="heading_${
+                                    id
+                                }">` +
                                 '<h4 class="panel-title">' +
-                                '<span data-toggle="collapse" data-parent="#accordion_' +
-                                id +
-                                '" data-target="#collapse_' +
-                                id +
-                                '" aria-expanded="false" aria-controls="collapse_' +
-                                id +
-                                '" style="cursor:pointer;" data-element="title">' +
-                                ' ' +
-                                title +
-                                '</span>' +
+                                `<span data-toggle="collapse" data-parent="#accordion_${
+                                    id
+                                }" data-target="#collapse_${
+                                    id
+                                }" aria-expanded="false" aria-controls="collapse_${
+                                    id
+                                }" style="cursor:pointer;" data-element="title">` +
+                                ` ${
+                                    title
+                                }</span>` +
                                 '</h4>' +
                                 '</div>'
                         )
                         .append(
                             $(
-                                '<div id="collapse_' +
-                                    id +
-                                    '" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_' +
-                                    id +
-                                    '" area-expanded="true">'
+                                `<div id="collapse_${
+                                    id
+                                }" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_${
+                                    id
+                                }" area-expanded="true">`
                             ).append($('<div class="panel-body">').append($widgetDiv))
                         )
                 )
             );
         },
-        getData: function () {
+        getData() {
             return {
                 type: 'Annotated Metagenome Assembly Page',
                 id: this.options.metagenomeID,
@@ -250,7 +251,7 @@ define([
                 title: 'Annotated Metagenome Assembly Page'
             };
         },
-        showError: function (panel, e) {
+        showError(panel, e) {
             panel.empty();
             const $err = $('<div>')
                 .addClass('alert alert-danger')
