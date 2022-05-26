@@ -1,12 +1,21 @@
-define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/size', '../legacy/widget'], function (
+define([
+    'jquery',
+    'd3',
+    './geometry/rectangle',
+    './geometry/point',
+    './geometry/size',
+    'lib/domUtils',
+
+    // for effect
+    '../legacy/widget'
+], (
     $,
     d3,
     Rectangle,
     Point,
-    Size
-) {
-    'use strict';
-
+    Size,
+    {domSafeText}
+) => {
     $.KBWidget({
         name: 'kbaseVisWidget',
         version: '1.0.0',
@@ -70,9 +79,9 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 return true;
             } else if (axis === 'y' && this.options.scaleYAxis) {
                 return true;
-            } else {
-                return false;
             }
+            return false;
+
         },
         _accessors: [
             'xGutter',
@@ -81,14 +90,14 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             'yPadding',
             'width',
             'height',
-            { name: 'json_dataset', setter: 'setJSONDataset' },
-            { name: 'dataset', setter: 'setDataset' },
-            { name: 'legend', setter: 'setLegend' },
-            { name: 'input', setter: 'setInput' },
-            { name: 'xLabel', setter: 'setXLabel' },
-            { name: 'yLabel', setter: 'setYLabel' },
-            { name: 'xScale', setter: 'setXScale' },
-            { name: 'yScale', setter: 'setYScale' },
+            {name: 'json_dataset', setter: 'setJSONDataset'},
+            {name: 'dataset', setter: 'setDataset'},
+            {name: 'legend', setter: 'setLegend'},
+            {name: 'input', setter: 'setInput'},
+            {name: 'xLabel', setter: 'setXLabel'},
+            {name: 'yLabel', setter: 'setYLabel'},
+            {name: 'xScale', setter: 'setXScale'},
+            {name: 'yScale', setter: 'setYScale'},
             'xScaleType',
             'yScaleType',
             'yHeightScaleType',
@@ -104,9 +113,9 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
         setInput: function setInput(newInput) {
             if ($.isPlainObject(newInput) && newInput.dataset !== undefined) {
                 return this.setValuesForKeys(newInput);
-            } else {
-                return this.setDataset(newInput);
             }
+            return this.setDataset(newInput);
+
         },
         setXLabel: function setXLabel(newXLabel) {
             this.setValueForKey('xLabel', newXLabel);
@@ -125,14 +134,14 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             this.render('yAxis');
         },
         createIDMapForDomain: function createIDMapForDomain(domain) {
-            var map = {};
-            $.each(domain, function (idx, val) {
+            const map = {};
+            $.each(domain, (idx, val) => {
                 map[idx] = val;
             });
             return map;
         },
         setXScaleDomain: function setXScaleDomain(domain, scaleType) {
-            var xScale = this.xScale();
+            let xScale = this.xScale();
 
             if (xScale === undefined) {
                 if (scaleType === undefined) {
@@ -164,7 +173,7 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             return xScale;
         },
         setYScaleDomain: function setYScaleDomain(domain, scaleType) {
-            var yScale = this.yScale();
+            let yScale = this.yScale();
 
             if (yScale === undefined) {
                 if (scaleType === undefined) {
@@ -229,13 +238,13 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             }, this);
 
             if (this.options.width !== undefined && this.options.width.match(/px/)) {
-                this.width(parseInt(this.options.width));
+                this.width(parseInt(this.options.width, 10));
             } else {
                 this.width(this.$elem.width());
             }
 
             if (this.options.height !== undefined && this.options.height.match(/px/)) {
-                this.height(parseInt(this.options.height));
+                this.height(parseInt(this.options.height, 10));
             } else {
                 this.height(this.$elem.height());
             }
@@ -291,21 +300,21 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             }
         },
         fitTextToWidth: function fitTextToWidth(text, width) {
-            var fakeText = this.D3svg()
+            const fakeText = this.D3svg()
                 .append('text')
                 .attr('opacity', 0)
                 .attr('font-size', this.options.legendSize)
                 .text(text);
 
-            var box = fakeText[0][0].getBBox();
+            let box = fakeText[0][0].getBBox();
 
-            var truncatedText = text;
-            var truncated = false;
-            var originalWidth = box.width;
+            let truncatedText = text;
+            let truncated = false;
+            const originalWidth = box.width;
 
             while (box.width + this.options.legendTextXOffset > width && truncatedText.length) {
                 truncatedText = truncatedText.substring(0, truncatedText.length - 1);
-                fakeText.text(truncatedText + '...');
+                fakeText.text(`${truncatedText  }...`);
                 box = fakeText[0][0].getBBox();
                 truncated = true;
             }
@@ -313,9 +322,9 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             fakeText.remove();
 
             return {
-                truncated: truncated,
-                text: text,
-                truncatedText: text === truncatedText ? text : truncatedText + '...',
+                truncated,
+                text,
+                truncatedText: text === truncatedText ? text : `${truncatedText  }...`,
                 width: originalWidth
             };
         },
@@ -326,9 +335,9 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 return;
             }
 
-            var $vis = this;
+            const $vis = this;
 
-            var shapeArea = {
+            const shapeArea = {
                 circle: 81,
                 square: 81,
                 'triangle-up': 49,
@@ -337,33 +346,34 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 cross: 49
             };
 
-            var legendRectSize = 8;
+            // unused, disable
+            // const legendRectSize = 8;
 
-            var legendRegionBounds = this[this.options.legendRegion + 'Bounds']();
+            const legendRegionBounds = this[`${this.options.legendRegion  }Bounds`]();
 
-            var legendWidth = Math.min(this.options.legendWidth || 1000000000, legendRegionBounds.size.width);
+            const legendWidth = Math.min(this.options.legendWidth || 1000000000, legendRegionBounds.size.width);
 
-            var legendX = 0;
-            var legendY = 0;
+            let legendX = 0;
+            let legendY = 0;
 
-            var textXOffset = $vis.options.legendTextXOffset;
-            var textYOffset = $vis.options.legendTextYOffset;
+            const textXOffset = $vis.options.legendTextXOffset;
+            const textYOffset = $vis.options.legendTextYOffset;
 
             if (this.options.legendAlignment.match(/B/)) {
                 legendY = legendRegionBounds.size.height - $vis.options.legendLineHeight * this.legend().length;
             }
 
             if (this.options.legendAlignment.match(/R/)) {
-                var actualWidth = 0;
-                this.legend().forEach(function (item, i) {
-                    var trunc = $vis.fitTextToWidth(item.label, legendWidth);
+                let actualWidth = 0;
+                this.legend().forEach((item) => {
+                    const trunc = $vis.fitTextToWidth(item.label, legendWidth);
                     actualWidth = Math.max(actualWidth, trunc.width);
                 });
 
                 legendX = legendRegionBounds.size.width - (actualWidth + textXOffset + 6);
             }
 
-            var uniqueKey = function (d) {
+            const uniqueKey = function (d) {
                 return d.label;
             };
 
@@ -375,25 +385,25 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 .append('g')
                 .attr('class', 'legend');
 
-            var legend = this.D3svg()
+            const legend = this.D3svg()
                 .select(this.region(this.options.legendRegion))
                 .selectAll('.legend')
                 .selectAll('g')
                 .data(this.legend(), uniqueKey);
 
-            var gTransform = function (b, j, i) {
-                var horz = 6 + legendX + $vis.options.legendOffset[0];
-                var vert = 6 + i * $vis.options.legendLineHeight + legendY + $vis.options.legendOffset[1];
-                return 'translate(' + horz + ',' + vert + ')';
+            const gTransform = function (b, j, i) {
+                const horz = 6 + legendX + $vis.options.legendOffset[0];
+                const vert = 6 + i * $vis.options.legendLineHeight + legendY + $vis.options.legendOffset[1];
+                return `translate(${  horz  },${  vert  })`;
             };
 
             legend
                 .enter()
                 .append('g')
                 .each(function (d, i) {
-                    var g = d3.select(this);
+                    const g = d3.select(this);
 
-                    g.attr('transform', function (b, j) {
+                    g.attr('transform', (b, j) => {
                         return gTransform(b, j, i);
                     });
 
@@ -403,32 +413,32 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                         .attr('opacity', 0);
                 });
 
-            var time = this.drawnLegend ? this.options.transitionTime : 0;
+            const time = this.drawnLegend ? this.options.transitionTime : 0;
 
             legend.each(function (d, i) {
-                var g = d3.select(this);
+                const g = d3.select(this);
 
                 g.transition()
                     .duration(time)
-                    .attr('transform', function (b, j) {
+                    .attr('transform', (b, j) => {
                         return gTransform(b, j, i);
                     });
 
-                var truncationObj = $vis.fitTextToWidth(d.label, legendWidth);
+                const truncationObj = $vis.fitTextToWidth(d.label, legendWidth);
 
                 g.selectAll('path')
                     .transition()
                     .duration(time)
-                    .attr('d', function (b) {
+                    .attr('d', () => {
                         return d3.svg
                             .symbol()
                             .type(d.shape || 'square')
                             .size(shapeArea[d.shape] || 81)();
                     })
-                    .style('fill', function (b, j) {
+                    .style('fill', () => {
                         return d.color;
                     })
-                    .style('stroke', function (b, j) {
+                    .style('stroke', () => {
                         return d.color;
                     })
                     .attr('opacity', 1);
@@ -440,22 +450,22 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                     .attr('y', textYOffset)
                     .attr('font-size', $vis.options.legendSize)
                     .style('cursor', 'pointer')
-                    .text(function () {
+                    .text(() => {
                         return truncationObj.truncatedText;
                     })
                     .attr('opacity', 1);
 
                 g.selectAll('text')
-                    .on('mouseover', function (d) {
+                    .on('mouseover', (d) => {
                         if (truncationObj.truncated) {
-                            $vis.showToolTip({ label: truncationObj.text });
+                            $vis.showToolTip({label: truncationObj.text});
                         }
 
                         if (d.represents) {
                             $vis.legendOver(d.represents);
                         }
                     })
-                    .on('mouseout', function (d) {
+                    .on('mouseout', (d) => {
                         if (truncationObj.truncated) {
                             $vis.hideToolTip();
                         }
@@ -465,8 +475,8 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                     });
             });
 
-            legend.exit().each(function (d, i) {
-                var g = d3.select(this);
+            legend.exit().each(function () {
+                const g = d3.select(this);
 
                 g.selectAll('path')
                     .transition()
@@ -488,11 +498,11 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             return;
         },
         renderULCorner: function renderULCorner() {
-            var ulBounds = this.ULBounds();
+            const ulBounds = this.ULBounds();
 
-            var imgSize = new Size(ulBounds.size.width, ulBounds.size.height);
+            const imgSize = new Size(ulBounds.size.width, ulBounds.size.height);
 
-            var inset = 5;
+            const inset = 5;
 
             imgSize.width -= inset;
             imgSize.height -= inset;
@@ -507,10 +517,10 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 return;
             }
 
-            var ulDataset = [this.options.ulIcon];
+            const ulDataset = [this.options.ulIcon];
 
             if (this.options.ulIcon) {
-                var ulLabel = this.D3svg()
+                const ulLabel = this.D3svg()
                     .select(this.region('UL'))
                     .selectAll('.ULLabel');
 
@@ -522,7 +532,7 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                     .attr('y', inset / 2)
                     .attr('width', imgSize.width)
                     .attr('height', imgSize.height)
-                    .attr('xlink:href', function (d) {
+                    .attr('xlink:href', (d) => {
                         return d;
                     });
             }
@@ -536,14 +546,14 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
 
             this.render();
         },
-        extractLegend: function extractLegend(dataset) {
+        extractLegend: function extractLegend() {
             /* no op in the super class */
         },
-        setJSONDataset: function (json_url) {
-            var $vis = this;
+        setJSONDataset(json_url) {
+            const $vis = this;
 
-            $.ajax(json_url, { dataType: 'json' })
-                .then(function (d) {
+            $.ajax(json_url, {dataType: 'json'})
+                .then((d) => {
                     if (d.data && !d.dataset) {
                         d.dataset = d.data;
                     }
@@ -561,11 +571,12 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                         $vis.setDataset(d);
                     }
                 })
-                .fail(function (d) {
+                .fail((d) => {
                     $vis.$elem.empty();
                     $vis.$elem
                         .addClass('alert alert-danger')
-                        .html('Could not load JSON ' + json_url + ' : ' + d.responseText);
+                        // safe
+                        .html(`Could not load JSON ${json_url} : ${domSafeText(d.responseText)}`);
                 });
         },
         setDataset: function setDataset(newDataset) {
@@ -599,22 +610,22 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             }
 
             //first, peel off our dataset
-            var myDataset = newDatasets.shift();
+            const myDataset = newDatasets.shift();
 
-            var $me = this;
+            const $me = this;
 
             //the remaining children are datasets of this vis.
-            var initKids = function () {
+            const initKids = function () {
                 $me.setDataset(myDataset);
 
-                for (var i = 0; i < newDatasets.length; i++) {
-                    var child;
+                for (let i = 0; i < newDatasets.length; i++) {
+                    let child;
 
                     if (i < $me.children().length) {
                         child = $me.children()[i];
                         child.reenter(i, newDatasets[i], $me);
                     } else {
-                        var childOptions = $me.childOptions($me.children().length, newDatasets[i]);
+                        const childOptions = $me.childOptions($me.children().length, newDatasets[i]);
                         childOptions.parent = $me;
                         child = $.jqElem('div')[$me.name](childOptions);
                         $me.children().push(child);
@@ -623,7 +634,7 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                     child.setDataset(newDatasets[i]);
                 }
 
-                for (var i = newDatasets.length; i < $me.children().length; i++) {
+                for (let i = newDatasets.length; i < $me.children().length; i++) {
                     $me.children()[i].setDataset(undefined);
                 }
 
@@ -632,7 +643,7 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
 
             this.callAfterInit(initKids);
         },
-        reenter: function reenter(idx, dataset, $parent) {},
+        reenter: function reenter() {},
         childOptions: function childOptions(idx, dataset) {
             return $.extend(true, {}, dataset.options || this.options.childOptions || this.options);
         },
@@ -643,12 +654,12 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             return [0, 100];
         },
         renderXLabel: function renderXLabel() {
-            var labelRegionBounds = this[this.options.xLabelRegion + 'Bounds']();
+            const labelRegionBounds = this[`${this.options.xLabelRegion  }Bounds`]();
 
-            var xLabeldataset = [this.xLabel()];
-            var yOffset = this.options.xLabelOffset;
+            const xLabeldataset = [this.xLabel()];
+            const yOffset = this.options.xLabelOffset;
 
-            var xLabel = this.D3svg()
+            const xLabel = this.D3svg()
                 .select(this.region(this.options.xLabelRegion))
                 .selectAll('.xLabel');
             xLabel
@@ -663,18 +674,18 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 .attr('font-size', this.options.xLabelSize)
                 .attr('font-family', 'sans-serif')
                 .attr('fill', 'black')
-                .attr('transform', 'translate(0,' + yOffset + ')')
+                .attr('transform', `translate(0,${  yOffset  })`)
                 .text(this.xLabel());
         },
         renderYLabel: function renderYLabel() {
-            var labelRegionBounds = this[this.options.yLabelRegion + 'Bounds']();
+            const labelRegionBounds = this[`${this.options.yLabelRegion  }Bounds`]();
 
-            var yLabeldataset = [this.yLabel()];
+            const yLabeldataset = [this.yLabel()];
 
-            var rotation = this.options.yLabelRegion === 'xPadding' ? -90 : 90;
-            var xOffset = this.options.yLabelOffset;
+            const rotation = this.options.yLabelRegion === 'xPadding' ? -90 : 90;
+            const xOffset = this.options.yLabelOffset;
 
-            var yLabel = this.D3svg()
+            const yLabel = this.D3svg()
                 .select(this.region(this.options.yLabelRegion))
                 .selectAll('.yLabel');
             yLabel
@@ -691,15 +702,15 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 .attr('fill', 'black')
                 .attr(
                     'transform',
-                    'translate(' +
-                        xOffset +
-                        ',0) rotate(' +
-                        rotation +
-                        ',' +
-                        (labelRegionBounds.size.width / 2 - 7) +
-                        ',' +
-                        labelRegionBounds.size.height / 2 +
-                        ')'
+                    `translate(${
+                        xOffset
+                    },0) rotate(${
+                        rotation
+                    },${
+                        labelRegionBounds.size.width / 2 - 7
+                    },${
+                        labelRegionBounds.size.height / 2
+                    })`
                 )
                 .text(this.yLabel());
         },
@@ -710,7 +721,7 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             return val;
         },
         renderXAxis: function renderXAxis() {
-            var $self = this;
+            const $self = this;
 
             if (!this.options.shouldRenderXAxis) {
                 return;
@@ -720,32 +731,32 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 return;
             }
 
-            var axisTransform = this.options.xAxisRegion === 'yGutter' ? axisRegionBounds.size.height : 0;
+            let axisTransform = this.options.xAxisRegion === 'yGutter' ? axisRegionBounds.size.height : 0;
 
             if (this.options.xAxisTransform) {
                 axisTransform = this.options.xAxisTransform;
             }
 
-            var axisRegionBounds = this[this.options.xAxisRegion + 'Bounds']();
+            const axisRegionBounds = this[`${this.options.xAxisRegion  }Bounds`]();
 
-            var xAxisOrientation = this.options.xAxisOrientation;
+            let xAxisOrientation = this.options.xAxisOrientation;
 
             if (xAxisOrientation === 'bottom' && axisTransform > axisRegionBounds.size.height - 30) {
                 xAxisOrientation = 'top';
             }
 
-            var xAxis = d3.svg
+            const xAxis = d3.svg
                 .axis()
                 .scale(this.xScale())
                 .orient(xAxisOrientation);
 
-            var ticks = this.xTickValues();
+            const ticks = this.xTickValues();
 
             if (ticks !== undefined) {
                 xAxis
                     .tickValues(ticks)
                     .tickSubdivide(0)
-                    .tickFormat(function (d) {
+                    .tickFormat((d) => {
                         return $self.xTickLabel.call($self, d);
                     });
             }
@@ -754,7 +765,7 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 xAxis.tickFormat('');
             }
 
-            var gxAxis = this.D3svg()
+            let gxAxis = this.D3svg()
                 .select(this.region(this.options.xAxisRegion))
                 .select('.xAxis');
 
@@ -771,16 +782,17 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             this.D3svg()
                 .select(this.region(this.options.xAxisRegion))
                 .selectAll('.xAxis')
-                .attr('transform', 'translate(0,' + axisTransform + ')');
+                .attr('transform', `translate(0,${  axisTransform  })`);
 
             if (this.options.xAxisVerticalLabels) {
-                gxAxis.selectAll('text').attr('transform', function (d, i) {
+                gxAxis.selectAll('text').attr('transform', function () {
                     try {
-                        var bounds = $self.yGutterBounds();
+                        // disable, unused
+                        // const bounds = $self.yGutterBounds();
 
-                        var textBounds = this.getBBox();
+                        const textBounds = this.getBBox();
                         //bullshit magic numbers. Moving it over by 2/3rds of the width seems to line it up nicely, and down by the height.
-                        return 'rotate(90) translate(' + (textBounds.width * 2) / 3 + ',-' + textBounds.height + ')';
+                        return `rotate(90) translate(${  (textBounds.width * 2) / 3  },-${  textBounds.height  })`;
                     } catch (err) {
                         //firefox is stupid! the first call to getBBox fails because it's not attached yet. Tosses an exception.
                         return undefined;
@@ -788,7 +800,7 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 });
             }
 
-            var transitionTime = this.renderedXAxis ? this.options.transitionTime : 0;
+            const transitionTime = this.renderedXAxis ? this.options.transitionTime : 0;
 
             gxAxis
                 .transition()
@@ -797,8 +809,9 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             this.renderedXAxis = true;
         },
         svg2HTML: function svg2HTML() {
-            var $container = $.jqElem('div').append(this.data('$svg'));
+            const $container = $.jqElem('div').append(this.data('$svg'));
 
+            // safe
             return $container.html();
         },
         renderYAxis: function renderYAxis() {
@@ -810,7 +823,7 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 return;
             }
 
-            var yAxis = d3.svg
+            const yAxis = d3.svg
                 .axis()
                 .scale(this.yScale())
                 .orient(this.options.yAxisOrientation);
@@ -819,12 +832,12 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 yAxis.tickFormat('');
             }
 
-            var gyAxis = this.D3svg()
+            let gyAxis = this.D3svg()
                 .select(this.region(this.options.yAxisRegion))
                 .select('.yAxis');
 
-            var axisRegionBounds = this[this.options.yAxisRegion + 'Bounds']();
-            var axisTransform = this.options.yAxisRegion === 'xPadding' ? axisRegionBounds.size.width : 0;
+            const axisRegionBounds = this[`${this.options.yAxisRegion  }Bounds`]();
+            const axisTransform = this.options.yAxisRegion === 'xPadding' ? axisRegionBounds.size.width : 0;
 
             if (!gyAxis[0][0]) {
                 gyAxis = this.D3svg()
@@ -832,10 +845,10 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                     .append('g')
                     .attr('class', 'yAxis axis')
                     .attr('fill', this.options.yAxisColor)
-                    .attr('transform', 'translate(' + axisTransform + ',0)');
+                    .attr('transform', `translate(${  axisTransform  },0)`);
             }
 
-            var transitionTime = this.renderedYAxis ? this.options.transitionTime : 0;
+            const transitionTime = this.renderedYAxis ? this.options.transitionTime : 0;
 
             gyAxis
                 .transition()
@@ -864,13 +877,13 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
          */
 
         appendUI: function appendUI($elem) {
-            var $vis = this;
+            const $vis = this;
 
-            var chartBounds = this.chartBounds();
+            const chartBounds = this.chartBounds();
             if (chartBounds.size.width !== chartBounds.size.height && this.options.aspectRatio !== 'default') {
-                var diff = Math.abs(chartBounds.size.width - chartBounds.size.height);
-                var newHeight = $elem.height();
-                var newWidth = $elem.width();
+                const diff = Math.abs(chartBounds.size.width - chartBounds.size.height);
+                let newHeight = $elem.height();
+                let newWidth = $elem.width();
 
                 if (this.options.aspectRatio === 'minSquare') {
                     if (chartBounds.size.width < chartBounds.size.height) {
@@ -897,20 +910,21 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 this.height(newHeight);
             }
 
-            var D3svg;
+            let D3svg;
 
             if (!this.options.parent) {
                 $elem.append(
+                    // safe
                     $.jqElem('style').html(
-                        '.axis path, .axis line { fill : none; stroke : black; shape-rendering : crispEdges;} .axis text \
-                            {font-family : sans-serif; font-size : 11px}'
+                        `.axis path, .axis line {fill : none; stroke : black; shape-rendering : crispEdges;} .axis text 
+                            {font-family : sans-serif; font-size : 11px}`
                     )
                 );
 
                 D3svg = d3
                     .select($elem.get(0))
                     .append('svg')
-                    .attr('style', 'width : ' + this.options.width + '; height : ' + this.options.height);
+                    .attr('style', `width : ${  this.options.width  }; height : ${  this.options.height}`);
                 //.attr('viewBox', '0 0 1600 1600')
                 //.attr('preserveAspectRatio', 'mMidYMid mMidYMid')
                 //.attr('width', 1600)
@@ -958,24 +972,24 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             }
 
             if (this.options.rootRegion) {
-                var rootRegion = $vis.region('root', true);
-                D3svg = D3svg.selectAll('.' + rootRegion).data([{ region: rootRegion }], function (d) {
+                const rootRegion = $vis.region('root', true);
+                D3svg = D3svg.selectAll(`.${  rootRegion}`).data([{region: rootRegion}], (d) => {
                     return d.region;
                 });
                 D3svg.enter()
                     .append('g')
-                    .attr('class', function (d) {
+                    .attr('class', (d) => {
                         return d.region;
                     })
                     .attr(
                         'transform',
-                        $.proxy(function (region) {
+                        $.proxy(() => {
                             return $vis.buildTransformation($vis.options.rootRegion);
                         }, this)
                     );
             }
 
-            var regions = [
+            const regions = [
                 'chart', //add the chart first, because we want it to be at the lowest level.
                 'UL',
                 'UR',
@@ -988,7 +1002,7 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             ];
 
             //used when debug is on.
-            var colors = ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow', 'purple', 'orange', 'gray'];
+            const colors = ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow', 'purple', 'orange', 'gray'];
 
             D3svg.selectAll('defs')
                 .data([null])
@@ -996,48 +1010,48 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 .append('defs')
                 .attr('class', 'definitions');
 
-            var regionG = D3svg.selectAll('g')
-                .data(regions, function (d) {
+            const regionG = D3svg.selectAll('g')
+                .data(regions, (d) => {
                     return d;
                 })
                 .enter()
                 .append('g')
-                .attr('class', function (region) {
+                .attr('class', (region) => {
                     return region;
                 })
                 .attr(
                     'data-x',
                     $.proxy(function (region) {
-                        var bounds = this[region + 'Bounds']();
+                        const bounds = this[`${region  }Bounds`]();
                         return bounds.origin.x;
                     }, this)
                 )
                 .attr(
                     'data-y',
                     $.proxy(function (region) {
-                        var bounds = this[region + 'Bounds']();
+                        const bounds = this[`${region  }Bounds`]();
                         return bounds.origin.y;
                     }, this)
                 )
                 .attr(
                     'data-width',
                     $.proxy(function (region) {
-                        var bounds = this[region + 'Bounds']();
+                        const bounds = this[`${region  }Bounds`]();
                         return bounds.size.width;
                     }, this)
                 )
                 .attr(
                     'data-height',
                     $.proxy(function (region) {
-                        var bounds = this[region + 'Bounds']();
+                        const bounds = this[`${region  }Bounds`]();
                         return bounds.size.height;
                     }, this)
                 )
                 .attr(
                     'transform',
                     $.proxy(function (region) {
-                        var bounds = this[region + 'Bounds']();
-                        return 'translate(' + bounds.origin.x + ',' + bounds.origin.y + ')';
+                        const bounds = this[`${region  }Bounds`]();
+                        return `translate(${  bounds.origin.x  },${  bounds.origin.y  })`;
                     }, this)
                 );
 
@@ -1048,34 +1062,34 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 .attr(
                     'width',
                     $.proxy(function (region) {
-                        var bounds = this[region + 'Bounds']();
+                        const bounds = this[`${region  }Bounds`]();
                         return bounds.size.width;
                     }, this)
                 )
                 .attr(
                     'height',
                     $.proxy(function (region) {
-                        var bounds = this[region + 'Bounds']();
+                        const bounds = this[`${region  }Bounds`]();
                         return bounds.size.height;
                     }, this)
                 )
-                .attr('fill', function (d) {
+                .attr('fill', () => {
                     return $vis.options.debug ? colors.shift() : $vis.options.bgColor;
                 })
                 .attr('class', 'background');
 
-            $.each(regions, function (idx, region) {
-                D3svg.selectAll('.' + region)
+            $.each(regions, (idx, region) => {
+                D3svg.selectAll(`.${  region}`)
                     .selectAll('g')
-                    .data([{ region: $vis.region(region, true), r: region }], function (d) {
+                    .data([{region: $vis.region(region, true), r: region}], (d) => {
                         return d.region;
                     })
                     .enter()
                     .append('g')
-                    .attr('class', function (d) {
+                    .attr('class', (d) => {
                         return d.region;
                     })
-                    .attr('transform', function (d) {
+                    .attr('transform', (d) => {
                         return $vis.buildTransformation(
                             $vis.options.transformations[d.r] || $vis.options.transformations.global
                         );
@@ -1091,34 +1105,34 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
              ;*/
         },
         buildTransformation: function buildTransformation(transformation) {
-            var transform = $.extend(
+            const transform = $.extend(
                 true,
-                { translate: { x: 0, y: 0 }, scale: { width: 1, height: 1 } },
+                {translate: {x: 0, y: 0}, scale: {width: 1, height: 1}},
                 transformation
             );
 
             return (
-                'translate(' +
-                transform.translate.x +
-                ',' +
-                transform.translate.y +
-                ')' +
-                ' scale(' +
-                transform.scale.width +
-                ',' +
-                transform.scale.height +
-                ')'
+                `translate(${
+                    transform.translate.x
+                },${
+                    transform.translate.y
+                })` +
+                ` scale(${
+                    transform.scale.width
+                },${
+                    transform.scale.height
+                })`
             );
         },
         D3svg: function D3svg() {
             if (this.options.parent) {
                 return this.options.parent.D3svg();
-            } else {
-                return this.data('D3svg');
             }
+            return this.data('D3svg');
+
         },
         region: function _region(region, asName) {
-            var dot = '';
+            let dot = '';
 
             if (!asName) {
                 dot = '.';
@@ -1128,7 +1142,7 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 return dot + this.options.customRegions[region];
             }
 
-            return dot + region + '-' + this.options.chartID;
+            return `${dot + region  }-${  this.options.chartID}`;
         },
         ULBounds: function ULBounds() {
             return new Rectangle(new Point(0, 0), new Size(this.xPadding(), this.yGutter()));
@@ -1179,10 +1193,10 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             );
         },
         chartBounds: function chartBounds() {
-            var widgetWidth = this.$elem.width();
-            var widgetHeight = this.$elem.height();
+            const widgetWidth = this.$elem.width();
+            const widgetHeight = this.$elem.height();
 
-            var chart = new Rectangle(
+            const chart = new Rectangle(
                 new Point(this.xPadding(), this.yGutter()),
                 new Size(
                     widgetWidth - this.xPadding() - this.xGutter(),
@@ -1207,12 +1221,13 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
 
             d3.selectAll('.visToolTip')
                 .style('display', 'block')
-                .html(args.label)
-                .style('left', args.event.pageX + 10 + 'px')
-                .style('top', args.event.pageY - 10 + 'px')
-                .style('max-width', (args.maxWidth || '300') + 'px');
+                // safe
+                .html(domSafeText(args.label))
+                .style('left', `${args.event.pageX + 10  }px`)
+                .style('top', `${args.event.pageY - 10  }px`)
+                .style('max-width', `${args.maxWidth || '300'  }px`);
         },
-        hideToolTip: function hideToolTip(args) {
+        hideToolTip: function hideToolTip() {
             d3.selectAll('.visToolTip').style('display', 'none');
         },
         radialGradient: function radialGradient(grad) {
@@ -1227,7 +1242,7 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 grad
             );
 
-            var gradKey = [grad.cx, grad.cy, grad.r, grad.startColor, grad.stopColor].join(',');
+            const gradKey = [grad.cx, grad.cy, grad.r, grad.startColor, grad.stopColor].join(',');
 
             /*$.each(
              this.radialGradients(),
@@ -1249,12 +1264,12 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             //I'd prefer to .select('.definitions').selectAll('radialGradient') and then just let
             //d3 figure out the one that appropriately maps to my given grad value...but I couldn't
             //get that to work for some inexplicable reason.
-            var gradient = this.D3svg()
+            const gradient = this.D3svg()
                 .select('.definitions')
-                .selectAll('#' + grad.id)
+                .selectAll(`#${  grad.id}`)
                 .data([grad]);
 
-            var newGrad = false;
+            let newGrad = false;
 
             //as brilliant as this hack is, it's also godawful. I might as well put a goto here.
             //this just returns the grad's id, as usual. BUT it also invokes a side effect to set
@@ -1264,25 +1279,25 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             gradient
                 .enter()
                 .append('radialGradient')
-                .attr('id', function (d) {
+                .attr('id', (d) => {
                     newGrad = true;
                     return d.id;
                 })
                 .attr('gradientUnits', 'userSpaceOnUse')
-                .attr('cx', function (d) {
+                .attr('cx', (d) => {
                     return d.cx;
                 })
-                .attr('cy', function (d) {
+                .attr('cy', (d) => {
                     return d.cy;
                 })
-                .attr('r', function (d) {
+                .attr('r', (d) => {
                     return 2.5 * d.r;
                 })
                 .attr('spreadMethod', 'pad');
 
-            var transitionTime = newGrad ? 0 : this.options.transitionTime;
+            const transitionTime = newGrad ? 0 : this.options.transitionTime;
 
-            var stop0 = gradient.selectAll('stop[offset="0%"]').data([grad]);
+            const stop0 = gradient.selectAll('stop[offset="0%"]').data([grad]);
             stop0
                 .enter()
                 .append('stop')
@@ -1290,11 +1305,11 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             stop0
                 .transition()
                 .duration(transitionTime)
-                .attr('stop-color', function (d) {
+                .attr('stop-color', (d) => {
                     return d.startColor;
                 });
 
-            var stop30 = gradient.selectAll('stop[offset="30%"]').data([grad]);
+            const stop30 = gradient.selectAll('stop[offset="30%"]').data([grad]);
             stop30
                 .enter()
                 .append('stop')
@@ -1303,11 +1318,11 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             stop30
                 .transition()
                 .duration(transitionTime)
-                .attr('stop-color', function (d) {
+                .attr('stop-color', (d) => {
                     return d.startColor;
                 });
 
-            var stop70 = gradient.selectAll('stop[offset="70%"]').data([grad]);
+            const stop70 = gradient.selectAll('stop[offset="70%"]').data([grad]);
             stop70
                 .enter()
                 .append('stop')
@@ -1316,14 +1331,14 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             stop70
                 .transition()
                 .duration(transitionTime)
-                .attr('stop-color', function (d) {
+                .attr('stop-color', (d) => {
                     return d.stopColor;
                 });
 
             return (this.radialGradients()[gradKey] = grad.id);
         },
         linearGradient: function linearGradient(grad) {
-            var chartBounds = this.chartBounds();
+            const chartBounds = this.chartBounds();
 
             grad = $.extend(
                 true,
@@ -1338,7 +1353,7 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                 grad
             );
 
-            var gradKey = [grad.cx, grad.cy, grad.r, grad.startColor, grad.stopColor].join(',');
+            const gradKey = [grad.cx, grad.cy, grad.r, grad.startColor, grad.stopColor].join(',');
 
             if (this.linearGradients()[gradKey] !== undefined && grad.id === undefined) {
                 grad.id = this.linearGradients()[gradKey];
@@ -1351,12 +1366,12 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             //I'd prefer to .select('.definitions').selectAll('linearGradient') and then just let
             //d3 figure out the one that appropriately maps to my given grad value...but I couldn't
             //get that to work for some inexplicable reason.
-            var gradient = this.D3svg()
+            const gradient = this.D3svg()
                 .select('.definitions')
-                .selectAll('#' + grad.id)
+                .selectAll(`#${  grad.id}`)
                 .data([grad]);
 
-            var newGrad = false;
+            let newGrad = false;
 
             //as brilliant as this hack is, it's also godawful. I might as well put a goto here.
             //this just returns the grad's id, as usual. BUT it also invokes a side effect to set
@@ -1366,49 +1381,49 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             gradient
                 .enter()
                 .append('linearGradient')
-                .attr('id', function (d) {
+                .attr('id', (d) => {
                     newGrad = true;
                     return d.id;
                 })
                 .attr('gradientUnits', 'userSpaceOnUse')
-                .attr('x1', function (d) {
+                .attr('x1', (d) => {
                     return d.x1;
                 })
-                .attr('x2', function (d) {
+                .attr('x2', (d) => {
                     return d.x2;
                 })
-                .attr('y1', function (d) {
+                .attr('y1', (d) => {
                     return d.y1;
                 })
-                .attr('y2', function (d) {
+                .attr('y2', (d) => {
                     return d.y2;
                 })
                 .attr('spreadMethod', 'pad');
 
-            var transitionTime = newGrad ? 0 : this.options.transitionTime;
+            const transitionTime = newGrad ? 0 : this.options.transitionTime;
 
-            var gradStops = gradient.selectAll('stop').data(grad.colors);
+            const gradStops = gradient.selectAll('stop').data(grad.colors);
 
             gradStops.enter().append('stop');
 
             gradStops
                 .transition()
                 .duration(transitionTime)
-                .attr('offset', function (d, i) {
+                .attr('offset', (d, i) => {
                     if (grad.gradStops) {
                         return grad.gradStops[i];
-                    } else {
-                        var num = 0;
-                        if (i === grad.colors.length - 1) {
-                            num = 1;
-                        } else if (i > 0) {
-                            num = i / (grad.colors.length - 1);
-                        }
-
-                        return Math.round(10000 * num) / 100 + '%';
                     }
+                    let num = 0;
+                    if (i === grad.colors.length - 1) {
+                        num = 1;
+                    } else if (i > 0) {
+                        num = i / (grad.colors.length - 1);
+                    }
+
+                    return `${Math.round(10000 * num) / 100  }%`;
+
                 })
-                .attr('stop-color', function (d) {
+                .attr('stop-color', (d) => {
                     return d;
                 });
 
@@ -1422,23 +1437,23 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
             }
 
             text.each(function () {
-                var text = d3.select(this),
+                const text = d3.select(this),
                     words = text
                         .text()
                         .split(/\s+/)
                         .reverse(),
-                    word,
-                    line = [],
-                    lineNumber = 0,
                     lineHeight = 1.1, // ems
                     y = text.attr('y'),
-                    dy = parseFloat(text.attr('dy')) || 0,
-                    tspan = text
-                        .text(null)
-                        .append('tspan')
-                        .attr('x', xCoord)
-                        .attr('y', y)
-                        .attr('dy', dy + 'em');
+                    dy = parseFloat(text.attr('dy')) || 0;
+
+                let tspan = text
+                    .text(null)
+                    .append('tspan')
+                    .attr('x', xCoord)
+                    .attr('y', y)
+                    .attr('dy', `${dy  }em`);
+
+                let word, line = [];
 
                 while ((word = words.pop())) {
                     line.push(word);
@@ -1451,26 +1466,26 @@ define(['jquery', 'd3', './geometry/rectangle', './geometry/point', './geometry/
                             .append('tspan')
                             .attr('x', xCoord)
                             .attr('y', y)
-                            .attr('dy', lineHeight + 'em') //++lineNumber * lineHeight + dy + "em")
+                            .attr('dy', `${lineHeight}em`) //++lineNumber * lineHeight + dy + "em")
                             .text(word);
                     }
                 }
             });
         },
         absPos: function absPos(obj) {
-            var box = obj.getBBox();
-            var matrix = obj.getScreenCTM();
+            const box = obj.getBBox();
+            const matrix = obj.getScreenCTM();
 
-            return { x: box.x + matrix.e, y: box.y + matrix.f };
+            return {x: box.x + matrix.e, y: box.y + matrix.f};
         },
         endall: function endall(transition, callback) {
-            var n = 0;
+            let n = 0;
             transition
-                .each(function () {
+                .each(() => {
                     ++n;
                 })
                 .each('end', function () {
-                    if (!--n) callback.apply(this, arguments);
+                    if (!--n) callback.apply(this);
                 });
         },
         uniqueness: function uniqueness(uniqueFunc) {
