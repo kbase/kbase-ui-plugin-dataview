@@ -7,6 +7,29 @@ define(['kb_common/utils'], (Utils) => {
         return donorNode.innerHTML;
     }
 
+    /**
+     * domSafeContent
+     * Returns the provided value as a string, safely
+     * encoded for inclusion into the DOM as innerHTML.
+     */
+    function domSafeValue(value) {
+        switch (typeof value) {
+        case 'string':
+            return domSafeText(value);
+        case 'number':
+            return String(value);
+        case 'undefined':
+            return '';
+        case 'boolean':
+            if (value) {
+                return 'true';
+            }
+            return 'false';
+        default:
+            throw new Error('No dom safe value for this type');
+        }
+    }
+
     function objectInfoToObject(rawObjectInfo) {
         const data = rawObjectInfo.map((value) => {
             if (typeof value === 'string') {
@@ -76,5 +99,5 @@ define(['kb_common/utils'], (Utils) => {
         };
     }
 
-    return {objectInfoToObject, workspaceInfoToObject, domSafeText};
+    return {objectInfoToObject, workspaceInfoToObject, domSafeText, domSafeValue};
 });
