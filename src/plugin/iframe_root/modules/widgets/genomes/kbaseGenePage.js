@@ -11,8 +11,7 @@ define([
     'widgets/genomes/kbaseGeneInstanceInfo',
     'widgets/genomes/kbaseGeneBiochemistry',
     'widgets/genomes/kbaseGeneSequence'
-], function ($, html, Workspace) {
-    'use strict';
+], ($, html, Workspace) => {
     $.KBWidget({
         name: 'KBaseGenePage',
         parent: 'kbaseWidget',
@@ -22,7 +21,7 @@ define([
             genomeID: null,
             workspaceID: null
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
             if (this.options.workspaceID === 'CDS') {
                 this.options.workspaceID = 'KBasePublicGenomesV4';
@@ -33,32 +32,32 @@ define([
             this.render();
             return this;
         },
-        render: function () {
-            var self = this;
-            var scope = {
+        render() {
+            const self = this;
+            const scope = {
                 ws: this.options.workspaceID,
                 gid: this.options.genomeID,
                 fid: this.options.featureID
             };
             ///////////////////////////////////////////////////////////////////////////////
-            var cell1 = $('<div panel panel-default">');
+            const cell1 = $('<div panel panel-default">');
             self.$elem.append(cell1);
-            var panel1 = self.makePleaseWaitPanel();
+            const panel1 = self.makePleaseWaitPanel();
             self.makeDecoration(cell1, 'Feature Overview', panel1);
             ///////////////////////////////////////////////////////////////////////////////
-            var cell2 = $('<div panel panel-default">');
+            const cell2 = $('<div panel panel-default">');
             self.$elem.append(cell2);
-            var panel2 = self.makePleaseWaitPanel();
+            const panel2 = self.makePleaseWaitPanel();
             self.makeDecoration(cell2, 'Biochemistry', panel2);
             ///////////////////////////////////////////////////////////////////////////////
-            var cell3 = $('<div panel panel-default">');
+            const cell3 = $('<div panel panel-default">');
             self.$elem.append(cell3);
-            var panel3 = self.makePleaseWaitPanel();
+            const panel3 = self.makePleaseWaitPanel();
             self.makeDecoration(cell3, 'Sequence', panel3);
             ///////////////////////////////////////////////////////////////////////////////
 
-            var objId = scope.ws + '/' + scope.gid;
-            var included = [
+            const objId = `${scope.ws  }/${  scope.gid}`;
+            const included = [
                 '/complete',
                 '/contig_ids',
                 '/contig_lengths',
@@ -78,7 +77,7 @@ define([
                 '/features/[*]/id'
             ];
 
-            var ready = function (genomeInfo) {
+            const ready = function (genomeInfo) {
                 panel1.empty();
                 try {
                     panel1.KBaseGeneInstanceInfo({
@@ -86,7 +85,7 @@ define([
                         genomeID: scope.gid,
                         workspaceID: scope.ws,
                         hideButtons: true,
-                        genomeInfo: genomeInfo,
+                        genomeInfo,
                         runtime: self.runtime
                     });
                 } catch (e) {
@@ -94,17 +93,13 @@ define([
                     self.showError(panel1, e.message);
                 }
 
-                var searchTerm = '';
-                if (genomeInfo && genomeInfo.data['scientific_name']) {
-                    searchTerm = genomeInfo.data['scientific_name'];
-                }
                 panel2.empty();
                 try {
                     panel2.KBaseGeneBiochemistry({
                         featureID: scope.fid,
                         genomeID: scope.gid,
                         workspaceID: scope.ws,
-                        genomeInfo: genomeInfo,
+                        genomeInfo,
                         runtime: self.runtime
                     });
                 } catch (e) {
@@ -117,7 +112,7 @@ define([
                     featureID: scope.fid,
                     genomeID: scope.gid,
                     workspaceID: scope.ws,
-                    genomeInfo: genomeInfo,
+                    genomeInfo,
                     runtime: self.runtime
                 });
             };
@@ -126,14 +121,14 @@ define([
                 [
                     {
                         ref: objId,
-                        included: included
+                        included
                     }
                 ],
-                function (data) {
-                    var genomeInfo = data[0];
-                    var featureIdx = null;
-                    for (var pos in genomeInfo.data.features) {
-                        var featureId = genomeInfo.data.features[pos].id;
+                (data) => {
+                    const genomeInfo = data[0];
+                    let featureIdx = null;
+                    for (const pos in genomeInfo.data.features) {
+                        const featureId = genomeInfo.data.features[pos].id;
                         if (featureId && featureId === scope.fid) {
                             featureIdx = pos;
                             break;
@@ -141,13 +136,13 @@ define([
                     }
                     if (featureIdx) {
                         self.workspace.get_object_subset(
-                            [{ ref: objId, included: ['/features/' + featureIdx] }],
-                            function (data) {
-                                var fInfo = data[0].data;
+                            [{ref: objId, included: [`/features/${  featureIdx}`]}],
+                            (data) => {
+                                const fInfo = data[0].data;
                                 genomeInfo.data.features[featureIdx] = fInfo.features[0];
                                 ready(genomeInfo);
                             },
-                            function (error) {
+                            (error) => {
                                 console.error('Error loading genome subdata');
                                 console.error(error);
                                 panel1.empty();
@@ -158,12 +153,12 @@ define([
                         );
                     } else {
                         panel1.empty();
-                        self.showError(panel1, 'Feature ' + scope.fid + ' is not found in genome');
+                        self.showError(panel1, `Feature ${  scope.fid  } is not found in genome`);
                         cell2.empty();
                         cell3.empty();
                     }
                 },
-                function (error) {
+                (error) => {
                     console.error('Error loading genome subdata');
                     console.error(error);
                     panel1.empty();
@@ -173,62 +168,53 @@ define([
                 }
             );
         },
-        makePleaseWaitPanel: function () {
+        makePleaseWaitPanel() {
+            // safe
             return $('<div>').html(html.loading('loading...'));
         },
-        makeDecoration: function ($panel, title, $widgetDiv) {
-            var id = this.genUUID();
+        makeDecoration($panel, title, $widgetDiv) {
+            const id = this.genUUID();
             $panel.append(
                 $(
-                    '<div class="panel-group" id="accordion_' + id + '" role="tablist" aria-multiselectable="true">'
+                    `<div class="panel-group" id="accordion_${id}" role="tablist" aria-multiselectable="true">`
                 ).append(
                     $('<div class="panel panel-default kb-widget">')
+                        .append(`<div class="panel-heading" role="tab" id="heading_${id}">
+                                    <h4 class="panel-title">
+                                        <span data-toggle="collapse" 
+                                              data-parent="#accordion_${id}" 
+                                              data-target="#collapse_${id}" 
+                                              aria-expanded="false" 
+                                              aria-controls="collapse_${id}" 
+                                              style="cursor:pointer;">${title}</span>
+                                    </h4>
+                                </div>`)
                         .append(
-                            '' +
-                                '<div class="panel-heading" role="tab" id="heading_' +
-                                id +
-                                '">' +
-                                '<h4 class="panel-title">' +
-                                '<span data-toggle="collapse" data-parent="#accordion_' +
-                                id +
-                                '" data-target="#collapse_' +
-                                id +
-                                '" aria-expanded="false" aria-controls="collapse_' +
-                                id +
-                                '" style="cursor:pointer;">' +
-                                ' ' +
-                                title +
-                                '</span>' +
-                                '</h4>' +
-                                '</div>'
-                        )
-                        .append(
-                            $(
-                                '<div id="collapse_' +
-                                    id +
-                                    '" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_' +
-                                    id +
-                                    '" area-expanded="true">'
-                            ).append($('<div class="panel-body">').append($widgetDiv))
+                            $(`<div id="collapse_${id}" 
+                                    class="panel-collapse collapse in" 
+                                    role="tabpanel" 
+                                    aria-labelledby="heading_${id}" 
+                                    area-expanded="true">`)
+                                .append($('<div class="panel-body">').append($widgetDiv))
                         )
                 )
             );
         },
-        getData: function () {
+        getData() {
             return {
                 type: 'Gene Page',
-                id: this.options.genomeID + '/' + this.options.featureID,
+                id: `${this.options.genomeID  }/${  this.options.featureID}`,
                 workspace: this.options.workspaceID,
                 title: 'Gene Page'
             };
         },
-        showError: function (panel, e) {
+        showError(panel, e) {
             panel.empty();
-            panel.append('Error: ' + JSON.stringify(e));
+            panel.append(`Error: ${  JSON.stringify(e)}`);
         },
-        genUUID: function () {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                var r = (Math.random() * 16) | 0,
+        genUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+                const r = (Math.random() * 16) | 0,
                     v = c === 'x' ? r : (r & 0x3) | 0x8;
                 return v.toString(16);
             });
