@@ -1,14 +1,3 @@
-/**
- * Just a simple example widget to display an expression series
- *
- */
-/*global
- define
- */
-/*jslint
- browser: true,
- white: true
- */
 define([
     'jquery',
     'bluebird',
@@ -16,12 +5,13 @@ define([
     'kb_common/utils',
     'kb_service/client/workspace',
     'kb_service/workspaceClient',
+    'lib/domUtils',
+
+    // For effect
     'kbaseUI/widget/legacy/widget',
     'kbaseUI/widget/legacy/tabs',
-
     'datatables_bootstrap'
-], function ($, Promise, html, Utils, Workspace, workspaceClient) {
-    'use strict';
+], ($, Promise, html, Utils, Workspace, workspaceClient, {domSafeText}) => {
     $.KBWidget({
         name: 'kbaseExpressionSeries',
         parent: 'kbaseWidget',
@@ -29,40 +19,40 @@ define([
         options: {
             color: 'black'
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
-            var workspace = new Workspace(this.runtime.getConfig('services.workspace.url'), {
+            const workspace = new Workspace(this.runtime.getConfig('services.workspace.url'), {
                     token: this.runtime.service('session').getAuthToken()
                 }),
                 wsClient = Object.create(workspaceClient).init({
                     url: this.runtime.getConfig('services.workspace.url'),
                     authToken: this.runtime.service('session').getAuthToken()
                 }),
-                name = options.name,
                 container = this.$elem;
 
+            // safe
             container.html(html.loading());
 
-            function buildTable(data, refhash) {
-                return Promise.try(function () {
+            function buildTable(data) {
+                return Promise.try(() => {
                     container.empty();
-                    var tabs = container.kbTabs({
+                    const tabs = container.kbTabs({
                             tabs: [
-                                { name: 'Overview', active: true },
-                                { name: 'ExpressionSeries', content: html.loading() }
+                                {name: 'Overview', active: true},
+                                {name: 'ExpressionSeries', content: html.loading()}
                             ]
                         }),
                         // Code to displaying overview data
                         keys = [
-                            { key: 'wsid' },
-                            { key: 'ws' },
-                            { key: 'kbid' },
-                            { key: 'source' },
-                            { key: 'genome' },
-                            { key: 'type' },
-                            { key: 'errors' },
-                            { key: 'owner' },
-                            { key: 'date' }
+                            {key: 'wsid'},
+                            {key: 'ws'},
+                            {key: 'kbid'},
+                            {key: 'source'},
+                            {key: 'genome'},
+                            {key: 'type'},
+                            {key: 'errors'},
+                            {key: 'owner'},
+                            {key: 'date'}
                         ],
                         wsObj = data[0][0],
                         genome = Object.keys(wsObj.data.genome_expression_sample_ids_map)[0],
@@ -71,7 +61,7 @@ define([
                             ws: wsObj.info[7],
                             kbid: wsObj.data.regulome_id,
                             source: wsObj.data.source,
-                            genome: genome,
+                            genome,
                             type: wsObj.data.type,
                             errors: wsObj.data.importErrors,
                             owner: wsObj.creator,
@@ -88,23 +78,23 @@ define([
                             'Owner',
                             'Creation date'
                         ],
-                        table = Utils.objTable({ obj: phenooverdata, keys: keys, labels: labels }),
+                        table = Utils.objTable({obj: phenooverdata, keys, labels}),
                         series = wsObj.data.genome_expression_sample_ids_map[genome],
                         sample_refs = [];
 
                     tabs.tabContent('Overview').append(table);
 
-                    for (var i = 0; i < series.length; i++) {
-                        sample_refs.push({ ref: series[i] });
+                    for (let i = 0; i < series.length; i++) {
+                        sample_refs.push({ref: series[i]});
                     }
-                    return Promise.resolve(workspace.get_objects(sample_refs)).then(function (sample_data) {
+                    return Promise.resolve(workspace.get_objects(sample_refs)).then((sample_data) => {
                         // container.rmLoading();
                         //container.empty();
                         //container.append(pcTable);
                         // create a table from the sample names
-                        var pcTable = $('<table class="table table-bordered table-striped" style="width: 100%;">');
-                        tabs.setContent({ name: 'ExpressionSeries', content: pcTable });
-                        var tableSettings = {
+                        const pcTable = $('<table class="table table-bordered table-striped" style="width: 100%;">');
+                        tabs.setContent({name: 'ExpressionSeries', content: pcTable});
+                        const tableSettings = {
                             sPaginationType: 'full_numbers',
                             iDisplayLength: 10,
                             aaData: sample_data,
@@ -112,7 +102,7 @@ define([
                             aoColumns: [
                                 {
                                     sTitle: 'Gene Expression Samples',
-                                    mData: function (d) {
+                                    mData(d) {
                                         return d.data.id;
                                     }
                                 }
@@ -123,24 +113,22 @@ define([
                             }
                         };
                         pcTable.dataTable(tableSettings);
-                        // container.html(tabs);
                     });
                 });
             }
 
             workspace
-                .get_objects([{ workspace: options.ws, name: options.name }])
-                .then(function (data) {
-                    var reflist = data[0].refs;
+                .get_objects([{workspace: options.ws, name: options.name}])
+                .then((data) => {
+                    const reflist = data[0].refs;
                     return new Promise.all([data, wsClient.translateRefs(reflist)]);
                 })
-                .then(function (data, refhash) {
+                .then((data, refhash) => {
                     return buildTable(data, refhash);
                 })
-                .catch(function (e) {
-                    // container.rmLoading();
+                .catch((e) => {
                     console.error(e);
-                    container.append('<div class="alert alert-danger">' + e.error.message + '</div>');
+                    container.append(`<div class="alert alert-danger">${domSafeText(e.error.message)}</div>`);
                 });
 
             return this;
