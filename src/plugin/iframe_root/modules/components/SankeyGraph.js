@@ -344,6 +344,7 @@ define([
                     return 0 * d3.rgb(d.color).darker(2);
                 })
                 .append('title')
+                // safe
                 .html((d) => {
                     const objectInfo = objectInfoToObject(d.info);
                     let text =
