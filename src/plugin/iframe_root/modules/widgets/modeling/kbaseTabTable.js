@@ -6,7 +6,7 @@ define([
     'kb_service/client/workspace',
     'kb_service/client/fba',
     'widgets/modeling/KBModeling',
-    'lib/format',
+    'lib/domUtils',
     'content',
 
     // for effect
@@ -29,7 +29,7 @@ define([
     Workspace,
     FBA,
     KBModeling,
-    fmt,
+    {domSafeText},
     content
 ) => {
     const IMAGE_URL = 'http://bioseed.mcs.anl.gov/~chenry/jpeg/';
@@ -38,6 +38,16 @@ define([
         a = t('a'),
         span = t('span'),
         table = t('table');
+
+    function domSafeError(err) {
+        if (err.message) {
+            return domSafeText(err.message);
+        }
+        if (err.error && err.error.message) {
+            return  domSafeText(err.error.message);
+        }
+        return 'Unknown error';
+    }
 
     $.KBWidget({
         name: 'kbaseTabTable',
@@ -549,19 +559,21 @@ define([
                                 .then(({ref, name}) => {
                                     table
                                         .find(`[data-ref="${ref}"]`)
-                                        .html(`<a href="${DATAVIEW_URL}/${ref}" target="_blank">${name || content.na()}</a>`);
+                                        // safe usage of html
+                                        .html(`<a href="${DATAVIEW_URL}/${ref}" target="_blank">${name ? domSafeText(name) : content.na()}</a>`);
                                     return null;
                                 })
                                 .catch((err) => {
                                     console.error(err);
                                     table
                                         .find(`[data-ref="${ref}"]`)
-                                        .html(`<span title="${err.message || err.error && err.error.message}" style="cursor: help">error fetching</span>`);
+                                        // safe usage of html
+                                        .html(`<span title="${domSafeError(err)}" style="cursor: help">error fetching</span>`);
                                     return null;
                                 });
                         } else {
                             // Plain column
-                            r.append(`<td data-k-b-testhook-field="${row.key}">${fmt.domSafeText(data[row.key])}</td>`);
+                            r.append(`<td data-k-b-testhook-field="${row.key}">${domSafeText(data[row.key])}</td>`);
                         }
                     } else if (row.type === 'pictureEquation') {
                         r.append($('<td></td>').append(this.pictureEquation(row.data)));
