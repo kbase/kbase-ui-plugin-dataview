@@ -1,26 +1,37 @@
-define(['bluebird', 'kb_common/html', 'kb_common/bootstrapUtils', '../queryService', 'datatables_bootstrap'], function (
+define([
+    'bluebird',
+    'kb_common/html',
+    'kb_common/bootstrapUtils',
+    'lib/format',
+    '../queryService',
+    'datatables_bootstrap'
+], (
     Promise,
     html,
     BS,
+    {domSafeText},
     QueryService
-) {
-    'use strict';
-    var t = html.tag,
+) => {
+    const t = html.tag,
         div = t('div'),
         span = t('span'),
         table = t('table'),
         tr = t('tr'),
-        td = t('td');
+        td = t('td'),
+        tdSafe = (content) => {
+            const tdTag = t('td');
+            return tdTag(domSafeText(content));
+        };
 
     function factory(config) {
-        var runtime = config.runtime;
-        var hostNode, container;
-        var queryService = QueryService({
-            runtime: runtime
+        const runtime = config.runtime;
+        let hostNode, container;
+        const queryService = QueryService({
+            runtime
         });
 
         function fetchData(objectRef) {
-            var querySpec = {
+            const querySpec = {
                 assembly: {
                     _args: {
                         ref: objectRef
@@ -46,6 +57,7 @@ define(['bluebird', 'kb_common/html', 'kb_common/bootstrapUtils', '../queryServi
         }
 
         function renderSummaryTable(data) {
+            // safe
             container.innerHTML = table(
                 {
                     class: 'table table-striped table-bordered table-hover',
@@ -54,12 +66,12 @@ define(['bluebird', 'kb_common/html', 'kb_common/bootstrapUtils', '../queryServi
                     }
                 },
                 [
-                    tr([td('Number of Contigs'), td(data.assembly.stats.num_contigs)]),
-                    tr([td('Total GC Content'), td(String((data.assembly.stats.gc_content * 100).toFixed(2)) + '%')]),
-                    tr([td('Total Length'), td(data.assembly.stats.dna_size + ' bp')]),
-                    tr([td('External Source'), td(data.workspace.external_source || na())]),
-                    tr([td('External Source ID'), td(data.workspace.external_source_id || na())]),
-                    tr([td('Source Origination Date'), td(data.workspace.external_source_origination_date || na())])
+                    tr([td('Number of Contigs'), tdSafe(data.assembly.stats.num_contigs)]),
+                    tr([td('Total GC Content'), td(`${String((data.assembly.stats.gc_content * 100).toFixed(2))}%`)]),
+                    tr([td('Total Length'), tdSafe(`${Intl.NumberFormat('en-us', {useGrouping: true}).format(data.assembly.stats.dna_size)} bp`)]),
+                    tr([td('External Source'), td(data.workspace.external_source ? domSafeText(data.workspace.external_source) : na())]),
+                    tr([td('External Source ID'), td(data.workspace.external_source_id ? domSafeText(data.workspace.external_source_id) : na())]),
+                    tr([td('Source Origination Date'), td(data.workspace.external_source_origination_date ? domSafeText(data.wforkspace.external_source_origination_date) : na())])
                 ]
             );
         }
@@ -77,23 +89,25 @@ define(['bluebird', 'kb_common/html', 'kb_common/bootstrapUtils', '../queryServi
         }
 
         function renderError(err) {
+            // safe
             container.innerHTML = BS.buildPanel({
                 type: 'danger',
                 title: 'Error',
-                body: err.message
+                body: domSafeText(err.message)
             });
         }
 
         // WIDGET/SERVICE API
 
         function attach(node) {
-            return Promise.try(function () {
+            return Promise.try(() => {
                 hostNode = node;
                 container = hostNode.appendChild(document.createElement('div'));
             });
         }
 
         function start(params) {
+            // safe
             container.innerHTML = div(
                 {
                     style: {
@@ -103,35 +117,35 @@ define(['bluebird', 'kb_common/html', 'kb_common/bootstrapUtils', '../queryServi
                 html.loading()
             );
             return fetchData(params.objectRef)
-                .then(function (data) {
+                .then((data) => {
                     renderSummaryTable(data);
                 })
-                .catch(function (err) {
+                .catch((err) => {
                     renderError(err);
                 });
         }
 
         function stop() {
-            return Promise.try(function () {
+            return Promise.try(() => {
                 return null;
             });
         }
 
         function detach() {
-            return Promise.try(function () {
+            return Promise.try(() => {
                 return null;
             });
         }
         return {
-            attach: attach,
-            start: start,
-            stop: stop,
-            detach: detach
+            attach,
+            start,
+            stop,
+            detach
         };
     }
 
     return {
-        make: function (config) {
+        make(config) {
             return factory(config);
         }
     };
