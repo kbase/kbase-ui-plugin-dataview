@@ -1,12 +1,9 @@
 define([
-    'knockout',
     'kb_knockout/registry',
     'kb_knockout/lib/generators',
     'kb_knockout/lib/viewModelBase',
     'kb_lib/html'
-], function (ko, reg, gen, ViewModelBase, html) {
-    'use strict';
-
+], (reg, gen, ViewModelBase, html) => {
     const t = html.tag,
         iframe = t('iframe'),
         p = t('p'),
@@ -21,7 +18,7 @@ define([
             self.runtime = context['$root'].runtime;
 
             this.files = params.files.map((file, index) => {
-                const name = file.name || 'download-' + index;
+                const name = file.name || `download-${  index}`;
                 return {
                     url: file.URL,
                     name: file.name,
@@ -36,18 +33,18 @@ define([
         makeDownloadLink(shock_url, name) {
             const m = shock_url.match(/\/node\/(.+)$/);
             if (m) {
-                var shock_id = m[1];
-                var query = {
+                const shock_id = m[1];
+                const query = {
                     id: shock_id,
                     wszip: 0,
-                    name: name
+                    name
                 };
-                var queryString = Object.keys(query)
-                    .map(function (key) {
+                const queryString = Object.keys(query)
+                    .map((key) => {
                         return [key, query[key]].map(encodeURIComponent).join('=');
                     })
                     .join('&');
-                var url = self.runtime.config('services.KBaseDataImport.url') + '/download?' + queryString;
+                const url = `${self.runtime.config('services.KBaseDataImport.url')}/download?${  queryString}`;
                 return url;
             }
         }

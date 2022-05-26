@@ -10,7 +10,7 @@ define([
     './links',
     './files',
     './createdObjects'
-], function (
+], (
     ko,
     reg,
     gen,
@@ -22,9 +22,7 @@ define([
     LinksComponent,
     FilesComponent,
     CreateObjectsComponent
-) {
-    'use strict';
-
+) => {
     const t = html.tag,
         span = t('span'),
         div = t('div');
@@ -92,29 +90,29 @@ define([
     }
 
     function buildIcon(arg) {
-        var klasses = ['fa'],
-            style = { verticalAlign: 'middle' };
-        klasses.push('fa-' + arg.name);
+        const klasses = ['fa'],
+            style = {verticalAlign: 'middle'};
+        klasses.push(`fa-${  arg.name}`);
         if (arg.rotate) {
-            klasses.push('fa-rotate-' + String(arg.rotate));
+            klasses.push(`fa-rotate-${  String(arg.rotate)}`);
         }
         if (arg.flip) {
-            klasses.push('fa-flip-' + arg.flip);
+            klasses.push(`fa-flip-${  arg.flip}`);
         }
         if (arg.size) {
             if (typeof arg.size === 'number') {
-                klasses.push('fa-' + String(arg.size) + 'x');
+                klasses.push(`fa-${  String(arg.size)  }x`);
             } else {
-                klasses.push('fa-' + arg.size);
+                klasses.push(`fa-${  arg.size}`);
             }
         }
         if (arg.classes) {
-            arg.classes.forEach(function (klass) {
+            arg.classes.forEach((klass) => {
                 klasses.push(klass);
             });
         }
         if (arg.style) {
-            Object.keys(arg.style).forEach(function (key) {
+            Object.keys(arg.style).forEach((key) => {
                 style[key] = arg.style[key];
             });
         }
@@ -124,19 +122,19 @@ define([
 
         return span({
             dataElement: 'icon',
-            style: style,
+            style,
             class: klasses.join(' ')
         });
     }
 
     function buildCollapsiblePanel(args) {
-        var collapseId = html.genId(),
-            type = args.type || 'primary',
-            classes = ['panel', 'panel-' + type],
-            // collapseClasses = ['panel-collapse collapse'],
-            // toggleClasses = [],
-            style = args.style || {},
-            icon;
+        const collapseId = html.genId();
+        const type = args.type || 'primary';
+        let classes = ['panel', `panel-${  type}`];
+        // collapseClasses = ['panel-collapse collapse'],
+        // toggleClasses = [],
+        const style = args.style || {};
+        let icon;
         if (args.hidden) {
             classes.push('hidden');
         }
@@ -155,10 +153,10 @@ define([
             {
                 class: classes.join(' '),
                 dataElement: args.name,
-                style: style
+                style
             },
             [
-                div({ class: 'panel-heading' }, [
+                div({class: 'panel-heading'}, [
                     div(
                         {
                             class: 'panel-title'
@@ -168,8 +166,8 @@ define([
                                 dataElement: 'title',
                                 // class: toggleClasses.join(' '),
                                 dataToggle: 'collapse',
-                                dataTarget: '#' + collapseId,
-                                style: { cursor: 'pointer' },
+                                dataTarget: `#${  collapseId}`,
+                                style: {cursor: 'pointer'},
                                 dataBind: {
                                     css: {
                                         collapsed: args.collapsed || false
@@ -186,7 +184,7 @@ define([
                         class: 'panel-collapse collapse',
                         dataBind: {
                             css: {
-                                in: '!' + args.collapsed || true
+                                in: `!${  args.collapsed}` || true
                             }
                         }
                     },
