@@ -44,10 +44,10 @@ define([
                 } else if (error.message) {
                     message = error.message;
                 } else {
-                    message = `Unknown error: ${  error}`;
+                    message = `Unknown error: ${error}`;
                 }
             } catch (ex) {
-                message = `Unknown error processing another error: ${  ex}`;
+                message = `Unknown error processing another error: ${ex.message}`;
             }
             // safe
             this.$title.html('Error');
