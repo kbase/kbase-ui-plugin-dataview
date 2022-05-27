@@ -12,10 +12,14 @@ define([
     'kb_service/client/workspace',
     'kb_service/utils',
     'kb_lib/jsonRpc/dynamicServiceClient',
+    'lib/jqueryUtils',
+
+    // for Effect
     'kbaseUI/widget/legacy/widget',
     'widgets/metagenomes/annotatedMetagenomeAssemblyWideOverview',
     'widgets/metagenomes/annotatedMetagenomeAssembly_AssemblyandAnnotationTab'
-], ($, Uuid, html, Workspace, serviceUtils, DynamicServiceClient) => {
+], ($, Uuid, html, Workspace, serviceUtils, DynamicServiceClient,
+    {$errorAlert}) => {
     $.KBWidget({
         name: 'AnnotatedMetagenomeAssembly',
         parent: 'kbaseWidget',
@@ -125,8 +129,7 @@ define([
                     console.error('Error loading genome subdata');
                     console.error(error);
                     _this.showError(_this.view.panels[0].inner_div, error);
-                    _this.view.panels[1].inner_div.empty();
-                    _this.view.panels[2].inner_div.empty();
+                    _this.showError(_this.view.panels[1].inner_div, 'Cannot show due to error above');
                 });
         },
 
@@ -151,10 +154,11 @@ define([
                     }
                 ]
             };
-            const that = this;
             this.view.panels.forEach((panel) => {
-                that.makeWidgetPanel(panel.outer_div, panel.label, panel.name, panel.inner_div);
-                that.$elem.append(panel.outer_div);
+                // safe
+                panel.outer_div.html(this.$renderWidgetPanel(panel.label, panel.name, panel.inner_div));
+                // safe
+                this.$elem.append(panel.outer_div);
                 // safe
                 panel.inner_div.html(html.loading('Loading...'));
             });
@@ -200,48 +204,47 @@ define([
             //     'Browsing Metagenome Features is not supported at this time. Coming soon!'
             // );
         },
-        // TODO: This is
-        makeWidgetPanel($panel, title, name, $widgetDiv) {
+        $renderWidgetPanel(title, name, $widget) {
             const id = new Uuid(4).format();
-            $panel.append(
-                $(
-                    `<div class="panel-group" id="accordion_${
-                        id
-                    }" role="tablist" aria-multiselectable="true" data-panel="${
-                        name
-                    }">`
-                ).append(
-                    $('<div class="panel panel-default kb-widget">')
-                        .append(
-                            '' +
-                                `<div class="panel-heading" role="tab" id="heading_${
-                                    id
-                                }">` +
-                                '<h4 class="panel-title">' +
-                                `<span data-toggle="collapse" data-parent="#accordion_${
-                                    id
-                                }" data-target="#collapse_${
-                                    id
-                                }" aria-expanded="false" aria-controls="collapse_${
-                                    id
-                                }" style="cursor:pointer;" data-element="title">` +
-                                ` ${
-                                    title
-                                }</span>` +
-                                '</h4>' +
-                                '</div>'
-                        )
-                        .append(
-                            $(
-                                `<div id="collapse_${
-                                    id
-                                }" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_${
-                                    id
-                                }" area-expanded="true">`
-                            ).append($('<div class="panel-body">').append($widgetDiv))
-                        )
-                )
-            );
+            return $('<div>')
+                .addClass('panel-group')
+                .attr('id', `accordion_${id}`)
+                .attr('role', 'tablist')
+                .attr('aria-multiselectable', 'true')
+                .attr('data-panel', name)
+                // safe
+                .append($('<div>')
+                    .addClass('panel panel-default kb-widget')
+                    // safe
+                    .append($('<div>')
+                        .attr('id', `heading_${id}`)
+                        .addClass('panel-heading')
+                        .attr('role', 'tab')
+                        // safe
+                        .append($('<h4>')
+                            .addClass('panel-title')
+                            // safe
+                            .html($('<span>')
+                                .attr('data-toggle', 'collapse')
+                                .attr('data-parent', `#accordion_${id}`)
+                                .attr('data-target', `#collapse_${id}`)
+                                .attr('aria-expanded', 'false')
+                                .attr('aria-controls', `collapse_${id}`)
+                                .css('cursor', 'pointer')
+                                .attr('data-element', 'title')
+                                .text(title))))
+                    // safe
+                    .append($('<div>')
+                        .attr('id', `collapse_${id}`)
+                        .addClass('panel-collapse collapse in')
+                        .attr('role', 'tabpanel')
+                        .attr('aria-labelledby', `heading_${id}`)
+                        .attr('area-expanded', 'true')
+                        // safe
+                        .append($('<div>')
+                            .addClass('panel-body')
+                            // safe
+                            .append($widget))));
         },
         getData() {
             return {
@@ -252,18 +255,10 @@ define([
             };
         },
         showError(panel, e) {
-            panel.empty();
-            const $err = $('<div>')
-                .addClass('alert alert-danger')
-                .append(
-                    $('<div>')
-                        .addClass('text-danger')
-                        .css('font-weight', 'bold')
-                        .text('Error')
-                )
-                .append($('<p>').text(JSON.stringify(e.message)))
-                .append($('<div>').text(JSON.stringify(e)));
-            panel.append($err);
+            console.error(e);
+            const $alert = $errorAlert(e);
+            // safe
+            panel.html($alert);
         }
     });
 });

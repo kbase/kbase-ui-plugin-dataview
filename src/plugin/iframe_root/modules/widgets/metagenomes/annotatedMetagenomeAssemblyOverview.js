@@ -5,7 +5,17 @@
  * Gene "instance" info (e.g. coordinates on a particular strain's genome)
  * is in a different widget.
  */
-define(['jquery', 'kb_common/html', 'numeral', 'kbaseUI/widget/legacy/widget'], function ($, html, numeral) {
+define([
+    'jquery',
+    'numeral',
+    'lib/jqueryUtils',
+
+    // for effect
+    'kbaseUI/widget/legacy/widget'
+], ($,
+    numeral,
+    {$errorAlert}
+) => {
     $.KBWidget({
         name: 'KBaseAMAOverview',
         parent: 'kbaseWidget',
@@ -18,88 +28,33 @@ define(['jquery', 'kb_common/html', 'numeral', 'kbaseUI/widget/legacy/widget'], 
         },
         $infoTable: null,
         noContigs: 'No Contigs',
-        init: function (options) {
+        init(options) {
             this._super(options);
 
-            this.$messagePane = $('<div/>').hide();
-            this.$elem.append(this.$messagePane);
+            this.$root = $('<div>');
+            // safe
+            this.$elem.html(this.$root);
 
             this.render();
             return this;
         },
-        render: function () {
-            this.$infoPanel = $('<div>');
-
-            this.$infoTable = $('<table>').addClass('table table-striped table-bordered');
-            this.$infoPanel.append(
-                $('<div>')
-                    .css('overflow', 'auto')
-                    .append(this.$infoTable)
-            );
-
-            this.$contigSelect = $('<select>')
-                .addClass('form-control')
-                .css({width: '60%', 'margin-right': '5px'})
-                .append(
-                    $('<option>')
-                        .attr('id', this.noContigs)
-                        .append(this.noContigs)
-                );
-
-            this.$infoPanel.hide();
-            this.$elem.append(this.$infoPanel);
-            this.renderWorkspace();
-        },
-        addInfoRow: function (a, b) {
-            return '<tr><th>' + a + '</th><td>' + b + '</td></tr>';
-        },
-        populateContigSelector: function (contigsToLengths) {
-            this.$contigSelect.empty();
-            if (!contigsToLengths || contigsToLengths.length === 0) {
-                this.$contigSelect.append(
-                    $('<option>')
-                        .attr('id', this.noContigs)
-                        .append(this.noContigs)
-                );
-            }
-            for (var contig in contigsToLengths) {
-                this.$contigSelect.append(
-                    $('<option>')
-                        .attr('id', contig)
-                        .append(contig + ' - ' + contigsToLengths[contig] + ' bp')
-                );
-            }
-        },
-        alreadyRenderedTable: false,
-        renderWorkspace: function () {
-            var self = this;
-            this.showMessage(html.loading('loading...'));
-            this.$infoPanel.hide();
-
+        render() {
             try {
-                self.showData(self.options.genomeInfo.data, self.options.genomeInfo.info[10]);
+                // safe
+                this.$root.html(this.$renderData(this.options.genomeInfo.data, this.options.genomeInfo.info[10]));
             } catch (e) {
-                self.showError(e);
+                console.error(e);
+                // safe
+                this.$root.html($errorAlert(e));
             }
-            /*
-            else {
-                var obj = this.buildObjectIdentity(this.options.workspaceID, this.options.genomeID),
-                    workspace = new Workspace(this.runtime.getConfig('services.workspace.url'), {
-                    token: this.runtime.service('session').getAuthToken()
-                });
-                workspace.get_objects([obj])
-                    .then(function (data) {
-                        self.showData(data[0].data);
-                    })
-                    .catch(function (err) {
-                        self.renderError(err);
-                    });
-            }
-            */
         },
-        showData: function (genome, metadata) {
-            var self = this,
-                gcContent = 'Unknown',
+        addInfoRow(a, b) {
+            return $('<tr>')
+                .append($('<th>').text(a))
+                .append($('<td>').text(b));
+        },
+        $renderData(genome, metadata) {
+            let gcContent = 'Unknown',
                 dnaLength = 'Unknown',
                 nFeatures = 0,
                 num_contigs = 0;
@@ -113,13 +68,13 @@ define(['jquery', 'kb_common/html', 'numeral', 'kbaseUI/widget/legacy/widget'], 
             if (genome.gc_content) {
                 gcContent = Number(genome.gc_content);
                 if (gcContent < 1.0) {
-                    gcContent = (gcContent * 100).toFixed(2) + ' %';
+                    gcContent = `${(gcContent * 100).toFixed(2)  } %`;
                 } else if (gcContent > 100) {
                     if (genome.dna_size && genome.dna_size !== 0) {
-                        gcContent = gcContent + Number(genome.dna_size) + ' %';
+                        gcContent = `${gcContent + Number(genome.dna_size)  } %`;
                     }
                 } else {
-                    gcContent = gcContent.toFixed(2) + ' %';
+                    gcContent = `${gcContent.toFixed(2)} %`;
                 }
             }
 
@@ -139,66 +94,32 @@ define(['jquery', 'kb_common/html', 'numeral', 'kbaseUI/widget/legacy/widget'], 
                 dnaLength = genome.dna_size;
             }
 
-            this.$infoTable
-                .empty()
-                .append(this.addInfoRow('Original Source File Name', genome.original_source_file_name))
-                .append(this.addInfoRow('DNA Length', numeral(dnaLength).format('0,0')))
-                .append(this.addInfoRow('Source ID', genome.source + ': ' + genome.source_id))
-                .append(this.addInfoRow('Number of Contigs', numeral(num_contigs).format('0,0')))
-                .append(this.addInfoRow('GC Content', gcContent))
-                .append(this.addInfoRow('Genetic Code', genome.genetic_code))
-                .append(this.addInfoRow('Number of features', numeral(nFeatures).format('0,0')));
+            return $('<table>').addClass('table table-striped table-hover table-bordered')
+                // safe
+                .append($('<tbody>')
+                    // safe
+                    .append(this.addInfoRow('Original Source File Name', genome.original_source_file_name || 'n/a'))
+                    // safe
+                    .append(this.addInfoRow('DNA Length', numeral(dnaLength).format('0,0')))
+                    // safe
+                    .append(this.addInfoRow('Source ID', `${genome.source || 'n/a'}: ${genome.source_id}`))
+                    // safe
+                    .append(this.addInfoRow('Number of Contigs', numeral(num_contigs).format('0,0')))
+                    // safe
+                    .append(this.addInfoRow('GC Content', gcContent))
+                    // safe
+                    .append(this.addInfoRow('Genetic Code', genome.genetic_code))
+                    // safe
+                    .append(this.addInfoRow('Number of features', numeral(nFeatures).format('0,0'))));
 
-            self.alreadyRenderedTable = true;
-
-            this.hideMessage();
-            this.$infoPanel.show();
         },
-        getData: function () {
+        getData() {
             return {
                 type: 'Genome',
                 id: this.options.genomeID,
                 workspace: this.options.workspaceID,
                 title: 'Genome Overview'
             };
-        },
-        showMessage: function (message) {
-            // kbase panel now does this for us, should probably remove this
-            var span = $('<span/>').append(message);
-
-            this.$messagePane
-                .empty()
-                .append(span)
-                .show();
-        },
-        hideMessage: function () {
-            // kbase panel now does this for us, should probably remove this
-            this.$messagePane.hide();
-        },
-        buildObjectIdentity: function (workspaceID, objectID) {
-            var obj = {};
-            if (/^\d+$/.exec(workspaceID)) obj['wsid'] = workspaceID;
-            else obj['workspace'] = workspaceID;
-
-            // same for the id
-            if (/^\d+$/.exec(objectID)) obj['objid'] = objectID;
-            else obj['name'] = objectID;
-            return obj;
-        },
-        renderError: function (error) {
-            let errString = 'Sorry, an unknown error occurred';
-            if (typeof error === 'string') {
-                errString = error;
-            } else if (error.error && error.error.message) {
-                errString = error.error.message;
-            }
-
-            var $errorDiv = $('<div>')
-                .addClass('alert alert-danger')
-                .append('<b>Error:</b>')
-                .append('<br>' + errString);
-            this.$elem.empty();
-            this.$elem.append($errorDiv);
         }
     });
 });
