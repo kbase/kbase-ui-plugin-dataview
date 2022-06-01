@@ -1,6 +1,4 @@
-define(['jquery', 'd3', '../legacy/authenticatedWidget'], function ($, d3) {
-    'use strict';
-
+define(['jquery', 'd3', '../legacy/authenticatedWidget'], ($, d3) => {
     $.KBWidget({
         name: 'kbaseHistogram',
         parent: 'kbaseAuthenticatedWidget',
@@ -11,15 +9,15 @@ define(['jquery', 'd3', '../legacy/authenticatedWidget'], function ($, d3) {
             tickColor: 'blue',
             colors: ['#0000FF', '#000099']
         },
-        getState: function () {
+        getState() {
             return {
                 numBins: this.options.numBins,
                 minCutoff: this.options.minCutoff,
                 maxCutoff: this.options.maxCutoff
             };
         },
-        loadState: function (state) {
-            this.options.numBins = parseInt(state.numBins);
+        loadState(state) {
+            this.options.numBins = parseInt(state.numBins, 10);
             this.options.minCutoff = parseFloat(state.minCutoff);
             this.options.maxCutoff = parseFloat(state.maxCutoff);
 
@@ -37,11 +35,11 @@ define(['jquery', 'd3', '../legacy/authenticatedWidget'], function ($, d3) {
             this.data('numBinsRange').val(this.options.numBins);
         },
         _accessors: ['dataset'],
-        setDataset: function (newDataset) {
+        setDataset(newDataset) {
             this.dataset(newDataset);
             this.renderHistogram(this.options.numBins);
         },
-        renderXAxis: function () {
+        renderXAxis() {
             this.data('barchart').renderXAxis();
         },
         init: function init(options) {
@@ -49,24 +47,29 @@ define(['jquery', 'd3', '../legacy/authenticatedWidget'], function ($, d3) {
 
             this.appendUI(this.$elem);
 
-            this.gradientID = this.data('barchart').linearGradient({ colors: this.options.colors });
+            this.gradientID = this.data('barchart').linearGradient({colors: this.options.colors});
 
             return this;
         },
         appendUI: function appendUI($elem) {
-            var $me = this;
+            const $me = this;
 
-            var $barElem = $.jqElem('div').css({ width: 800, height: 500 });
+            const $barElem = $.jqElem('div').css({width: 800, height: 500});
 
-            var $barContainer = $.jqElem('div')
+            const $barContainer = $.jqElem('div')
+                // safe
                 .append(
+                    // safe
                     $.jqElem('div')
                         .attr('class', 'col-md-10')
+                        // safe
                         .append(
                             $.jqElem('div')
                                 .attr('class', 'col-md-1')
+                                // safe
                                 .append(
                                     $.jqElem('div')
+                                        // safe
                                         .append(
                                             $.jqElem('span')
                                                 .attr('id', 'numBins')
@@ -75,9 +78,11 @@ define(['jquery', 'd3', '../legacy/authenticatedWidget'], function ($, d3) {
                                         .append(' bins')
                                 )
                         )
+                        // safe
                         .append(
                             $.jqElem('div')
                                 .attr('class', 'col-md-8')
+                                // safe
                                 .append(
                                     $.jqElem('input')
                                         .attr('id', 'numBinsRange')
@@ -87,10 +92,10 @@ define(['jquery', 'd3', '../legacy/authenticatedWidget'], function ($, d3) {
                                         .attr('value', $me.options.numBins)
                                         .attr('step', 1)
                                         .css('width', '800px')
-                                        .on('input', function (e) {
+                                        .on('input', function () {
                                             $me.data('numBins').text($(this).val());
                                         })
-                                        .on('change', function (e) {
+                                        .on('change', function () {
                                             $me.data('numBins').text($(this).val());
                                             $me.options.numBins = parseInt($(this).val());
                                             $me.renderHistogram();
@@ -98,59 +103,70 @@ define(['jquery', 'd3', '../legacy/authenticatedWidget'], function ($, d3) {
                                 )
                         )
                 )
+                // safe
                 .append(
                     $.jqElem('div')
                         .attr('class', 'col-md-4')
+                        // safe
                         .append(
                             $.jqElem('div')
                                 .attr('class', 'input-group')
+                                // safe
                                 .append(
                                     $.jqElem('div')
                                         .attr('class', 'input-group-addon')
                                         .append(' Expression level at least ')
                                 )
+                                // safe
                                 .append(
                                     $.jqElem('input')
                                         .attr('type', 'input')
                                         .attr('id', 'minCutoff')
                                         .attr('class', 'form-control')
                                         .attr('value', $me.options.minCutoff)
-                                        .on('change', function (e) {
+                                        .on('change', function () {
                                             $me.options.minCutoff = parseFloat($(this).val());
                                             $me.renderHistogram();
                                         })
                                 )
                         )
                 )
+                // safe
                 .append(
+                    // safe
                     $.jqElem('div')
                         .attr('class', 'col-md-4 col-md-offset-3')
+                        // safe
                         .append(
                             $.jqElem('div')
                                 .attr('class', 'input-group')
+                                // safe
                                 .append(
                                     $.jqElem('div')
                                         .attr('class', 'input-group-addon')
-                                        .append(' Expression level at most ')
+                                        .text(' Expression level at most ')
                                 )
+                                // safe
                                 .append(
                                     $.jqElem('input')
                                         .attr('type', 'input')
                                         .attr('class', 'form-control')
                                         .attr('id', 'maxCutoff')
                                         .attr('value', $me.options.maxCutoff)
-                                        .on('change', function (e) {
+                                        .on('change', function () {
                                             $me.options.maxCutoff = parseFloat($(this).val());
                                             $me.renderHistogram();
                                         })
                                 )
                         )
                 )
+                // safe
                 .append($barElem);
 
+            // safe
             $elem.append($barContainer);
 
-            var $barchart = $barElem.kbaseBarchart(this.options);
+            const $barchart = $barElem.kbaseBarchart(this.options);
 
             $barchart.superRenderXAxis = $barchart.renderXAxis;
             $barchart.renderXAxis = function () {
@@ -160,14 +176,14 @@ define(['jquery', 'd3', '../legacy/authenticatedWidget'], function ($, d3) {
                     .D3svg()
                     .selectAll('.xAxis .tick text')
                     .attr('fill', this.options.tickColor)
-                    .on('mouseover', function (L, i) {
-                        $.each($barchart.dataset(), function (i, d) {
+                    .on('mouseover', (L) => {
+                        $.each($barchart.dataset(), (i, d) => {
                             if (d.bar === L) {
-                                $barchart.showToolTip({ label: d.tooltip });
+                                $barchart.showToolTip({label: d.tooltip});
                             }
                         });
                     })
-                    .on('mouseout', function (d) {
+                    .on('mouseout', () => {
                         $barchart.hideToolTip();
                     });
             };
@@ -177,18 +193,18 @@ define(['jquery', 'd3', '../legacy/authenticatedWidget'], function ($, d3) {
             this.data('barchart', $barchart);
         },
         renderHistogram: function renderHistogram(bins) {
-            var $me = this;
+            const $me = this;
 
             if (bins === undefined) {
                 bins = this.options.numBins;
             }
 
-            var filteredDataset = this.dataset();
+            let filteredDataset = this.dataset();
 
             if (!isNaN(this.options.minCutoff) || !isNaN(this.options.maxCutoff)) {
                 filteredDataset = [];
 
-                $.each(this.dataset(), function (i, v) {
+                $.each(this.dataset(), (i, v) => {
                     if (
                         (isNaN($me.options.minCutoff) || v >= $me.options.minCutoff) &&
                         (isNaN($me.options.maxCutoff) || v <= $me.options.maxCutoff)
@@ -198,22 +214,22 @@ define(['jquery', 'd3', '../legacy/authenticatedWidget'], function ($, d3) {
                 });
             }
 
-            var barData = d3.layout.histogram().bins(bins)(filteredDataset);
+            const barData = d3.layout.histogram().bins(bins)(filteredDataset);
 
-            var bars = [];
-            var sigDigits = 1000;
-            $.each(barData, function (i, bin) {
-                var range =
-                    Math.round(bin.x * sigDigits) / sigDigits +
-                    ' to ' +
-                    Math.round((bin.x + bin.dx) * sigDigits) / sigDigits;
+            const bars = [];
+            const sigDigits = 1000;
+            $.each(barData, (i, bin) => {
+                const range =
+                    `${Math.round(bin.x * sigDigits) / sigDigits
+                    } to ${
+                        Math.round((bin.x + bin.dx) * sigDigits) / sigDigits}`;
 
                 bars.push({
                     bar: range,
                     value: bin.y,
-                    color: 'url(#' + $me.gradientID + ')', //'blue',
+                    color: `url(#${  $me.gradientID  })`, //'blue',
                     //color : 'blue',
-                    tooltip: bin.y + ' in range<br>' + range,
+                    tooltip: `${bin.y  } in range<br>${  range}`,
                     id: bin.x
                 });
             });
