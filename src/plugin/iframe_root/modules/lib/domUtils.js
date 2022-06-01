@@ -1,4 +1,10 @@
-define(['kb_common/utils'], (Utils) => {
+define([
+    'kb_common/utils',
+    'kb_lib/jsonRpc/exceptions'
+], (
+    Utils,
+    JSONRPCExceptions
+) => {
 
     const donorNode = document.createElement('div');
     function domSafeText(rawContent) {
@@ -99,23 +105,35 @@ define(['kb_common/utils'], (Utils) => {
         };
     }
 
-    function domSafeErrorMessage(error) {
-        const text = (() => {
-            try {
-                if (typeof error === 'string') {
-                    return error;
-                } else if (error.message) {
-                    return error.message;
-                } else if (error.error) {
-                    return error.error.message;
-                }
-                return 'Unknown error';
-            } catch (ex) {
-                return `Unknown error processing another error: ${ex.message}`;
-            }
-        })();
+    function domSafeErrorMessage(error, defaultMessage) {
+        const text = errorMessage(error, defaultMessage);
         return domSafeText(text);
     }
 
-    return {objectInfoToObject, workspaceInfoToObject, domSafeText, domSafeValue, domSafeErrorMessage};
+    const DEFAULT_ERROR_MESSAGE = 'Unknown error';
+    function errorMessage(error, defaultMessage) {
+        function messageOrDefault(message) {
+            return message || defaultMessage || DEFAULT_ERROR_MESSAGE;
+        }
+        if (typeof error === 'string') {
+            return messageOrDefault(error);
+        } else if (error instanceof Error) {
+            if (error instanceof JSONRPCExceptions.JsonRpcError) {
+                return messageOrDefault(error.originalError.message || error.originalError.name);
+            }
+            return messageOrDefault(error.message || error.name);
+        } else if (typeof error === 'object' && error !== null && error.error) {
+            // Is probably a KBase service error
+            return messageOrDefault(error.error.message || error.name);
+        }
+        return messageOrDefault();
+    }
+    return {
+        objectInfoToObject,
+        workspaceInfoToObject,
+        domSafeText,
+        domSafeValue,
+        domSafeErrorMessage,
+        errorMessage
+    };
 });
