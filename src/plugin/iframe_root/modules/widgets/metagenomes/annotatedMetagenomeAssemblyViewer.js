@@ -126,6 +126,38 @@ define([
             this.$elem.append($errorBox);
         },
 
+        $notImplemented() {
+            return $('<span>')
+                .css('font-style', 'italic')
+                .css('font-size', '90%')
+                .text('not implemented');
+        },
+
+        $noData() {
+            return $('<span>')
+                .css('font-style', 'italic')
+                .css('font-size', '90%')
+                .text('∅');
+        },
+
+
+        $renderAliases(aliases) {
+            return $('<table>')
+                .addClass('table table-small')
+                .css('width', 'fit-content')
+                // safe
+                .append($('<tbody>')
+                    // safe
+                    .append(
+                        aliases.map(([a, b]) => {
+                            return $('<tr>')
+                                // safe
+                                .append($('<td>').text(a))
+                                // safe
+                                .append($('<td>').text(b));
+                        })));
+        },
+
         tabData() {
             const names = ['Browse Features', 'Browse Contigs'];
             const ids = ['browse_features', 'browse_contigs'];
@@ -306,7 +338,7 @@ define([
                 $pagenateDiv.hide();
             };
 
-            const buildRow = function (rowData) {
+            const buildRow = (rowData) => {
                 const $tr = $('<tr>');
                 let hasFunc = false;
                 const hasOntology = false;
@@ -330,13 +362,25 @@ define([
                 $tr.append($('<td>').text(rowData['function']));
                 if (rowData['function']) { hasFunc = true; }
 
-                let $td = $('<td>');
-                // safe
-                $tr.append($td);
+                // TODO: These are the function description and aliases columns, which are
+                // unimplemented for some reason.
+                // console.log(rowData.functional_descriptions, rowData.aliases);
 
-                $td = $('<td>');
+                // TODO: implement; was fully unimplemented (just empty cell); I don't currently
+                // have access to an AMA with features with descriptions.
                 // safe
-                $tr.append($td);
+                const $functionalDescriptions = $('<td>').html(this.$notImplemented());
+
+                // safe
+                $tr.append($functionalDescriptions);
+
+                // TODO: implement; was fully unimplemented (just empty cell); I don't currently
+                // have access to an AMA with aliases.
+                // safe
+                const $aliases = $('<td>').html(rowData.aliases ? this.$renderAliases(rowData.aliases) : this.$noData());
+
+                // safe
+                $tr.append($aliases);
 
                 if (rowData['global_location']['contig_id']) {
                     const loc = rowData['global_location'];
@@ -382,7 +426,7 @@ define([
                 clearInfo();
 
                 const features = results['features'];
-                if (features.length>0) {
+                if (features.length > 0) {
                     let hasFunc = false;
                     let hasOntology = false;
                     let hasAlias = false;

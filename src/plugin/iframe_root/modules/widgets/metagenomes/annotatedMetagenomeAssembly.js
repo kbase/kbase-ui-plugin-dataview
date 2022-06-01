@@ -97,6 +97,8 @@ define([
                         },
                         assembly_error = function (data, error){
                             console.error('Error loading contigset subdata', data, error);
+                            _this.showError(_this.view.panels[0].inner_div, error);
+                            _this.showError(_this.view.panels[1].inner_div, 'Cannot show due to error above');
                         };
                     if (Object.prototype.hasOwnProperty.call(metagenome, 'assembly_ref')) {
                         assembly_ref = metagenome.assembly_ref;
