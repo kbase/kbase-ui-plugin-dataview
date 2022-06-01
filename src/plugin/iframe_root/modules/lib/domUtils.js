@@ -14,7 +14,7 @@ define([
     }
 
     /**
-     * domSafeContent
+     * domSafeValue
      * Returns the provided value as a string, safely
      * encoded for inclusion into the DOM as innerHTML.
      */
