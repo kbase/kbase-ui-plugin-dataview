@@ -1,5 +1,5 @@
 /**
- * Requires bootstrap 3 for buttons
+ * Requires bootstrap 3 for buttonsx
  */
 define(['jquery', 'kbaseUI/widget/legacy/widget', 'bootstrap'], ($) => {
     $.KBWidget({
@@ -28,7 +28,7 @@ define(['jquery', 'kbaseUI/widget/legacy/widget', 'bootstrap'], ($) => {
                         .css('font-size', '125%')
                         .css('font-weight', 'bold')
                         // safe
-                        .append('|<<')
+                        .text('|<<')
                         .click(() => {
                             self.options.browser.moveLeftEnd();
                         })
@@ -40,8 +40,7 @@ define(['jquery', 'kbaseUI/widget/legacy/widget', 'bootstrap'], ($) => {
                         .addClass('btn btn-default')
                         .css('font-size', '125%')
                         .css('font-weight', 'bold')
-                        // safe
-                        .append('<')
+                        .text('<')
                         .click(() => {
                             self.options.browser.moveLeftStep();
                         })
@@ -53,8 +52,7 @@ define(['jquery', 'kbaseUI/widget/legacy/widget', 'bootstrap'], ($) => {
                         .addClass('btn btn-default')
                         .css('font-size', '125%')
                         .css('font-weight', 'bold')
-                        // safe
-                        .append('+')
+                        .text('+')
                         .click(() => {
                             self.options.browser.zoomIn();
                         })
@@ -66,8 +64,7 @@ define(['jquery', 'kbaseUI/widget/legacy/widget', 'bootstrap'], ($) => {
                         .addClass('btn btn-default')
                         .css('font-size', '125%')
                         .css('font-weight', 'bold')
-                        // safe
-                        .append('-')
+                        .text('-')
                         .click(() => {
                             self.options.browser.zoomOut();
                         })
@@ -79,8 +76,7 @@ define(['jquery', 'kbaseUI/widget/legacy/widget', 'bootstrap'], ($) => {
                         .addClass('btn btn-default')
                         .css('font-size', '125%')
                         .css('font-weight', 'bold')
-                        // safe
-                        .append('>')
+                        .text('>')
                         .click(() => {
                             self.options.browser.moveRightStep();
                         })
@@ -92,8 +88,7 @@ define(['jquery', 'kbaseUI/widget/legacy/widget', 'bootstrap'], ($) => {
                         .addClass('btn btn-default')
                         .css('font-size', '125%')
                         .css('font-weight', 'bold')
-                        // safe
-                        .append('>>|')
+                        .text('>>|')
                         .click(() => {
                             self.options.browser.moveRightEnd();
                         })

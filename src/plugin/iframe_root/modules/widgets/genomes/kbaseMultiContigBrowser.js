@@ -40,9 +40,19 @@ define([
     'jquery',
     'd3',
     'kb_common/html',
+    'lib/domUtils',
+    'lib/jqueryUtils',
+
+    // for effect
     'kbaseUI/widget/legacy/widget',
     'widgets/genomes/kbaseContigBrowserButtons'
-], ($, d3, html) => {
+], (
+    $,
+    d3,
+    html,
+    {domSafeText},
+    {$errorAlert}
+) => {
     $.KBWidget({
         name: 'KBaseMultiContigBrowser',
         parent: 'kbaseWidget',
@@ -118,6 +128,7 @@ define([
             }
 
             this.$messagePane = $('<div/>');
+            // safe
             this.$elem.append(this.$messagePane);
             this.showMessage(html.loading('loading contig details'));
 
@@ -127,10 +138,11 @@ define([
             this.$contigSelect = $('<select>')
                 .addClass('form-control')
                 .css({width: '60%', 'margin-right': '5px'})
+                // safe
                 .append(
                     $('<option>')
                         .attr('value', this.noContigs)
-                        .append(this.noContigs)
+                        .text(this.noContigs)
                 );
             this.$contigSelect.change(function () {
                 const contigId = $(this).val();
@@ -141,27 +153,35 @@ define([
                 }
             });
             this.$selectPanel = $('<div class="col-md-3"/>');
+            // safe
             this.$selectPanel.append(
                 $('<div>')
                     .addClass('form-inline')
+                    // safe
                     .append(this.$contigSelect)
+                    // safe
                     .append(this.$contigButton)
             );
+            // safe
             $maindiv.append(this.$selectPanel);
 
             // panel where contig browser is defined
             const $contigViewPanelWrapper = $('<div class="col-md-6"/>');
             this.$contigViewPanel = $('<div id="contigmainview" align="center"/>').css({overflow: 'auto'});
             $contigViewPanelWrapper
+            // safe
                 .append(this.$contigViewPanel)
+                // safe
                 .append('<div>')
                 .KBaseContigBrowserButtons({browser: self});
 
+            // safe
             $maindiv.append($contigViewPanelWrapper);
 
             // panel where feature info is displayed
             // safe usage of html
             this.$featureInfoPanel = $('<div class="col-md-3"/>').html('<b>Click on a feature to view details</b>');
+            // safe
             $maindiv.append(this.$featureInfoPanel);
 
             self.showData(self.options.genomeInfo.data, $maindiv);
@@ -171,28 +191,23 @@ define([
                     self.$featureInfoPanel.empty();
                     const $infoTable = $('<table>').addClass('table table-striped table-bordered');
                     if (d.id) {
+                        // safe
                         $infoTable.append(
                             self.addInfoRow(
-                                'Feature ID',
-                                `<a href="/#dataview/${
-                                    self.options.workspaceID
-                                }/${
-                                    self.options.genomeID
-                                }?sub=Feature&subid=${
-                                    d.id
-                                }" target="_blank">${
-                                    d.id
-                                }</a>`
+                                'Feature ID', null,
+                                `<a href="/#dataview/${domSafeText(self.options.workspaceID)}/${domSafeText(self.options.genomeID)}?sub=Feature&subid=${domSafeText(d.id)}" target="_blank">${domSafeText(d.id)}</a>`
                             )
                         );
                     }
                     if (d.type) {
+                        // safe
                         $infoTable.append(self.addInfoRow('Type', d.type));
                     }
                     if (d.function) {
+                        // safe
                         $infoTable.append(self.addInfoRow('Function', d.function));
                     }
-
+                    // safe
                     self.$featureInfoPanel.append($infoTable);
                 };
             }
@@ -226,6 +241,7 @@ define([
             }
 
             self.populateContigSelector(contigsToLengths);
+            // safe
             self.$elem.append($maindiv);
 
             self.hideMessage();
@@ -237,8 +253,20 @@ define([
                 self.render();
             }
         },
-        addInfoRow(a, b) {
-            return `<tr><th>${  a  }</th><td>${  b  }</td></tr>`;
+        addInfoRow(headerText, infoText, infoHTML) {
+            const $row = $('<tr>')
+                // safe
+                .append($('<th>').text(headerText));
+            if (infoText) {
+                // safe
+                $row.append($('<td>').text(infoText));
+            } else if (infoHTML) {
+                // safe (trusing infoHTML)
+                $row.append($('<td>').html(infoHTML));
+            } else {
+                // safe
+                $row.$row.append($('<td>').text('n/a'));
+            }
         },
         /**
          *
@@ -304,16 +332,18 @@ define([
         populateContigSelector(contigsToLengths) {
             this.$contigSelect.empty();
             if (!contigsToLengths || contigsToLengths.length === 0)
+                // safe
                 this.$contigSelect.append(
                     $('<option>')
                         .attr('value', this.noContigs)
-                        .append(this.noContigs)
+                        .text(this.noContigs)
                 );
             for (const contig in contigsToLengths) {
+                // safe
                 this.$contigSelect.append(
                     $('<option>')
                         .attr('value', contig)
-                        .append(`${contig  } - ${  contigsToLengths[contig]  } bp`)
+                        .text(`${contig} - ${contigsToLengths[contig]} bp`)
                 );
             }
         },
@@ -1044,12 +1074,9 @@ define([
             }
         },
         showMessage(message) {
-            // kbase panel now does this for us, should probably remove this
-            const span = $('<span/>').append(message);
-
             this.$messagePane
-                .empty()
-                .append(span)
+                // safe (trusing message)
+                .html($('<span/>').html(message))
                 .show();
         },
         hideMessage() {
@@ -1065,16 +1092,8 @@ define([
             };
         },
         renderError(error) {
-            let errString = 'Sorry, an unknown error occurred';
-            if (typeof error === 'string') errString = error;
-            else if (error.error && error.error.message) errString = error.error.message;
-
-            const $errorDiv = $('<div>')
-                .addClass('alert alert-danger')
-                .append('<b>Error:</b>')
-                .append(`<br>${  errString}`);
-            this.$elem.empty();
-            this.$elem.append($errorDiv);
+            // safe
+            this.$elem.html($errorAlert(error));
         },
         buildObjectIdentity(workspaceID, objectId) {
             const obj = {};

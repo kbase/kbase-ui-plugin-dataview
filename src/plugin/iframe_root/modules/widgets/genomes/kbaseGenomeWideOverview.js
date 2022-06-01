@@ -7,11 +7,12 @@
  */
 define([
     'jquery',
+
+    // FOr effect
     'kbaseUI/widget/legacy/widget',
     'widgets/genomes/kbaseGenomeOverview',
     'widgets/genomes/kbaseWikiDescription'
-], function ($) {
-    'use strict';
+], ($) => {
     $.KBWidget({
         name: 'KBaseGenomeWideOverview',
         parent: 'kbaseWidget',
@@ -21,18 +22,21 @@ define([
             workspaceID: null,
             genomeInfo: null
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
             this.render();
             return this;
         },
-        render: function () {
-            var self = this;
-            var row = $('<div class="row">');
+        render() {
+            const self = this;
+            const row = $('<div class="row">');
+            // safe
             self.$elem.append(row);
-            var overview = $('<div class="col-md-4">');
+            const overview = $('<div class="col-md-4">');
+            // safe
             row.append(overview);
-            var wikidescription = $('<div class="col-md-8">');
+            const wikidescription = $('<div class="col-md-8">');
+            // safe
             row.append(wikidescription);
 
             overview.KBaseGenomeOverview({
@@ -48,7 +52,7 @@ define([
                 runtime: self.runtime
             });
         },
-        getData: function () {
+        getData() {
             return {
                 type: 'Genome Overview',
                 id: this.options.genomeID,

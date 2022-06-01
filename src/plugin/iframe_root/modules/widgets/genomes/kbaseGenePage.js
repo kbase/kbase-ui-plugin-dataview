@@ -7,11 +7,21 @@ define([
     'jquery',
     'kb_common/html',
     'kb_service/client/workspace',
+    'lib/domUtils',
+    'lib/jqueryUtils',
+
+    // For Effect
     'kbaseUI/widget/legacy/widget',
     'widgets/genomes/kbaseGeneInstanceInfo',
     'widgets/genomes/kbaseGeneBiochemistry',
     'widgets/genomes/kbaseGeneSequence'
-], ($, html, Workspace) => {
+], (
+    $,
+    html,
+    Workspace,
+    {domSafeText},
+    {$errorAlert}
+) => {
     $.KBWidget({
         name: 'KBaseGenePage',
         parent: 'kbaseWidget',
@@ -41,16 +51,19 @@ define([
             };
             ///////////////////////////////////////////////////////////////////////////////
             const cell1 = $('<div panel panel-default">');
+            // safe
             self.$elem.append(cell1);
             const panel1 = self.makePleaseWaitPanel();
             self.makeDecoration(cell1, 'Feature Overview', panel1);
             ///////////////////////////////////////////////////////////////////////////////
             const cell2 = $('<div panel panel-default">');
+            // safe
             self.$elem.append(cell2);
             const panel2 = self.makePleaseWaitPanel();
             self.makeDecoration(cell2, 'Biochemistry', panel2);
             ///////////////////////////////////////////////////////////////////////////////
             const cell3 = $('<div panel panel-default">');
+            // safe
             self.$elem.append(cell3);
             const panel3 = self.makePleaseWaitPanel();
             self.makeDecoration(cell3, 'Sequence', panel3);
@@ -90,7 +103,7 @@ define([
                     });
                 } catch (e) {
                     console.error(e);
-                    self.showError(panel1, e.message);
+                    self.showError(panel1, e);
                 }
 
                 panel2.empty();
@@ -104,17 +117,22 @@ define([
                     });
                 } catch (e) {
                     console.error(e);
-                    self.showError(panel2, e.message);
+                    self.showError(panel2, e);
                 }
 
                 panel3.empty();
-                panel3.KBaseGeneSequence({
-                    featureID: scope.fid,
-                    genomeID: scope.gid,
-                    workspaceID: scope.ws,
-                    genomeInfo,
-                    runtime: self.runtime
-                });
+                try {
+                    panel3.KBaseGeneSequence({
+                        featureID: scope.fid,
+                        genomeID: scope.gid,
+                        workspaceID: scope.ws,
+                        genomeInfo,
+                        runtime: self.runtime
+                    });
+                } catch (err) {
+                    console.error(err);
+                    self.showError(panel3, err);
+                }
             };
 
             self.workspace.get_object_subset(
@@ -153,7 +171,7 @@ define([
                         );
                     } else {
                         panel1.empty();
-                        self.showError(panel1, `Feature ${  scope.fid  } is not found in genome`);
+                        self.showError(panel1, `Feature ${scope.fid} is not found in genome`);
                         cell2.empty();
                         cell3.empty();
                     }
@@ -174,30 +192,36 @@ define([
         },
         makeDecoration($panel, title, $widgetDiv) {
             const id = this.genUUID();
+            // safe
             $panel.append(
                 $(
                     `<div class="panel-group" id="accordion_${id}" role="tablist" aria-multiselectable="true">`
-                ).append(
-                    $('<div class="panel panel-default kb-widget">')
-                        .append(`<div class="panel-heading" role="tab" id="heading_${id}">
-                                    <h4 class="panel-title">
-                                        <span data-toggle="collapse" 
-                                              data-parent="#accordion_${id}" 
-                                              data-target="#collapse_${id}" 
-                                              aria-expanded="false" 
-                                              aria-controls="collapse_${id}" 
-                                              style="cursor:pointer;">${title}</span>
-                                    </h4>
-                                </div>`)
-                        .append(
-                            $(`<div id="collapse_${id}" 
-                                    class="panel-collapse collapse in" 
-                                    role="tabpanel" 
-                                    aria-labelledby="heading_${id}" 
-                                    area-expanded="true">`)
-                                .append($('<div class="panel-body">').append($widgetDiv))
-                        )
                 )
+                    // safe
+                    .append(
+                        $('<div class="panel panel-default kb-widget">')
+                            // safe
+                            .append(`<div class="panel-heading" role="tab" id="heading_${id}">
+                                        <h4 class="panel-title">
+                                            <span data-toggle="collapse" 
+                                                data-parent="#accordion_${id}" 
+                                                data-target="#collapse_${id}" 
+                                                aria-expanded="false" 
+                                                aria-controls="collapse_${id}" 
+                                                style="cursor:pointer;">${domSafeText(title)}</span>
+                                        </h4>
+                                    </div>`)
+                            // safe
+                            .append(
+                                $(`<div id="collapse_${id}" 
+                                        class="panel-collapse collapse in" 
+                                        role="tabpanel" 
+                                        aria-labelledby="heading_${id}" 
+                                        area-expanded="true">`)
+                                    // safe
+                                    .append($('<div class="panel-body">').append($widgetDiv))
+                            )
+                    )
             );
         },
         getData() {
@@ -209,8 +233,8 @@ define([
             };
         },
         showError(panel, e) {
-            panel.empty();
-            panel.append(`Error: ${  JSON.stringify(e)}`);
+            // safe
+            panel.html($errorAlert(e));
         },
         genUUID() {
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {

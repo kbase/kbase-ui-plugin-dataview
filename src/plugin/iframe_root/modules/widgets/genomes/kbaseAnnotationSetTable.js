@@ -6,10 +6,17 @@ define([
     'kb_common/html',
     'kb_service/client/workspace',
     'lib/domUtils',
+    'lib/jqueryUtils',
 
+    // For effect
     'kbaseUI/widget/legacy/authenticatedWidget',
     'datatables_bootstrap'
-], ($, html, Workspace, {domSafeText, domSafeValue}) => {
+], (
+    $,
+    html,
+    Workspace,
+    {domSafeText, domSafeValue},
+    {$errorAlert}) => {
     $.KBWidget({
         name: 'AnnotationSetTable',
         parent: 'kbaseAuthenticatedWidget',
@@ -27,9 +34,11 @@ define([
             const container = this.$elem;
             container.empty();
             if (!this.runtime.service('session').isLoggedIn()) {
+                // safe
                 container.append('<div>[Error] You\'re not logged in</div>');
                 return;
             }
+            // safe
             container.append(html.loading('loading data...'));
 
             const kbws = new Workspace(this.runtime.getConfig('services.workspace.url'), {
@@ -44,8 +53,9 @@ define([
                         //var msg = "[Error] Object "+self.options.id+" does not exist in workspace "+self.options.ws;
 
                         // We are moving away from "workspace"
-                        const msg = `[Error] Object ${  self.options.id  } can not be found`;
-                        container.append(`<div><p>${  msg  }>/p></div>`);
+                        const msg = `[Error] Object ${self.options.id} can not be found`;
+                        // safe
+                        container.append(`<div><p>${domSafeText(msg)}>/p></div>`);
                     } else {
                         const otus = data[0].data.otus;
                         const rows = [];
@@ -74,18 +84,12 @@ define([
                         const table = html.makeTable(options);
                         // safe useage of html(), as determined by the table created above
                         container.html(table);
-                        $(`#${  options.generated.id}`).dataTable();
+                        $(`#${options.generated.id}`).dataTable();
                     }
                 },
-                (data) => {
-                    container.empty();
-                    const main = $('<div>');
-                    main.append(
-                        $('<p>')
-                            .css({padding: '10px 20px'})
-                            .text(`[Error] ${  data.error.message}`)
-                    );
-                    container.append(main);
+                (error) => {
+                    // safe
+                    container.html($errorAlert(error));
                 }
             );
             return self;

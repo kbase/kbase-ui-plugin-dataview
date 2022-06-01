@@ -23,7 +23,7 @@ define([
     'widgets/genomes/kbaseGenomeLineage',
     'widgets/genomes/kbaseGenomeRELineage',
     'widgets/trees/kbaseTree'
-], ($, html, GenericClient, DynamicServiceClient, serviceUtils, post, {domSafeText}) => {
+], ($, html, GenericClient, DynamicServiceClient, serviceUtils, post, {errorMessage}) => {
     const t = html.tag,
         div = t('div'),
         a = t('a'),
@@ -66,6 +66,7 @@ define([
             const $row = $('<div class="row">');
 
             const $taxonomyColumn = $('<div class="col-md-5">');
+            // safe
             $row.append($taxonomyColumn);
 
             // This area for the RE taxonomy widget
@@ -73,15 +74,19 @@ define([
             let $reTaxonomyInfo;
             if (this.runtime.featureEnabled('re-lineage')) {
                 $reTaxonomyInfo = $('<div>');
+                // safe
                 $taxonomyColumn.append($makeTitle('New Lineage'));
+                // safe
                 $taxonomyColumn.append($reTaxonomyInfo);
             }
 
             // This area for the taxonomy widget
             const $taxonomyInfo = $('<div>');
             if (this.runtime.featureEnabled('re-lineage')) {
+                // safe
                 $taxonomyColumn.append($makeTitle('Old Lineage'));
             }
+            // safe
             $taxonomyColumn.append($taxonomyInfo);
 
 
@@ -189,20 +194,22 @@ define([
                 ]
             );
 
+            // safe
             $row.append(treeArea);
 
+            // safe
             this.$elem.append($row);
 
-            this.$treeNode = $(`#${  treeNodeId}`);
-            this.$treeMessageNode = $(`#${  treeMessageNodeId}`);
+            this.$treeNode = $(`#${treeNodeId}`);
+            this.$treeMessageNode = $(`#${treeMessageNodeId}`);
 
             // COMMENTED OUT: new narrative button
             // this.$newTreeButtonNode = $('#' + newTreeButtonNodeId);
 
-            this.$buttonsNode = $(`#${  buttonsNodeId}`);
-            this.$messageNode = $(`#${  messageNodeId}`);
-            this.$prevButtonNode = $(`#${  prevButtonNodeId}`);
-            this.$nextButtonNode = $(`#${  nextButtonNodeId}`);
+            this.$buttonsNode = $(`#${buttonsNodeId}`);
+            this.$messageNode = $(`#${messageNodeId}`);
+            this.$prevButtonNode = $(`#${prevButtonNodeId}`);
+            this.$nextButtonNode = $(`#${nextButtonNodeId}`);
 
             this.$prevButtonNode.click(() => {
                 if (!this.trees) {
@@ -255,15 +262,15 @@ define([
                 })
                 .catch((error) => {
                     console.error(error);
-                    let err;
-                    if (typeof error === 'string') {
-                        err += `: ${error}`;
-                    } else if (error.error && error.error.message) {
-                        err += `: ${error.error.message}`;
-                    } else {
-                        err = 'Error retrieving species trees info';
-                    }
-                    this.setMessage(domSafeText(err));
+                    // let err;
+                    // if (typeof error === 'string') {
+                    //     err += `: ${error}`;
+                    // } else if (error.error && error.error.message) {
+                    //     err += `: ${error.error.message}`;
+                    // } else {
+                    //     err = 'Error retrieving species trees info';
+                    // }
+                    this.setMessage(errorMessage(error,  'Error retrieving species trees info'));
                 });
         },
         // SpeciesTreeBuilder/insert_set_of_genomes_into_species_tree
@@ -499,6 +506,7 @@ define([
             this.$buttonsNode.empty();
         },
         addButton(markup) {
+            // safe
             this.$buttonsNode.append(markup);
         },
         hideNavButtons() {
@@ -513,8 +521,7 @@ define([
         //     this.$treeMessageNode.html(html);
         // },
         setMessage(message) {
-            // safe - checked all usages below
-            this.$messageNode.html(message);
+            this.$messageNode.text(message);
         },
         renderTree() {
             const trees = this.trees;
@@ -532,7 +539,7 @@ define([
                 //     'You may do this from any Narrative you have write access to, or create a new Narrative ',
                 //     'with the button below.'
                 // ].join(''));
-                this.setMessage(['There are no species trees associated with this genome.']);
+                this.setMessage('There are no species trees associated with this genome.');
                 this.$prevButtonNode.addClass('hidden');
                 this.$nextButtonNode.addClass('hidden');
             } else if (trees.length === 1) {

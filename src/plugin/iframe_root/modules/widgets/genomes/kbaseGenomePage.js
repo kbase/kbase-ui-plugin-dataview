@@ -9,15 +9,26 @@ define([
     'jquery',
     'uuid',
     'kb_common/html',
-    'kb_service/client/workspace',
     'kb_service/utils',
     'kb_lib/jsonRpc/dynamicServiceClient',
+    'lib/domUtils',
+    'lib/jqueryUtils',
+
+    // For Effect
     'kbaseUI/widget/legacy/widget',
     'widgets/genomes/kbaseGenomeWideOverview',
     'widgets/genomes/kbaseLitWidget',
     'widgets/genomes/kbaseGenomeWideTaxonomy',
     'widgets/genomes/kbaseGenomeWideAssemblyAnnotation'
-], ($, Uuid, html, Workspace, serviceUtils, DynamicServiceClient) => {
+], (
+    $,
+    Uuid,
+    html,
+    serviceUtils,
+    DynamicServiceClient,
+    {domSafeText},
+    {$errorAlert}
+) => {
     $.KBWidget({
         name: 'KBaseGenomePage',
         parent: 'kbaseWidget',
@@ -182,16 +193,11 @@ define([
                         })
                         .catch((error) => {
                             _this.showError(_this.view.panels[0].inner_div, error);
-                            console.error(error);
                         });
-
-
                     return null;
                 })
                 .catch((error) => {
-                    console.error('Error loading genome subdata');
-                    console.error(error);
-                    _this.showError(_this.view.panels[0].inner_div, error);
+                    _this.showError(_this.view.panels[0].inner_div, error, 'Error loading genome subdata');
                     _this.view.panels[1].inner_div.empty();
                     _this.view.panels[2].inner_div.empty();
                     _this.view.panels[3].inner_div.empty();
@@ -279,6 +285,7 @@ define([
             const that = this;
             this.view.panels.forEach((panel) => {
                 that.makeWidgetPanel(panel.outer_div, panel.label, panel.name, panel.inner_div);
+                // safe
                 that.$elem.append(panel.outer_div);
                 // safe usage of html
                 panel.inner_div.html(html.loading('Loading...'));
@@ -291,9 +298,8 @@ define([
                     id: this.options.genomeID,
                     ver: this.options.objectVersion
                 },
-                panelError = function (p, e) {
-                    console.error(e);
-                    _this.showError(p, e.message);
+                panelError = (p, e) => {
+                    _this.showError(p, e);
                 };
 
             _this.view.panels[0].inner_div.empty();
@@ -350,8 +356,8 @@ define([
                 (genomeInfo && genomeInfo.data['domain'] === 'Eukaryota') ||
                 (genomeInfo && genomeInfo.data['domain'] === 'Plant')
             ) {
-                _this.view.panels[3].inner_div.empty();
-                _this.view.panels[3].inner_div.append(
+                // safe
+                _this.view.panels[3].inner_div.html(
                     'Browsing Eukaryotic Genome Features is not supported at this time.'
                 );
             } else {
@@ -381,44 +387,49 @@ define([
         // TODO: This is
         makeWidgetPanel($panel, title, name, $widgetDiv) {
             const id = new Uuid(4).format();
+            // safe
             $panel.append(
                 $(
                     `<div class="panel-group" id="accordion_${
                         id
                     }" role="tablist" aria-multiselectable="true" data-panel="${
-                        name
+                        domSafeText(name)
                     }">`
-                ).append(
-                    $('<div class="panel panel-default kb-widget">')
-                        .append(
-                            '' +
-                                `<div class="panel-heading" role="tab" id="heading_${
-                                    id
-                                }">` +
-                                '<h4 class="panel-title">' +
-                                `<span data-toggle="collapse" data-parent="#accordion_${
-                                    id
-                                }" data-target="#collapse_${
-                                    id
-                                }" aria-expanded="false" aria-controls="collapse_${
-                                    id
-                                }" style="cursor:pointer;" data-element="title">` +
-                                ` ${
-                                    title
-                                }</span>` +
-                                '</h4>' +
-                                '</div>'
-                        )
-                        .append(
-                            $(
-                                `<div id="collapse_${
-                                    id
-                                }" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_${
-                                    id
-                                }" area-expanded="true">`
-                            ).append($('<div class="panel-body">').append($widgetDiv))
-                        )
                 )
+                    // safe
+                    .append(
+                        $('<div class="panel panel-default kb-widget">')
+                            // safe
+                            .append(
+                                '' +
+                                    `<div class="panel-heading" role="tab" id="heading_${
+                                        id
+                                    }">` +
+                                    '<h4 class="panel-title">' +
+                                    `<span data-toggle="collapse" data-parent="#accordion_${
+                                        id
+                                    }" data-target="#collapse_${
+                                        id
+                                    }" aria-expanded="false" aria-controls="collapse_${
+                                        id
+                                    }" style="cursor:pointer;" data-element="title">` +
+                                    ` ${domSafeText(title)}</span>` +
+                                    '</h4>' +
+                                    '</div>'
+                            )
+                            // safe
+                            .append(
+                                $(
+                                    `<div id="collapse_${
+                                        id
+                                    }" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_${
+                                        id
+                                    }" area-expanded="true">`
+                                )
+                                    // safe
+                                    .append($('<div class="panel-body">').append($widgetDiv))
+                            )
+                    )
             );
         },
         getData() {
@@ -429,19 +440,13 @@ define([
                 title: 'Genome Page'
             };
         },
-        showError(panel, e) {
-            panel.empty();
-            const $err = $('<div>')
-                .addClass('alert alert-danger')
-                .append(
-                    $('<div>')
-                        .addClass('text-danger')
-                        .css('font-weight', 'bold')
-                        .text('Error')
-                )
-                .append($('<p>').text(JSON.stringify(e.message)))
-                .append($('<div>').text(JSON.stringify(e)));
-            panel.append($err);
+        showError(panel, error, title) {
+            if (title) {
+                console.error(title);
+            }
+            console.error(error);
+            // safe
+            panel.html($errorAlert(error, title));
         }
     });
 });

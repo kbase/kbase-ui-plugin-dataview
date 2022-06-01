@@ -1,12 +1,12 @@
 define([
     'jquery',
 
+    // For effect
     'kbaseUI/widget/legacy/widget',
     'widgets/genomes/kbaseMultiContigBrowser',
     'widgets/genomes/kbaseSEEDFunctions',
     'widgets/genomes/kbaseGenomeGeneTable'
-], function ($) {
-    'use strict';
+], ($) => {
     $.KBWidget({
         name: 'KBaseGenomeWideAssemAnnot',
         parent: 'kbaseWidget',
@@ -18,16 +18,18 @@ define([
             genomeInfo: null,
             contigSetInfo: null
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
             this.render();
             return this;
         },
-        render: function () {
-            var self = this;
-            var row0 = $('<div class="row">');
+        render() {
+            const self = this;
+            const row0 = $('<div class="row">');
+            // safe
             self.$elem.append(row0);
-            var contigbrowser = $('<div class="col-md-12">');
+            const contigbrowser = $('<div class="col-md-12">');
+            // safe
             row0.append(contigbrowser);
             contigbrowser.KBaseMultiContigBrowser({
                 genomeID: self.options.genomeID,
@@ -36,11 +38,14 @@ define([
                 genomeInfo: self.options.genomeInfo,
                 runtime: self.runtime
             });
-            var row1 = $('<div class="row">');
+            const row1 = $('<div class="row">');
+            // safe
             self.$elem.append(row1);
-            var seedannotations = $('<div class="col-md-6">');
+            const seedannotations = $('<div class="col-md-6">');
+            // safe
             row1.append(seedannotations);
-            var genetable = $('<div class="col-md-6">');
+            const genetable = $('<div class="col-md-6">');
+            // safe
             row1.append(genetable);
             seedannotations.KBaseSEEDFunctions({
                 objNameOrId: self.options.genomeID,
@@ -57,7 +62,7 @@ define([
                 runtime: self.runtime
             });
         },
-        getData: function () {
+        getData() {
             return {
                 type: 'Genome Assembly and Annotation',
                 id: this.options.genomeID,

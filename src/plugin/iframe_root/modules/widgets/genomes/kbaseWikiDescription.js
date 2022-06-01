@@ -23,6 +23,7 @@ define([
     'kb_common/html',
     'kb_service/client/workspace',
     'lib/domUtils',
+    'dompurify',
 
     // For effect
     'kbaseUI/widget/legacy/widget'
@@ -30,7 +31,8 @@ define([
     $,
     html,
     Workspace,
-    {domSafeText}
+    {domSafeText},
+    DOMPurify
 ) => {
     $.KBWidget({
         name: 'KBaseWikiDescription',
@@ -67,6 +69,7 @@ define([
                 return this;
             }
             this.$messagePane = $('<div>');
+            // safe
             this.$elem.append(this.$messagePane);
 
             this.workspaceClient = new Workspace(
@@ -122,12 +125,11 @@ define([
                          */
                         if (desc.searchTerm) {
                             const $descDiv = $(
-                                `<div style="text-align:justify; max-height: ${
-                                    this.options.maxTextHeight
-                                }px; overflow-y:auto; padding-right:5px">`
-                            ).append(desc.description);
+                                `<div style="text-align:justify; max-height: ${this.options.maxTextHeight}px; overflow-y:auto; padding-right:5px">`
+                            )
+                                .append(DOMPurify.sanitize(desc.description));
 
-                            var $descHeader = $('<div>');
+                            let $descHeader = $('<div>');
                             if (strainName === desc.redirectFrom) {
                                 $descHeader = $(this.redirectHeader(strainName, desc.redirectFrom, desc.searchTerm));
                             } else if (strainName !== desc.searchTerm) {
@@ -138,22 +140,29 @@ define([
                                 `<p>[<a href="${  desc.wikiUri  }" target="_new">more at Wikipedia</a>]</p>`
                             );
 
+                            // TODO: refactor to pure jquery
                             let imageHtml =
-                                `Unable to find an image. If you have one, you might consider <a href="${
-                                    desc.wikiUri
-                                }" target="_new">adding it to Wikipedia</a>.`;
+                                `Unable to find an image. If you have one, you might consider <a href="${encodeURI(desc.wikiUri)}" target="_new">adding it to Wikipedia</a>.`;
                             if (desc.imageUri !== null) {
-                                imageHtml = `<img src="${  desc.imageUri  }"`;
-                                if (this.options.width) imageHtml += `style="width:${  this.options.width  }px;"`;
+                                imageHtml = `<img src="${desc.imageUri}"`;
+                                if (this.options.width) {
+                                    imageHtml += `style="width:${this.options.width}px;"`;
+                                }
                                 imageHtml += '/>';
                             }
+
                             $taxonDescription
+                                // safe
                                 .append($descHeader)
+                                // safe
                                 .append($descDiv)
+                                // safe
                                 .append($descFooter);
+                            // safe
                             $taxonImage.append(imageHtml);
                         } else {
-                            $descHeader = $(this.notFoundHeader(strainName, desc.searchTerm, desc.redirectFrom));
+                            const $descHeader = $(this.notFoundHeader(strainName, desc.searchTerm, desc.redirectFrom));
+                            // safe
                             $taxonDescription.append($descHeader);
                             $taxonImage.append('Unable to find an image.');
                         }
@@ -161,16 +170,22 @@ define([
 
                     this.hideMessage();
 
+                    // safe
                     this.$elem.append(
                         $('<div id="mainview">')
                             .css('overflow', 'auto')
+                            // safe
                             .append(
+                                // safe
                                 $('<table cellpadding=4, cellspacing=2, border=0 style="width:100%">').append(
                                     $('<tr>')
+                                        // safe
                                         .append($('<td style="vertical-align:top">').append($taxonDescription))
+                                        // safe
                                         .append($('<td style="vertical-align:top">').append($taxonImage))
                                 )
                             )
+                            // safe
                             .append($('<br>'))
                     );
                 }, this),
@@ -294,15 +309,12 @@ define([
         notFoundHeader(strainName, term, redirectFrom) {
             const underscoredName = strainName.replace(/\s+/g, '_');
             let str =
-                `<p><b>"<i>${
-                    strainName
-                }</i>" not found in Wikipedia. Add a description on <a href='http://en.wikipedia.org/wiki/${
-                    underscoredName
-                }' target='_new'>Wikipedia</a>.</b></p>`;
+                `<p><b>"<i>${domSafeText(strainName)}</i>" not found in Wikipedia. 
+                Add a description on <a href='http://en.wikipedia.org/wiki/${domSafeText(underscoredName)}' target='_new'>Wikipedia</a>.</b></p>`;
             if (term) {
-                str += `<p><b>Showing description for <i>${  term  }</i></b>`;
+                str += `<p><b>Showing description for <i>${domSafeText(term)}</i></b>`;
                 if (redirectFrom) {
-                    str += `<br>redirected from <i>${  redirectFrom  }</i>`;
+                    str += `<br>redirected from <i>${domSafeText(redirectFrom)}</i>`;
                 }
                 str += '</p>';
             }
@@ -319,16 +331,13 @@ define([
          * @return {string} an HTML string with the parameters rendered nicely.
          * @private
          */
+        // TODO: yet strainName is unused!
         redirectHeader(strainName, redirectFrom, term) {
             const underscoredName = redirectFrom.replace(/\s+/g, '_');
             const str =
                 '<p><b>' +
-                `Showing description for <i>${
-                    term
-                }</i></b>` +
-                `<br>redirected from <i>${
-                    underscoredName
-                }</i>` +
+                `Showing description for <i>${domSafeText(term)}</i></b>` +
+                `<br>redirected from <i>${domSafeText(underscoredName)}</i>` +
                 '</p>';
 
             return str;
@@ -340,9 +349,10 @@ define([
          * @private
          */
         showMessage(message) {
-            const span = $('<span>').append(message);
-
-            this.$messagePane.append(span);
+            // safe (usages)
+            const span = $('<span>').html(message);
+            // safe
+            this.$messagePane.html(span);
             this.$messagePane.removeClass('kbwidget-hide-message');
         },
         /**
@@ -386,10 +396,12 @@ define([
 
             const $errorDiv = $('<div>')
                 .addClass('alert alert-danger')
+                // safe
                 .append('<b>Error:</b>')
-                .append(`<br>${  errString}`);
-            this.$elem.empty();
-            this.$elem.append($errorDiv);
+                // safe
+                .append(`<br>${domSafeText(errString)}`);
+            // safe
+            this.$elem.heml($errorDiv);
         },
         searchedOnce: false,
         /**
@@ -518,7 +530,6 @@ define([
                                         }
                                     }
                                     // Finally, pass the finished result to successCallback
-                                    console.log('hit!', hit, data);
                                     if (successCallback) {
                                         successCallback(hit);
                                     }

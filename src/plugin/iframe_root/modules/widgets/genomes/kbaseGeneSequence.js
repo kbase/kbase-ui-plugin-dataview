@@ -5,12 +5,22 @@
  * Gene "instance" info (e.g. coordinates on a particular strain's genome)
  * is in a different widget.
  */
-define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widget/legacy/widget'], function (
+define([
+    'jquery',
+    'kb_common/html',
+    'kb_service/client/workspace',
+    'dompurify',
+    'lib/domUtils',
+
+    // for effect
+    'kbaseUI/widget/legacy/widget'
+], (
     $,
     html,
-    Workspace
-) {
-    'use strict';
+    Workspace,
+    DOMPurify,
+    {domSafeText}
+) => {
     $.KBWidget({
         name: 'KBaseGeneSequence',
         parent: 'kbaseWidget',
@@ -24,7 +34,7 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
             seq_cell_height: 208,
             genomeInfo: null
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
 
             if (this.options.featureID === null) {
@@ -39,59 +49,62 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
 
             return this;
         },
-        render: function () {
+        render() {
             this.$messagePane = $('<div/>').addClass('kbwidget-message-pane hide');
+            // safe
             this.$elem.append(this.$messagePane);
 
             this.$infoPanel = $('<div>').css('overflow', 'auto');
             this.$infoTable = $('<table>').addClass('table table-striped table-bordered');
 
+            // safe
             this.$elem.append(this.$infoPanel.append(this.$infoTable));
         },
-        makeRow: function (name, value, color) {
-            var $row = $('<tr>')
-                .append($('<th>').append(name))
+        makeRow(name, value, color) {
+            const $row = $('<tr>')
+                // safe
+                .append($('<th>').text(name))
+                // safe
                 .append(
+                    // safe
                     $('<td>').append(
                         $(
-                            '<div style=\'max-height:' +
-                                this.options.seq_cell_height +
-                                'px; overflow:scroll; font-family:monospace; background-color:' +
-                                color +
-                                '; border:1px solid transparent\'>'
-                        ).append(value)
+                            `<div style='max-height:${this.options.seq_cell_height}px; overflow:scroll; font-family:monospace; background-color:${color}; border:1px solid transparent'>`
+                        )
+                            // safe
+                            .append(DOMPurify.sanitize(value))
                     )
                 );
             //.append("<td style='max-height: 100px; overflow:scroll; font-family: monospace'>").append($("<div style='max-height:100px; overflow:scroll; font-family: monospace'>").append(value));
             return $row;
         },
-        renderWorkspace: function () {
-            var self = this;
+        renderWorkspace() {
+            const self = this;
             this.showMessage(html.loading());
             this.$infoPanel.hide();
 
             if (this.options.genomeInfo) {
                 self.ready(this.options.genomeInfo);
             } else {
-                var obj = this.buildObjectIdentity(this.options.workspaceID, this.options.genomeID);
+                const obj = this.buildObjectIdentity(this.options.workspaceID, this.options.genomeID);
 
-                var workspace = new Workspace(this.runtime.config('services.workspace.url'), {
+                const workspace = new Workspace(this.runtime.config('services.workspace.url'), {
                     token: this.runtime.service('session').getAuthToken()
                 });
                 workspace
                     .get_objects([obj])
-                    .then(function (genome) {
+                    .then((genome) => {
                         self.ready(genome[0]);
                     })
-                    .catch(function (err) {
+                    .catch((err) => {
                         self.renderError(err);
                     });
             }
         },
-        ready: function (genome) {
+        ready(genome) {
             if (genome.data.features) {
-                var feature = null;
-                for (var i = 0; i < genome.data.features.length; i++) {
+                let feature = null;
+                for (let i = 0; i < genome.data.features.length; i++) {
                     if (genome.data.features[i].id === this.options.featureID) {
                         feature = genome.data.features[i];
                         break;
@@ -100,56 +113,58 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
 
                 // Gene sequence
                 //
-                var dnaSequenceStr = 'No gene sequence found.';
+                let dnaSequenceStr = 'No gene sequence found.';
                 if (feature.dna_sequence) {
                     // get dna_sequence from object
                     dnaSequenceStr = feature.dna_sequence;
                     // wrap seq
-                    var seq_width = 50;
+                    const seq_width = 50;
                     if (dnaSequenceStr.length > seq_width) {
-                        var dnaDispStr = '';
-                        var start_pos = 0;
-                        var end_pos = 0;
-                        for (var i = 0; (i + 1) * seq_width < dnaSequenceStr.length; i++) {
+                        let dnaDispStr = '';
+                        let start_pos = 0;
+                        let end_pos = 0;
+                        for (let i = 0; (i + 1) * seq_width < dnaSequenceStr.length; i++) {
                             start_pos = i * seq_width;
                             end_pos = (i + 1) * seq_width;
-                            dnaDispStr += dnaSequenceStr.substring(start_pos, end_pos) + '<br>';
+                            dnaDispStr += `${dnaSequenceStr.substring(start_pos, end_pos)}<br>`;
                         }
                         start_pos += seq_width;
                         end_pos = dnaSequenceStr.length;
                         if (start_pos < dnaSequenceStr.length) {
-                            dnaDispStr += dnaSequenceStr.substring(start_pos, end_pos) + '<br>';
+                            dnaDispStr += `${dnaSequenceStr.substring(start_pos, end_pos)}<br>`;
                         }
                         dnaSequenceStr = dnaDispStr;
                     }
                 }
+                // safe
                 this.$infoTable.append(this.makeRow('Gene', dnaSequenceStr, 'white'));
                 // end gene sequence
 
                 // Protein sequence (for peg) (do first for bottom-up table build?)
                 //
-                var proteinTranslationStr = 'No protein sequence found.';
+                let proteinTranslationStr = 'No protein sequence found.';
                 if (feature.protein_translation) {
                     proteinTranslationStr = feature.protein_translation;
                     // wrap seq
-                    var seq_width = 50;
+                    const seq_width = 50;
                     if (proteinTranslationStr.length > seq_width) {
-                        var protDispStr = '';
-                        var start_pos = 0;
-                        var end_pos = 0;
-                        for (var i = 0; (i + 1) * seq_width < proteinTranslationStr.length; i++) {
+                        let protDispStr = '';
+                        let start_pos = 0;
+                        let end_pos = 0;
+                        for (let i = 0; (i + 1) * seq_width < proteinTranslationStr.length; i++) {
                             start_pos = i * seq_width;
                             end_pos = (i + 1) * seq_width;
-                            protDispStr += proteinTranslationStr.substring(start_pos, end_pos) + '<br>';
+                            protDispStr += `${proteinTranslationStr.substring(start_pos, end_pos)}<br>`;
                         }
                         start_pos += seq_width;
                         end_pos = proteinTranslationStr.length;
                         if (start_pos < proteinTranslationStr.length) {
-                            protDispStr += proteinTranslationStr.substring(start_pos, end_pos) + '<br>';
+                            protDispStr += `${proteinTranslationStr.substring(start_pos, end_pos)}<br>`;
                         }
                         proteinTranslationStr = protDispStr;
                     }
                 }
+                // safe
                 this.$infoTable.append(
                     this.makeRow('Protein', proteinTranslationStr, '#f9f9f9')
                     //.each(function(){$(this).css('font-family','monospace')})
@@ -161,18 +176,18 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
             } else {
                 this.renderError({
                     error:
-                        'No genetic features found in the genome with object id: ' +
-                        this.options.workspaceID +
-                        '/' +
-                        this.options.genomeID
+                        `No genetic features found in the genome with object id: ${
+                            this.options.workspaceID
+                        }/${
+                            this.options.genomeID}`
                 });
             }
 
             this.hideMessage();
             this.$infoPanel.show();
         },
-        buildObjectIdentity: function (workspaceID, objectID) {
-            var obj = {};
+        buildObjectIdentity(workspaceID, objectID) {
+            const obj = {};
             if (/^\d+$/.exec(workspaceID)) obj['wsid'] = workspaceID;
             else obj['workspace'] = workspaceID;
 
@@ -181,7 +196,7 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
             else obj['name'] = objectID;
             return obj;
         },
-        getData: function () {
+        getData() {
             return {
                 type: 'Feature',
                 id: this.options.featureID,
@@ -189,28 +204,31 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                 title: 'Gene Sequence'
             };
         },
-        showMessage: function (message) {
-            var span = $('<span/>').append(message);
+        showMessage(message) {
+            // safe
+            const span = $('<span/>').append(message);
 
             this.$messagePane
-                .empty()
-                .append(span)
+                // safe
+                .html(span)
                 .removeClass('hide');
         },
-        hideMessage: function () {
+        hideMessage() {
             this.$messagePane.addClass('hide');
         },
-        renderError: function (error) {
-            var errString = 'Sorry, an unknown error occurred';
+        renderError(error) {
+            let errString = 'Sorry, an unknown error occurred';
             if (typeof error === 'string') errString = error;
             else if (error.error && error.error.message) errString = error.error.message;
 
-            var $errorDiv = $('<div>')
+            const $errorDiv = $('<div>')
                 .addClass('alert alert-danger')
+                // safe
                 .append('<b>Error:</b>')
-                .append('<br>' + errString);
-            this.$elem.empty();
-            this.$elem.append($errorDiv);
+                // safe
+                .append(`<br>${domSafeText(errString)}`);
+            // safe
+            this.$elem.html($errorDiv);
         }
     });
 });
