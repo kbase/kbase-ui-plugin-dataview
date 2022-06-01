@@ -21,6 +21,12 @@ module.exports = function (grunt) {
                 src: 'node_modules/htm/dist/htm.umd.js',
                 dest: '../src/plugin/iframe_root/modules/vendor/htm'
             },
+            dompurify: {
+                expand: true,
+                flatten: true,
+                src: 'node_modules/dompurify/dist/purify.js',
+                dest: '../src/plugin/iframe_root/modules/vendor/dompurify'
+            },
             leaflet: {
                 expand: true,
                 flatten: false,
@@ -32,7 +38,7 @@ module.exports = function (grunt) {
                 ],
                 dest: '../src/plugin/iframe_root/modules/vendor/leaflet'
             },
-             'leaflet-tilejson': {
+            'leaflet-tilejson': {
                 expand: true,
                 flatten: false,
                 cwd: 'node_modules/leaflet-tilejson',
