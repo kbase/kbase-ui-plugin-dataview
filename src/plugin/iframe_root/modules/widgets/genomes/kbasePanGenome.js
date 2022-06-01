@@ -4,9 +4,12 @@ define([
     'preact',
     'htm',
     'kb_lib/jsonRpc/dynamicServiceClient',
+    'kb_lib/jsonRpc/exceptions',
     'components/Table',
     'content',
+    'lib/domUtils',
 
+    // For effect
     'kbaseUI/widget/legacy/kbaseTabs',
     'kbaseUI/widget/legacy/authenticatedWidget',
     'kbaseUI/widget/legacy/tabs',
@@ -17,8 +20,10 @@ define([
     preact,
     htm,
     DynamicServiceClient,
+    exceptions,
     Table,
-    content
+    content,
+    {domSafeText}
 ) => {
     const html = htm.bind(preact.h);
 
@@ -39,38 +44,31 @@ define([
         return validRef;
     }
 
-    function createError(title, error, stackTrace) {
+    function createError(title, error) {
         const $errorPanel = $('<div>')
             .addClass('alert alert-danger')
-            .append(`<b>${  title  }</b><br>Please contact the KBase team at <a href="http://kbase.us/contact-us/">http://kbase.us/contact-us/</a> with the information below.`);
+            // safe
+            .append(`<b>${domSafeText(title)}</b><br>Please contact the KBase team at <a href="http://kbase.us/contact-us/">http://kbase.us/contact-us/</a> with the information below.`);
 
+        // safe
         $errorPanel.append('<br><br>');
 
         // If it's a string, just dump the string.
         if (typeof error === 'string') {
-            $errorPanel.append(error);
-        }
-
-        // If it's an object, expect an error object
-        else if (typeof error === 'object') {
-            let errObj = error;
-            if (error.status && error.error && error.error.error) {
-                errObj = {
-                    status: error.status,
-                    code: error.error.code,
-                    message: error.error.message,
-                    name: error.error.name
-                };
-                if (!stackTrace) {
-                    stackTrace = error.error.error;
-                }
+            // safe
+            $errorPanel.append(domSafeText(error));
+        } else if (error instanceof Error) {
+            if (error instanceof exceptions.JsonRpcError) {
+                // safe
+                $errorPanel.append(domSafeText(error.originalError.message || error.originalError.name));
+            } else {
+                // safe
+                $errorPanel.append(domSafeText(error.message || error.name));
             }
-            Object.keys(errObj).forEach((key) => {
-                $errorPanel.append($('<div>').append(`<b>${  key  }:</b> ${  errObj[key]}`));
-            });
-        }
-        else if (error) {
+        } else if (error) {
             $errorPanel.append('No other information available. Sorry!');
+        } else {
+            $errorPanel.append('An unknown error occurred.');
         }
         // TODO: restore
         // if (stackTrace) {
@@ -109,6 +107,7 @@ define([
                 this.objRef = `${this.options.ws  }/${  this.options.name}`;
             }
             if (!checkObjectRef(this.objRef)) {
+                // safe
                 this.$elem.append(createError('Bad object.', 'PanGenome Object Unavailable.'));
                 this.isError = true;
             }
@@ -121,6 +120,7 @@ define([
             }
 
             const $tabContainer = $('<div>');
+            // safe
             this.$elem.append($tabContainer);
             this.tabs = $tabContainer.kbaseTabs({
                 tabPosition: top,
@@ -135,11 +135,6 @@ define([
                     canDelete: false,
                     showContentCallback: this.showHomologFamilies.bind(this)
                 },
-                // {
-                //     tab: 'Families',
-                //     canDelete: false,
-                //     showContentCallback: this.showProteinFamilies.bind(this)
-                // },
                 {
                     tab: 'Families',
                     canDelete: false,
@@ -155,22 +150,60 @@ define([
             return this;
         },
 
-        tableRow(items) {
+        $noData() {
+            return $('<span>')
+                .css('font-style', 'italic')
+                .css('font-size', '90%')
+                .text('∅');
+        },
+
+        $renderCell(valueText, valueHTML) {
+            const $valueCell = $('<td>');
+            if (valueText) {
+                // safe
+                $valueCell.text(valueText);
+            } else if (valueHTML) {
+                // safe (trusting valueHTML)
+                $valueCell.html(valueHTML);
+            } else {
+                // safe
+                $valueCell.html(this.$noData());
+            }
+            return $valueCell;
+        },
+
+        $tableRow([headerText, valueText, valueHTML]) {
+            return $('<tr>')
+                // safe
+                .append($('<th>').text(headerText))
+                // safe
+                .append(this.$renderCell(valueText, valueHTML));
+        },
+
+        $tableRowN(items) {
             const $row = $('<tr>');
-            items.forEach((item) => {
-                $row.append($('<td>').append(item));
+            items.forEach((value) => {
+                if (value instanceof Array) {
+                    const [valueText, valueHTML] = value;
+                    // safe
+                    $row.append(this.$renderCell(valueText, valueHTML));
+                } else {
+                    // safe
+                    $row.append(this.$renderCell(value, null));
+                }
             });
             return $row;
         },
 
         loading(message) {
             message = message || 'Loading...';
-            return `<span><span>${message}</span><span class="fa fa-spinner fa-pulse fa-fw" style="margin-left: "6px"></span></span>`;
+            return `<span><span>${domSafeText(message)}</span><span class="fa fa-spinner fa-pulse fa-fw" style="margin-left: "6px"></span></span>`;
         },
 
         showSummary() {
             const self = this;
-            const $summaryDiv = $('<div>').append(this.loading);
+            // safe
+            const $summaryDiv = $('<div>').append(this.loading());
             const pangenomeClient = new DynamicServiceClient({
                 module: 'PanGenomeAPI',
                 url: this.runtime.config('services.ServiceWizard.url'),
@@ -183,9 +216,12 @@ define([
                     const $topTable = $('<table class="table table-hover table-striped table-bordered">');
 
                     $topTable
-                        .append(self.tableRow(['Pan-genome object Id', self.options.name]))
-                        .append(self.tableRow(['Total # of genomes', data.genomes_count]))
-                        .append(self.tableRow(['Total # of protein coding genes', [
+                        // safe
+                        .append(self.$tableRow(['Pan-genome object Id', self.options.name]))
+                        // safe
+                        .append(self.$tableRow(['Total # of genomes', data.genomes_count]))
+                        // safe
+                        .append(self.$tableRow(['Total # of protein coding genes', null, [
                             '<b>',
                             content.niceNumber(data.genes.genes_count),
                             '</b> genes with translation; <b>',
@@ -194,7 +230,8 @@ define([
                             content.niceNumber(data.genes.singleton_family_genes_count),
                             '</b> are in singleton families'
                         ].join(' ')]))
-                        .append(self.tableRow(['Total # of families', [
+                        // safe
+                        .append(self.$tableRow(['Total # of families', null, [
                             '<b>',
                             content.niceNumber(data.families.families_count),
                             '</b> families; <b>',
@@ -205,17 +242,24 @@ define([
                         ].join(' ')]));
 
                     const $genomeTable = $('<table class="table table-hover table-striped table-bordered">')
+                        // safe
                         .append($('<tr>')
+                            // safe
                             .append($('<th>Genome</th>'))
+                            // safe
                             .append($('<th># Genes</th>'))
+                            // safe
                             .append($('<th># Genes in Homologs</th>'))
+                            // safe
                             .append($('<th># Genes in Singletons</th>'))
+                            // safe
                             .append($('<th># Homolog Families</th>'))
                         );
 
                     Object.keys(data.genomes).forEach((genome) => {
                         const genomeData = data.genomes[genome];
-                        $genomeTable.append(self.tableRow([
+                        // safe
+                        $genomeTable.append(self.$tableRowN([
                             genome,
                             content.niceNumber(genomeData.genome_genes),
                             content.niceNumber(genomeData.genome_homolog_family_genes),
@@ -224,19 +268,21 @@ define([
                         ]));
                     });
 
+                    // safe
                     $summaryDiv.empty().append($topTable).append($genomeTable);
                 })
                 .catch((error) => {
                     $summaryDiv
-                        .empty()
-                        .append(createError('Pangenome data summary error', error.error));
+                        // safe
+                        .html(createError('Pangenome data summary error', error));
                 });
             return $summaryDiv;
         },
 
         showHomologFamilies() {
             const self = this;
-            const $homologDiv = $('<div>').append(this.loading());
+            // safe
+            const $homologDiv = $('<div>').html(this.loading());
             const pangenomeClient = new DynamicServiceClient({
                 module: 'PanGenomeAPI',
                 url: this.runtime.config('services.ServiceWizard.url'),
@@ -251,32 +297,36 @@ define([
                     const numberTable = [];
                     const header = ['<th>Genome</th><th>Legend</th>'];
                     for (let i=0; i<numGenomes; i++) {
-                        header.push(`<th style="text-align:center"><b>G${  i+1  }</b></th>`);
+                        header.push(`<th style="text-align:center"><b>G${i+1}</b></th>`);
                         const singleComp = [];
-                        singleComp.push(`<b>G${  i+1  }</b> - ${  genomeList[i]}`);
-                        singleComp.push('# homolog families');
+                        singleComp.push([null, `<b>G${i+1}</b> - ${domSafeText(genomeList[i])}`]);
+                        singleComp.push(['# homolog families', null]);
                         for (let j=0; j<numGenomes; j++) {
-                            let cell = data.shared_family_map[genomeList[i]][genomeList[j]];
+                            const cell = data.shared_family_map[genomeList[i]][genomeList[j]];
                             if (i === j) {
-                                cell = `<font color="#d2691e">${  cell  }</font>`;
+                                singleComp.push([null, `<font color="#d2691e">${domSafeText(cell)}</font>`]);
+                            } else {
+                                singleComp.push([cell, null]);
                             }
-                            singleComp.push(cell);
                         }
 
                         numberTable.push(singleComp);
                     }
 
                     const $prettyTable = $('<table class="table table-hover table-striped table-bordered">');
+                    // safe
                     $prettyTable.append($('<tr>').append(header.join()));
                     for (let i=0; i<numberTable.length; i++) {
-                        $prettyTable.append(self.tableRow(numberTable[i]));
+                        // safe
+                        $prettyTable.append(self.$tableRowN(numberTable[i]));
                     }
+                    // safe
                     $homologDiv.empty().append($prettyTable);
                 })
                 .catch((error) => {
                     $homologDiv
-                        .empty()
-                        .append(createError('Pangenome homolog family data error', error.error));
+                        // safe
+                        .html(createError('Pangenome homolog family data error', error));
                 });
             return $homologDiv;
         },
@@ -357,6 +407,7 @@ define([
         },
 
         createProteinFamilyTab(fam) {
+            // safe
             const $div = $('<div>').append(this.loading());
             const colMap = {
                 genome: 0,
@@ -513,14 +564,10 @@ define([
                         });
                 })
                 .catch((err) => {
-                    $div.html(this.buildError(err));
+                    // safe
+                    $div.html(createError('Error fetching family features', err));
                 });
             return $div;
-        },
-
-        buildError(error) {
-            console.error('ERROR', error);
-            return `<div><span class="alert alert-danger">ERROR: ${error.message || error.error.message}</span></div>`;
         },
 
         searchAndCacheOrthologs(query, sortBy, start, limit) {

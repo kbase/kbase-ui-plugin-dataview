@@ -5,12 +5,19 @@
  * Gene "instance" info (e.g. coordinates on a particular strain's genome)
  * is in a different widget.
  */
-define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widget/legacy/widget'], function (
-    $,
+define([
+    'jquery',
+    'kb_common/html',
+    'kb_service/client/workspace',
+    'lib/domUtils',
+
+    // For effect
+    'kbaseUI/widget/legacy/widget'
+], ($,
     html,
-    Workspace
-) {
-    'use strict';
+    Workspace,
+    {domSafeText}
+) => {
     $.KBWidget({
         name: 'KBaseGeneInstanceInfo',
         parent: 'kbaseWidget',
@@ -23,11 +30,11 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
             width: 350,
             genomeInfo: null
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
 
             if (!this.options.featureID) {
-                this.renderError();
+                this.renderError('required parameter "FeatureID" not provided to the widget');
                 return this;
             }
 
@@ -38,22 +45,21 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
 
             return this;
         },
-        render: function (options) {
+        render() {
             /*
-             * Need to get:
-             * Feature name
-             * Feature type (cds, peg, etc.)
-             * Location (coordinates) (link to centered genome browser -- or highlight in existing one?)
-             * Length
-             * Exons/structure.
-             * Link to alignments, domains, trees, etc. GC content?
-             * families
-             * subsystems
-             */
-
-            var makeButton = function (btnName) {
-                var id = btnName;
-                btnName = btnName.replace(/\w\S*/g, function (txt) {
+                * Need to get:
+                * Feature name
+                * Feature type (cds, peg, etc.)
+                * Location (coordinates) (link to centered genome browser -- or highlight in existing one?)
+                * Length
+                * Exons/structure.
+                * Link to alignments, domains, trees, etc. GC content?
+                * families
+                * subsystems
+                */
+            const makeButton = function (btnName) {
+                const id = btnName;
+                btnName = btnName.replace(/\w\S*/g, (txt) => {
                     return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
                 });
 
@@ -61,10 +67,11 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                     .attr('id', id)
                     .attr('type', 'button')
                     .addClass('btn btn-primary')
-                    .append(btnName);
+                    .text(btnName);
             };
 
             this.$messagePane = $('<div/>').addClass('kbwidget-message-pane kbwidget-hide-message');
+            // safe
             this.$elem.append(this.$messagePane);
 
             this.$infoPanel = $('<div>').css('overflow', 'auto');
@@ -74,28 +81,33 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                 .addClass('btn-group')
                 //.append(makeButton("domains"))
                 //.append(makeButton("operons"))
+                // safe
                 .append(makeButton('sequence'))
+                // safe
                 .append(makeButton('biochemistry'))
+                // safe
                 .append(makeButton('structure'));
 
+            // safe
             this.$infoPanel.append(this.$infoTable);
             if (!this.options.hideButtons) {
+                // safe
                 this.$infoPanel.append(this.$buttonPanel);
             }
 
+            // safe
             this.$elem.append(this.$infoPanel);
         },
 
-        renderWorkspace: function () {
-            var self = this;
+        renderWorkspace() {
+            const self = this;
             this.$infoPanel.hide();
             this.showMessage(html.loading());
 
             if (self.options.genomeInfo) {
                 self.ready(self.options.genomeInfo);
             } else {
-                var obj = this.buildObjectIdentity(this.options.workspaceID, this.options.genomeID),
-                    prom = this.workspace.get_objects([obj]);
+                const obj = this.buildObjectIdentity(this.options.workspaceID, this.options.genomeID), prom = this.workspace.get_objects([obj]);
 
                 // var prom = this.options.kbCache.req('ws', 'get_objects', [obj]);
                 $.when(prom).fail(
@@ -105,18 +117,18 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                     }, this)
                 );
                 $.when(prom).done(
-                    $.proxy(function (genome) {
+                    $.proxy((genome) => {
                         genome = genome[0];
                         self.ready(genome);
                     }, this)
                 );
             }
         },
-        ready: function (genome) {
-            var self = this,
-                feature = null;
+        ready(genome) {
+            const self = this;
+            let feature = null;
             if (genome.data.features) {
-                for (var i = 0; i < genome.data.features.length; i++) {
+                for (let i = 0; i < genome.data.features.length; i++) {
                     if (genome.data.features[i].id === this.options.featureID) {
                         feature = genome.data.features[i];
                         break;
@@ -127,92 +139,99 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                     // FINALLY we have the feature! Hooray!
                     this.$infoTable.empty();
                     /* Function
-                     * Genome + link
-                     * Length
-                     * Location
-                     * Aliases
-                     */
-
+                        * Genome + link
+                        * Length
+                        * Location
+                        * Aliases
+                        */
                     // Figure out the function.
-                    var func = feature['function'];
+                    let func = feature['function'];
                     if (!func) {
                         func = 'Unknown';
                     }
-                    this.$infoTable.append(this.makeRow('Function', func));
+                    // safe
+                    this.$infoTable.append(this.$renderRow('Function', func));
 
                     // Show the genome and a button for it.
+                    // safe
                     this.$infoTable.append(
-                        this.makeRow(
-                            'Genome',
+                        this.$renderRow(
+                            'Genome', null,
                             $('<div/>')
-                                .append(genome.data.scientific_name)
+                                // safe
+                                .append(domSafeText(genome.data.scientific_name))
+                                // safe
                                 .append('<br>')
+                                // safe
                                 .append(this.makeGenomeButton(this.options.genomeID, this.options.workspaceID))
                         )
                     );
                     // Figure out the feature length
-                    var len = 'Unknown';
+                    let len = 'Unknown';
                     if (feature.dna_sequence_length) {
-                        len = feature.dna_sequence_length + ' bp';
+                        len = `${feature.dna_sequence_length  } bp`;
                     } else if (feature.dna_sequence) {
-                        len = feature.dna_sequence.length + ' bp';
+                        len = `${feature.dna_sequence.length  } bp`;
                     } else if (feature.location && feature.location.length > 0) {
                         len = 0;
-                        for (var i = 0; i < feature.location.length; i++) {
+                        for (let i = 0; i < feature.location.length; i++) {
                             len += feature.location[i][3];
                         }
                         len += ' bp';
                     }
                     if (feature.protein_translation) {
-                        len += ', ' + feature.protein_translation.length + ' aa';
+                        len += `, ${  feature.protein_translation.length  } aa`;
                     }
-                    this.$infoTable.append(this.makeRow('Length', len));
+                    // safe
+                    this.$infoTable.append(this.$renderRow('Length', len));
 
+                    // safe
                     this.$infoTable.append(
-                        this.makeRow('Location', $('<div/>').append(this.parseLocation(feature.location)))
+                        // safe
+                        this.$renderRow('Location', null, $('<div/>').append(this.parseLocation(feature.location)))
                     );
                     //.append(this.parseLocation(feature.location))
                     //.append(this.makeContigButton(feature.location))));
-
                     // Aliases
-                    var aliasesStr = 'No known aliases';
-                    if (feature.aliases) aliasesStr = feature.aliases.join(', ');
-                    self.$infoTable.append(self.makeRow('Aliases', aliasesStr));
+                    let aliasesStr = 'No known aliases';
+                    if (feature.aliases)
+                        aliasesStr = feature.aliases.join(', ');
+                    // safe
+                    self.$infoTable.append(self.$renderRow('Aliases', domSafeText(aliasesStr)));
                     // end Aliases
-
                     // LOL GC content. Does anyone even care these days?
                     //if (feature.dna_sequence) {
                     //    var gc = this.calculateGCContent(feature.dna_sequence);
                     //    this.$infoTable.append(this.makeRow("GC Content", Number(gc).toFixed(2)));
                     //}
-
                     // Protein families list.
-                    var proteinFamilies = '';
+                    let proteinFamilies = '';
                     if (feature.protein_families) {
                         if (feature.protein_families.length > 0) {
                             proteinFamilies = '';
-                            for (var i = 0; i < feature.protein_families.length; i++) {
-                                var fam = feature.protein_families[i];
-                                proteinFamilies += fam.id + ': ' + fam.subject_description + '<br>';
+                            for (let i = 0; i < feature.protein_families.length; i++) {
+                                const fam = feature.protein_families[i];
+                                proteinFamilies += `${domSafeText(fam.id)}: ${domSafeText(fam.subject_description)}<br>`;
                             }
                         }
                     }
                     if (proteinFamilies) {
-                        this.$infoTable.append(this.makeRow('Protein Families', proteinFamilies));
+                        // safe
+                        this.$infoTable.append(this.$renderRow('Protein Families', proteinFamilies));
                     }
 
                     // first add handlers that say we do not have domains or operons for this gene
-                    this.$buttonPanel.find('button#domains').click(function (event) {
+                    this.$buttonPanel.find('button#domains').click(() => {
                         window.alert(
                             'No domain assignments available for this gene.  You will be able to compute domain assignments in the Narrative in the future.'
                         );
                     });
-                    this.$buttonPanel.find('button#operons').click(function (event) {
+                    this.$buttonPanel.find('button#operons').click(() => {
                         window.alert(
                             'No operon assignments available for this gene.  You will be able to compute operon assignments in the Narrative in the future.'
                         );
                     });
-                    this.$buttonPanel.find('button#structure').click(function (event) {
+                    this.$buttonPanel.find('button#structure').click(() => {
                         window.alert(
                             'No structure assignments available for this gene.  You will be able to compute structure assignments in the Narrative in the future.'
                         );
@@ -240,12 +259,11 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                     //         }
                     //     } // we don't add error function- if they don't match or this fails, do nothing.
                     // );
-
                     // bind button events
                     this.$buttonPanel.find('button#sequence').click(
                         $.proxy(function (event) {
                             this.trigger('showSequence', {
-                                event: event,
+                                event,
                                 featureID: this.options.featureID,
                                 genomeID: this.options.genomeID,
                                 workspaceID: this.options.workspaceID,
@@ -256,7 +274,7 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                     this.$buttonPanel.find('button#biochemistry').click(
                         $.proxy(function (event) {
                             this.trigger('showBiochemistry', {
-                                event: event,
+                                event,
                                 featureID: this.options.featureID,
                                 genomeID: this.options.genomeID,
                                 workspaceID: this.options.workspaceID,
@@ -266,86 +284,97 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                     );
                 } else {
                     this.renderError({
-                        error:
-                            'Gene \'' +
-                            this.options.featureID +
-                            '\' not found in the genome with object id: ' +
-                            this.options.workspaceID +
-                            '/' +
-                            this.options.genomeID
+                        error: `Gene '${this.options.featureID}' not found in the genome with object id: ${this.options.workspaceID}/${this.options.genomeID}`
                     });
                 }
             } else {
                 this.renderError({
-                    error:
-                        'No genetic features found in the genome with object id: ' +
-                        this.options.workspaceID +
-                        '/' +
-                        this.options.genomeID
+                    error: `No genetic features found in the genome with object id: ${
+                        this.options.workspaceID
+                    }/${
+                        this.options.genomeID}`
                 });
             }
 
             this.hideMessage();
             this.$infoPanel.show();
         },
-        makeRow: function (name, value) {
-            var $row = $('<tr/>')
-                .append($('<th />').append(name))
-                .append($('<td />').append(value));
-            return $row;
+
+        $renderCell(valueText, valueHTML) {
+            const $valueCell = $('<td>');
+            if (valueText) {
+                // safe
+                $valueCell.text(valueText);
+            } else if (valueHTML) {
+                // safe (trusting valueHTML)
+                $valueCell.html(valueHTML);
+            } else {
+                // safe
+                $valueCell.html(this.$noData());
+            }
+            return $valueCell;
         },
-        makeContigButton: function (loc) {
+
+        $renderRow(headerText, valueText, valueHTML) {
+            return $('<tr>')
+                // safe
+                .append($('<th>').text(headerText))
+                // safe
+                .append(this.$renderCell(valueText, valueHTML));
+        },
+
+        makeContigButton(loc) {
             if (this.options.hideButtons) {
                 return '';
             }
-            if (loc === null || loc[0][0] === null) return '';
+            if (loc === null || loc[0][0] === null)
+                return '';
 
-            var contigID = loc[0][0];
+            const contigID = loc[0][0];
 
-            var self = this;
-            var $contigBtn = $('<button />')
+            const self = this;
+            const $contigBtn = $('<button />')
                 .addClass('btn btn-default')
-                .append('Show Contig')
-                .on('click', function (event) {
+                .text('Show Contig')
+                .on('click', (event) => {
                     self.trigger('showContig', {
                         contig: contigID,
                         centerFeature: self.options.featureID,
                         genomeId: self.options.genomeID,
                         workspaceId: self.options.workspaceID,
                         kbCache: self.options.kbCache,
-                        event: event
+                        event
                     });
                 });
 
             return $contigBtn;
         },
-        makeGenomeButton: function (genomeID, workspaceID) {
-            if (!genomeID) return '';
+        makeGenomeButton(genomeID, workspaceID) {
+            if (!genomeID) {
+                return '';
+            }
 
-            if (!workspaceID) workspaceID = null;
+            // TODO: umm, this is very silly.
+            if (!workspaceID) {
+                workspaceID = null;
+            }
 
+            // safe
             return $('<div>').append(
-                '<a href="/#dataview/' +
-                    workspaceID +
-                    '/' +
-                    genomeID +
-                    '" target="_blank">' +
-                    workspaceID +
-                    '/<wbr>' +
-                    genomeID +
-                    '</a>'
+                `<a href="/#dataview/${domSafeText(workspaceID)}/${domSafeText(genomeID)}" target="_blank">${domSafeText(workspaceID)}/<wbr>${domSafeText(genomeID)}</a>`
             );
         },
         /**
          * Returns the GC content of a string as a percentage value.
          * You'll still need to concat it to some number of decimal places.
          */
-        calculateGCContent: function (s) {
-            var gc = 0;
+        calculateGCContent(s) {
+            let gc = 0;
             s = s.toLowerCase();
-            for (var i = 0; i < s.length; i++) {
-                var c = s[i];
-                if (c === 'g' || c === 'c') gc++;
+            for (let i = 0; i < s.length; i++) {
+                const c = s[i];
+                if (c === 'g' || c === 'c')
+                    gc++;
             }
             return (gc / s.length) * 100;
         },
@@ -356,37 +385,40 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
          *   789 - 1234 (+)
          *   on contig [ kb|g.0.c.1 ]  // clicking opens contig browser centered on feature.
          */
-        parseLocation: function (loc) {
+        parseLocation(loc) {
             if (loc.length === 0) {
                 return 'Unknown';
             }
 
-            var locStr = '';
-            for (var i = 0; i < loc.length; i++) {
-                var start = Number(loc[i][1]);
-                var length = Number(loc[i][3]);
+            let locStr = '';
+            for (let i = 0; i < loc.length; i++) {
+                const start = Number(loc[i][1]);
+                const length = Number(loc[i][3]);
 
-                var end = 0;
-                if (loc[i][2] === '+') end = start + length - 1;
-                else end = start - length + 1;
+                let end = 0;
+                if (loc[i][2] === '+')
+                    end = start + length - 1;
+                else
+                    end = start - length + 1;
 
-                locStr += start + ' to ' + end + ' (' + loc[i][2] + ')<br/>';
+                locStr += `${start} to ${end} (${loc[i][2]})<br/>`;
                 //                locStr += loc[i][1] + " - " + loc[i][3] + " (" + loc[i][2] + ")<br/>";
             }
             return locStr;
         },
-        showMessage: function (message) {
-            var span = $('<span/>').append(message);
+        showMessage(message) {
+            // safe (trusting message)
+            const span = $('<span/>').html(message);
 
             this.$messagePane
-                .empty()
-                .append(span)
+                // safe
+                .html(span)
                 .removeClass('hide');
         },
-        hideMessage: function () {
+        hideMessage() {
             this.$messagePane.addClass('hide');
         },
-        getData: function () {
+        getData() {
             return {
                 type: 'Feature',
                 id: this.options.featureID,
@@ -395,26 +427,34 @@ define(['jquery', 'kb_common/html', 'kb_service/client/workspace', 'kbaseUI/widg
                 title: 'Gene Instance'
             };
         },
-        renderError: function (error) {
-            var errString = 'Sorry, an unknown error occurred';
-            if (typeof error === 'string') errString = error;
-            else if (error.error && error.error.message) errString = error.error.message;
+        renderError(error) {
+            let errString = 'Sorry, an unknown error occurred';
+            if (typeof error === 'string')
+                errString = error;
+            else if (error.error && error.error.message)
+                errString = error.error.message;
 
-            var $errorDiv = $('<div>')
+            const $errorDiv = $('<div>')
                 .addClass('alert alert-danger')
+                // safe
                 .append('<b>Error:</b>')
-                .append('<br>' + errString);
-            this.$elem.empty();
-            this.$elem.append($errorDiv);
+                // safe
+                .append(`<br>${domSafeText(errString)}`);
+            // safe
+            this.$elem.html($errorDiv);
         },
-        buildObjectIdentity: function (workspaceID, objectID) {
-            var obj = {};
-            if (/^\d+$/.exec(workspaceID)) obj['wsid'] = workspaceID;
-            else obj['workspace'] = workspaceID;
+        buildObjectIdentity(workspaceID, objectID) {
+            const obj = {};
+            if (/^\d+$/.exec(workspaceID))
+                obj['wsid'] = workspaceID;
+            else
+                obj['workspace'] = workspaceID;
 
             // same for the id
-            if (/^\d+$/.exec(objectID)) obj['objid'] = objectID;
-            else obj['name'] = objectID;
+            if (/^\d+$/.exec(objectID))
+                obj['objid'] = objectID;
+            else
+                obj['name'] = objectID;
             return obj;
         }
     });

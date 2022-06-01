@@ -6,7 +6,7 @@ define([
     'kb_service/client/workspace',
     'kb_service/client/fba',
     'widgets/modeling/KBModeling',
-    'lib/format',
+    'lib/domUtils',
     'content',
 
     // for effect
@@ -29,7 +29,7 @@ define([
     Workspace,
     FBA,
     KBModeling,
-    fmt,
+    {domSafeText},
     content
 ) => {
     const IMAGE_URL = 'http://bioseed.mcs.anl.gov/~chenry/jpeg/';
@@ -38,6 +38,16 @@ define([
         a = t('a'),
         span = t('span'),
         table = t('table');
+
+    function domSafeError(err) {
+        if (err.message) {
+            return domSafeText(err.message);
+        }
+        if (err.error && err.error.message) {
+            return  domSafeText(err.error.message);
+        }
+        return 'Unknown error';
+    }
 
     $.KBWidget({
         name: 'kbaseTabTable',
@@ -443,7 +453,7 @@ define([
                                 }" data-name="${
                                     ref.name
                                 }">${
-                                    ref.name
+                                    domSafeText(ref.name)
                                 }</a>`
                             );
                         }
@@ -517,7 +527,7 @@ define([
                     }
 
                     const r = $('<tr>');
-                    r.append(`<td><b>${  row.label  }</b></td>`);
+                    r.append(`<td><b>${domSafeText(row.label)}</b></td>`);
 
                     // if the data is in the row definition, use it
                     if ('data' in row) {
@@ -535,33 +545,34 @@ define([
                                 );
                             }
                             return row.data;
-
                         })() || content.na();
-                        r.append(`<td>${  value  }</td>`);
+                        r.append(`<td>${value}</td>`);
                     } else if ('key' in row) {
                         if (row.type === 'wstype') {
                             const ref = data[row.key];
 
-                            const cell = $(`<td data-ref="${  ref  }">loading...</td>`);
+                            const cell = $(`<td data-ref="${ref}">loading...</td>`);
                             r.append(cell);
 
                             getLink(ref)
                                 .then(({ref, name}) => {
                                     table
                                         .find(`[data-ref="${ref}"]`)
-                                        .html(`<a href="${DATAVIEW_URL}/${ref}" target="_blank">${name || content.na()}</a>`);
+                                        // safe usage of html
+                                        .html(`<a href="${DATAVIEW_URL}/${ref}" target="_blank">${name ? domSafeText(name) : content.na()}</a>`);
                                     return null;
                                 })
                                 .catch((err) => {
                                     console.error(err);
                                     table
                                         .find(`[data-ref="${ref}"]`)
-                                        .html(`<span title="${err.message || err.error && err.error.message}" style="cursor: help">error fetching</span>`);
+                                        // safe usage of html
+                                        .html(`<span title="${domSafeError(err)}" style="cursor: help">error fetching</span>`);
                                     return null;
                                 });
                         } else {
                             // Plain column
-                            r.append(`<td data-k-b-testhook-field="${row.key}">${fmt.domSafeText(data[row.key])}</td>`);
+                            r.append(`<td data-k-b-testhook-field="${row.key}">${domSafeText(data[row.key])}</td>`);
                         }
                     } else if (row.type === 'pictureEquation') {
                         r.append($('<td></td>').append(this.pictureEquation(row.data)));
@@ -643,7 +654,7 @@ define([
                     panel.append(
                         `<div class="pull-left text-center">\
                                     <img src="${img_url}" width=150 ><br>\
-                                    <div class="cpd-id" data-cpd="${cpd}">${cpd}</div>\
+                                    <div class="cpd-id" data-cpd="${cpd}">${domSafeText(cpd)}</div>\
                                 </div>`
                     );
 
@@ -682,10 +693,11 @@ define([
                     .then((d) => {
                         const map = {};
                         for (const i in d) {
-                            map[d[i].id] = d[i].name;
+                            map[d[i].id] = domSafeText(d[i].name);
                         }
 
                         $('.cpd-id').each(function () {
+                            // safe - I think
                             $(this).html(map[$(this).data('cpd')]);
                         });
                         return null;

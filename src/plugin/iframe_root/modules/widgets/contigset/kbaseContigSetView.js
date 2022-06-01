@@ -9,18 +9,19 @@ define([
     'kb_service/client/workspace',
     'kb_common/html',
     'uuid',
+    'lib/domUtils',
 
     // for effect
     'datatables_bootstrap',
     'kbaseUI/widget/legacy/authenticatedWidget'
-], function (
+], (
     $,
     Promise,
     Workspace,
     html,
-    Uuid
-) {
-    'use strict';
+    Uuid,
+    {domSafeErrorMessage}
+) => {
     $.KBWidget({
         name: 'kbaseContigSetView',
         parent: 'kbaseAuthenticatedWidget',
@@ -34,7 +35,7 @@ define([
             ws_name: null,
             width: 850
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
 
             // TODO: these should be named more sensibly ...
@@ -54,14 +55,15 @@ define([
             this.render();
             return this;
         },
-        render: function () {
-            var self = this;
-            var pref = new Uuid(4).format();
+        render() {
+            const self = this;
+            const pref = new Uuid(4).format();
 
-            var container = this.$elem;
+            const container = this.$elem;
 
-            var ready = function () {
+            const ready = function () {
                 container.empty();
+                // safe
                 container.append(html.loading('loading data...'));
 
                 // var p = kb.req('ws', 'get_object_subset', [{ref: self.ws_name + "/" + self.ws_id, included: ['contigs/[*]/id', 'contigs/[*]/length', 'id', 'name', 'source', 'source_id', 'type']}]);
@@ -69,7 +71,7 @@ define([
                 Promise.try(
                     self.ws_service.get_object_subset([
                         {
-                            ref: self.ws_name + '/' + self.ws_id,
+                            ref: `${self.ws_name  }/${  self.ws_id}`,
                             included: [
                                 'contigs/[*]/id',
                                 'contigs/[*]/length',
@@ -82,66 +84,70 @@ define([
                         }
                     ])
                 )
-                    .then(function (data) {
+                    .then((data) => {
                         container.empty();
-                        var cs = data[0].data,
+                        const cs = data[0].data,
                             tabNames = ['Overview', 'Contigs'],
                             tabIds = ['overview', 'contigs'],
-                            tabs = $('<ul id="' + pref + 'table-tabs" class="nav nav-tabs"/>'),
-                            i;
+                            tabs = $(`<ul id="${pref}table-tabs" class="nav nav-tabs"/>`);
+                        // safe
                         tabs.append(
-                            '<li class="active"><a href="#' +
-                                pref +
-                                tabIds[0] +
-                                '" data-toggle="tab" >' +
-                                tabNames[0] +
-                                '</a></li>'
+                            `<li class="active"><a href="#${pref}${tabIds[0]
+                            }" data-toggle="tab" >${tabNames[0]}</a></li>`
                         );
-                        for (i = 1; i < tabIds.length; i += 1) {
+                        for (let i = 1; i < tabIds.length; i += 1) {
+                            // safe
                             tabs.append(
-                                '<li><a href="#' + pref + tabIds[i] + '" data-toggle="tab">' + tabNames[i] + '</a></li>'
+                                `<li><a href="#${pref}${tabIds[i]  }" data-toggle="tab">${tabNames[i]}</a></li>`
                             );
                         }
+                        // safe
                         container.append(tabs);
 
                         // tab panel
-                        var tab_pane = $('<div id="' + pref + 'tab-content" class="tab-content"/>');
-                        tab_pane.append('<div class="tab-pane in active" id="' + pref + tabIds[0] + '"/>');
-                        for (i = 1; i < tabIds.length; i += 1) {
-                            tab_pane.append($('<div class="tab-pane in" id="' + pref + tabIds[i] + '"/>'));
+                        const tab_pane = $(`<div id="${pref}tab-content" class="tab-content"/>`);
+                        // safe
+                        tab_pane.append(`<div class="tab-pane in active" id="${pref}${tabIds[0]}"/>`);
+                        for (let i = 1; i < tabIds.length; i += 1) {
+                            // safe
+                            tab_pane.append($(`<div class="tab-pane in" id="${pref}${tabIds[i]}"/>`));
                         }
+                        // safe
                         container.append(tab_pane);
 
-                        $('#' + pref + 'table-tabs a').click(function (e) {
+                        $(`#${  pref  }table-tabs a`).click(function (e) {
                             e.preventDefault();
                             $(this).tab('show');
                         });
 
                         ////////////////////////////// Overview Tab //////////////////////////////
-                        $('#' + pref + 'overview').append(
+                        // safe
+                        $(`#${pref}overview`).append(
                             '<table class="table table-striped table-bordered" ' +
-                                'style="margin-left: auto; margin-right: auto;" id="' +
-                                pref +
-                                'overview-table"/>'
+                                `style="margin-left: auto; margin-right: auto;" id="${
+                                    pref
+                                }overview-table"/>`
                         );
-                        var overviewLabels = ['KBase ID', 'Name', 'Object ID', 'Source', 'Source ID', 'Type'];
-                        var overviewData = [cs.id, cs.name, self.ws_id, cs.source, cs.source_id, cs.type];
-                        var overviewTable = $('#' + pref + 'overview-table');
-                        for (i = 0; i < overviewData.length; i += 1) {
+                        const overviewLabels = ['KBase ID', 'Name', 'Object ID', 'Source', 'Source ID', 'Type'];
+                        const overviewData = [cs.id, cs.name, self.ws_id, cs.source, cs.source_id, cs.type];
+                        const overviewTable = $(`#${  pref  }overview-table`);
+                        for (let i = 0; i < overviewData.length; i += 1) {
+                            // safe
                             overviewTable.append(
-                                '<tr><td>' + overviewLabels[i] + '</td> ' + '<td>' + overviewData[i] + '</td></tr>'
+                                `<tr><td>${  overviewLabels[i]  }</td> ` + `<td>${  overviewData[i]  }</td></tr>`
                             );
                         }
 
                         ////////////////////////////// Contigs Tab //////////////////////////////
-                        $('#' + pref + 'contigs').append(
-                            '<table id="' +
-                                pref +
-                                'contigs-table" ' +
+                        // safe
+                        $(`#${  pref  }contigs`).append(
+                            `<table id="${
+                                pref
+                            }contigs-table" ` +
                                 'class="table table-bordered table-striped" style="width: 100%; margin-left: 0px; margin-right: 0px;"/>'
                         );
 
-                        const contigsData = cs.contigs.map(function (contig) {
+                        const contigsData = cs.contigs.map((contig) => {
                             return {
                                 name: contig.id,
                                 length: contig.length
@@ -151,8 +157,8 @@ define([
                             sPaginationType: 'full_numbers',
                             iDisplayLength: 10,
                             aoColumns: [
-                                { sTitle: 'Contig name', mData: 'name' },
-                                { sTitle: 'Length', mData: 'length' }
+                                {sTitle: 'Contig name', mData: 'name'},
+                                {sTitle: 'Length', mData: 'length'}
                             ],
                             aaData: contigsData,
                             oLanguage: {
@@ -160,27 +166,20 @@ define([
                                 sEmptyTable: 'No contigs found.'
                             }
                         };
-                        $('#' + pref + 'contigs-table').dataTable(contigsSettings);
+                        $(`#${  pref  }contigs-table`).dataTable(contigsSettings);
                     })
-                    .catch(function (data) {
+                    .catch((err) => {
                         container.empty();
-                        var message;
-                        if (data.error && data.error.message) {
-                            message = data.error.message;
-                        } else if (data.message) {
-                            message = data.message;
-                        } else {
-                            message = data;
-                        }
+                        // safe
                         container.append(
-                            '<div class="alert alert-danger">' + '<p>[Error] ' + message + '</p>' + '</div>'
+                            `<div class="alert alert-danger"><p>[Error] ${domSafeErrorMessage(err)}</p></div>`
                         );
                     });
             };
             ready();
             return this;
         },
-        getData: function () {
+        getData() {
             return {
                 type: 'NarrativeTempCard',
                 id: this.ws_id,
@@ -188,12 +187,12 @@ define([
                 title: 'Contig-set'
             };
         },
-        loggedInCallback: function (event, auth) {
+        loggedInCallback(event, auth) {
             this.token = auth.token;
             //this.render();
             return this;
         },
-        loggedOutCallback: function () {
+        loggedOutCallback() {
             this.token = null;
             //this.render();
             return this;

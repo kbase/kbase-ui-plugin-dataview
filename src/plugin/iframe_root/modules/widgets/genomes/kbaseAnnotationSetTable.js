@@ -5,11 +5,18 @@ define([
     'jquery',
     'kb_common/html',
     'kb_service/client/workspace',
+    'lib/domUtils',
+    'lib/jqueryUtils',
 
+    // For effect
     'kbaseUI/widget/legacy/authenticatedWidget',
     'datatables_bootstrap'
-], function ($, html, Workspace) {
-    'use strict';
+], (
+    $,
+    html,
+    Workspace,
+    {domSafeText, domSafeValue},
+    {$errorAlert}) => {
     $.KBWidget({
         name: 'AnnotationSetTable',
         parent: 'kbaseAuthenticatedWidget',
@@ -18,82 +25,80 @@ define([
             id: null,
             ws: null
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
             return this;
         },
-        render: function () {
-            var self = this;
-            var container = this.$elem;
+        render() {
+            const self = this;
+            const container = this.$elem;
             container.empty();
             if (!this.runtime.service('session').isLoggedIn()) {
+                // safe
                 container.append('<div>[Error] You\'re not logged in</div>');
                 return;
             }
+            // safe
             container.append(html.loading('loading data...'));
 
-            var kbws = new Workspace(this.runtime.getConfig('services.workspace.url'), {
+            const kbws = new Workspace(this.runtime.getConfig('services.workspace.url'), {
                 token: this.runtime.service('session').getAuthToken()
             });
             kbws.get_objects(
-                [{ ref: self.options.ws + '/' + self.options.id }],
-                function (data) {
+                [{ref: `${self.options.ws  }/${  self.options.id}`}],
+                (data) => {
                     container.empty();
                     // parse data
                     if (data.length === 0) {
                         //var msg = "[Error] Object "+self.options.id+" does not exist in workspace "+self.options.ws;
 
                         // We are moving away from "workspace"
-                        var msg = '[Error] Object ' + self.options.id + ' can not be found';
-                        container.append('<div><p>' + msg + '>/p></div>');
+                        const msg = `[Error] Object ${self.options.id} can not be found`;
+                        // safe
+                        container.append(`<div><p>${domSafeText(msg)}>/p></div>`);
                     } else {
-                        var otus = data[0].data.otus,
-                            rows = [],
-                            o,
+                        const otus = data[0].data.otus;
+                        const rows = [];
+                        let o,
                             funcs,
                             f;
                         for (o = 0; o < otus.length; o += 1) {
                             funcs = otus[o].functions;
                             for (f = 0; f < funcs.length; f += 1) {
                                 rows.push([
-                                    funcs[f].reference_genes.join('<br>'),
-                                    funcs[f].functional_role,
-                                    funcs[f].abundance,
-                                    funcs[f].confidence,
-                                    otus[o].name
+                                    funcs[f].reference_genes.map((value) => {return domSafeValue(value);}).join('<br>'),
+                                    domSafeValue(funcs[f].functional_role),
+                                    domSafeValue(funcs[f].abundance),
+                                    domSafeValue(funcs[f].confidence),
+                                    domSafeText(otus[o].name)
                                 ]);
                             }
                         }
 
                         // container.append('<div id="annotationTable' + tableId + '" style="width: 95%;"></div>');
-                        var options = {
+                        const options = {
                             columns: ['features', 'functional role', 'abundance', 'avg e-value', 'otu'],
-                            rows: rows,
+                            rows,
                             class: 'table table-striped'
                         };
-                        var table = html.makeTable(options);
+                        const table = html.makeTable(options);
+                        // safe useage of html(), as determined by the table created above
                         container.html(table);
-                        $('#' + options.generated.id).dataTable();
+                        $(`#${options.generated.id}`).dataTable();
                     }
                 },
-                function (data) {
-                    container.empty();
-                    var main = $('<div>');
-                    main.append(
-                        $('<p>')
-                            .css({ padding: '10px 20px' })
-                            .text('[Error] ' + data.error.message)
-                    );
-                    container.append(main);
+                (error) => {
+                    // safe
+                    container.html($errorAlert(error));
                 }
             );
             return self;
         },
-        loggedInCallback: function (event, auth) {
+        loggedInCallback() {
             this.render();
             return this;
         },
-        loggedOutCallback: function (event, auth) {
+        loggedOutCallback() {
             this.render();
             return this;
         }

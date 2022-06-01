@@ -9,8 +9,7 @@ define([
     'jquery',
     'kbaseUI/widget/legacy/widget',
     'widgets/metagenomes/annotatedMetagenomeAssemblyOverview'
-], function ($) {
-    'use strict';
+], ($) => {
     $.KBWidget({
         name: 'annotatedMetagenomeAssemblyWideOverview',
         parent: 'kbaseWidget',
@@ -20,26 +19,28 @@ define([
             workspaceID: null,
             genomeInfo: null
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
             this.render();
             return this;
         },
-        render: function () {
-            var self = this;
-            var row = $('<div class="row">');
+        render() {
+            const self = this;
+            const row = $('<div class="row">');
+            // safe
             self.$elem.append(row);
-            var overview = $('<div class="col-md-4">');
-            row.append(overview);
+            const $overview = $('<div class="col-md-4">');
+            // safe
+            row.append($overview);
 
-            overview.KBaseAMAOverview({
+            $overview.KBaseAMAOverview({
                 genomeID: self.options.metagenomeID,
                 workspaceID: self.options.workspaceID,
                 genomeInfo: self.options.genomeInfo,
                 runtime: self.runtime
             });
         },
-        getData: function () {
+        getData() {
             return {
                 type: 'Annotated Metagenome Assembly Overview',
                 id: this.options.metagenomeID,

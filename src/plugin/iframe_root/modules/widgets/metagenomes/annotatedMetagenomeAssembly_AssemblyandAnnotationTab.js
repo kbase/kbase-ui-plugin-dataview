@@ -4,8 +4,7 @@ define([
     'kbaseUI/widget/legacy/widget',
     'widgets/genomes/kbaseMultiContigBrowser',
     'widgets/metagenomes/annotatedMetagenomeAssemblyViewer'
-], function ($) {
-    'use strict';
+], ($) => {
     $.KBWidget({
         name: 'KBaseAnnotatedMetagenomeAssemblyWideAssemAnnot',
         parent: 'kbaseWidget',
@@ -17,17 +16,19 @@ define([
             genomeInfo: null,
             is_metagenome: false,
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
             this.render();
             return this;
         },
-        render: function () {
-            var self = this;
-            var row1 = $('<div class="row">');
-            self.$elem.append(row1);
-            var genetable = $('<div>');
-            row1.append(genetable);
+        render() {
+            const self = this;
+            const $row1 = $('<div class="row">');
+            // safe
+            self.$elem.append($row1);
+            const genetable = $('<div>');
+            // safe
+            $row1.append(genetable);
             genetable.kbaseAnnotatedMetagenomeAssemblyView({
                 ws: self.options.genomeInfo.info[6],
                 id: self.options.genomeInfo.info[0],
@@ -35,7 +36,7 @@ define([
                 runtime: self.runtime
             });
         },
-        getData: function () {
+        getData() {
             return {
                 type: 'Annotated Metagenome Assembly Assembly and Annotation',
                 id: this.options.genomeID,

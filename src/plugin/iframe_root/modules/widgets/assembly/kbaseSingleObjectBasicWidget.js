@@ -10,9 +10,16 @@ define([
     'jquery',
     'kb_service/client/workspace',
     'kb_common/html',
+    'lib/domUtils',
+
+    // For effect
     'kbaseUI/widget/legacy/authenticatedWidget'
-], function ($, Workspace, html) {
-    'use strict';
+], (
+    $,
+    Workspace,
+    html,
+    {domSafeText}
+) => {
     $.KBWidget({
         name: 'kbaseSingleObjectBasicWidget',
         parent: 'kbaseAuthenticatedWidget',
@@ -22,7 +29,7 @@ define([
             workspaceId: null,
             objVer: null
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
 
             this.options.landingPageURL = '/#dataview/';
@@ -31,17 +38,20 @@ define([
             this.$errorPane = $('<div>')
                 .addClass('alert alert-danger')
                 .hide();
+            // safe
             this.$elem.append(this.$errorPane);
 
             this.$messagePane = $('<div>');
+            // safe
             this.$elem.append(this.$messagePane);
 
             this.$mainPane = $('<div>');
+            // safe
             this.$elem.append(this.$mainPane);
 
             return this;
         },
-        loggedInCallback: function (event, auth) {
+        loggedInCallback(event, auth) {
             // Cretae a new workspace client
             this.ws = new Workspace(this.workspaceURL, auth);
 
@@ -50,84 +60,88 @@ define([
 
             return this;
         },
-        loggedOutCallback: function (event, auth) {
+        loggedOutCallback() {
             this.ws = null;
             this.isLoggedIn = false;
             return this;
         },
-        render: function () {
-            var self = this;
+        render() {
+            const self = this;
             self.loading(true);
 
             // Get object
-            var identityObj = self.buildObjectIdentity(
+            const identityObj = self.buildObjectIdentity(
                 self.options.workspaceId,
                 self.options.objId,
                 self.options.objVer
             );
             this.ws.get_objects(
                 [identityObj],
-                function (d) {
+                (d) => {
                     self.loading(false);
                     self.buildWidgetContent(d[0].data);
                 },
-                function (error) {
+                (error) => {
                     self.loading(false);
                     self.showError(error);
                 }
             );
         },
-        buildWidgetContent: function (objData) {
-            var $container = this.$mainPane;
-            var dataModel = this.getDataModel(objData);
+        buildWidgetContent(objData) {
+            const $container = this.$mainPane;
+            const dataModel = this.getDataModel(objData);
 
-            $container.append(dataModel.description);
+            $container.append(domSafeText(dataModel.description));
 
             // Build a table
-            var $table = $('<table class="table table-striped table-bordered" />')
+            const $table = $('<table class="table table-striped table-bordered" />')
                 .css('width', '100%')
                 .css('margin', ' 1em 0 0 0');
+            // safe
             $container.append($table);
 
-            for (var i = 0; i < dataModel.items.length; i++) {
-                var item = dataModel.items[i];
+            for (let i = 0; i < dataModel.items.length; i++) {
+                const item = dataModel.items[i];
                 if (item.header) {
+                    // safe
                     $table.append(this.makeHeaderRow(item.name, item.value));
                 } else {
+                    // safe
                     $table.append(this.makeRow(item.name, item.value));
                 }
             }
         },
-        getDataModel: function (objData) {
+        getDataModel(objData) {
             // Example of the data model
             return {
-                description: 'Example description for the object: ' + JSON.stringify(objData),
+                description: `Example description for the object: ${  JSON.stringify(objData)}`,
                 items: [
-                    { name: 'name1', value: 'value1' },
-                    { name: 'name2', value: 'value2' },
-                    { header: '1', name: 'Group title 2' },
-                    { name: 'name2.1', value: 'value2.1' },
-                    { name: 'name2.2', value: 'value2.2' }
+                    {name: 'name1', value: 'value1'},
+                    {name: 'name2', value: 'value2'},
+                    {header: '1', name: 'Group title 2'},
+                    {name: 'name2.1', value: 'value2.1'},
+                    {name: 'name2.2', value: 'value2.2'}
                 ]
             };
         },
-        makeHeaderRow: function (name) {
-            return $('<tr/>').append(
+        makeHeaderRow(name) {
+            // safe
+            return $('<tr>').html(
                 $('<td colspan=\'2\'/>')
-                    //                  .css('background-color','#f9f9f9')
-                    //                  .css('font-size', '1.1em')
-                    //                  .css('font-weight', 'bold')
-                    .append($('<b />').append(name))
+                    // safe
+                    .html($('<b/>').text(name))
             );
         },
-        makeRow: function (name, value) {
-            return $('<tr/>')
+        makeRow(name, value) {
+            return $('<tr>')
+                // safe
                 .append(
-                    $('<th />')
+                    $('<th>')
                         .css('width', '20%')
-                        .append(name)
+                        .text(name)
                 )
-                .append($('<td />').append(value));
+                // safe
+                .append($('<td>').text(value));
         },
         /*
          getData: function() {
@@ -139,22 +153,21 @@ define([
          };
          },
          */
-        loading: function (isLoading) {
+        loading(isLoading) {
             if (isLoading) this.showMessage(html.loading());
             else this.hideMessage();
         },
-        showMessage: function (message) {
-            var span = $('<span/>').append(message);
-
-            this.$messagePane.append(span);
+        showMessage(message) {
+            // safe
+            this.$messagePane.append($('<span>').html(message));
             this.$messagePane.show();
         },
-        hideMessage: function () {
+        hideMessage() {
             this.$messagePane.hide();
             this.$messagePane.empty();
         },
-        buildObjectIdentity: function (workspaceID, objectID, objectVer, wsRef) {
-            var obj = {};
+        buildObjectIdentity(workspaceID, objectID, objectVer, wsRef) {
+            const obj = {};
             if (wsRef) {
                 obj['ref'] = wsRef;
             } else {
@@ -169,10 +182,13 @@ define([
             }
             return obj;
         },
-        showError: function (error) {
+        showError(error) {
             this.$errorPane.empty();
+            // safe
             this.$errorPane.append('<strong>Error when retrieving data.</strong><br><br>');
-            this.$errorPane.append(error.error.message);
+            // safe
+            this.$errorPane.append(domSafeText(error.error.message));
+            // safe
             this.$errorPane.append('<br>');
             this.$errorPane.show();
         }

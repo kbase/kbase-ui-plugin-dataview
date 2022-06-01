@@ -10,10 +10,15 @@ define([
     'jquery',
     'd3',
     'kb_service/client/workspace',
+
+    // For effect
     'kbaseUI/widget/legacy/authenticatedWidget',
     'css!./kbaseSEEDFunctions'
-], function ($, d3, Workspace) {
-    'use strict';
+], (
+    $,
+    d3,
+    Workspace
+) => {
     $.KBWidget({
         name: 'KBaseSEEDFunctions',
         parent: 'kbaseAuthenticatedWidget',
@@ -26,14 +31,14 @@ define([
             genomeInfo: null
         },
         /*
-         SEEDTree:{ "name":"Functional Categories", "count": 0, "children":[], "size":0, "x0":0, "y0":0 },
-         subsysToGeneMap:[],
-         maxCount:0,
-         */
+            SEEDTree:{ "name":"Functional Categories", "count": 0, "children":[], "size":0, "x0":0, "y0":0 },
+            subsysToGeneMap:[],
+            maxCount:0,
+            */
         SEEDTree: {},
         subsysToGeneMap: [],
         maxCount: 0,
-        margin: { top: 30, right: 20, bottom: 30, left: 20 },
+        margin: {top: 30, right: 20, bottom: 30, left: 20},
         width: 920,
         barHeight: 20,
         barWidth: 400,
@@ -48,12 +53,11 @@ define([
         /**
          * Initialize the widget.
          */
-
-        init: function (options) {
+        init(options) {
             this._super(options);
 
             // init SEED
-            this.SEEDTree = { name: 'Functional Categories', count: 0, children: [], size: 0, x0: 0, y0: 0 };
+            this.SEEDTree = {name: 'Functional Categories', count: 0, children: [], size: 0, x0: 0, y0: 0};
             this.subsysToGeneMap = [];
             this.maxCount = 0;
 
@@ -67,51 +71,45 @@ define([
             return this;
         },
         /*
-         I need to load the SEED subsystem ontology. I am going to use
-         the "subsys.txt" file I found at:
-         ftp.theseed.org/subsystems/subsys.txt
+            I need to load the SEED subsystem ontology. I am going to use
+            the "subsys.txt" file I found at:
+            ftp.theseed.org/subsystems/subsys.txt
 
-         Note that this file is updated weekly, but not versioned. It's
-         possible that errors will arise because the subsystems assigned
-         in the genome object are out of date relative to the current
-         subsys.txt file.
+            Note that this file is updated weekly, but not versioned. It's
+            possible that errors will arise because the subsystems assigned
+            in the genome object are out of date relative to the current
+            subsys.txt file.
 
-         file format is:
-         Level 1 \t Level 2 \t Level 3 \t Level 4\t Optional GO id \t Optional GO desc \n
+            file format is:
+            Level 1 \t Level 2 \t Level 3 \t Level 4\t Optional GO id \t Optional GO desc \n
 
-         ontologyDepth is set to 4 for SEED
+            ontologyDepth is set to 4 for SEED
 
-         SEED is not a strict heirarchy, some nodes have multiple parents
-         I'm going to keep track of a nodes parents to map things right.
+            SEED is not a strict heirarchy, some nodes have multiple parents
+            I'm going to keep track of a nodes parents to map things right.
 
-         to scale the graph, I'm going to keep track of the max count in the Level 1 of the
-         hierarchy.
+            to scale the graph, I'm going to keep track of the max count in the Level 1 of the
+            hierarchy.
 
-         maxCount - count in the largest Level 1 category
+            maxCount - count in the largest Level 1 category
 
-         loadSEEDHierarchy() function will parse file and populate the SEEDTree data structure
-         */
-        loadSEEDHierarchy: function () {
-            var self = this;
-            var ontologyDepth = 4; //this should be moved up to the global variables
-            var nodeMap = {};
+            loadSEEDHierarchy() function will parse file and populate the SEEDTree data structure
+            */
+        loadSEEDHierarchy() {
+            const self = this;
+            const ontologyDepth = 4; //this should be moved up to the global variables
+            const nodeMap = {};
 
-            var SEEDTree = self.SEEDTree;
-            var subsysToGeneMap = self.subsysToGeneMap;
-            var Level1 = [];
+            const SEEDTree = self.SEEDTree;
+            const subsysToGeneMap = self.subsysToGeneMap;
+            const Level1 = [];
 
             //d3.text("assets/data/subsys.txt", function(text) {
             //d3.text("/static/subsys.txt", function(text) {
-            d3.text(this.runtime.pluginResourcePath + '/data/subsys.txt', function (text) {
-                var data = d3.tsv.parseRows(text),
-                    totalGenesWithFunctionalRoles = 0,
-                    i,
-                    j,
-                    geneCount,
-                    nodeHierarchy,
-                    parentHierarchy,
-                    node,
-                    gene;
+            d3.text(`${this.runtime.pluginResourcePath  }/data/subsys.txt`, (text) => {
+                const data = d3.tsv.parseRows(text);
+                let totalGenesWithFunctionalRoles = 0;
+                let i, j, geneCount, nodeHierarchy, parentHierarchy, node, gene;
 
                 for (i = 0; i < data.length; i += 1) {
                     geneCount = 0;
@@ -130,30 +128,28 @@ define([
                     for (j = 0; j < ontologyDepth; j += 1) {
                         // some node names are an empty string "". I'm going to set these to
                         // a modified version of their parent node name
-                        data[i][j] = data[i][j] === '' ? '--- ' + data[i][j - 1] + ' ---' : data[i][j];
-                        nodeHierarchy = parentHierarchy + ':' + data[i][j];
+                        data[i][j] = data[i][j] === '' ? `--- ${  data[i][j - 1]  } ---` : data[i][j];
+                        nodeHierarchy = `${parentHierarchy  }:${  data[i][j]}`;
 
                         // create new node for top level of hierarchy if it's not already defined.
                         if (j === 0) {
                             if (nodeMap[nodeHierarchy] === undefined) {
-                                node = { name: data[i][j], size: 0, children: [] };
+                                node = {name: data[i][j], size: 0, children: []};
                                 SEEDTree.children.push(node);
                                 nodeMap[nodeHierarchy] = node;
                                 Level1[data[i][j]] = 0;
                             }
                             Level1[data[i][j]] += geneCount;
-                        } else {
-                            if (nodeMap[nodeHierarchy] === undefined) {
-                                node = { name: data[i][j], size: 0, children: [] };
-                                nodeMap[parentHierarchy].children.push(node);
-                                nodeMap[nodeHierarchy] = node;
+                        } else if (nodeMap[nodeHierarchy] === undefined) {
+                            node = {name: data[i][j], size: 0, children: []};
+                            nodeMap[parentHierarchy].children.push(node);
+                            nodeMap[nodeHierarchy] = node;
 
-                                if (j === ontologyDepth - 1 && subsysToGeneMap[data[i][j]] !== undefined) {
-                                    subsysToGeneMap[data[i][j]].forEach(function (f) {
-                                        gene = { name: f, size: '' };
-                                        node.children.push(gene);
-                                    });
-                                }
+                            if (j === ontologyDepth - 1 && subsysToGeneMap[data[i][j]] !== undefined) {
+                                subsysToGeneMap[data[i][j]].forEach((f) => {
+                                    gene = {name: f, size: ''};
+                                    node.children.push(gene);
+                                });
                             }
                         }
                         nodeMap[nodeHierarchy].size += geneCount;
@@ -162,34 +158,35 @@ define([
                 }
 
                 if (totalGenesWithFunctionalRoles === 0) {
+                    // safe
                     self.$mainview.prepend(
                         '<b>No Functional Categories assigned, you can add them using the Narrative.</b>'
                     );
                 } else {
                     // Set maxCount to scale bars
-                    var k;
+                    let k;
                     for (k in Level1) {
                         self.maxCount = self.maxCount > Level1[k] ? self.maxCount : Level1[k];
                     }
 
                     $.when(
-                        self.SEEDTree.children.forEach(function (d) {
+                        self.SEEDTree.children.forEach((d) => {
                             self.collapse(d);
                         })
                     ).done(self.update((self.root = self.SEEDTree)));
                 }
             });
         },
-        update: function (source) {
-            var self = this;
+        update(source) {
+            const self = this;
 
-            var nodes = self.tree.nodes(self.SEEDTree);
+            const nodes = self.tree.nodes(self.SEEDTree);
 
-            var scale = d3.scale
+            const scale = d3.scale
                 .linear()
                 .domain([0, this.maxCount])
                 .range([0, 275]);
-            var height = Math.max(500, nodes.length * self.barHeight + self.margin.top + self.margin.bottom);
+            const height = Math.max(500, nodes.length * self.barHeight + self.margin.top + self.margin.bottom);
 
             d3.selectAll(this.$mainview)
                 .select('svg')
@@ -200,24 +197,25 @@ define([
             d3.select(self.frameElement)
                 .transition()
                 .duration(self.duration)
-                .style('height', height + 'px');
+                .style('height', `${height  }px`);
 
             // Compute the "layout".
-            nodes.forEach(function (n, i) {
+            nodes.forEach((n, i) => {
                 n.x = i * self.barHeight;
             });
 
             // Update the nodes…
-            var node = self.svg.selectAll('g.KBSnode').data(nodes, function (d) {
+            const node = self.svg.selectAll('g.KBSnode').data(nodes, (d) => {
                 return d.id || (d.id = ++self.i);
             });
 
-            var nodeEnter = node
+            const nodeEnter = node
                 .enter()
+                // safe
                 .append('g')
                 .attr('class', 'KBSnode')
-                .attr('transform', function () {
-                    return 'translate(' + source.y0 + ',' + source.x0 + ')';
+                .attr('transform', () => {
+                    return `translate(${  source.y0  },${  source.x0  })`;
                 })
                 .style('opacity', 1e-6)
                 .on('mouseover', function () {
@@ -237,6 +235,7 @@ define([
 
             // Enter any new nodes at the parent's previous position.
             nodeEnter
+                // safe
                 .append('rect')
                 .attr('y', -self.barHeight / 2)
                 .attr('x', 300)
@@ -245,42 +244,45 @@ define([
                 .style('fill', self.color)
                 .on(
                     'click',
-                    $.proxy(function (d) {
+                    $.proxy((d) => {
                         self.click(d);
                     }, self)
                 );
 
             nodeEnter
+                // safe
                 .append('text')
                 .attr('dy', 3.5)
                 .attr('dx', 300 + 5.5)
-                .text(function (d) {
+                .text((d) => {
                     return d.name;
                 });
 
             nodeEnter
+                // safe
                 .append('rect')
                 .attr('y', -self.barHeight / 2)
-                .attr('x', function (d) {
+                .attr('x', (d) => {
                     return 0 + 275 - scale(d.size) - d.depth * self.stepSize;
                 })
                 .attr('height', self.barHeight)
-                .attr('width', function (d) {
+                .attr('width', (d) => {
                     return scale(d.size);
                 })
                 .style('fill', self.color)
                 .on(
                     'click',
-                    $.proxy(function (d) {
+                    $.proxy((d) => {
                         self.click(d);
                     }, self)
                 );
 
             nodeEnter
+                // safe
                 .append('text')
                 .attr('dy', 3.5)
                 .attr('x', 278)
-                .text(function (d) {
+                .text((d) => {
                     return d.name === 'Functional Categories' ? '' : d.size;
                 });
 
@@ -288,15 +290,15 @@ define([
             nodeEnter
                 .transition()
                 .duration(self.duration)
-                .attr('transform', function (d) {
-                    return 'translate(' + d.y + ',' + d.x + ')';
+                .attr('transform', (d) => {
+                    return `translate(${  d.y  },${  d.x  })`;
                 })
                 .style('opacity', 1);
 
             node.transition()
                 .duration(self.duration)
-                .attr('transform', function (d) {
-                    return 'translate(' + d.y + ',' + d.x + ')';
+                .attr('transform', (d) => {
+                    return `translate(${  d.y  },${  d.x  })`;
                 })
                 .style('opacity', 1)
                 .select('rect')
@@ -306,31 +308,31 @@ define([
             node.exit()
                 .transition()
                 .duration(self.duration)
-                .attr('transform', function () {
-                    return 'translate(' + source.y + ',' + source.x + ')';
+                .attr('transform', () => {
+                    return `translate(${  source.y  },${  source.x  })`;
                 })
                 .style('opacity', 1e-6)
                 .remove();
 
             // Stash the old positions for transition.
-            nodes.forEach(function (d) {
+            nodes.forEach((d) => {
                 d.x0 = d.x;
                 d.y0 = d.y;
             });
         },
         // Toggle children on click.
-        click: function (d) {
+        click(d) {
             // open window with gene landing page
             // if (d.children === undefined || (d._children === null && d.children === null)) {
             // The size is set to an empty string for navigable leaves
             if (d.size === '') {
                 window.open(
-                    '/#dataview/' +
-                        this.options.wsNameOrId +
-                        '/' +
-                        this.options.objNameOrId +
-                        '?sub=Feature&subid=' +
-                        d.name
+                    `/#dataview/${
+                        this.options.wsNameOrId
+                    }/${
+                        this.options.objNameOrId
+                    }?sub=Feature&subid=${
+                        d.name}`
                 );
             }
 
@@ -345,12 +347,11 @@ define([
 
             this.update(d);
         },
-        color: function (d) {
+        color(d) {
             /*
-             * leaf color is set here.
-             * A parent node collapsed and a non-feature leaf without
-             */
-
+                * leaf color is set here.
+                * A parent node collapsed and a non-feature leaf without
+                */
             // terminal feature nodes are distinguished by having a string as
             // the size. A 0 size node has no children, and just retains
             // the standard color.
@@ -370,65 +371,67 @@ define([
             }
             return '#ffffff';
         },
-        collapse: function (d) {
-            var self = this;
+        collapse(d) {
+            const self = this;
             if (d.children) {
                 d._children = d.children;
-                d._children.forEach(function (n) {
+                d._children.forEach((n) => {
                     self.collapse(n);
                 });
                 d.children = null;
             }
         },
-        getData: function () {
+        getData() {
             return {
                 title: 'Functional Categories ',
                 id: this.options.objNameOrId,
                 workspace: this.options.wsNameOrId
             };
         },
-        render: function () {
-            var self = this;
+        render() {
+            const self = this;
             self.showData(self.options.genomeInfo.data);
         },
-        showData: function (genomeObj) {
-            var margin = this.margin,
-                width = this.width;
+        showData(genomeObj) {
+            const margin = this.margin, width = this.width;
 
-            var container = this.$elem;
+            const container = this.$elem;
 
-            var SEEDTree = this.SEEDTree;
-            var subsysToGeneMap = this.subsysToGeneMap;
+            const SEEDTree = this.SEEDTree;
+            const subsysToGeneMap = this.subsysToGeneMap;
             container.empty();
-            var tax_domain = genomeObj.domain;
+            const tax_domain = genomeObj.domain;
 
             // doesn't work for Euks yet
             if (tax_domain === 'Eukaryota') {
-                container.prepend('<b>Functional Categories not yet available for ' + tax_domain + '</b>');
+                // safe
+                container.prepend(`<b>Functional Categories not yet available for ${tax_domain}</b>`);
                 return this;
             }
 
             this.tree = d3.layout.tree().nodeSize([0, this.stepSize]);
 
-            this.$mainview = $('<div>').css({ 'overflow-x': 'scroll' });
+            this.$mainview = $('<div>').css({'overflow-x': 'scroll'});
+            // safe
             container.append(this.$mainview);
 
             this.svg = d3
                 .select(this.$mainview[0])
+                // safe
                 .append('svg')
                 .attr('width', width + margin.left + margin.right)
+                // safe
                 .append('g')
-                .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+                .attr('transform', `translate(${margin.left},${margin.top})`);
 
             /*
-             First I am going to iterate over the Genome Typed Object and
-             create a mapping of the assigned functional roles (by SEED) to
-             an array of genes with those roles.
+                First I am going to iterate over the Genome Typed Object and
+                create a mapping of the assigned functional roles (by SEED) to
+                an array of genes with those roles.
 
-             subsysToGeneMap [ SEED Role ] = Array of Gene Ids
-             */
-
-            genomeObj.features.forEach(function (feature) {
+                subsysToGeneMap [ SEED Role ] = Array of Gene Ids
+                */
+            genomeObj.features.forEach((feature) => {
                 // Each function can have multiple genes, creating mapping of function to list of gene ids
                 if (!feature.functions) {
                     if (feature.function) {
@@ -453,7 +456,7 @@ define([
 
             this.loadSEEDHierarchy();
         },
-        loggedInCallback: function (event, auth) {
+        loggedInCallback(event, auth) {
             this.authToken = auth;
             this.wsClient = new Workspace(this.runtime.getConfig('services.workspace.url'), {
                 token: this.runtime.service('session').getAuthToken()
@@ -461,7 +464,7 @@ define([
             this.render();
             return this;
         },
-        loggedOutCallback: function () {
+        loggedOutCallback() {
             this.authToken = null;
             this.wsClient = null;
             return this;

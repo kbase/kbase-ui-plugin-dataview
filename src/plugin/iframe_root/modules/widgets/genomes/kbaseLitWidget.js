@@ -3,10 +3,18 @@ define([
     'underscore',
     'd3',
     'kb_common/html',
+    'lib/domUtils',
+
+    // For effect
     'kbaseUI/widget/legacy/widget',
     'datatables_bootstrap'
-], function ($, _, d3, html) {
-    'use strict';
+], (
+    $,
+    _,
+    d3,
+    html,
+    {domSafeText}
+) => {
     $.KBWidget({
         name: 'KBaseLitWidget',
         parent: 'kbaseWidget',
@@ -19,7 +27,7 @@ define([
             height: 700,
             maxPubCount: 50
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
 
             if (this.options.row === null) {
@@ -28,21 +36,18 @@ define([
             }
             return this.render();
         },
-        addInfoRow: function (a, b) {
-            return '<tr><td>' + a + '</td><td>' + b + '</td></tr>';
-        },
-        xmlToJson: function (xml) {
-            var self = this;
+        xmlToJson(xml) {
+            const self = this;
             // Create the return object
-            var obj = {};
+            let obj = {};
 
             if (xml.nodeType === 1) {
                 // element
                 // do attributes
                 if (xml.attributes.length > 0) {
                     obj['@attributes'] = {};
-                    for (var j = 0; j < xml.attributes.length; j++) {
-                        var attribute = xml.attributes.item(j);
+                    for (let j = 0; j < xml.attributes.length; j++) {
+                        const attribute = xml.attributes.item(j);
                         obj['@attributes'][attribute.nodeName] = attribute.value;
                     }
                 }
@@ -53,14 +58,14 @@ define([
 
             // do children
             if (xml.hasChildNodes()) {
-                for (var i = 0; i < xml.childNodes.length; i++) {
-                    var item = xml.childNodes.item(i);
-                    var nodeName = item.nodeName;
+                for (let i = 0; i < xml.childNodes.length; i++) {
+                    const item = xml.childNodes.item(i);
+                    const nodeName = item.nodeName;
                     if (typeof obj[nodeName] === 'undefined') {
                         obj[nodeName] = self.xmlToJson(item);
                     } else {
                         if (typeof obj[nodeName].push === 'undefined') {
-                            var old = obj[nodeName];
+                            const old = obj[nodeName];
                             obj[nodeName] = [];
                             obj[nodeName].push(old);
                         }
@@ -70,44 +75,50 @@ define([
             }
             return obj;
         },
-        render: function (options) {
-            var self = this;
+        render() {
+            const self = this;
 
             self.tooltip = d3
                 .select('body')
                 .append('div')
                 .classed('kbcb-tooltip', true);
 
-            var lit = self.options.literature;
-            var loader = $(html.loading());
+            let lit = self.options.literature;
+            const loader = $(html.loading());
 
-            var resultsDiv = $('<div>').append(
-                '<table cellpadding="0" cellspacing="0" border="0" id="literature-table" \
-                            class="table table-bordered table-striped" style="width: 100%; margin-left: 0px; margin-right: 0px;"/>'
-            );
-            var searchBarDiv = $('<div>').append('<input type="text" name="lit-query-box">');
-            var searchBarButton = $('<input type=\'button\' id=\'lit-search-button\' value=\'Update Search\'>').on(
+            const resultsDiv = $('<div>')
+                // safe
+                .append(
+                    `<table cellpadding="0" cellspacing="0" border="0" id="literature-table" 
+                                class="table table-bordered table-striped" style="width: 100%; margin-left: 0px; margin-right: 0px;"/>`
+                );
+            const searchBarDiv = $('<div>')
+                // safe
+                .append('<input type="text" name="lit-query-box">');
+
+            const searchBarButton = $('<input type=\'button\' id=\'lit-search-button\' value=\'Update Search\'>').on(
                 'click',
-                function () {
+                () => {
                     lit = $litQueryBox.val();
-                    tableInput = [];
                     litDataTable.fnDestroy();
                     populateSearch(lit);
                 }
             );
 
-            var tableInput = [];
-            var litDataTable;
+            let litDataTable;
 
             self.$elem
+                // safe
                 .append(searchBarDiv.append(searchBarButton))
+                // safe
                 .append(loader)
+                // safe
                 .append(resultsDiv);
 
             // nb: needs to be after that stuff is added to the dom.
-            var $litQueryBox = self.$elem.find('[name="lit-query-box"]');
+            const $litQueryBox = self.$elem.find('[name="lit-query-box"]');
             $litQueryBox.val(lit);
-            $litQueryBox.css({ width: '300px' });
+            $litQueryBox.css({width: '300px'});
 
             populateSearch(lit);
 
@@ -116,27 +127,27 @@ define([
                 $.ajax({
                     async: true,
                     url:
-                        'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmax=' +
-                        self.options.maxPubCount +
-                        '&sort=pub+date&term=' +
-                        lit.replace(/\s+/g, '+'),
+                        `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmax=${
+                            self.options.maxPubCount
+                        }&sort=pub+date&term=${
+                            lit.replace(/\s+/g, '+')}`,
                     type: 'GET',
-                    success: function (data) {
-                        var htmlJson = self.xmlToJson(data);
-                        var query = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=';
-                        var abstr =
+                    success(data) {
+                        let htmlJson = self.xmlToJson(data);
+                        let query = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=';
+                        let abstr =
                             'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&rettype=abstract&id=';
                         if (htmlJson.eSearchResult[1].Count['#text'] === '0') {
-                            var tableSettings = {
+                            const tableSettings = {
                                 // "sPaginationType": "full_numbers",
                                 iDisplayLength: 4,
                                 sDom: 't<flip>',
                                 aaSorting: [[3, 'desc']],
                                 aoColumns: [
-                                    { sTitle: 'Journal', mData: 'source' },
-                                    { sTitle: 'Authors', mData: 'author' },
-                                    { sTitle: 'Title', mData: 'title' },
-                                    { sTitle: 'Date', mData: 'date' }
+                                    {sTitle: 'Journal', mData: 'source'},
+                                    {sTitle: 'Authors', mData: 'author'},
+                                    {sTitle: 'Title', mData: 'title'},
+                                    {sTitle: 'Date', mData: 'date'}
                                 ],
                                 aaData: []
                             };
@@ -145,7 +156,7 @@ define([
                             return;
                         }
                         if (_.isArray(htmlJson.eSearchResult[1].IdList.Id)) {
-                            var x;
+                            let x;
                             for (x = 0; x < htmlJson.eSearchResult[1].IdList.Id.length; x++) {
                                 query += htmlJson.eSearchResult[1].IdList.Id[x]['#text'];
                                 abstr += htmlJson.eSearchResult[1].IdList.Id[x]['#text'];
@@ -161,8 +172,8 @@ define([
                             query += htmlJson.eSearchResult[1].IdList.Id['#text'];
                             abstr += htmlJson.eSearchResult[1].IdList.Id['#text'];
                         }
-                        var tableInput = [];
-                        var abstractsDict = {};
+                        const tableInput = [];
+                        const abstractsDict = {};
 
                         $.when(
                             $.ajax({
@@ -170,29 +181,31 @@ define([
                                 url: abstr,
                                 type: 'GET'
                             })
-                        ).then(function (data) {
+                        ).then((data) => {
                             htmlJson = self.xmlToJson(data);
 
-                            var abstracts = htmlJson.PubmedArticleSet[1].PubmedArticle;
+                            const abstracts = htmlJson.PubmedArticleSet[1].PubmedArticle;
                             if (_.isArray(abstracts)) {
-                                var abstract_idx;
+                                let abstract_idx;
                                 for (abstract_idx in abstracts) {
-                                    var article = abstracts[abstract_idx].MedlineCitation;
-                                    var articleID = article.PMID['#text'];
+                                    const article = abstracts[abstract_idx].MedlineCitation;
+                                    const articleID = article.PMID['#text'];
+                                    let articleAbstract;
                                     if (typeof article.Article.Abstract !== 'undefined') {
-                                        var articleAbstract = article.Article.Abstract.AbstractText['#text'];
+                                        articleAbstract = article.Article.Abstract.AbstractText['#text'];
                                     } else {
-                                        var articleAbstract = 'No abstract found for this article.';
+                                        articleAbstract = 'No abstract found for this article.';
                                     }
                                     abstractsDict[articleID] = articleAbstract;
                                 }
                             } else {
-                                var article = abstracts.MedlineCitation;
-                                var articleID = article.PMID['#text'];
+                                const article = abstracts.MedlineCitation;
+                                const articleID = article.PMID['#text'];
+                                let articleAbstract;
                                 if (typeof article.Article.Abstract !== 'undefined') {
-                                    var articleAbstract = article.Article.Abstract.AbstractText['#text'];
+                                    articleAbstract = article.Article.Abstract.AbstractText['#text'];
                                 } else {
-                                    var articleAbstract = 'No abstract found for this article.';
+                                    articleAbstract = 'No abstract found for this article.';
                                 }
                                 abstractsDict[articleID] = articleAbstract;
                             }
@@ -204,55 +217,57 @@ define([
                                     type: 'GET'
                                 })
                             ).then(
-                                function (data) {
+                                (data) => {
                                     htmlJson = self.xmlToJson(data);
 
-                                    var summaries = htmlJson.eSummaryResult[1].DocSum; // Add pub date field into table as well.
-                                    var summaryList;
+                                    const summaries = htmlJson.eSummaryResult[1].DocSum; // Add pub date field into table as well.
+                                    let summaryList;
                                     if (_.isArray(summaries)) {
                                         summaryList = [];
-                                        for (summary in summaries) {
+                                        for (const summary in summaries) {
                                             summaryList.push(summaries[summary]);
                                         }
                                     } else {
                                         summaryList = [summaries];
                                     }
 
-                                    var articleIDs = [],
-                                        summary_idx,
+                                    const articleIDs = [];
+                                    let summary_idx,
                                         summary,
                                         item_idx,
                                         infoRow;
 
                                     for (summary_idx in summaryList) {
                                         summary = summaryList[summary_idx].Item;
-                                        var tableInputRow = {};
-                                        var isJournal = false;
+                                        const tableInputRow = {};
+                                        let isJournal = false;
                                         for (item_idx in summary) {
                                             infoRow = summary[item_idx];
+                                            // date
                                             if (infoRow['@attributes'].Name === 'PubDate') {
-                                                tableInputRow['date'] = infoRow['#text'].substring(0, 4);
+                                                tableInputRow['date'] = domSafeText(infoRow['#text'].substring(0, 4));
                                             }
+                                            // source
                                             if (infoRow['@attributes'].Name === 'Source') {
-                                                tableInputRow['source'] = infoRow['#text'];
+                                                tableInputRow['source'] = domSafeText(infoRow['#text']);
                                             }
+                                            // abstract
                                             if (infoRow['@attributes'].Name === 'Title') {
                                                 tableInputRow['title'] =
                                                     '<a href=' +
-                                                    'https://www.ncbi.nlm.nih.gov/pubmed/' +
-                                                    summaryList[summary_idx].Id['#text'] +
-                                                    ' target=_blank>' +
-                                                    infoRow['#text'] +
-                                                    '</a>';
+                                                    `https://www.ncbi.nlm.nih.gov/pubmed/${
+                                                        summaryList[summary_idx].Id['#text']
+                                                    } target=_blank>${domSafeText(infoRow['#text'])}</a>`;
                                                 tableInputRow['abstract'] = summaryList[summary_idx].Id['#text'];
                                                 articleIDs.push(summaryList[summary_idx].Id['#text']);
                                             }
+                                            // authors
                                             if (infoRow['@attributes'].Name === 'AuthorList') {
-                                                var authors = '';
+                                                let authors = '';
                                                 if ('#text' in infoRow) {
                                                     if (_.isArray(infoRow.Item)) {
-                                                        var commaDelay = 1,
-                                                            author_idx,
+                                                        let commaDelay = 1;
+                                                        let author_idx,
                                                             author;
                                                         for (author_idx in infoRow.Item) {
                                                             author = infoRow.Item[author_idx];
@@ -269,21 +284,20 @@ define([
                                                 } else {
                                                     authors = 'No authors found for this article.';
                                                 }
-                                                tableInputRow['author'] = authors;
+                                                tableInputRow['author'] = domSafeText(authors);
                                             }
+                                            // Flag if this is a journal; we only display journals.
                                             if (infoRow['@attributes'].Name === 'PubTypeList') {
                                                 if ('#text' in infoRow) {
                                                     if (_.isArray(infoRow.Item)) {
-                                                        var pub_idx;
+                                                        let pub_idx;
                                                         for (pub_idx in infoRow.Item) {
                                                             if (infoRow.Item[pub_idx]['#text'] === 'Journal Article') {
                                                                 isJournal = true;
                                                             }
                                                         }
-                                                    } else {
-                                                        if (infoRow.Item['#text'] === 'Journal Article') {
-                                                            isJournal = true;
-                                                        }
+                                                    } else if (infoRow.Item['#text'] === 'Journal Article') {
+                                                        isJournal = true;
                                                     }
                                                 }
                                             }
@@ -293,22 +307,22 @@ define([
                                         }
                                     }
 
-                                    var sDom = 't<flip>';
+                                    let sDom = 't<flip>';
                                     if (tableInput.length <= 10) {
                                         sDom = 'tfi';
                                     }
-                                    var tableSettings = {
+                                    const tableSettings = {
                                         iDisplayLength: 4,
-                                        sDom: sDom,
+                                        sDom,
                                         aaSorting: [],
                                         aoColumns: [
-                                            { sTitle: 'Journal', mData: 'source' },
-                                            { sTitle: 'Authors', mData: 'author' },
-                                            { sTitle: 'Title', mData: 'title' },
-                                            { sTitle: 'Date', mData: 'date' }
+                                            {sTitle: 'Journal', mData: 'source'},
+                                            {sTitle: 'Authors', mData: 'author'},
+                                            {sTitle: 'Title', mData: 'title'},
+                                            {sTitle: 'Date', mData: 'date'}
                                         ],
                                         aaData: tableInput,
-                                        fnRowCallback: function (nRow, aaData, iDisplayIndex) {
+                                        fnRowCallback(nRow, aaData) {
                                             nRow.setAttribute('id', aaData['abstract']);
                                         }
                                     };
@@ -320,17 +334,18 @@ define([
                                             self.tooltip = self.tooltip.text(abstractsDict[$(this).attr('id')]);
                                             return self.tooltip.style('visibility', 'visible');
                                         })
-                                        .on('mouseout', function () {
+                                        .on('mouseout', () => {
                                             return self.tooltip.style('visibility', 'hidden');
                                         })
-                                        .on('mousemove', function (e) {
+                                        .on('mousemove', (e) => {
                                             return self.tooltip
-                                                .style('top', e.pageY + 15 + 'px')
-                                                .style('left', e.pageX - 10 + 'px');
+                                                .style('top', `${e.pageY + 15  }px`)
+                                                .style('left', `${e.pageX - 10  }px`);
                                         });
                                 },
-                                function () {
+                                () => {
                                     loader.hide();
+                                    // safe
                                     self.$elem.append(
                                         '<br><b>Failed to retrieve literature search results. Try again later.</b>'
                                     );
@@ -343,7 +358,7 @@ define([
 
             return this;
         },
-        getData: function () {
+        getData() {
             return {
                 type: 'LitWidget',
                 id: this.options.genomeID,

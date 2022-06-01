@@ -4103,6 +4103,7 @@ define([
     // css
     jQuery("<style>")
         .prop("type", "text/css")
+        // safe
         .html("\
 svg:svg {\
     display: none;\

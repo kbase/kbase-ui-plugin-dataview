@@ -2,13 +2,25 @@
  * Shows taxonomic lineage.
  *
  */
-define(['jquery', 'uuid', 'kb_common/html', 'kbaseUI/widget/legacy/widget'], function ($, Uuid, html) {
-    'use strict';
+define([
+    'jquery',
+    'uuid',
+    'kb_common/html',
+    'lib/domUtils',
+    'lib/jqueryUtils',
 
-    var t = html.tag,
+    // For effect
+    'kbaseUI/widget/legacy/widget'
+], (
+    $,
+    Uuid,
+    html,
+    {domSafeText},
+    {$errorAlert}
+) => {
+    const t = html.tag,
         a = t('a'),
         div = t('div'),
-        span = t('span'),
         table = t('table'),
         tr = t('tr'),
         th = t('th'),
@@ -26,11 +38,10 @@ define(['jquery', 'uuid', 'kb_common/html', 'kbaseUI/widget/legacy/widget'], fun
         token: null,
         uniqueId: null,
 
-        init: function (options) {
+        init(options) {
             this._super(options);
             if (!this.options.genomeInfo) {
-                this.renderError('Genome information not supplied');
-                return;
+                throw new Error('Genome information not supplied');
             }
             this.genome = options.genomeInfo.data;
 
@@ -40,39 +51,41 @@ define(['jquery', 'uuid', 'kb_common/html', 'kbaseUI/widget/legacy/widget'], fun
             return this;
         },
 
-        render: function () {
-            this.$elem.empty().append(
-                table(
-                    {
-                        class: 'table table-bordered'
-                    },
-                    [
-                        tr([
-                            th(
-                                {
-                                    style: {
-                                        width: '11em'
-                                    }
-                                },
-                                'Scientific Name'
-                            ),
-                            td(
-                                {
-                                    dataField: 'scientific-name',
-                                    style: {
-                                        fontStyle: 'italic'
-                                    }
-                                },
-                                this.genome.scientific_name
-                            )
-                        ]),
-                        tr([th('Taxonomic Lineage'), td(this.buildLineage())])
-                    ]
-                )
-            );
+        render() {
+            this.$elem
+                // safe
+                .html(
+                    table(
+                        {
+                            class: 'table table-bordered'
+                        },
+                        [
+                            tr([
+                                th(
+                                    {
+                                        style: {
+                                            width: '11em'
+                                        }
+                                    },
+                                    'Scientific Name'
+                                ),
+                                td(
+                                    {
+                                        dataField: 'scientific-name',
+                                        style: {
+                                            fontStyle: 'italic'
+                                        }
+                                    },
+                                    domSafeText(this.genome.scientific_name)
+                                )
+                            ]),
+                            tr([th('Taxonomic Lineage'), td(this.buildLineage())])
+                        ]
+                    )
+                );
         },
 
-        buildLineage: function () {
+        buildLineage() {
             if (!this.genome.taxonomy) {
                 return 'No taxonomic data for this genome.';
             }
@@ -83,7 +96,7 @@ define(['jquery', 'uuid', 'kb_common/html', 'kbaseUI/widget/legacy/widget'], fun
             if (this.genome.taxonomy.indexOf(',') >= 0) {
                 separator = ',';
             }
-            var splittax = this.genome.taxonomy.split(separator).map((item) => {
+            const splittax = this.genome.taxonomy.split(separator).map((item) => {
                 return item.trim();
             });
 
@@ -97,47 +110,24 @@ define(['jquery', 'uuid', 'kb_common/html', 'kbaseUI/widget/legacy/widget'], fun
                     }
                 },
                 splittax.map((item) => {
-                    var searchtax = item.replace('/ /g', '+');
-                    var link = 'http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?name=' + searchtax;
+                    const searchtax = item.replace('/ /g', '+');
+                    const link = `http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?name=${searchtax}`;
                     return div(
                         a(
                             {
                                 href: link,
                                 target: '_blank'
                             },
-                            item
+                            domSafeText(item)
                         )
                     );
                 })
             );
         },
 
-        renderError: function (error) {
-            var errorMessage;
-            if (typeof error === 'string') {
-                errorMessage = error;
-            } else if (error.error && error.error.message) {
-                errorMessage = error.error.message;
-            } else {
-                errorMessage = 'Sorry, an unknown error occurred';
-            }
-
-            var errorAlert = div(
-                {
-                    class: 'alert alert-danger'
-                },
-                [
-                    span(
-                        {
-                            textWeight: 'bold'
-                        },
-                        'Error: '
-                    ),
-                    span(errorMessage)
-                ]
-            );
-            this.$elem.empty();
-            this.$elem.append(errorAlert);
+        renderError(error) {
+            // safe
+            this.$elem.html($errorAlert(error));
         }
     });
 });

@@ -3,6 +3,7 @@ define(['jquery', 'bluebird', 'kb_lib/html'], ($, Promise, html) => {
         const id = html.genId(),
             div = html.tag('div'),
             span = html.tag('span');
+        // safe - as long as usage of createBSPanel is safe!
         $node.html(
             div({class: 'panel panel-default '}, [
                 div({class: 'panel-heading'}, [span({class: 'panel-title'}, title)]),

@@ -5,12 +5,20 @@
  * Gene "instance" info (e.g. coordinates on a particular strain's genome)
  * is in a different widget.
  */
-define(['jquery', 'kb_lib/htmlBuilders', 'kb_service/client/workspace', 'kbaseUI/widget/legacy/widget'], function (
+define([
+    'jquery',
+    'kb_lib/htmlBuilders',
+    'kb_service/client/workspace',
+    'lib/domUtils',
+
+    // for effect
+    'kbaseUI/widget/legacy/widget'
+], (
     $,
     htmlBuilders,
-    Workspace
-) {
-    'use strict';
+    Workspace,
+    {domSafeText}
+) => {
     $.KBWidget({
         name: 'KBaseGeneBiochemistry',
         parent: 'kbaseWidget',
@@ -22,7 +30,7 @@ define(['jquery', 'kb_lib/htmlBuilders', 'kb_service/client/workspace', 'kbaseUI
             workspaceID: null,
             genomeInfo: null
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
 
             if (this.options.featureID === null) {
@@ -35,47 +43,84 @@ define(['jquery', 'kb_lib/htmlBuilders', 'kb_service/client/workspace', 'kbaseUI
 
             return this;
         },
-        render: function () {
+        render() {
             this.$messagePane = $('<div/>').addClass('kbwidget-message-pane kbwidget-hide-message');
+            // safe
             this.$elem.append(this.$messagePane);
 
             this.$infoPanel = $('<div>').css('overflow', 'auto');
             this.$infoTable = $('<table>').addClass('table table-striped table-bordered');
 
+            // safe
             this.$elem.append(this.$infoPanel.append(this.$infoTable));
         },
 
-        makeRow: function (name, value) {
-            var $row = $('<tr>')
-                .append($('<th>').append(name))
-                .append($('<td>').append(value));
-            return $row;
+        $noData(textMessage) {
+            return $('<span>')
+                .css('font-style', 'italic')
+                .css('font-size', '90%')
+                .text(textMessage || '∅');
         },
-        renderWorkspace: function () {
-            var self = this;
+
+        $renderCell(valueText, valueHTML) {
+            const $valueCell = $('<td>');
+            if (valueText) {
+                // safe
+                $valueCell.text(valueText);
+            } else if (valueHTML) {
+                // safe (trusting valueHTML as good html text or jquery object)
+                $valueCell.html(valueHTML);
+            } else {
+                // safe
+                $valueCell.html(this.$noData());
+            }
+            return $valueCell;
+        },
+
+        $renderRow(headerText, valueText, valueHTML) {
+            return $('<tr>')
+                // safe
+                .append($('<th>').text(headerText))
+                // safe
+                .append(this.$renderCell(valueText, valueHTML));
+        },
+
+        renderWorkspace() {
+            const self = this;
             this.showMessage(htmlBuilders.loading());
             this.$infoPanel.hide();
 
             if (this.options.genomeInfo) {
                 self.ready(this.options.genomeInfo);
             } else {
-                var obj = this.buildObjectIdentity(this.options.workspaceID, this.options.genomeID);
-                var workspace = new Workspace(this.runtime.config('services.workspace.url'), {
+                const obj = this.buildObjectIdentity(this.options.workspaceID, this.options.genomeID);
+                const workspace = new Workspace(this.runtime.config('services.workspace.url'), {
                     token: this.runtime.service('session').getAuthToken()
                 });
                 workspace
                     .get_objects([obj])
-                    .then(function (genome) {
+                    .then((genome) => {
                         self.ready(genome[0]);
                     })
-                    .catch(function (err) {
+                    .catch((err) => {
                         self.renderError(err);
                     });
             }
         },
-        ready: function (genome) {
+        unixEpochToTimestamp(time) {
+            if (!time) {
+                return 'n/a';
+            }
+            const options = {
+                year: 'numeric', month: 'numeric', day: 'numeric',
+                hour: 'numeric', minute: 'numeric', second: 'numeric',
+                hour12: false
+            };
+            return Intl.DateTimeFormat('en-US', options).format(time * 1000);
+        },
+        ready(genome) {
             if (genome.data.features) {
-                var feature = null;
+                let feature = null;
                 for (let i = 0; i < genome.data.features.length; i++) {
                     if (genome.data.features[i].id === this.options.featureID) {
                         feature = genome.data.features[i];
@@ -93,7 +138,8 @@ define(['jquery', 'kb_lib/htmlBuilders', 'kb_service/client/workspace', 'kbaseUI
                     func = 'Unknown';
                 }
 
-                this.$infoTable.append(this.makeRow('Function', func));
+                // safe
+                this.$infoTable.append(this.$renderRow('Function', func));
 
                 // Subsystems, single string
                 //var subsysSumStr = "No subsystem summary found.";
@@ -103,37 +149,38 @@ define(['jquery', 'kb_lib/htmlBuilders', 'kb_service/client/workspace', 'kbaseUI
                 //this.$infoTable.append(this.makeRow("Subsystems Summary", subsysSumStr));
 
                 // Subsystem, detailed
-                var subsysDataStr = 'No subsystem data found.';
+                let subsysDataStr;
                 if (feature.subsystem_data) {
                     subsysDataStr = '';
                     for (let i = 0; i < feature.subsystem_data.length; i++) {
-                        var subsys = feature.subsystem_data[i];
+                        const subsys = feature.subsystem_data[i];
                         // typedef tuple<string subsystem, string variant, string role> subsystem_data;
                         subsysDataStr +=
                             '<p>' +
-                            'Subsystem: ' +
-                            subsys[0] +
-                            '<br>' +
-                            'Variant: ' +
-                            subsys[1] +
-                            '<br>' +
-                            'Role: ' +
-                            subsys[2];
+                            `Subsystem: ${domSafeText(subsys[0])}<br>` +
+                            `Variant: ${domSafeText(subsys[1])}<br>` +
+                            `Role: ${domSafeText(subsys[2])}`;
                     }
+                } else {
+                    subsysDataStr = this.$noData('No subsystem data found.');
                 }
-                this.$infoTable.append(this.makeRow('Subsystems', subsysDataStr));
+                // safe
+                this.$infoTable.append(this.$renderRow('Subsystems', null, subsysDataStr));
 
                 // Annotation
-                var annotationsStr = 'No annotation comments found.';
+                let annotationsStr;
                 if (feature.annotations) {
                     annotationsStr = '';
-                    for (var i = 0; i < feature.annotations.length; i++) {
-                        var annot = feature.annotations[i];
+                    for (let i = 0; i < feature.annotations.length; i++) {
+                        const annot = feature.annotations[i];
                         // typedef tuple<string comment, string annotator, int annotation_time> annotation;
-                        annotationsStr += annot[0] + ' (' + annot[1] + ', timestamp:' + annot[2] + ')' + '<br>';
+                        annotationsStr += `${annot[0]} (${annot[1]}, timestamp: ${this.unixEpochToTimestamp(annot[2])})<br>`;
                     }
+                } else {
+                    annotationsStr = this.$noData('No annotation comments found.');
                 }
-                this.$infoTable.append(this.makeRow('Annotation Comments', annotationsStr));
+                // safe
+                this.$infoTable.append(this.$renderRow('Annotation Comments', null, annotationsStr));
 
                 // Protein families list.
                 //var proteinFamilies = "None found";
@@ -148,18 +195,18 @@ define(['jquery', 'kb_lib/htmlBuilders', 'kb_service/client/workspace', 'kbaseUI
             } else {
                 this.renderError({
                     error:
-                        'No genetic features found in the genome with object id: ' +
-                        this.options.workspaceID +
-                        '/' +
-                        this.options.genomeID
+                        `No genetic features found in the genome with object id: ${
+                            this.options.workspaceID
+                        }/${
+                            this.options.genomeID}`
                 });
             }
 
             this.hideMessage();
             this.$infoPanel.show();
         },
-        buildObjectIdentity: function (workspaceID, objectID) {
-            var obj = {};
+        buildObjectIdentity(workspaceID, objectID) {
+            const obj = {};
             if (/^\d+$/.exec(workspaceID)) {
                 obj['wsid'] = workspaceID;
             } else {
@@ -174,7 +221,7 @@ define(['jquery', 'kb_lib/htmlBuilders', 'kb_service/client/workspace', 'kbaseUI
             }
             return obj;
         },
-        getData: function () {
+        getData() {
             return {
                 type: 'Feature',
                 id: this.options.featureID,
@@ -182,34 +229,34 @@ define(['jquery', 'kb_lib/htmlBuilders', 'kb_service/client/workspace', 'kbaseUI
                 title: 'Biochemical Function'
             };
         },
-        showMessage: function (message) {
-            var span = $('<span/>').append(message);
-
+        showMessage(message) {
             this.$messagePane
-                .empty()
-                .append(span)
+                // safe (usages)
+                .html($('<div>').html(message))
                 .removeClass('hide');
         },
-        hideMessage: function () {
+        hideMessage() {
             this.$messagePane.addClass('hide');
         },
-        makeErrorString: function (error) {
+        makeErrorString(error) {
             if (typeof error === 'string') {
                 return error;
             } else if (error.error && error.error.message) {
                 return error.error.message;
-            } else {
-                return 'Sorry, an unknown error occurred';
             }
+            return 'Sorry, an unknown error occurred';
+
         },
-        renderError: function (error) {
-            var errString = this.makeErrorString(error),
+        renderError(error) {
+            const errString = this.makeErrorString(error),
                 $errorDiv = $('<div>')
                     .addClass('alert alert-danger')
+                    // safe
                     .append('<b>Error:</b>')
-                    .append('<br>' + errString);
-            this.$elem.empty();
-            this.$elem.append($errorDiv);
+                    // safe
+                    .append(`<br>${domSafeText(errString)}`);
+            // safe
+            this.$elem.html($errorDiv);
         }
     });
 });

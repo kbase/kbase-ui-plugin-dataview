@@ -7,9 +7,16 @@ define([
     'jquery',
     'kb_common/html',
     'kb_service/client/workspace',
+    'lib/domUtils',
+
+    // for effect
     'kbaseUI/widget/legacy/authenticatedWidget'
-], function ($, html, Workspace) {
-    'use strict';
+], (
+    $,
+    html,
+    Workspace,
+    {domSafeText}
+) => {
     $.KBWidget({
         name: 'kbaseAssemblyView',
         parent: 'kbaseAuthenticatedWidget',
@@ -25,74 +32,74 @@ define([
             job_id: null
         },
         timer: null,
-        init: function (options) {
+        init(options) {
             this._super(options);
             this.wsUrl = this.runtime.getConfig('services.workspace.url');
             this.ws_name = options.ws_name;
             this.ws_id = options.ws_id;
-            if (options.job_id) this.job_id = options.job_id;
+            if (options.job_id)
+                this.job_id = options.job_id;
             if (options.ws && options.id) {
                 this.ws_id = options.id;
                 this.ws_name = options.ws;
             }
             return this;
         },
-        render: function () {
-            var self = this;
+        render() {
+            const self = this;
 
-            var container = this.$elem;
+            const container = this.$elem;
             if (self.token === null) {
-                container.empty();
-                container.append('<div>[Error] You\'re not logged in</div>');
+                // safe
+                container.html('<div>[Error] You\'re not logged in</div>');
                 return;
             }
 
-            var kbws = new Workspace(self.wsUrl, { token: self.token });
+            const kbws = new Workspace(self.wsUrl, {token: self.token});
 
-            var ready = function () {
+            const ready = function () {
                 container.empty();
+                // safe
                 container.append(html.loading('loading data...'));
-                var objname;
-                objname = self.ws_id;
+                const objname = self.ws_id;
                 // commented this out ... can't think of how this ever worked. eap.
                 //if (typeof self.ws_id === 'string') {
                 //     if (self.ws_id.indexOf('.report') === -1) { //Check if contigset or report
                 //        objname = self.ws_id + '.report';
                 //     }
                 // }
-
                 kbws.get_objects(
-                    [{ ref: self.ws_name + '/' + objname }],
-                    function (data) {
-                        container.empty();
-                        var report_div = '<div class="" style="margin-top:15px">';
-                        var report = data[0].data.report;
-                        report_div += '<pre><code>' + report + '</code></pre><br>'; // code block behaves differently in LP and Narrative, needed to add <pre> block --mike
-                        container.append(report_div);
+                    [{ref: `${self.ws_name  }/${  objname}`}],
+                    (data) => {
+                        let report_div = '<div class="" style="margin-top:15px">';
+                        const report = data[0].data.report;
+                        report_div += `<pre><code>${domSafeText(report)}</code></pre><br>`; // code block behaves differently in LP and Narrative, needed to add <pre> block --mike
+                        // safe
+                        container.html(report_div);
                     },
-                    function (data) {
-                        container.empty();
-                        container.append('<p>[Error] ' + data.error.message + '</p>');
+                    (data) => {
+                        // safe
+                        container.html(`<p>[Error] ${domSafeText(data.error.message)}</p>`);
                     }
                 );
             };
             ready();
             return this;
         },
-        getData: function () {
+        getData() {
             return {
                 type: 'NarrativeTempCard',
-                id: this.ws_name + '.' + this.ws_id,
+                id: `${this.ws_name  }.${  this.ws_id}`,
                 workspace: this.ws_name,
                 title: 'Temp Widget'
             };
         },
-        loggedInCallback: function (event, auth) {
+        loggedInCallback(event, auth) {
             this.token = auth.token;
             this.render();
             return this;
         },
-        loggedOutCallback: function (event, auth) {
+        loggedOutCallback() {
             this.token = null;
             this.render();
             return this;
