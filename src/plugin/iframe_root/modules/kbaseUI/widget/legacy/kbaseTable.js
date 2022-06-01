@@ -51,8 +51,7 @@ define([
     './deletePrompt',
     './buttonControls',
     './searchControls',
-], function ($) {
-    'use strict';
+], ($) => {
     $.KBWidget({
         name: 'kbaseTable',
         version: '1.0.0',
@@ -64,20 +63,20 @@ define([
             bordered: true,
             headerOptions: {},
             resizable: false,
-            header_callback: function (header) {
+            header_callback(header) {
                 if (header.label !== undefined) {
                     return header.label;
                 }
-                return header.value.replace(/(?:^|\s+)([a-z])/g, function (v) {
+                return header.value.replace(/(?:^|\s+)([a-z])/g, (v) => {
                     return v.toUpperCase();
                 });
             },
-            row_callback: function () {},
+            row_callback() {},
             sortButtons: {},
             navControls: false
         },
-        default_row_callback: function (cell) {
-            var value;
+        default_row_callback(cell) {
+            let value;
             if (cell === undefined) {
                 return cell;
             }
@@ -90,7 +89,7 @@ define([
                 cell.value;
 
             if (cell.type === 'th') {
-                value = value.replace(/(?:^|\s+)([a-z])/g, function (v) {
+                value = value.replace(/(?:^|\s+)([a-z])/g, (v) => {
                     return v.toUpperCase();
                 });
                 value += ' : ';
@@ -102,7 +101,7 @@ define([
 
             return value;
         },
-        init: function (options) {
+        init(options) {
 
             this._super(options);
 
@@ -111,11 +110,11 @@ define([
             return this;
 
         },
-        appendUI: function ($elem, struct) {
+        appendUI($elem, struct) {
 
             $elem.empty();
 
-            var $tbl = $('<table></table>')
+            const $tbl = $('<table></table>')
                 .attr('id', 'table')
                 .css('margin', '0px')
                 .addClass('table');
@@ -142,12 +141,12 @@ define([
             }
 
             if (struct.header) {
-                var $thead = $('<thead></thead>')
+                const $thead = $('<thead></thead>')
                     .attr('id', 'thead');
 
                 $thead.append(this.navControls(struct.header.length));
 
-                var $tr = $('<tr></tr>')
+                const $tr = $('<tr></tr>')
                     .attr('id', 'headerRow');
 
                 $.each(
@@ -155,16 +154,16 @@ define([
                     $.proxy(function (idx, header) {
 
                         if (typeof header === 'string') {
-                            header = { value: header };
+                            header = {value: header};
                             struct.header[idx] = header;
                         }
 
-                        var callback = header.callback || this.options.header_callback;
+                        const callback = header.callback || this.options.header_callback;
 
-                        var label = callback(header, this);
-                        var h = header.value;
+                        const label = callback(header, this);
+                        const h = header.value;
 
-                        var $th = $.jqElem('th')
+                        const $th = $.jqElem('th')
                             .append(label);
 
                         if (this.options.resizable) {
@@ -177,10 +176,10 @@ define([
 
                         if (header.sortable || (header.sortable === undefined && this.options.sortable)) {
 
-                            var buttonId = header.value + '-sortButton';
-                            var $buttonIcon = $('<i></i>')
+                            const buttonId = `${header.value  }-sortButton`;
+                            const $buttonIcon = $('<i></i>')
                                 .addClass('fa fa-sort');
-                            var $button = $('<button></button>')
+                            const $button = $('<button></button>')
                                 .addClass('btn btn-default btn-xs')
                                 .attr('id', buttonId)
                                 .css('display', 'none')
@@ -189,7 +188,7 @@ define([
                                 .data('shouldHide', true);
                             $button.bind('click', $.proxy(function () {
 
-                                var $lastSort = this.data('lastSort');
+                                const $lastSort = this.data('lastSort');
                                 if ($lastSort !== undefined && $lastSort.get(0) !== $button.get(0)) {
                                     $lastSort.children(':first').removeClass('fa fa-sort-up');
                                     $lastSort.children(':first').removeClass('fa fa-sort-down');
@@ -228,10 +227,10 @@ define([
                             this.sortButtons()[header.value] = $button;
 
                             $th.append($button);
-                            $th.bind('mouseover', $.proxy(function () {
+                            $th.bind('mouseover', $.proxy(() => {
                                 $button.css('display', 'inline');
                             }, this));
-                            $th.bind('mouseout', $.proxy(function () {
+                            $th.bind('mouseout', $.proxy(() => {
                                 if ($button.data('shouldHide')) {
                                     $button.css('display', 'none');
                                 }
@@ -249,25 +248,25 @@ define([
 
             if (struct.rows) {
 
-                var $tbody = this.data('tbody', $('<tbody></tbody>'));
+                const $tbody = this.data('tbody', $('<tbody></tbody>'));
                 this.layoutRows(struct.rows, struct.header);
 
                 $tbl.append($tbody);
             }
 
             if (struct.footer) {
-                var $tfoot = $('<tfoot></tfoot>')
+                const $tfoot = $('<tfoot></tfoot>')
                     .attr('id', 'tfoot');
 
-                var $tfootTR = $.jqElem('tr');
+                const $tfootTR = $.jqElem('tr');
                 $tfoot.append($tfootTR);
 
-                for (var idx = 0; idx < struct.footer.length; idx++) {
-                    var fcell = struct.footer[idx];
+                for (let idx = 0; idx < struct.footer.length; idx++) {
+                    const fcell = struct.footer[idx];
 
-                    var value = fcell;
-                    var style;
-                    var colspan;
+                    let value = fcell;
+                    let style;
+                    let colspan;
 
                     if (typeof fcell === 'object') {
                         value = fcell.value;
@@ -275,7 +274,7 @@ define([
                         colspan = fcell.colspan;
                     }
 
-                    var $td = $.jqElem('td')
+                    const $td = $.jqElem('td')
                         .append(value);
                     if (style) {
                         $td.attr('style', style);
@@ -297,11 +296,11 @@ define([
             return $elem;
 
         },
-        navControls: function (colspan) {
+        navControls(colspan) {
 
-            var $tbl = this;
+            const $tbl = this;
 
-            var controlsTR = $.jqElem('tr')
+            const controlsTR = $.jqElem('tr')
                 .css('display', this.options.navControls ? undefined : 'none')
                 .append($.jqElem('td')
                     .attr('colspan', colspan)
@@ -319,16 +318,16 @@ define([
                                     .addClass('fa fa-caret-left')
                                 )
                                 .on('click', function () {
-                                    var maxRows = $tbl.options.maxVisibleRowIndex || $tbl.numRows();
-                                    var minRows = $tbl.options.minVisibleRowIndex || 0;
-                                    var visRows = maxRows - minRows;
+                                    const maxRows = $tbl.options.maxVisibleRowIndex || $tbl.numRows();
+                                    const minRows = $tbl.options.minVisibleRowIndex || 0;
+                                    const visRows = maxRows - minRows;
 
-                                    var newMin = minRows - visRows;
+                                    let newMin = minRows - visRows;
                                     if (newMin <= 0) {
                                         $(this).attr('disabled', true);
                                         newMin = 0;
                                     }
-                                    var newMax = newMin + visRows;
+                                    const newMax = newMin + visRows;
 
                                     $tbl.options.minVisibleRowIndex = newMin;
                                     $tbl.options.maxVisibleRowIndex = newMax;
@@ -353,16 +352,16 @@ define([
                                     .addClass('fa fa-caret-right')
                                 )
                                 .on('click', function () {
-                                    var maxRows = $tbl.options.maxVisibleRowIndex || $tbl.numRows();
-                                    var minRows = $tbl.options.minVisibleRowIndex || 0;
-                                    var visRows = maxRows - minRows;
+                                    const maxRows = $tbl.options.maxVisibleRowIndex || $tbl.numRows();
+                                    const minRows = $tbl.options.minVisibleRowIndex || 0;
+                                    const visRows = maxRows - minRows;
 
-                                    var newMax = maxRows + visRows;
+                                    let newMax = maxRows + visRows;
                                     if (newMax >= $tbl.numRows()) {
                                         newMax = $tbl.numRows();
                                         $(this).attr('disabled', true);
                                     }
-                                    var newMin = newMax - visRows;
+                                    const newMin = newMax - visRows;
 
                                     $tbl.options.minVisibleRowIndex = newMin;
                                     $tbl.options.maxVisibleRowIndex = newMax;
@@ -385,8 +384,8 @@ define([
                                     .attr('id', 'removeIcon')
                                     .addClass('fa fa-minus')
                                 )
-                                .on('click', function () {
-                                    var currentVis = $tbl.options.maxVisibleRowIndex || 0;
+                                .on('click', () => {
+                                    let currentVis = $tbl.options.maxVisibleRowIndex || 0;
                                     currentVis--;
 
                                     if (currentVis < 1) {
@@ -408,12 +407,12 @@ define([
                                     .attr('id', 'addIcon')
                                     .addClass('fa fa-plus')
                                 )
-                                .on('click', function () {
-                                    var currentVis = $tbl.options.maxVisibleRowIndex || 0;
+                                .on('click', () => {
+                                    let currentVis = $tbl.options.maxVisibleRowIndex || 0;
                                     currentVis++;
 
                                     if (currentVis > $tbl.numRows()) {
-                                        var visDiff = currentVis - $tbl.numRows();
+                                        const visDiff = currentVis - $tbl.numRows();
                                         currentVis = $tbl.options.structure.rows.length;
                                         $tbl.options.minVisibleRowIndex -= visDiff;
                                         if ($tbl.options.minVisibleRowIndex < 0) {
@@ -440,7 +439,7 @@ define([
                 onMouseover: false,
                 type: 'inline',
                 context: this,
-                searchCallback: function (e, value, $tbl) {
+                searchCallback(e, value, $tbl) {
                     $tbl.refilter(value);
                 }
             });
@@ -448,14 +447,14 @@ define([
             return controlsTR;
 
         },
-        sort: function (header, direction) {
+        sort(header, direction) {
 
-            var $sortButton = this.sortButtons()[header];
+            const $sortButton = this.sortButtons()[header];
 
             if (direction === -1 || direction === 1 && $sortButton !== undefined) {
 
-                var lsh = this.data('lastSortHeader');
-                var lsd = this.data('lastSortDir');
+                const lsh = this.data('lastSortHeader');
+                const lsd = this.data('lastSortDir');
 
                 if (header === lsh && direction === lsd) {
                     return;
@@ -476,12 +475,12 @@ define([
                 $sortButton.css('display', 'inline');
             }
         },
-        refilter: function (filter) {
+        refilter(filter) {
             this.options.filter = filter;
             this.sortAndLayoutOn(this.data('lastSortHeader'), this.data('lastSortDir'));
         },
-        sortAndLayoutOn: function (h, dir) {
-            var sortedRows = this.options.structure.rows;
+        sortAndLayoutOn(h, dir) {
+            let sortedRows = this.options.structure.rows;
 
             if (h !== undefined) {
 
@@ -489,9 +488,9 @@ define([
 
                 sortedRows =
                     this.options.structure.rows.slice().sort(
-                        function (a, b) {
-                            var keyA = a[h];
-                            var keyB = b[h];
+                        (a, b) => {
+                            let keyA = a[h];
+                            let keyB = b[h];
 
                             if (keyA !== undefined && keyA.sortValue !== undefined) {
                                 keyA = keyA.sortValue;
@@ -509,9 +508,9 @@ define([
                                 return 0 - dir;
                             } else if (keyA > keyB) {
                                 return dir;
-                            } else {
-                                return 0;
                             }
+                            return 0;
+
 
                         }
                     );
@@ -520,11 +519,11 @@ define([
             this.layoutRows(sortedRows, this.options.structure.header);
 
         },
-        layoutRows: function (rows, header) {
+        layoutRows(rows, header) {
 
             this.data('tbody').empty();
 
-            var numRows = 0;
+            let numRows = 0;
 
             if ($.isArray(rows)) {
                 for (let idx = 0; idx < rows.length; idx++) {
@@ -540,16 +539,16 @@ define([
                     let key = this.options.structure.keys[idx];
 
                     if (typeof key !== 'object') {
-                        key = { value: key };
+                        key = {value: key};
                     }
 
                     key.type = 'th';
                     key.style = 'white-space : nowrap';
 
                     const $row = this.createRow({
-                        key: key,
-                        value: { value: rows[key.value], key: key.value },
-                    }, [{ value: 'key' }, { value: 'value' }]);
+                        key,
+                        value: {value: rows[key.value], key: key.value},
+                    }, [{value: 'key'}, {value: 'value'}]);
 
                     if ($row !== undefined && $row.children().length) {
                         numRows++;
@@ -563,27 +562,27 @@ define([
             this.displayRows();
 
         },
-        displayRows: function () {
+        displayRows() {
             this.data('tbody')
                 .find('tr')
                 .css('display', '');
 
-            var maxRows = this.options.maxVisibleRowIndex || this.numRows();
+            let maxRows = this.options.maxVisibleRowIndex || this.numRows();
             if (maxRows > this.numRows()) {
                 maxRows = this.numRows();
             }
 
-            var minRows = this.options.minVisibleRowIndex || 0;
+            const minRows = this.options.minVisibleRowIndex || 0;
 
             this.data('tbody')
-                .find('tr:lt(' + minRows + ')')
+                .find(`tr:lt(${  minRows  })`)
                 .css('display', 'none');
 
             this.data('tbody')
-                .find('tr:gt(' + (maxRows - 1) + ')')
+                .find(`tr:gt(${  maxRows - 1  })`)
                 .css('display', 'none');
 
-            this.visRowString('Rows ' + (minRows + 1) + ' to ' + maxRows + ' of ' + this.numRows());
+            this.visRowString(`Rows ${  minRows + 1  } to ${  maxRows  } of ${  this.numRows()}`);
 
             if (this.options.navControls) {
                 this.data('pageLeftButton').attr('disabled', minRows === 0);
@@ -593,7 +592,7 @@ define([
                 this.data('addButton').attr('disabled', maxRows === this.numRows());
             }
         },
-        addOptions: function ($cell, options) {
+        addOptions($cell, options) {
 
             if (typeof options === 'string' || options === undefined) {
                 return;
@@ -603,21 +602,21 @@ define([
                 $cell.attr('style', options.style);
             }
             if (options.class !== undefined) {
-                var classes = typeof options.class === 'string' ? [options.class] :
+                const classes = typeof options.class === 'string' ? [options.class] :
                     options.class;
 
                 $.each(
                     classes,
-                    $.proxy(function (idx, cl) {
+                    $.proxy((idx, cl) => {
                         $cell.addClass(cl);
                     }, this)
                 );
             }
 
-            var events = ['mouseover', 'mouseout', 'click'];
+            const events = ['mouseover', 'mouseout', 'click'];
             $.each(
                 events,
-                $.proxy(function (idx, e) {
+                $.proxy((idx, e) => {
                     if (options[e] !== undefined) {
                         $cell.bind(e, options[e]);
                     }
@@ -633,17 +632,17 @@ define([
             }
 
         },
-        createRow: function (rowData, headers) {
+        createRow(rowData, headers) {
 
-            var $tr = $.jqElem('tr')
+            let $tr = $.jqElem('tr')
                 //if we don't explicitly set the background color at this level, then
                 //overlapping background elements will occasionally be visible. This is
                 //stupid and seems like a rendering error. Nonetheless, we hack around it.
                 .css('background-color', 'white');
 
-            var callback = this.options.row_callback;
+            const callback = this.options.row_callback;
 
-            var filterString = '';
+            let filterString = '';
 
             if ($.isArray(rowData)) {
 
@@ -651,7 +650,7 @@ define([
                     rowData,
                     $.proxy(function (idx, cell) {
 
-                        var value = typeof cell === 'object' ?
+                        const value = typeof cell === 'object' ?
                             cell.value :
                             cell;
 
@@ -661,7 +660,7 @@ define([
 
                         filterString += value instanceof $ ? value.text() : value;
 
-                        var $td = $.jqElem('td').append(value);
+                        const $td = $.jqElem('td').append(value);
 
                         if (typeof cell === 'object') {
 
@@ -677,9 +676,9 @@ define([
                 $.each(
                     headers,
                     $.proxy(function (hidx, header) {
-                        var h = header.value;
+                        const h = header.value;
 
-                        var type = 'td';
+                        let type = 'td';
 
                         // null is an irritating special case. Because it's not defined,
                         // but it is a type of object. frick.
@@ -695,9 +694,9 @@ define([
                             type = rowData[h].type;
                         }
 
-                        var $td = $.jqElem(type);
+                        const $td = $.jqElem(type);
 
-                        var label = callback(rowData[h], h, rowData, this);
+                        let label = callback(rowData[h], h, rowData, this);
                         if (label === undefined) {
                             label = this.default_row_callback(rowData[h], h, rowData, this);
                         }
@@ -726,7 +725,7 @@ define([
             }
 
             if (this.options.filter !== undefined) {
-                var filterRegex = new RegExp(this.options.filter, 'i');
+                const filterRegex = new RegExp(this.options.filter, 'i');
                 if (!filterString.match(filterRegex)) {
                     $tr = undefined;
                 }
@@ -735,18 +734,18 @@ define([
             return $tr;
 
         },
-        deletePrompt: function (row) {
-            var $deleteModal = $('<div></div>').kbaseDeletePrompt({
+        deletePrompt(row) {
+            const $deleteModal = $('<div></div>').kbaseDeletePrompt({
                 name: row,
                 callback: this.deleteRowCallback(row)
             });
 
             $deleteModal.openPrompt();
         },
-        deleteRowCallback: function () {
+        deleteRowCallback() {
 
         },
-        shouldDeleteRow: function () {
+        shouldDeleteRow() {
             return 1;
         }
     });
