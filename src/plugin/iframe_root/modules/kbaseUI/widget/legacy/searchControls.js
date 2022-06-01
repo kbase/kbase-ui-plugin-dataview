@@ -1,5 +1,13 @@
-define(['jquery', 'bootstrap', 'css!font_awesome', './widget'], function ($) {
-    'use strict';
+define([
+    'jquery',
+    'bootstrap',
+    'css!font_awesome',
+
+    // For effect
+    './widget'
+], (
+    $
+) => {
     $.KBWidget({
         name: 'kbaseSearchControls',
         version: '1.0.0',
@@ -9,23 +17,24 @@ define(['jquery', 'bootstrap', 'css!font_awesome', './widget'], function ($) {
             position: 'top',
             type: 'floating'
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
 
             this.appendUI($(this.$elem));
 
             return this;
         },
-        appendUI: function ($elem) {
-            var $sc = this;
+        appendUI($elem) {
+            const $sc = this;
 
-            var restoreMouseOver = this.options.onMouseover;
+            const restoreMouseOver = this.options.onMouseover;
 
             if (this.options.type === 'floating') {
                 $elem.css('position', 'relative');
             }
-            var $filterbox = $.jqElem('div')
+            const $filterbox = $.jqElem('div')
                 .addClass('input-group input-group-sm')
+                // safe
                 .append(
                     $.jqElem('input')
                         .attr('type', 'text')
@@ -36,7 +45,7 @@ define(['jquery', 'bootstrap', 'css!font_awesome', './widget'], function ($) {
                                 $sc.value(undefined);
                             }
 
-                            var value = $sc.value();
+                            const value = $sc.value();
 
                             if (value.length) {
                                 $sc.data('searchIcon').removeClass('fa-search');
@@ -53,13 +62,16 @@ define(['jquery', 'bootstrap', 'css!font_awesome', './widget'], function ($) {
                             $sc.options.searchCallback.call(this, e, value, $sc.options.context);
                         })
                 )
+                // safe
                 .append(
                     $.jqElem('span')
                         .addClass('input-group-btn')
+                        // safe
                         .append(
                             $.jqElem('button')
                                 .addClass('btn btn-default')
                                 .attr('id', 'searchButton')
+                                // safe
                                 .append(
                                     $.jqElem('i')
                                         .attr('id', 'searchIcon')
@@ -90,17 +102,18 @@ define(['jquery', 'bootstrap', 'css!font_awesome', './widget'], function ($) {
 
             this._rewireIds($filterbox, this);
 
+            // safe
             $elem.append($filterbox);
 
             $elem.data('searchControls', $filterbox);
 
             $elem
-                .on('mouseover.kbaseSearchControls', function () {
+                .on('mouseover.kbaseSearchControls', () => {
                     if ($sc.options.onMouseover) {
                         $filterbox.show();
                     }
                 })
-                .on('mouseout.kbaseSearchControls', function () {
+                .on('mouseout.kbaseSearchControls', () => {
                     if ($sc.options.onMouseover) {
                         $filterbox.hide();
                     }
@@ -112,7 +125,7 @@ define(['jquery', 'bootstrap', 'css!font_awesome', './widget'], function ($) {
 
             return this;
         },
-        value: function (newVal) {
+        value(newVal) {
             if (arguments.length) {
                 this.data('searchBox').val(newVal);
             }

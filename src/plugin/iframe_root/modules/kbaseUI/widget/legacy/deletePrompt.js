@@ -28,8 +28,17 @@
  Sure, you could just set it up through kbasePrompt. But why bother?
  */
 
-define(['jquery', './widget', './prompt'], function ($) {
-    'use strict';
+define([
+    'jquery',
+    './widget',
+    'lib/domUtils',
+
+    // For effect
+    './prompt'
+], (
+    $,
+    {domSafeText}
+) => {
     $.KBWidget({
         name: 'kbaseDeletePrompt',
         parent: 'kbasePrompt',
@@ -37,12 +46,12 @@ define(['jquery', './widget', './prompt'], function ($) {
         options: {
             controls: ['cancelButton', 'okayButton']
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
 
-            return $('<div></div>').kbasePrompt({
+            return $('<div>').kbasePrompt({
                 title: 'Confirm deletion',
-                body: 'Really delete <strong>' + this.options.name + '</strong>?',
+                body: `Really delete <strong>${domSafeText(this.options.name)}</strong>?`,
                 controls: [
                     'cancelButton',
                     {

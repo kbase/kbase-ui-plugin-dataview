@@ -43,9 +43,14 @@
  }
  );
  */
-
+/*
+Regarding DOM safety, generally this widget needs to trust in its usage, as the input the append () or html () can be
+anything from a simple string to a complex jquery object tree. We can't encode or purify anything given this.
+*/
 define([
     'jquery',
+
+    // For effect
     'css!font_awesome',
     './widget',
     './deletePrompt',
@@ -135,8 +140,10 @@ define([
             }
 
             if (this.options.caption) {
-                $tbl.append($('<caption></caption>')
-                    .append(this.options.caption)
+                // safe
+                $tbl.append($('<caption>')
+                    // safe (need to trust)
+                    .html(this.options.caption)
                 );
             }
 
@@ -144,6 +151,7 @@ define([
                 const $thead = $('<thead></thead>')
                     .attr('id', 'thead');
 
+                // safe
                 $thead.append(this.navControls(struct.header.length));
 
                 const $tr = $('<tr></tr>')
@@ -164,6 +172,7 @@ define([
                         const h = header.value;
 
                         const $th = $.jqElem('th')
+                            // safe (need to trust)
                             .append(label);
 
                         if (this.options.resizable) {
@@ -184,6 +193,7 @@ define([
                                 .attr('id', buttonId)
                                 .css('display', 'none')
                                 .css('float', 'right')
+                                // safe
                                 .append($buttonIcon)
                                 .data('shouldHide', true);
                             $button.bind('click', $.proxy(function () {
@@ -226,6 +236,7 @@ define([
 
                             this.sortButtons()[header.value] = $button;
 
+                            // safe
                             $th.append($button);
                             $th.bind('mouseover', $.proxy(() => {
                                 $button.css('display', 'inline');
@@ -238,11 +249,15 @@ define([
                             }, this));
                         }
 
+                        // safe
                         $tr.append($th);
                     }, this)
                 );
 
+                // safe
                 $thead.append($tr);
+
+                // safe
                 $tbl.append($thead);
             }
 
@@ -251,6 +266,7 @@ define([
                 const $tbody = this.data('tbody', $('<tbody></tbody>'));
                 this.layoutRows(struct.rows, struct.header);
 
+                // safe
                 $tbl.append($tbody);
             }
 
@@ -259,6 +275,7 @@ define([
                     .attr('id', 'tfoot');
 
                 const $tfootTR = $.jqElem('tr');
+                // safe
                 $tfoot.append($tfootTR);
 
                 for (let idx = 0; idx < struct.footer.length; idx++) {
@@ -275,6 +292,7 @@ define([
                     }
 
                     const $td = $.jqElem('td')
+                        // safe (need to trust)
                         .append(value);
                     if (style) {
                         $td.attr('style', style);
@@ -283,14 +301,17 @@ define([
                         $td.attr('colspan', colspan);
                     }
 
+                    // safe
                     $tfootTR.append($td);
                 }
 
+                // safe
                 $tbl.append($tfoot);
             }
 
             this._rewireIds($tbl, this);
 
+            // safe
             $elem.append($tbl);
 
             return $elem;
@@ -302,17 +323,22 @@ define([
 
             const controlsTR = $.jqElem('tr')
                 .css('display', this.options.navControls ? undefined : 'none')
+                // safe
                 .append($.jqElem('td')
                     .attr('colspan', colspan)
                     .css('background-color', 'lightgray')
+                    // safe
                     .append($.jqElem('div')
                         .addClass('pull-left')
                         .addClass('input-group input-group-sm')
+                        // safe
                         .append($.jqElem('span')
                             .addClass('input-group-btn')
+                            // safe
                             .append($.jqElem('button')
                                 .addClass('btn btn-default')
                                 .attr('id', 'pageLeftButton')
+                                // safe
                                 .append($.jqElem('i')
                                     .attr('id', 'leftIcon')
                                     .addClass('fa fa-caret-left')
@@ -333,20 +359,23 @@ define([
                                     $tbl.options.maxVisibleRowIndex = newMax;
 
                                     $tbl.displayRows();
-
                                 })
                             )
                         )
+                        // safe
                         .append($.jqElem('span')
                             .attr('id', 'visRecords')
                             .addClass('input-group-addon')
                             .kb_bind(this, 'visRowString')
                         )
+                        // safe
                         .append($.jqElem('span')
                             .addClass('input-group-btn')
+                            // safe
                             .append($.jqElem('button')
                                 .addClass('btn btn-default')
                                 .attr('id', 'pageRightButton')
+                                // safe
                                 .append($.jqElem('i')
                                     .attr('id', 'rightIcon')
                                     .addClass('fa fa-caret-right')
@@ -367,19 +396,22 @@ define([
                                     $tbl.options.maxVisibleRowIndex = newMax;
 
                                     $tbl.displayRows();
-
                                 })
                             )
                         )
                     )
+                    // safe
                     .append($.jqElem('div')
                         .addClass('pull-left')
                         .addClass('input-group input-group-sm')
+                        // safe
                         .append($.jqElem('span')
                             .addClass('input-group-btn')
+                            // safe
                             .append($.jqElem('button')
                                 .addClass('btn btn-default')
                                 .attr('id', 'removeButton')
+                                // safe
                                 .append($.jqElem('i')
                                     .attr('id', 'removeIcon')
                                     .addClass('fa fa-minus')
@@ -398,11 +430,14 @@ define([
                                 })
                             )
                         )
+                        // safe
                         .append($.jqElem('span')
                             .addClass('input-group-btn')
+                            // safe
                             .append($.jqElem('button')
                                 .addClass('btn btn-default')
                                 .attr('id', 'addButton')
+                                // safe
                                 .append($.jqElem('i')
                                     .attr('id', 'addIcon')
                                     .addClass('fa fa-plus')
@@ -427,6 +462,7 @@ define([
                             )
                         )
                     )
+                    // safe
                     .append($.jqElem('div')
                         .addClass('pull-right')
                         .attr('id', 'searchDiv')
@@ -520,7 +556,6 @@ define([
 
         },
         layoutRows(rows, header) {
-
             this.data('tbody').empty();
 
             let numRows = 0;
@@ -530,6 +565,7 @@ define([
                     const $row = this.createRow(rows[idx], header);
                     if ($row !== undefined && $row.children().length) {
                         numRows++;
+                        // safe
                         this.data('tbody').append($row);
                     }
                 }
@@ -552,6 +588,7 @@ define([
 
                     if ($row !== undefined && $row.children().length) {
                         numRows++;
+                        // safe
                         this.data('tbody').append($row);
                     }
                 }
@@ -633,7 +670,6 @@ define([
 
         },
         createRow(rowData, headers) {
-
             let $tr = $.jqElem('tr')
                 //if we don't explicitly set the background color at this level, then
                 //overlapping background elements will occasionally be visible. This is
@@ -645,11 +681,9 @@ define([
             let filterString = '';
 
             if ($.isArray(rowData)) {
-
                 $.each(
                     rowData,
                     $.proxy(function (idx, cell) {
-
                         const value = typeof cell === 'object' ?
                             cell.value :
                             cell;
@@ -660,19 +694,19 @@ define([
 
                         filterString += value instanceof $ ? value.text() : value;
 
+                        // safe (need to trust)
                         const $td = $.jqElem('td').append(value);
 
                         if (typeof cell === 'object') {
-
                             this.addOptions($td, cell);
                         }
 
+                        // safe
                         $tr.append($td);
 
                     }, this)
                 );
             } else if (headers !== undefined && headers.length) {
-
                 $.each(
                     headers,
                     $.proxy(function (hidx, header) {
@@ -704,12 +738,12 @@ define([
                         filterString += label instanceof $ ? label.text() : label;
 
                         if (rowData[h] && !rowData[h].externalSortValue) {
-
                             rowData[h].sortValue = label instanceof $ ?
                                 label.text() :
                                 label;
                         }
 
+                        // safe (need to trust)
                         $td.append(label);
 
                         if (typeof rowData[h] !== 'string') {
@@ -717,6 +751,7 @@ define([
                         }
 
                         if (label !== undefined) {
+                            // safe
                             $tr.append($td);
                         }
 
@@ -735,7 +770,7 @@ define([
 
         },
         deletePrompt(row) {
-            const $deleteModal = $('<div></div>').kbaseDeletePrompt({
+            const $deleteModal = $('<div>').kbaseDeletePrompt({
                 name: row,
                 callback: this.deleteRowCallback(row)
             });

@@ -1,5 +1,4 @@
-define(['jquery', 'kb_lib/html', 'kb_lib/htmlBuilders'], function ($, html, htmlBuilders) {
-    'use strict';
+define(['jquery', 'kb_lib/html', 'kb_lib/htmlBuilders'], ($, html, htmlBuilders) => {
     // jQuery plugins that you can use to add and remove a
     // loading giff to a dom element.
     $.fn.rmLoading = function () {
@@ -8,9 +7,10 @@ define(['jquery', 'kb_lib/html', 'kb_lib/htmlBuilders'], function ($, html, html
             .remove();
     };
     $.fn.loading = function (text) {
-        var div = html.tag('div');
+        const div = html.tag('div');
         $(this).rmLoading();
-        $(this).append(div({ class: 'loader' }, htmlBuilders.loading(text)));
+        // safe
+        $(this).append(div({class: 'loader'}, htmlBuilders.loading(text)));
         return this;
     };
 });
