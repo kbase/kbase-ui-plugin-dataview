@@ -16,11 +16,18 @@
  *
  */
 
-define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSeedVizConfig'], (
+define([
+    'jquery',
+    'd3',
+    'kb_service/client/workspace',
+    'widgets/modeling/modelSeedVizConfig',
+    'lib/jqueryUtils'
+], (
     $,
     d3,
     Workspace,
-    ModelSeedVizConfig
+    ModelSeedVizConfig,
+    {$errorAlert}
 ) => {
     function ModelSeedPathway(params) {
         let container;
@@ -860,6 +867,7 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                 $('#x-pos').text(x);
                 $('#y-pos').text(y);
             });
+            // safe
             container.prepend(edit_opts);
 
             // event for options
@@ -1117,7 +1125,8 @@ define(['jquery', 'd3', 'kb_service/client/workspace', 'widgets/modeling/modelSe
                     return null;
                 })
                 .catch((e) => {
-                    container.prepend(`<div class="alert alert-danger">${  e.error.message  }</div>`);
+                    // safe
+                    container.prepend($errorAlert(e));
                 });
         }
 

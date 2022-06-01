@@ -4,22 +4,23 @@ define([
     'kb_service/client/workspace',
     'widgets/modeling/modelSeedPathway',
     'content',
+    'lib/jqueryUtils',
 
     // for effect
     'kbaseUI/widget/legacy/widget',
     'kbaseUI/widget/legacy/tabs'
-], function (
+], (
     $,
     Promise,
     Workspace,
     ModelSeedPathway,
-    content
-) {
-    'use strict';
+    content,
+    {$errorAlert}
+) => {
     $.KBWidget({
         name: 'kbasePathways',
         version: '1.0.0',
-        init: function (options) {
+        init(options) {
             const self = this;
             const imageWorkspace = 'nconrad:kegg',
                 mapWorkspace = 'nconrad:pathwaysjson',
@@ -29,7 +30,7 @@ define([
             // add tabs
             const selectionTable = $('<table class="table table-bordered table-striped">');
             const tabs = container.kbTabs({
-                tabs: [{ name: 'Selection', content: selectionTable, active: true }]
+                tabs: [{name: 'Selection', content: selectionTable, active: true}]
             });
             this.runtime = options.runtime;
             this.workspaceClient = new Workspace(this.runtime.config('services.workspace.url'), {
@@ -53,45 +54,45 @@ define([
                             aoColumns: [
                                 {
                                     sTitle: 'Name',
-                                    mData: function (data) {
+                                    mData(data) {
                                         return (
-                                            '<a class="pathway-link" data-map_id="' +
-                                            data[1] +
-                                            '">' +
-                                            data[10].name +
-                                            '</a>'
+                                            `<a class="pathway-link" data-map_id="${
+                                                data[1]
+                                            }">${
+                                                data[10].name
+                                            }</a>`
                                         );
                                     }
                                 },
-                                { sTitle: 'Map ID', mData: 1 },
+                                {sTitle: 'Map ID', mData: 1},
                                 {
                                     sTitle: 'Rxn Count',
                                     sWidth: '10%',
-                                    mData: function (data) {
+                                    mData(data) {
                                         const metadata = data[10];
                                         if ('Number reactions' in metadata) {
                                             return parseInt(metadata['Number reactions']);
-                                        } else {
-                                            return content.na();
                                         }
+                                        return content.na();
+
                                     }
                                 },
                                 {
                                     sTitle: 'Cpd Count',
                                     sWidth: '10%',
-                                    mData: function (data) {
+                                    mData(data) {
                                         const metadata = data[10];
                                         if ('Number compounds' in metadata) {
                                             return parseInt(metadata['Number compounds']);
-                                        } else {
-                                            return content.na();
                                         }
+                                        return content.na();
+
                                     }
                                 },
                                 {
                                     sTitle: 'Source',
                                     sWidth: '10%',
-                                    mData: function () {
+                                    mData() {
                                         return 'KEGG';
                                     }
                                 }
@@ -105,9 +106,10 @@ define([
                         selectionTable.dataTable(tableSettings);
                         return true;
                     })
-                    .catch(function (err) {
+                    .catch((err) => {
                         console.error(err);
-                        container.prepend('<div class="alert alert-danger">' + err.error.message + '</div>');
+                        // safe
+                        container.prepend($errorAlert(err));
                         return false;
                     });
             };
@@ -116,12 +118,12 @@ define([
                 // event for clicking on pathway link
                 container.find('.pathway-link').unbind('click');
                 container.find('.pathway-link').click(function () {
-                    var map_id = $(this).data('map_id'),
+                    const map_id = $(this).data('map_id'),
                         name = $(this).text(),
-                        elemID = map_id + '-' + self.uuid(),
-                        container = $('<div id="path-container-' + elemID + '" style="position:relative;">');
+                        elemID = `${map_id  }-${  self.uuid()}`,
+                        container = $(`<div id="path-container-${  elemID  }" style="position:relative;">`);
                     container.loading();
-                    tabs.addTab({ name: name, removable: true, content: container });
+                    tabs.addTab({name, removable: true, content: container});
                     load_map(map_id, container, elemID);
                     tabs.showTab(name);
                 });
@@ -129,36 +131,38 @@ define([
                 container.find('.pathway-link').tooltip({
                     title: 'Open path tab',
                     placement: 'right',
-                    delay: { show: 1000 }
+                    delay: {show: 1000}
                 });
             } // end events
 
             function load_map(map, container, elemID) {
                 Promise.all([
-                    self.workspaceClient.get_objects([{ workspace: imageWorkspace, name: map + '.png' }]),
-                    self.workspaceClient.get_objects([{ workspace: mapWorkspace, name: map }])
+                    self.workspaceClient.get_objects([{workspace: imageWorkspace, name: `${map  }.png`}]),
+                    self.workspaceClient.get_objects([{workspace: mapWorkspace, name: map}])
                 ])
-                    .spread(function (imgRes, mapRes) {
-                        var image = imgRes[0].data.id,
+                    .spread((imgRes, mapRes) => {
+                        const image = imgRes[0].data.id,
                             mapData = mapRes[0].data;
                         // no need to decode...
+                        // safe
                         container.append(
-                            '<img src="data:image/png;base64,' + image + '" style="display: inline-block;">'
+                            `<img src="data:image/png;base64,${image}" style="display: inline-block;">`
                         );
-                        container.append('<div id="pathway-' + elemID + '" style="position:absolute; top:0;">');
+                        // safe
+                        container.append(`<div id="pathway-${elemID}" style="position:absolute; top:0;">`);
                         container.rmLoading();
-                        var modelSeedPathway = new ModelSeedPathway({
-                            elem: 'pathway-' + elemID,
+                        const modelSeedPathway = new ModelSeedPathway({
+                            elem: `pathway-${  elemID}`,
                             usingImage: true,
-                            mapData: mapData,
-                            models: models,
-                            fbas: fbas,
+                            mapData,
+                            models,
+                            fbas,
                             runtime: self.runtime
                         });
                         modelSeedPathway.render();
                         return null;
                     })
-                    .catch(function (err) {
+                    .catch((err) => {
                         console.error('Error loading map');
                         console.error(err);
                     });
