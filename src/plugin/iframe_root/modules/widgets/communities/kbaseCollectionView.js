@@ -50,9 +50,9 @@ define([
                 message = `Unknown error processing another error: ${ex.message}`;
             }
             // safe
-            this.$title.html('Error');
+            this.$title.text('Error');
             // safe
-            this.$body.html(domSafeText(message));
+            this.$body.text(message);
             console.error('ERROR in kbaseCollectionView.js');
             console.error(error);
         },
@@ -63,7 +63,7 @@ define([
                 return;
             }
             // safe
-            this.$title.html('Metagenome Collection');
+            this.$title.text('Metagenome Collection');
             // safe
             this.$body.html(html.loading('loading data...'));
 
@@ -124,8 +124,8 @@ define([
                         },
                         table = html.makeTable(options);
                     // safe
-                    self.$title.html(`Metagenome Collection ${domSafeText(title)}`);
-                    // safe 
+                    self.$title.text(`Metagenome Collection ${title}`);
+                    // safe
                     self.$body.html(table);
                     $(`#${options.generated.id}`).dataTable();
                 })
