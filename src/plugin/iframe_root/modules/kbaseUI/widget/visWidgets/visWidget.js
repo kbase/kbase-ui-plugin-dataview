@@ -1222,7 +1222,7 @@ define([
             d3.selectAll('.visToolTip')
                 .style('display', 'block')
                 // safe
-                .html(domSafeText(args.label))
+                .text(args.label)
                 .style('left', `${args.event.pageX + 10  }px`)
                 .style('top', `${args.event.pageY - 10  }px`)
                 .style('max-width', `${args.maxWidth || '300'  }px`);

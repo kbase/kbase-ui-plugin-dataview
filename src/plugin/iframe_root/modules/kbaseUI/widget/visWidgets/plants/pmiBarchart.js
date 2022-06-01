@@ -14,7 +14,7 @@ define([
     d3,
     Promise,
     Workspace,
-    {domSafeErrorMessage}
+    {errorMessage}
 ) => {
     $.KBWidget({
         name: 'kbasePMIBarchart',
@@ -394,7 +394,7 @@ define([
                 .catch((err) => {
                     $pmi.$elem.empty();
                     // safe
-                    $pmi.$elem.addClass('alert alert-danger').html(`Could not load object : ${domSafeErrorMessage(err)}`);
+                    $pmi.$elem.addClass('alert alert-danger').text(`Could not load object : ${errorMessage(err)}`);
                 });
 
             this.appendUI(this.$elem);
