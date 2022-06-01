@@ -9,7 +9,7 @@ define([
     'datatables_bootstrap',
     'kbaseUI/widget/legacy/authenticatedWidget',
     'kbaseUI/widget/legacy/kbaseTable'
-], ($, colorbrewer, Workspace, {domSafeText}, Uuid) => {
+], ($, colorbrewer, Workspace, {domSafeText, errorMessage}, Uuid) => {
     const MAPPINGS = [
         [/(EC:([\\w.-]+))/, '<a target = \'_blank\' href = \'http://enzyme.expasy.org/EC/$2\'>$1</a>'],
         [/(PMID:([\\w.-]+))/, '<a target = \'_blank\' href = \'http://www.ncbi.nlm.nih.gov/pubmed/$2\'>$1</a>'],
@@ -167,6 +167,7 @@ define([
                         }
                     });
 
+                    // safe
                     $metaElem.append($metaTable.$elem);
 
                     const $typeDefElem = this.data('typeDefElem');
@@ -214,9 +215,8 @@ define([
                         ],
                         createdRow: (row, data) => {
                             const $linkCell = $('td', row).eq(0);
-                            $linkCell.empty();
-
-                            $linkCell.append(this.termLink(data[0]));
+                            // safe
+                            $linkCell.html(this.termLink(data[0]));
 
                             const $nameCell = $('td', row).eq(1);
 
@@ -231,14 +231,17 @@ define([
 
                     $dt.rows.add(table_data).draw();
 
+                    // safe
                     this.data('colorMapElem').append('Ontology namespace key: ');
 
+                    // safe
                     $.each(this.colorMap, (k, v) => {
+                        // safe
                         this.data('colorMapElem').append(
                             $.jqElem('span')
                                 .css('padding-left', '25px')
                                 .css('color', v)
-                                .append(k)
+                                .text(k)
                         );
                     });
 
@@ -256,15 +259,9 @@ define([
                     this.data('globalContainerElem').show();
                 })
                 .catch((err) => {
+                    console.error(err);
                     this.$elem.empty();
-                    let message;
-                    if (err.message) {
-                        message = err.message;
-                    } else if (err.error) {
-                        message = err.error.message;
-                    }
-                    // safe usage of html
-                    this.$elem.addClass('alert alert-danger').html(`Could not load object : ${domSafeText(message)}`);
+                    this.$elem.addClass('alert alert-danger').text(`Could not load object : ${errorMessage(err)}`);
                 });
 
             this.appendUI(this.$elem);
@@ -272,7 +269,7 @@ define([
         },
         termLink(term, withName) {
             return $.jqElem('a')
-                .append(term.id + (withName ? ` [${  term.name  }]` : ''))
+                .text(term.id + (withName ? ` [${domSafeText(term.name)}]` : ''))
                 .on('click', (e) => {
                     e.preventDefault();
                     this.appendTerm(term.id);
@@ -340,20 +337,25 @@ define([
                 //}
 
                 const $li = $.jqElem('li');
+                // safe
                 $ul.append($li);
 
                 const term = this.getTerm(k);
 
+                // safe
                 $li.append(this.termLink(term));
+                // safe
                 $li.append(' ');
+                // safe
                 $li.append(
                     $.jqElem('span')
                         .css('color', this.colorMap[term.namespace])
-                        .append(term.name)
+                        .text(term.name)
                 );
 
                 if (v !== undefined) {
                     ret = this.buildLineageElem(v);
+                    // safe
                     ret.parent.append($ul);
                     ret.parent = $ul;
                 }
@@ -420,6 +422,7 @@ define([
                 .collapse('hide');
 
             if (this.termCache[term_id] === undefined) {
+                // safe
                 $termElem.append(this.data('loaderElem'));
                 this.data('loaderElem').show();
 
@@ -457,17 +460,11 @@ define([
 
                         this.reallyAppendTerm(term);
                     })
-                    .catch((d) => {
-                        console.error(d);
-                        let message;
-                        if (d.message) {
-                            message = d.message;
-                        } else if (d.error) {
-                            message = d.error.message;
-                        }
+                    .catch((err) => {
+                        console.error(err);
                         this.$elem.empty();
                         // safe usage of html
-                        this.$elem.addClass('alert alert-danger').html(`Could not load object : ${domSafeText(message)}`);
+                        this.$elem.addClass('alert alert-danger').text(`Could not load object : ${errorMessage(err)}`);
                     });
             } else {
                 this.reallyAppendTerm(this.termCache[term_id]);
@@ -538,6 +535,7 @@ define([
                  var $linkCell = $('td', row).eq(0);
                  $linkCell.empty();
 
+                 // safe
                  $linkCell.append( $self.termLink(data[0]) )
 
                  var $nameCell = $('td', row).eq(1);
@@ -553,23 +551,30 @@ define([
                  });*/
 
                 for (const type in term.relationship_closure) {
+                    // safe
                     $closureElem.append($.jqElem('li').append(`${type  } relationships`));
 
                     const $subUL = $.jqElem('ul');
+                    // safe
                     $closureElem.append($subUL);
 
                     $.each(term.relationship_closure[type], (i, elem) => {
                         const term = this.getTerm(elem[0]);
 
+                        // safe
                         $subUL.append(
                             $.jqElem('li')
+                                // safe
                                 .append(`${elem[1]  } away - `)
+                                // safe
                                 .append(this.termLink(term))
+                                // safe
                                 .append(' - ')
+                                // safe
                                 .append(
                                     $.jqElem('span')
                                         .css('color', this.colorMap[term.namespace])
-                                        .append(term.name)
+                                        .text(term.name)
                                 )
                         );
                     });
@@ -581,11 +586,16 @@ define([
             if (term.relationship !== undefined) {
                 $.each(term.relationship, (i, rel) => {
                     const parts = rel.split(/ ! /);
+                    // umm, does nothing.
                     this.extractLink(parts[0]);
                     $relationship
-                        .append(parts[0])
+                        // safe
+                        .append(domSafeText(parts[0]))
+                        // safe
                         .append(' ! ')
-                        .append(parts[1])
+                        // safe
+                        .append(domSafeText(parts[1]))
+                        // safe
                         .append('<br>');
                 });
             }
@@ -611,6 +621,7 @@ define([
                         namespace: term.namespace,
                         synonym: $.isArray(term.synonym) ? term.synonym.join('<br>') : term.synonym,
                         comment: term.comment,
+                        // safe
                         is_a: $closureElem ? $.jqElem('div').append($closureElem) : undefined, //$lineageElem.root, // or $force.$elem
                         relationship: term.relationship ? $relationship : undefined,
                         xref: this.extractLink($.isArray(term.xref) ? term.xref.join('<br>') : term.xref)
@@ -618,19 +629,25 @@ define([
                 }
             });
 
+            // safe
             $termElem.append($table.$elem);
         },
         appendUI: function appendUI($elem) {
+            // safe
             $elem.append($.jqElem('style').text('.ontology-top { vertical-align : top }'));
 
             const $loaderElem = $.jqElem('div')
+                // safe
                 .append(
                     '<br>&nbsp;Loading data...<br>&nbsp;please wait...<br>&nbsp;Data parsing may take upwards of 30 seconds, during which time this page may be unresponsive.'
                 )
+                // safe
                 .append($.jqElem('br'))
+                // safe
                 .append(
                     $.jqElem('div')
                         .attr('align', 'center')
+                        // safe
                         .append(
                             $.jqElem('i')
                                 .addClass('fa fa-spinner')
@@ -639,9 +656,11 @@ define([
                 );
 
             this.data('loaderElem', $loaderElem);
+            // safe
             $elem.append($loaderElem);
 
             const $globalContainer = this.data('globalContainerElem', $.jqElem('div').css('display', 'none'));
+            // safe
             $elem.append($globalContainer);
 
             const $metaElem = this.data('metaElem', $.jqElem('div'));
@@ -649,6 +668,8 @@ define([
             const $metaContainerElem = this.createContainerElem('Overview', [$metaElem]);
 
             this.data('metaContainerElem', $metaContainerElem);
+
+            // safe
             $globalContainer.append($metaContainerElem);
 
             const $tableElem = $.jqElem('table')
@@ -662,6 +683,7 @@ define([
             const $containerElem = this.createContainerElem('Term Dictionary', [$tableElem, $colorMapElem]);
 
             this.data('containerElem', $containerElem);
+            // safe
             $globalContainer.append($containerElem);
 
             const $termElem = this.data('termElem', $.jqElem('div'));
@@ -669,6 +691,7 @@ define([
             const $termContainerElem = this.createContainerElem('Term', [$termElem], 'none');
 
             this.data('termContainerElem', $termContainerElem);
+            // safe
             $globalContainer.append($termContainerElem);
 
             const $typeDefElem = this.data('typeDefElem', $.jqElem('table').addClass('display')).css({
@@ -682,6 +705,7 @@ define([
             );
 
             this.data('typeDefContainerElem', $typeDefContainerElem);
+            // safe
             $globalContainer.append($typeDefContainerElem);
 
             return $elem;
@@ -693,12 +717,14 @@ define([
             const $panelBody = $.jqElem('div').addClass('panel-body collapse in');
 
             $.each(content, (i, v) => {
+                // safe (if v is!)
                 $panelBody.append(v);
             });
 
             const $containerElem = $.jqElem('div')
                 .addClass('panel panel-default')
                 .css('display', display)
+                // safe
                 .append(
                     $.jqElem('div')
                         .addClass('panel-heading')
@@ -712,16 +738,19 @@ define([
                                 .find('i')
                                 .toggleClass('fa-rotate-90');
                         })
+                        // safe
                         .append(
                             $.jqElem('h4')
                                 .addClass('panel-title')
+                                // safe
                                 .append(
                                     $.jqElem('span')
                                         .attr('data-toggle', 'collapse')
-                                        .attr('data-target', `#${  panelCollapseId}`)
+                                        .attr('data-target', `#${panelCollapseId}`)
                                         .attr('aria-expanded', 'true')
-                                        .attr('aria-controls', `#${  panelCollapseId}`)
+                                        .attr('aria-controls', `#${panelCollapseId}`)
                                         .css('cursor', 'pointer')
+                                        // safe
                                         .append(
                                             $.jqElem('span')
                                                 .text(name)
@@ -730,12 +759,14 @@ define([
                                 )
                         )
                 )
+                // safe
                 .append(
                     $.jqElem('div')
                         .addClass('panel-collapse collapse in')
                         .attr('id', panelCollapseId)
                         .attr('role', 'tabpanel')
                         .attr('aria-expanded', 'true')
+                        // safe
                         .append($panelBody)
                 );
 
