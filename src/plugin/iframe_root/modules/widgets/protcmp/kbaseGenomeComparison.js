@@ -20,7 +20,7 @@ define([
     Workspace,
     DynamicServiceClient,
     GenericClient,
-    {domSafeText, domSafeErrorMessage, domSafeValue},
+    {domSafeText, errorMessage, domSafeValue},
     Uuid
 ) => {
     $.KBWidget({
@@ -102,7 +102,7 @@ define([
                     .catch((err) => {
                         const tdElem = $(`#${self.pref}job`);
                         // safe
-                        tdElem.html(`Error accessing comparison object: ${domSafeErrorMessage(err)}`);
+                        tdElem.text(`Error accessing comparison object: ${errorMessage(err)}`);
                     });
             };
             const cmpIsLoaded = function () {
@@ -334,7 +334,7 @@ define([
                     .catch((err) => {
                         const tdElem = $(`#${self.pref}job`);
                         // safe
-                        tdElem.html(`Error accessing genome objects: ${domSafeErrorMessage(err)}`);
+                        tdElem.text(`Error accessing genome objects: ${errorMessage(err)}`);
                     });
             };
             dataIsReady();

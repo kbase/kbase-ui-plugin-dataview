@@ -12,7 +12,7 @@ define([
     'lib/domUtils',
 
     'kbaseUI/widget/legacy/authenticatedWidget'
-], ($, Uuid, html, Workspace, UserAndJobState, EasyTree, {domSafeText, domSafeErrorMessage}) => {
+], ($, Uuid, html, Workspace, UserAndJobState, EasyTree, {domSafeText, errorMessage}) => {
     $.KBWidget({
         name: 'kbaseTree',
         parent: 'kbaseAuthenticatedWidget',
@@ -88,8 +88,7 @@ define([
                                 // safe
                                 tdElem.html(html.loading(domSafeText(status)));
                             } else {
-                                // safe
-                                tdElem.html(domSafeText(status));
+                                tdElem.text(status);
                             }
                             if (complete === 1) {
                                 clearInterval(self.timer);
@@ -107,7 +106,7 @@ define([
                             } else {
                                 const tdElem = $(`#${self.pref}job`);
                                 // safe
-                                tdElem.html(`Error accessing job status: ${domSafeErrorMessage(err)}`);
+                                tdElem.text(`Error accessing job status: ${errorMessage(err)}`);
                             }
                         });
                 };
