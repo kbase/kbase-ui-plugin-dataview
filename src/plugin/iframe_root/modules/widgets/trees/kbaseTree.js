@@ -10,9 +10,11 @@ define([
     'kb_service/client/userAndJobState',
     'lib/easyTree',
     'lib/domUtils',
+    'lib/jqueryUtils',
 
+    // for effect
     'kbaseUI/widget/legacy/authenticatedWidget'
-], ($, Uuid, html, Workspace, UserAndJobState, EasyTree, {domSafeText, errorMessage}) => {
+], ($, Uuid, html, Workspace, UserAndJobState, EasyTree, {domSafeText, errorMessage, domSafeContent}, {$errorAlert}) => {
     $.KBWidget({
         name: 'kbaseTree',
         parent: 'kbaseAuthenticatedWidget',
@@ -47,6 +49,7 @@ define([
                 token: this.runtime.service('session').getAuthToken()
             });
             this.$messagePane = $('<div/>').addClass('kbwidget-message-pane kbwidget-hide-message');
+            // safe
             this.$elem.append(this.$messagePane);
 
             this.render();
@@ -65,6 +68,7 @@ define([
                 self.$elem.empty();
 
                 const panel = $('<div class="loader-table"/>');
+                // safe
                 self.$elem.append(panel);
                 const table = $(
                     '<table class="table table-striped table-bordered" ' +
@@ -72,10 +76,14 @@ define([
                             self.pref
                         }overview-table"/>`
                 );
+                // safe
                 panel.append(table);
-                table.append(`<tr><td>Job was created with id</td><td>${  self.options.jobID  }</td></tr>`);
-                table.append(`<tr><td>Output result will be stored as</td><td>${  self.options.treeID  }</td></tr>`);
-                table.append(`<tr><td>Current job state is</td><td id="${  self.pref  }job"></td></tr>`);
+                // safe
+                table.append(`<tr><td>Job was created with id</td><td>${domSafeContent(self.options.jobID)}</td></tr>`);
+                // safe
+                table.append(`<tr><td>Output result will be stored as</td><td>${domSafeContent(self.options.treeID)}</td></tr>`);
+                // safe
+                table.append(`<tr><td>Current job state is</td><td id="${self.pref}job"></td></tr>`);
                 const timeLst = function () {
                     jobSrv
                         .get_job_status(self.options.jobID)
@@ -129,11 +137,13 @@ define([
 
                     const canvasDivId = `knhx-canvas-div-${  self.pref}`;
                     self.canvasId = `knhx-canvas-${  self.pref}`;
-                    self.$canvas = $(`<div id="${  canvasDivId  }">`).append($(`<canvas id="${  self.canvasId  }">`));
+                    // safe
+                    self.$canvas = $(`<div id="${  canvasDivId  }">`).append($(`<canvas id="${self.canvasId}">`));
 
                     if (self.options.height) {
                         self.$canvas.css({'max-height': self.options.height - 85, overflow: 'scroll'});
                     }
+                    // safe
                     self.$elem.append(self.$canvas);
 
                     // SKIP FOR NOW
@@ -207,19 +217,8 @@ define([
                 });
         },
         renderError(error) {
-            let errString = 'Sorry, an unknown error occurred';
-            if (typeof error === 'string') {
-                errString = error;
-            } else if (error.error && error.error.message) {
-                errString = error.error.message;
-            }
-
-            const $errorDiv = $('<div>')
-                .addClass('alert alert-danger')
-                .append('<b>Error:</b>')
-                .append(`<br>${  errString}`);
-            this.$elem.empty();
-            this.$elem.append($errorDiv);
+            // safe
+            this.$elem.html($errorAlert(error));
         },
         getData() {
             return {
@@ -261,9 +260,8 @@ define([
             }
         },
         showMessage(message) {
-            const span = $('<span/>').append(message);
-
-            this.$messagePane.append(span);
+            // safe (usages checked)
+            this.$messagePane.append($('<span/>').append(message));
             this.$messagePane.show();
         },
         hideMessage() {
