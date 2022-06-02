@@ -96,6 +96,7 @@ define([], function () {
             if (pmo === null) {
                 this.createMenu(clickHandler);
             }
+            // safe (trust usage)
             pmo.innerHTML = which;
             pmo.style.width = (optWidth === undefined) ? optWidth : '150px';
             var eventX = ie ? event.clientX : e.clientX;
