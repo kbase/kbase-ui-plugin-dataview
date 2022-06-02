@@ -6,11 +6,12 @@ define([
     'kb_service/client/workspace',
     'kb_common/html',
     'widgets/communities/kbStandaloneGraph',
-    'lib/format',
+    'lib/domUtils',
+    'lib/jqueryUtils',
 
     'datatables_bootstrap',
     'kbaseUI/widget/legacy/authenticatedWidget'
-], ($, Workspace, html, Graph, {domSafeText}) => {
+], ($, Workspace, html, Graph, {domSafeText}, {$errorAlert}) => {
     $.KBWidget({
         name: 'AbundanceDataView',
         parent: 'kbaseAuthenticatedWidget',
@@ -31,21 +32,24 @@ define([
             const container = this.$elem;
             container.empty();
             if (self.token === null) {
+                // safe
                 container.append('<div>[Error] You\'re not logged in</div>');
                 return;
             }
+            // safe
             container.append(html.loading('loading data...'));
 
             const kbws = new Workspace(this.runtime.getConfig('services.workspace.url'), {token: self.token});
             kbws.get_objects(
-                [{ref: `${self.options.ws  }/${  self.options.id}`}],
+                [{ref: `${self.options.ws}/${self.options.id}`}],
                 (data) => {
                     container.empty();
                     // parse data
                     if (data.length === 0) {
                         const msg =
-                            `[Error] Object ${  self.options.id  } does not exist in workspace ${  self.options.ws}`;
-                        container.append(`<div><p>${  msg  }>/p></div>`);
+                            `[Error] Object ${self.options.id} does not exist in workspace ${self.options.ws}`;
+                        // safe (id and ws can't be invalid here)
+                        container.append(`<div><p>${msg}>/p></div>`);
                     } else {
                         const biom = data[0].data;
                         let matrix = [];
@@ -129,11 +133,14 @@ define([
                         });
                         const $tabs = $('<ul>')
                             .addClass('nav nav-tabs')
+                            // safe
                             .append(
                                 $('<li>')
                                     .addClass('active')
+                                    // safe
                                     .append($graphTab)
                             )
+                            // safe
                             .append($('<li>').append($tableTab));
 
                         const divs =
@@ -144,6 +151,7 @@ define([
                             `<div class='tab-pane' id='outputTable${
                                 graphId
                             }' style='width: 95%;'></div></div>`;
+                        // safe
                         container.append($tabs).append(divs);
                         // TABLE
 
@@ -187,15 +195,9 @@ define([
                         devTest.render();
                     }
                 },
-                (data) => {
-                    container.empty();
-                    const main = $('<div>');
-                    main.append(
-                        $('<p>')
-                            .css({padding: '10px 20px'})
-                            .text(`[Error] ${  data.error.message}`)
-                    );
-                    container.append(main);
+                (error) => {
+                    // safe
+                    container.html($errorAlert(error));
                 }
             );
             return self;
