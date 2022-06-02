@@ -293,6 +293,7 @@ define([
             const setToLoad = function ($panel) {
                 //clearInfo();
                 $panel.empty();
+                // xss safe
                 const $loadingDiv = $('<div>').attr('align', 'left').append($('<i class="fa fa-spinner fa-spin fa-2x">'));
                 // xss safe
                 $panel.append($loadingDiv);
@@ -536,6 +537,7 @@ define([
                 };
 
                 const buildSingleColHeader = function (key, title, width, showSortedIcon, sortEvent, target) {
+                    // xss safe
                     target.$colgroup.append($('<col span=1>').addClass(`feature-tbl-${key}`).css('width',width));
                     const h = buildColumnHeader(title, key, sortEvent);
                     // xss safe
@@ -724,7 +726,7 @@ define([
                 // xss safe
                 .append($infoRow);
 
-            // save
+            // xss safe
             const $pageBack = $('<button class="btn btn-default">').html('<i class="fa fa-caret-left" aria-hidden="true">');
             // xss safe
             const $pageForward = $('<button class="btn btn-default">').html('<i class="fa fa-caret-right" aria-hidden="true">');
@@ -1158,6 +1160,7 @@ define([
                                 if (start-twentyKb < 0) {
                                     return;
                                 }
+                                // xss safe
                                 $browserRow.append($('<i class="fa fa-spinner fa-spin fa-2x">'));
                                 start = start - twentyKb;
                                 length = twentyKb;
@@ -1172,6 +1175,7 @@ define([
                                 if (start+twentyKb>contig_length) {
                                     return;
                                 }
+                                // xss safe
                                 $browserRow.append($('<i class="fa fa-spinner fa-spin fa-2x">'));
                                 if (start+twentyKb>contig_length) {
                                     return;
