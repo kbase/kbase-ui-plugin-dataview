@@ -97,58 +97,58 @@ define(['jquery', './widget'], ($) => {
             const $dialogModal = $('<div></div>')
                 .attr('class', `modal ${  this.options.modalClass}`)
                 .attr('tabindex', '-1')
-                // safe
+                // xss safe
                 .append(
                     $.jqElem('div')
                         .addClass('modal-dialog')
-                        // safe
+                        // xss safe
                         .append(
                             $.jqElem('div')
                                 .addClass('modal-content')
-                                // safe
+                                // xss safe
                                 .append(
                                     $('<div></div>')
                                         .attr('class', 'modal-header')
-                                        // safe
+                                        // xss safe
                                         .append(
                                             $('<button></button>')
                                                 .attr('type', 'button')
                                                 .attr('class', 'close')
                                                 .attr('data-dismiss', 'modal')
                                                 .attr('aria-hidden', 'true')
-                                                // safe
+                                                // xss safe
                                                 .append('x\n')
                                         )
-                                        // safe
+                                        // xss safe
                                         .append(
                                             $('<h3></h3>')
                                                 .addClass('modal-title')
                                                 .attr('id', 'title')
                                         )
                                 )
-                                // safe
+                                // xss safe
                                 .append(
                                     $('<div></div>')
                                         .attr('class', 'modal-body')
                                         .attr('id', 'body')
                                 )
-                                // safe
+                                // xss safe
                                 .append(
                                     $('<div></div>')
                                         .attr('class', 'modal-footer')
-                                        // safe
+                                        // xss safe
                                         .append(
                                             $('<div></div>')
                                                 .addClass('row')
                                                 .addClass('form-horizontal')
-                                                // safe
+                                                // xss safe
                                                 .append(
                                                     $('<div></div>')
                                                         .addClass('col-sm-5')
                                                         .addClass('text-left')
                                                         .attr('id', 'footer')
                                                 )
-                                                // safe
+                                                // xss safe
                                                 .append(
                                                     $('<div></div>')
                                                         .addClass('col-sm-7')
@@ -172,17 +172,17 @@ define(['jquery', './widget'], ($) => {
             this._rewireIds($dialogModal, $dialogModal);
 
             if (this.options.title) {
-                // safe (need to trust)
+                // xss safe (need to trust)
                 $dialogModal.data('title').append(this.options.title);
             }
 
             if (this.options.body) {
-                // safe (need to trust)
+                // xss safe (need to trust)
                 $dialogModal.data('body').append(this.options.body);
             }
 
             if (this.options.footer) {
-                // safe (need to trust)
+                // xss safe (need to trust)
                 $dialogModal.data('footer').append(this.options.footer);
             }
 
@@ -200,7 +200,7 @@ define(['jquery', './widget'], ($) => {
                 const $button = $('<a></a>')
                     .attr('href', '#')
                     .attr('class', btnClass)
-                    // safe (need to trust)
+                    // xss safe (need to trust)
                     .append(val.name)
                     .bind('click', function (e) {
                         e.preventDefault();
@@ -212,7 +212,7 @@ define(['jquery', './widget'], ($) => {
                     $button.attr('id', val.id);
                 }
 
-                // safe
+                // xss safe
                 $dialogModal.data('controls').append($button);
             });
 

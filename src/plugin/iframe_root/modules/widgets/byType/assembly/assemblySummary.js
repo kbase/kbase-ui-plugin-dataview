@@ -57,7 +57,7 @@ define([
         }
 
         function renderSummaryTable(data) {
-            // safe
+            // xss safe
             container.innerHTML = table(
                 {
                     class: 'table table-striped table-bordered table-hover',
@@ -89,7 +89,7 @@ define([
         }
 
         function renderError(err) {
-            // safe
+            // xss safe
             container.innerHTML = BS.buildPanel({
                 type: 'danger',
                 title: 'Error',
@@ -107,7 +107,7 @@ define([
         }
 
         function start(params) {
-            // safe
+            // xss safe
             container.innerHTML = div(
                 {
                     style: {

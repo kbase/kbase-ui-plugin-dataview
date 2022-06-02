@@ -101,12 +101,12 @@ define([
                     })
                     .catch((err) => {
                         const tdElem = $(`#${self.pref}job`);
-                        // safe
+                        // xss safe
                         tdElem.text(`Error accessing comparison object: ${errorMessage(err)}`);
                     });
             };
             const cmpIsLoaded = function () {
-                // safe
+                // xss safe
                 container.html(html.loading('loading comparison data...'));
                 return gaapi.callFunc('get_genome_v1', [{
                     genomes: [{ref: self.cmp.genome1ref}, {ref: self.cmp.genome2ref}],
@@ -125,12 +125,12 @@ define([
                         const genome2id = genomes[1].data.scientific_name;
                         container.empty();
                         const $nc = $('#root');
-                        // safe
+                        // xss safe
                         $nc.append(`<div id="widget-tooltip_${self.pref}" class="dataview-tooltip">Test message</div>`);
                         const table = $('<table/>')
                             .addClass('table table-bordered')
                             .css({'margin-left': 'auto', 'margin-right': 'auto'});
-                        // safe
+                        // xss safe
                         container.append(table);
                         const $createTableRow = function (label, textValue, htmlValue) {
                             const $row = $('<tr>')
@@ -141,10 +141,10 @@ define([
                             if (textValue) {
                                 $valueCell.text(textValue);
                             } else {
-                                // safe (usages)
+                                // xss safe (usages)
                                 $valueCell.html(htmlValue);
                             }
-                            // safe
+                            // xss safe
                             $row.append($valueCell);
                             return $row;
                         };
@@ -158,12 +158,12 @@ define([
                             if (self.cmp.data2[i].length > 0)
                                 count2hits++;
                         }
-                        // safe
+                        // xss safe
                         table.append($createTableRow('Comparison object', self.ws_id));
-                        // safe
+                        // xss safe
                         table.append($createTableRow('Genome1 (x-axis)',null,  `<a href="/#dataview/${self.genome1Ref}" target="_blank">${domSafeValue(genome1id)}</a>` +
                         ` (${  self.cmp.proteome1names.length  } genes, ${  count1hits  } have hits)`));
-                        // safe
+                        // xss safe
                         table.append($createTableRow('Genome2 (y-axis)', null, `<a href="/#dataview/${self.genome2Ref}" target="_blank">${domSafeValue(genome2id)}</a>` +
                         ` (${self.cmp.proteome2names.length} genes, ${count2hits} have hits)`));
                         if (self.scale == null)
@@ -173,7 +173,7 @@ define([
                         const sd = ' style="border: 0px; margin: 0px; padding: 1px;"';
                         const sb = ' style="width: 27px;"';
 
-                        // safe
+                        // xss safe
                         table.append('<tr><td>' +
                             '<center>' +
                             `<button id="${self.pref}btn-zi">Zoom +</button>`+
@@ -324,7 +324,7 @@ define([
                                 const tip = $(`#widget-tooltip_${  self.pref}`);
                                 if (Number(hit.bestDist) >= 0) {
                                     const msg = `X-axis: ${domSafeValue(self.cmp.proteome1names[Number(hit.bestI)])}, Y-axis: ${domSafeValue(self.cmp.proteome2names[Number(hit.bestJ)])}<br>click to see details...`;
-                                    // safe
+                                    // xss safe
                                     tip.html(msg);
                                     tip.css({
                                         top: `${Number(hit.scrY) + 10  }px`,
@@ -334,7 +334,7 @@ define([
                                     return;
                                 }
                                 tip.hide();
-                                // safe
+                                // xss safe
                                 tip.html('');
                             })
                             .click((e) => {
@@ -352,7 +352,7 @@ define([
                     })
                     .catch((err) => {
                         const tdElem = $(`#${self.pref}job`);
-                        // safe
+                        // xss safe
                         tdElem.text(`Error accessing genome objects: ${errorMessage(err)}`);
                     });
             };
@@ -457,7 +457,7 @@ define([
                 }
             }
             svg += '</svg>';
-            // safe
+            // xss safe
             $svg.html($(svg));
         },
 
@@ -468,7 +468,7 @@ define([
             const st = ' style="border: 0px; margin: 0px; padding: 0px;"';
             if (self.geneI < 0 || self.geneJ < 0) {
                 self.refreshDetailedRect();
-                // safe
+                // xss safe
                 tbl.append(`<tr${st}><td${st}>${self.selectHitsMessage}</td></tr>`);
                 return;
             }
@@ -484,7 +484,7 @@ define([
             const sr = ' style="border: 0px; margin: 0px; padding: 0px;"';
             // const sd = ' style="border: 0px; margin: 0px; padding: 1px;"';
             const sb = ' style="width: 27px;"';
-            // safe
+            // xss safe
             tbl.append(`<tr${sr}>`+
                 `<td rowspan="${self.geneRows+2}" width="10" style="border: 0px; margin: 0px; padding: 0px; text-align: center; vertical-align: middle;"><button id="${self.pref}btn-dirI"${sb}>${arrowI}</button></td>`+
                 `<td style="border: 0px; margin: 0px; padding: 0px; text-align: center; vertical-align: middle;"><button id="${self.pref}btn-i-up"${sb}>&#8593;</button></td>`+
@@ -512,7 +512,7 @@ define([
                 if (rowPos == 0)
                     tds += `<td id="${self.pref}glinks" rowspan="${self.geneRows}" width="30"${sr}/>`;
                 tds += `<td ${tdSt}>` + `<a href="/#dataview/${self.genome2Ref}?sub=Feature&subid=${self.cmp.proteome2names[j]}" target="_blank">${labelJ}</a>` + '</td>';
-                // safe
+                // xss safe
                 tbl.append(`<tr${sr}>${tds}</tr>`);
                 const y1 = rowPos * (self.geneRowH + 0.2) + rowHalf;
                 for (const tuplePos in self.cmp.data1[i]) {
@@ -529,7 +529,7 @@ define([
                     }
                 }
             }
-            // safe
+            // xss safe
             tbl.append(`<tr${sr}>`+
                 `<td style="border: 0px; margin: 0px; padding: 0px; text-align: center; vertical-align: middle;"><button id="${self.pref}btn-i-dn"${sb}>&#8595;</button></td>`+
                 `<td style="border: 0px; margin: 0px; padding: 0px; text-align: center; vertical-align: middle;"><button id="${self.pref}btn-both-dn"${sb}>&#8595;&#8595;</button></td>`+
@@ -537,7 +537,7 @@ define([
                 '</tr>');
             const svgTd = $(`#${self.pref}glinks`);
             const svgH = self.geneRows * self.geneRowH;
-            // safe
+            // xss safe
             svgTd.append(`<svg width="30" height="${svgH}">${svgLines}</svg>`);
             svgTd
                 .hover(
@@ -582,7 +582,7 @@ define([
                     if (minDist && minDist <= 2) {
                         const msg = `Gene1: ${domSafeText(bestLine.gene1)}<br>Gene2: ${domSafeText(bestLine.gene2)}<br>` +
                         `Bit-score: ${domSafeValue(bestLine.bit_score)}<br>Percent of related BBH bit-score: ${domSafeValue(bestLine.percent_of_bbh)}%`;
-                        // safe
+                        // xss safe
                         tip.html(msg);
                         tip.css({
                             top: `${Number(docY) + 10  }px`,
@@ -592,7 +592,7 @@ define([
                         return;
                     }
                     tip.hide();
-                    // safe
+                    // xss safe
                     tip.html('');
                 });
             $(`#${self.pref}btn-dirI`).click(() => {

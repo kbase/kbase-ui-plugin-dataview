@@ -49,7 +49,7 @@ define([
                 token: this.runtime.service('session').getAuthToken()
             });
             this.$messagePane = $('<div/>').addClass('kbwidget-message-pane kbwidget-hide-message');
-            // safe
+            // xss safe
             this.$elem.append(this.$messagePane);
 
             this.render();
@@ -68,7 +68,7 @@ define([
                 self.$elem.empty();
 
                 const panel = $('<div class="loader-table"/>');
-                // safe
+                // xss safe
                 self.$elem.append(panel);
                 const table = $(
                     '<table class="table table-striped table-bordered" ' +
@@ -76,13 +76,13 @@ define([
                             self.pref
                         }overview-table"/>`
                 );
-                // safe
+                // xss safe
                 panel.append(table);
-                // safe
+                // xss safe
                 table.append(`<tr><td>Job was created with id</td><td>${domSafeValue(self.options.jobID)}</td></tr>`);
-                // safe
+                // xss safe
                 table.append(`<tr><td>Output result will be stored as</td><td>${domSafeValue(self.options.treeID)}</td></tr>`);
-                // safe
+                // xss safe
                 table.append(`<tr><td>Current job state is</td><td id="${self.pref}job"></td></tr>`);
                 const timeLst = function () {
                     jobSrv
@@ -93,7 +93,7 @@ define([
                             const wasError = data[6];
                             const tdElem = $(`#${  self.pref  }job`);
                             if (status === 'running') {
-                                // safe
+                                // xss safe
                                 tdElem.html(html.loading(domSafeText(status)));
                             } else {
                                 tdElem.text(status);
@@ -113,7 +113,7 @@ define([
                                 // Just skip all this cause data was already showed through setState()
                             } else {
                                 const tdElem = $(`#${self.pref}job`);
-                                // safe
+                                // xss safe
                                 tdElem.text(`Error accessing job status: ${errorMessage(err)}`);
                             }
                         });
@@ -137,13 +137,13 @@ define([
 
                     const canvasDivId = `knhx-canvas-div-${  self.pref}`;
                     self.canvasId = `knhx-canvas-${  self.pref}`;
-                    // safe
+                    // xss safe
                     self.$canvas = $(`<div id="${  canvasDivId  }">`).append($(`<canvas id="${self.canvasId}">`));
 
                     if (self.options.height) {
                         self.$canvas.css({'max-height': self.options.height - 85, overflow: 'scroll'});
                     }
-                    // safe
+                    // xss safe
                     self.$elem.append(self.$canvas);
 
                     // SKIP FOR NOW
@@ -217,7 +217,7 @@ define([
                 });
         },
         renderError(error) {
-            // safe
+            // xss safe
             this.$elem.html($errorAlert(error));
         },
         getData() {
@@ -260,7 +260,7 @@ define([
             }
         },
         showMessage(message) {
-            // safe (usages checked)
+            // xss safe (usages checked)
             this.$messagePane.append($('<span/>').append(message));
             this.$messagePane.show();
         },

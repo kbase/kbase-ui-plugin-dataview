@@ -279,7 +279,7 @@ define([
         render() {
             // get the target div
             const target = this.settings.target;
-            // safe
+            // xss safe
             target.innerHTML = '<div class=\'plot_div\'></div>';
             target.firstChild.setAttribute(
                 'style',

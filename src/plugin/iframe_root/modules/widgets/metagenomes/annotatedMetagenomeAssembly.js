@@ -157,11 +157,11 @@ define([
                 ]
             };
             this.view.panels.forEach((panel) => {
-                // safe
+                // xss safe
                 panel.outer_div.html(this.$renderWidgetPanel(panel.label, panel.name, panel.inner_div));
-                // safe
+                // xss safe
                 this.$elem.append(panel.outer_div);
-                // safe
+                // xss safe
                 panel.inner_div.html(html.loading('Loading...'));
             });
         },
@@ -214,18 +214,18 @@ define([
                 .attr('role', 'tablist')
                 .attr('aria-multiselectable', 'true')
                 .attr('data-panel', name)
-                // safe
+                // xss safe
                 .append($('<div>')
                     .addClass('panel panel-default kb-widget')
-                    // safe
+                    // xss safe
                     .append($('<div>')
                         .attr('id', `heading_${id}`)
                         .addClass('panel-heading')
                         .attr('role', 'tab')
-                        // safe
+                        // xss safe
                         .append($('<h4>')
                             .addClass('panel-title')
-                            // safe
+                            // xss safe
                             .html($('<span>')
                                 .attr('data-toggle', 'collapse')
                                 .attr('data-parent', `#accordion_${id}`)
@@ -235,17 +235,17 @@ define([
                                 .css('cursor', 'pointer')
                                 .attr('data-element', 'title')
                                 .text(title))))
-                    // safe
+                    // xss safe
                     .append($('<div>')
                         .attr('id', `collapse_${id}`)
                         .addClass('panel-collapse collapse in')
                         .attr('role', 'tabpanel')
                         .attr('aria-labelledby', `heading_${id}`)
                         .attr('area-expanded', 'true')
-                        // safe
+                        // xss safe
                         .append($('<div>')
                             .addClass('panel-body')
-                            // safe
+                            // xss safe
                             .append($widget))));
         },
         getData() {
@@ -259,7 +259,7 @@ define([
         showError(panel, e) {
             console.error(e);
             const $alert = $errorAlert(e);
-            // safe
+            // xss safe
             panel.html($alert);
         }
     });

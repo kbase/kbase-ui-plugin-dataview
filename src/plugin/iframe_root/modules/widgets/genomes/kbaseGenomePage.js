@@ -285,9 +285,9 @@ define([
             const that = this;
             this.view.panels.forEach((panel) => {
                 that.makeWidgetPanel(panel.outer_div, panel.label, panel.name, panel.inner_div);
-                // safe
+                // xss safe
                 that.$elem.append(panel.outer_div);
-                // safe usage of html
+                // xss safe usage of html
                 panel.inner_div.html(html.loading('Loading...'));
             });
         },
@@ -356,7 +356,7 @@ define([
                 (genomeInfo && genomeInfo.data['domain'] === 'Eukaryota') ||
                 (genomeInfo && genomeInfo.data['domain'] === 'Plant')
             ) {
-                // safe
+                // xss safe
                 _this.view.panels[3].inner_div.html(
                     'Browsing Eukaryotic Genome Features is not supported at this time.'
                 );
@@ -387,7 +387,7 @@ define([
         // TODO: This is
         makeWidgetPanel($panel, title, name, $widgetDiv) {
             const id = new Uuid(4).format();
-            // safe
+            // xss safe
             $panel.append(
                 $(
                     `<div class="panel-group" id="accordion_${
@@ -396,10 +396,10 @@ define([
                         domSafeText(name)
                     }">`
                 )
-                    // safe
+                    // xss safe
                     .append(
                         $('<div class="panel panel-default kb-widget">')
-                            // safe
+                            // xss safe
                             .append(
                                 '' +
                                     `<div class="panel-heading" role="tab" id="heading_${
@@ -417,7 +417,7 @@ define([
                                     '</h4>' +
                                     '</div>'
                             )
-                            // safe
+                            // xss safe
                             .append(
                                 $(
                                     `<div id="collapse_${
@@ -426,7 +426,7 @@ define([
                                         id
                                     }" area-expanded="true">`
                                 )
-                                    // safe
+                                    // xss safe
                                     .append($('<div class="panel-body">').append($widgetDiv))
                             )
                     )
@@ -445,7 +445,7 @@ define([
                 console.error(title);
             }
             console.error(error);
-            // safe
+            // xss safe
             panel.html($errorAlert(error, title));
         }
     });

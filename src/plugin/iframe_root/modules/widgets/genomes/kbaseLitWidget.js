@@ -87,13 +87,13 @@ define([
             const loader = $(html.loading());
 
             const resultsDiv = $('<div>')
-                // safe
+                // xss safe
                 .append(
                     `<table cellpadding="0" cellspacing="0" border="0" id="literature-table" 
                                 class="table table-bordered table-striped" style="width: 100%; margin-left: 0px; margin-right: 0px;"/>`
                 );
             const searchBarDiv = $('<div>')
-                // safe
+                // xss safe
                 .append('<input type="text" name="lit-query-box">');
 
             const searchBarButton = $('<input type=\'button\' id=\'lit-search-button\' value=\'Update Search\'>').on(
@@ -108,11 +108,11 @@ define([
             let litDataTable;
 
             self.$elem
-                // safe
+                // xss safe
                 .append(searchBarDiv.append(searchBarButton))
-                // safe
+                // xss safe
                 .append(loader)
-                // safe
+                // xss safe
                 .append(resultsDiv);
 
             // nb: needs to be after that stuff is added to the dom.
@@ -345,7 +345,7 @@ define([
                                 },
                                 () => {
                                     loader.hide();
-                                    // safe
+                                    // xss safe
                                     self.$elem.append(
                                         '<br><b>Failed to retrieve literature search results. Try again later.</b>'
                                     );

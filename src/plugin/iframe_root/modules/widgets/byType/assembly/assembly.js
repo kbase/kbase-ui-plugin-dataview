@@ -57,7 +57,7 @@ define([
         function attach(node) {
             hostNode = node;
             container = hostNode.appendChild(document.createElement('div'));
-            // safe
+            // xss safe
             container.innerHTML = layout();
             return Promise.all(
                 widgets.map((widget) => {
@@ -94,7 +94,7 @@ define([
                 })
             ).then(() => {
                 if (hostNode && container) {
-                    // safe
+                    // xss safe
                     container.innerHTML = '';
                     hostNode.removeChild(container);
                 }

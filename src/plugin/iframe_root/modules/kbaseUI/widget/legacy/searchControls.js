@@ -34,7 +34,7 @@ define([
             }
             const $filterbox = $.jqElem('div')
                 .addClass('input-group input-group-sm')
-                // safe
+                // xss safe
                 .append(
                     $.jqElem('input')
                         .attr('type', 'text')
@@ -62,16 +62,16 @@ define([
                             $sc.options.searchCallback.call(this, e, value, $sc.options.context);
                         })
                 )
-                // safe
+                // xss safe
                 .append(
                     $.jqElem('span')
                         .addClass('input-group-btn')
-                        // safe
+                        // xss safe
                         .append(
                             $.jqElem('button')
                                 .addClass('btn btn-default')
                                 .attr('id', 'searchButton')
-                                // safe
+                                // xss safe
                                 .append(
                                     $.jqElem('i')
                                         .attr('id', 'searchIcon')
@@ -102,7 +102,7 @@ define([
 
             this._rewireIds($filterbox, this);
 
-            // safe
+            // xss safe
             $elem.append($filterbox);
 
             $elem.data('searchControls', $filterbox);

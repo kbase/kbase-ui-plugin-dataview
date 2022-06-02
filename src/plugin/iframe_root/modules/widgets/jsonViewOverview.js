@@ -21,11 +21,11 @@ define(['kb_common/html'], (html) => {
 
         function attach(node) {
             container = node;
-            // safe
+            // xss safe
             container.innerHTML = div({class: 'well'}, html.loading('Loading object overview...'));
         }
         function start(params) {
-            // safe
+            // xss safe
             container.innerHTML = div({class: 'well'}, renderOverview(params.object));
         }
 

@@ -163,7 +163,7 @@ define(['jquery', 'widgets/communities/jquery.svg'], ($) => {
 
             // get the target div
             const target = this.settings.target;
-            // safe
+            // xss safe
             target.innerHTML = '<div class=\'heatmap-container\'><div class=\'heatmap_div\'></div></div>';
             const heatmap = $(target).find('.heatmap_div');
             heatmap.attr('style', `width: ${  this.settings.width  }px; height: ${  this.settings.height  }px;`);

@@ -140,9 +140,9 @@ define([
             }
 
             if (this.options.caption) {
-                // safe
+                // xss safe
                 $tbl.append($('<caption>')
-                    // safe (need to trust)
+                    // xss safe (need to trust)
                     .html(this.options.caption)
                 );
             }
@@ -151,7 +151,7 @@ define([
                 const $thead = $('<thead></thead>')
                     .attr('id', 'thead');
 
-                // safe
+                // xss safe
                 $thead.append(this.navControls(struct.header.length));
 
                 const $tr = $('<tr></tr>')
@@ -172,7 +172,7 @@ define([
                         const h = header.value;
 
                         const $th = $.jqElem('th')
-                            // safe (need to trust)
+                            // xss safe (need to trust)
                             .append(label);
 
                         if (this.options.resizable) {
@@ -193,7 +193,7 @@ define([
                                 .attr('id', buttonId)
                                 .css('display', 'none')
                                 .css('float', 'right')
-                                // safe
+                                // xss safe
                                 .append($buttonIcon)
                                 .data('shouldHide', true);
                             $button.bind('click', $.proxy(function () {
@@ -236,7 +236,7 @@ define([
 
                             this.sortButtons()[header.value] = $button;
 
-                            // safe
+                            // xss safe
                             $th.append($button);
                             $th.bind('mouseover', $.proxy(() => {
                                 $button.css('display', 'inline');
@@ -249,15 +249,15 @@ define([
                             }, this));
                         }
 
-                        // safe
+                        // xss safe
                         $tr.append($th);
                     }, this)
                 );
 
-                // safe
+                // xss safe
                 $thead.append($tr);
 
-                // safe
+                // xss safe
                 $tbl.append($thead);
             }
 
@@ -266,7 +266,7 @@ define([
                 const $tbody = this.data('tbody', $('<tbody></tbody>'));
                 this.layoutRows(struct.rows, struct.header);
 
-                // safe
+                // xss safe
                 $tbl.append($tbody);
             }
 
@@ -275,7 +275,7 @@ define([
                     .attr('id', 'tfoot');
 
                 const $tfootTR = $.jqElem('tr');
-                // safe
+                // xss safe
                 $tfoot.append($tfootTR);
 
                 for (let idx = 0; idx < struct.footer.length; idx++) {
@@ -292,7 +292,7 @@ define([
                     }
 
                     const $td = $.jqElem('td')
-                        // safe (need to trust)
+                        // xss safe (need to trust)
                         .append(value);
                     if (style) {
                         $td.attr('style', style);
@@ -301,17 +301,17 @@ define([
                         $td.attr('colspan', colspan);
                     }
 
-                    // safe
+                    // xss safe
                     $tfootTR.append($td);
                 }
 
-                // safe
+                // xss safe
                 $tbl.append($tfoot);
             }
 
             this._rewireIds($tbl, this);
 
-            // safe
+            // xss safe
             $elem.append($tbl);
 
             return $elem;
@@ -323,22 +323,22 @@ define([
 
             const controlsTR = $.jqElem('tr')
                 .css('display', this.options.navControls ? undefined : 'none')
-                // safe
+                // xss safe
                 .append($.jqElem('td')
                     .attr('colspan', colspan)
                     .css('background-color', 'lightgray')
-                    // safe
+                    // xss safe
                     .append($.jqElem('div')
                         .addClass('pull-left')
                         .addClass('input-group input-group-sm')
-                        // safe
+                        // xss safe
                         .append($.jqElem('span')
                             .addClass('input-group-btn')
-                            // safe
+                            // xss safe
                             .append($.jqElem('button')
                                 .addClass('btn btn-default')
                                 .attr('id', 'pageLeftButton')
-                                // safe
+                                // xss safe
                                 .append($.jqElem('i')
                                     .attr('id', 'leftIcon')
                                     .addClass('fa fa-caret-left')
@@ -362,20 +362,20 @@ define([
                                 })
                             )
                         )
-                        // safe
+                        // xss safe
                         .append($.jqElem('span')
                             .attr('id', 'visRecords')
                             .addClass('input-group-addon')
                             .kb_bind(this, 'visRowString')
                         )
-                        // safe
+                        // xss safe
                         .append($.jqElem('span')
                             .addClass('input-group-btn')
-                            // safe
+                            // xss safe
                             .append($.jqElem('button')
                                 .addClass('btn btn-default')
                                 .attr('id', 'pageRightButton')
-                                // safe
+                                // xss safe
                                 .append($.jqElem('i')
                                     .attr('id', 'rightIcon')
                                     .addClass('fa fa-caret-right')
@@ -400,18 +400,18 @@ define([
                             )
                         )
                     )
-                    // safe
+                    // xss safe
                     .append($.jqElem('div')
                         .addClass('pull-left')
                         .addClass('input-group input-group-sm')
-                        // safe
+                        // xss safe
                         .append($.jqElem('span')
                             .addClass('input-group-btn')
-                            // safe
+                            // xss safe
                             .append($.jqElem('button')
                                 .addClass('btn btn-default')
                                 .attr('id', 'removeButton')
-                                // safe
+                                // xss safe
                                 .append($.jqElem('i')
                                     .attr('id', 'removeIcon')
                                     .addClass('fa fa-minus')
@@ -430,14 +430,14 @@ define([
                                 })
                             )
                         )
-                        // safe
+                        // xss safe
                         .append($.jqElem('span')
                             .addClass('input-group-btn')
-                            // safe
+                            // xss safe
                             .append($.jqElem('button')
                                 .addClass('btn btn-default')
                                 .attr('id', 'addButton')
-                                // safe
+                                // xss safe
                                 .append($.jqElem('i')
                                     .attr('id', 'addIcon')
                                     .addClass('fa fa-plus')
@@ -462,7 +462,7 @@ define([
                             )
                         )
                     )
-                    // safe
+                    // xss safe
                     .append($.jqElem('div')
                         .addClass('pull-right')
                         .attr('id', 'searchDiv')
@@ -565,7 +565,7 @@ define([
                     const $row = this.createRow(rows[idx], header);
                     if ($row !== undefined && $row.children().length) {
                         numRows++;
-                        // safe
+                        // xss safe
                         this.data('tbody').append($row);
                     }
                 }
@@ -588,7 +588,7 @@ define([
 
                     if ($row !== undefined && $row.children().length) {
                         numRows++;
-                        // safe
+                        // xss safe
                         this.data('tbody').append($row);
                     }
                 }
@@ -694,14 +694,14 @@ define([
 
                         filterString += value instanceof $ ? value.text() : value;
 
-                        // safe (need to trust)
+                        // xss safe (need to trust)
                         const $td = $.jqElem('td').append(value);
 
                         if (typeof cell === 'object') {
                             this.addOptions($td, cell);
                         }
 
-                        // safe
+                        // xss safe
                         $tr.append($td);
 
                     }, this)
@@ -743,7 +743,7 @@ define([
                                 label;
                         }
 
-                        // safe (need to trust)
+                        // xss safe (need to trust)
                         $td.append(label);
 
                         if (typeof rowData[h] !== 'string') {
@@ -751,7 +751,7 @@ define([
                         }
 
                         if (label !== undefined) {
-                            // safe
+                            // xss safe
                             $tr.append($td);
                         }
 

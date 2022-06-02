@@ -381,7 +381,7 @@ define([
             return Promise.try(() => {
                 parent = node;
                 container = node.appendChild(document.createElement('div'));
-                // safe, component uses bindings
+                // xss safe, component uses bindings
                 container.innerHTML = renderComponent();
             });
         }

@@ -23,7 +23,7 @@ define([
                 titleId = html.genId(),
                 bodyId = html.genId();
             this._super(options);
-            // safe
+            // xss safe
             this.$elem.html(
                 html.makePanel({
                     title: div({id: titleId}),
@@ -49,9 +49,9 @@ define([
             } catch (ex) {
                 message = `Unknown error processing another error: ${ex.message}`;
             }
-            // safe
+            // xss safe
             this.$title.text('Error');
-            // safe
+            // xss safe
             this.$body.text(message);
             console.error('ERROR in kbaseCollectionView.js');
             console.error(error);
@@ -62,9 +62,9 @@ define([
                 this.showError('You are not logged in');
                 return;
             }
-            // safe
+            // xss safe
             this.$title.text('Metagenome Collection');
-            // safe
+            // xss safe
             this.$body.html(html.loading('loading data...'));
 
             const workspace = new Workspace(this.runtime.config('services.workspace.url'), {token: this.token});
@@ -123,9 +123,9 @@ define([
                             classes: ['table', 'table-striped']
                         },
                         table = html.makeTable(options);
-                    // safe
+                    // xss safe
                     self.$title.text(`Metagenome Collection ${title}`);
-                    // safe
+                    // xss safe
                     self.$body.html(table);
                     $(`#${options.generated.id}`).dataTable();
                 })

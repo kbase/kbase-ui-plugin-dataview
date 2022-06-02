@@ -218,7 +218,7 @@ define([
                  });
                  */
             // append the svg canvas to the page
-            // safe
+            // xss safe
             d3.select($graphNode[0]).html('');
             $graphNode.show();
             const svg = d3.select($graphNode[0]).append('svg');
@@ -344,7 +344,7 @@ define([
                     return 0 * d3.rgb(d.color).darker(2);
                 })
                 .append('title')
-                // safe
+                // xss safe
                 .html((d) => {
                     const objectInfo = objectInfoToObject(d.info);
                     let text =

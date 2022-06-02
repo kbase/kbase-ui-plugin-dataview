@@ -66,7 +66,7 @@ define([
             const $row = $('<div class="row">');
 
             const $taxonomyColumn = $('<div class="col-md-5">');
-            // safe
+            // xss safe
             $row.append($taxonomyColumn);
 
             // This area for the RE taxonomy widget
@@ -74,19 +74,19 @@ define([
             let $reTaxonomyInfo;
             if (this.runtime.featureEnabled('re-lineage')) {
                 $reTaxonomyInfo = $('<div>');
-                // safe
+                // xss safe
                 $taxonomyColumn.append($makeTitle('New Lineage'));
-                // safe
+                // xss safe
                 $taxonomyColumn.append($reTaxonomyInfo);
             }
 
             // This area for the taxonomy widget
             const $taxonomyInfo = $('<div>');
             if (this.runtime.featureEnabled('re-lineage')) {
-                // safe
+                // xss safe
                 $taxonomyColumn.append($makeTitle('Old Lineage'));
             }
-            // safe
+            // xss safe
             $taxonomyColumn.append($taxonomyInfo);
 
 
@@ -194,10 +194,10 @@ define([
                 ]
             );
 
-            // safe
+            // xss safe
             $row.append(treeArea);
 
-            // safe
+            // xss safe
             this.$elem.append($row);
 
             this.$treeNode = $(`#${treeNodeId}`);
@@ -506,7 +506,7 @@ define([
             this.$buttonsNode.empty();
         },
         addButton(markup) {
-            // safe
+            // xss safe
             this.$buttonsNode.append(markup);
         },
         hideNavButtons() {

@@ -171,7 +171,7 @@ define([
 
         function renderTable(table) {
             const node = container.querySelector('[data-element="summary"]');
-            // safe - just inserts a component
+            // xss safe - just inserts a component
             node.innerHTML = div({
                 dataBind: {
                     component: {
@@ -196,7 +196,7 @@ define([
         function attach(node) {
             return Promise.try(() => {
                 container = node;
-                // safe
+                // xss safe
                 container.innerHTML = div([
                     div(
                         {
@@ -219,7 +219,7 @@ define([
         }
 
         function renderError(err) {
-            // safe
+            // xss safe
             container.innerHTML = BS.buildPanel({
                 type: 'danger',
                 title: 'Error',

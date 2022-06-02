@@ -57,19 +57,19 @@ define(['jquery', 'd3', '../legacy/authenticatedWidget'], ($, d3) => {
             const $barElem = $.jqElem('div').css({width: 800, height: 500});
 
             const $barContainer = $.jqElem('div')
-                // safe
+                // xss safe
                 .append(
-                    // safe
+                    // xss safe
                     $.jqElem('div')
                         .attr('class', 'col-md-10')
-                        // safe
+                        // xss safe
                         .append(
                             $.jqElem('div')
                                 .attr('class', 'col-md-1')
-                                // safe
+                                // xss safe
                                 .append(
                                     $.jqElem('div')
-                                        // safe
+                                        // xss safe
                                         .append(
                                             $.jqElem('span')
                                                 .attr('id', 'numBins')
@@ -78,11 +78,11 @@ define(['jquery', 'd3', '../legacy/authenticatedWidget'], ($, d3) => {
                                         .append(' bins')
                                 )
                         )
-                        // safe
+                        // xss safe
                         .append(
                             $.jqElem('div')
                                 .attr('class', 'col-md-8')
-                                // safe
+                                // xss safe
                                 .append(
                                     $.jqElem('input')
                                         .attr('id', 'numBinsRange')
@@ -103,21 +103,21 @@ define(['jquery', 'd3', '../legacy/authenticatedWidget'], ($, d3) => {
                                 )
                         )
                 )
-                // safe
+                // xss safe
                 .append(
                     $.jqElem('div')
                         .attr('class', 'col-md-4')
-                        // safe
+                        // xss safe
                         .append(
                             $.jqElem('div')
                                 .attr('class', 'input-group')
-                                // safe
+                                // xss safe
                                 .append(
                                     $.jqElem('div')
                                         .attr('class', 'input-group-addon')
                                         .append(' Expression level at least ')
                                 )
-                                // safe
+                                // xss safe
                                 .append(
                                     $.jqElem('input')
                                         .attr('type', 'input')
@@ -131,22 +131,22 @@ define(['jquery', 'd3', '../legacy/authenticatedWidget'], ($, d3) => {
                                 )
                         )
                 )
-                // safe
+                // xss safe
                 .append(
-                    // safe
+                    // xss safe
                     $.jqElem('div')
                         .attr('class', 'col-md-4 col-md-offset-3')
-                        // safe
+                        // xss safe
                         .append(
                             $.jqElem('div')
                                 .attr('class', 'input-group')
-                                // safe
+                                // xss safe
                                 .append(
                                     $.jqElem('div')
                                         .attr('class', 'input-group-addon')
                                         .text(' Expression level at most ')
                                 )
-                                // safe
+                                // xss safe
                                 .append(
                                     $.jqElem('input')
                                         .attr('type', 'input')
@@ -160,10 +160,10 @@ define(['jquery', 'd3', '../legacy/authenticatedWidget'], ($, d3) => {
                                 )
                         )
                 )
-                // safe
+                // xss safe
                 .append($barElem);
 
-            // safe
+            // xss safe
             $elem.append($barContainer);
 
             const $barchart = $barElem.kbaseBarchart(this.options);

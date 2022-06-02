@@ -805,10 +805,10 @@ define(['jquery', 'handlebars', 'd3'], function ($, Handlebars, d3) {
         templateSuccess: function (templateString) {
             var template = Handlebars.compile(templateString),
                 res = template(this.templateContent()),
-                // safe (need to trust)
+                // xss safe (need to trust)
                 $res = $.jqElem('span').append(res);
             this._rewireIds($res, this);
-            // safe
+            // xss safe
             this.$elem.append($res);
         },
         templateFailure: function (res) {

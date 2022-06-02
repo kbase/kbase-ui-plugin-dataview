@@ -54,7 +54,7 @@ define(
                     this.$messagePane = $('<div/>')
                         .addClass('kbwidget-message-pane')
                         .addClass('kbwidget-hide-message');
-                    // safe
+                    // xss safe
                     this.$elem.append(this.$messagePane);
 
                     //this.cdmiClient = new CDMI_API(this.cdmiURL);
@@ -68,7 +68,7 @@ define(
                     if (this.options.showButtons) {
                         this.$elem.append($('<div>')
                             .css('text-align', 'center')
-                            // safe
+                            // xss safe
                             .html(new KBaseContigBrowserButtons({browser: this}).$render())
                         );
                     }
@@ -658,7 +658,7 @@ define(
                 },
 
                 showMessage($message) {
-                    // safe
+                    // xss safe
                     this.$messagePane.html($message);
                     this.$messagePane.removeClass('kbwidget-hide-message');
                 },

@@ -50,7 +50,7 @@ define([
                     const group = name.replace(/:.+/, '');
                     const sub_name = name.replace(/.+:\s*/, '');
 
-                    // safe
+                    // xss safe
                     this.data('selectbox').append(
                         $.jqElem('option')
                             .attr('value', func)
@@ -67,17 +67,17 @@ define([
                         const $groupButton = $.jqElem('div')
                             .addClass('btn-group dropup')
                             .css({'padding-right': '5px'})
-                            // safe
+                            // xss safe
                             .append(
                                 $.jqElem('button')
                                     .attr('type', 'button')
                                     .addClass('btn btn-sm btn-default')
-                                    // safe
+                                    // xss safe
                                     .append(
                                         $.jqElem('span')
                                             .css('display', 'none')
                                             .addClass('check fa fa-check')
-                                            // safe
+                                            // xss safe
                                             .append('&nbsp;')
                                     )
                                     .append(domSafeText(group))
@@ -147,12 +147,12 @@ define([
                                         $pmi.displaySubsystems(selected_subsystems);
                                     })
                             )
-                            // safe
+                            // xss safe
                             .append(
                                 $.jqElem('button')
                                     .attr('type', 'button')
                                     .addClass('btn btn-sm btn-default dropdown-toggle')
-                                    // safe
+                                    // xss safe
                                     .append($.jqElem('span').addClass('fa fa-caret-up'))
                                     .on('click', function () {
                                         const isOpen = $(this)
@@ -209,24 +209,24 @@ define([
                                         $pmi.displaySubsystems(selected_subsystems);
                                     })
                             )
-                            // safe
+                            // xss safe
                             .append(
                                 $.jqElem('ul')
                                     .addClass('dropdown-menu')
                                     .css({width: '450px', 'padding-left': '5px', 'text-align': 'left'})
                             );
-                        // safe
+                        // xss safe
                         this.data('formElem').append($groupButton);
 
                         groups[group] = $groupButton;
                     }
 
-                    // safe
+                    // xss safe
                     groups[group].find('ul').append(
-                        // safe
+                        // xss safe
                         $.jqElem('li').append(
                             $.jqElem('label')
-                                // safe
+                                // xss safe
                                 .append(
                                     $.jqElem('input')
                                         .attr('type', 'checkbox')
@@ -267,11 +267,11 @@ define([
                                             //$pmi.displaySubsystems(selected_subsystems);
                                         })
                                 )
-                                // safe
+                                // xss safe
                                 .append(
                                     $.jqElem('span')
                                         .css('color', colorScale(f))
-                                        // safe
+                                        // xss safe
                                         .append(`&nbsp;&nbsp;${domSafeText(sub_name)}`)
                                 )
                         )
@@ -405,7 +405,7 @@ define([
                 })
                 .catch((err) => {
                     $pmi.$elem.empty();
-                    // safe
+                    // xss safe
                     $pmi.$elem.addClass('alert alert-danger').text(`Could not load object : ${errorMessage(err)}`);
                 });
 
@@ -504,21 +504,21 @@ define([
             const $pmi = this;
 
             const $container = $.jqElem('div')
-                // safe
+                // xss safe
                 .append(
                     $.jqElem('div')
                         .css('display', 'none')
                         .attr('id', 'old-formElem')
-                        // safe
+                        // xss safe
                         .append(
                             $.jqElem('span')
-                            // safe
+                            // xss safe
                                 .append('Select subsystem(s):&nbsp;&nbsp;')
                                 .css('float', 'left')
                         )
-                        // safe
+                        // xss safe
                         .append(
-                            // safe
+                            // xss safe
                             $.jqElem('form').append(
                                 $.jqElem('select')
                                     .attr('id', 'selectbox')
@@ -532,7 +532,7 @@ define([
                             )
                         )
                 )
-                // safe
+                // xss safe
                 .append(
                     $.jqElem('div')
                         .attr('id', 'barchartElem')
@@ -540,27 +540,27 @@ define([
                         .css('width', 1100) //$elem.width())
                         .css('height', 500) //$elem.height() - 30)
                 )
-                // safe
+                // xss safe
                 .append(
                     $.jqElem('div')
                         .attr('id', 'formElem')
                         .css({width: '100%', 'text-align': 'center'})
                 )
-                // safe
+                // xss safe
                 .append(
                     $.jqElem('div')
                         .attr('id', 'loader')
-                        // safe
+                        // xss safe
                         .append(
                             '<br>&nbsp;Loading data...<br>&nbsp;please wait...<br>&nbsp;Data parsing may take upwards of 30 seconds, during which time this window may be unresponsive.'
                         )
-                        // safe
+                        // xss safe
                         .append($.jqElem('br'))
-                        // safe
+                        // xss safe
                         .append(
                             $.jqElem('div')
                                 .attr('align', 'center')
-                                // safe
+                                // xss safe
                                 .append(
                                     $.jqElem('i')
                                         .addClass('fa fa-spinner')
@@ -621,7 +621,7 @@ define([
                 this.setDataset(this.dataset());
             }
 
-            // safe
+            // xss safe
             $elem.append($container);
         }
     });

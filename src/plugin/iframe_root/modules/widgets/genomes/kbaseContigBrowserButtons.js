@@ -20,20 +20,20 @@ define(['jquery', 'kbaseUI/widget/legacy/widget', 'bootstrap'], ($) => {
             const self = this;
             const $buttonSet = $('<div/>')
                 .addClass('btn-group')
-                // safe
+                // xss safe
                 .append(
                     $('<button/>')
                         .attr('type', 'button')
                         .addClass('btn btn-default')
                         .css('font-size', '125%')
                         .css('font-weight', 'bold')
-                        // safe
+                        // xss safe
                         .text('|<<')
                         .click(() => {
                             self.options.browser.moveLeftEnd();
                         })
                 )
-                // safe
+                // xss safe
                 .append(
                     $('<button/>')
                         .attr('type', 'button')
@@ -45,7 +45,7 @@ define(['jquery', 'kbaseUI/widget/legacy/widget', 'bootstrap'], ($) => {
                             self.options.browser.moveLeftStep();
                         })
                 )
-                // safe
+                // xss safe
                 .append(
                     $('<button/>')
                         .attr('type', 'button')
@@ -57,7 +57,7 @@ define(['jquery', 'kbaseUI/widget/legacy/widget', 'bootstrap'], ($) => {
                             self.options.browser.zoomIn();
                         })
                 )
-                // safe
+                // xss safe
                 .append(
                     $('<button/>')
                         .attr('type', 'button')
@@ -69,7 +69,7 @@ define(['jquery', 'kbaseUI/widget/legacy/widget', 'bootstrap'], ($) => {
                             self.options.browser.zoomOut();
                         })
                 )
-                // safe
+                // xss safe
                 .append(
                     $('<button/>')
                         .attr('type', 'button')
@@ -81,7 +81,7 @@ define(['jquery', 'kbaseUI/widget/legacy/widget', 'bootstrap'], ($) => {
                             self.options.browser.moveRightStep();
                         })
                 )
-                // safe
+                // xss safe
                 .append(
                     $('<button/>')
                         .attr('type', 'button')
@@ -94,7 +94,7 @@ define(['jquery', 'kbaseUI/widget/legacy/widget', 'bootstrap'], ($) => {
                         })
                 );
 
-            // safe
+            // xss safe
             this.$elem.append($('<div align=\'center\'/>').append($buttonSet));
 
             return this;

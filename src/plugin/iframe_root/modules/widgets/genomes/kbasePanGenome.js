@@ -47,22 +47,22 @@ define([
     function createError(title, error) {
         const $errorPanel = $('<div>')
             .addClass('alert alert-danger')
-            // safe
+            // xss safe
             .append(`<b>${domSafeText(title)}</b><br>Please contact the KBase team at <a href="http://kbase.us/contact-us/">http://kbase.us/contact-us/</a> with the information below.`);
 
-        // safe
+        // xss safe
         $errorPanel.append('<br><br>');
 
         // If it's a string, just dump the string.
         if (typeof error === 'string') {
-            // safe
+            // xss safe
             $errorPanel.append(domSafeText(error));
         } else if (error instanceof Error) {
             if (error instanceof exceptions.JsonRpcError) {
-                // safe
+                // xss safe
                 $errorPanel.append(domSafeText(error.originalError.message || error.originalError.name));
             } else {
-                // safe
+                // xss safe
                 $errorPanel.append(domSafeText(error.message || error.name));
             }
         } else if (error) {
@@ -107,7 +107,7 @@ define([
                 this.objRef = `${this.options.ws  }/${  this.options.name}`;
             }
             if (!checkObjectRef(this.objRef)) {
-                // safe
+                // xss safe
                 this.$elem.append(createError('Bad object.', 'PanGenome Object Unavailable.'));
                 this.isError = true;
             }
@@ -120,7 +120,7 @@ define([
             }
 
             const $tabContainer = $('<div>');
-            // safe
+            // xss safe
             this.$elem.append($tabContainer);
             this.tabs = $tabContainer.kbaseTabs({
                 tabPosition: top,
@@ -160,13 +160,13 @@ define([
         $renderCell(valueText, valueHTML) {
             const $valueCell = $('<td>');
             if (valueText) {
-                // safe
+                // xss safe
                 $valueCell.text(valueText);
             } else if (valueHTML) {
-                // safe (trusting valueHTML)
+                // xss safe (trusting valueHTML)
                 $valueCell.html(valueHTML);
             } else {
-                // safe
+                // xss safe
                 $valueCell.html(this.$noData());
             }
             return $valueCell;
@@ -174,9 +174,9 @@ define([
 
         $tableRow([headerText, valueText, valueHTML]) {
             return $('<tr>')
-                // safe
+                // xss safe
                 .append($('<th>').text(headerText))
-                // safe
+                // xss safe
                 .append(this.$renderCell(valueText, valueHTML));
         },
 
@@ -185,10 +185,10 @@ define([
             items.forEach((value) => {
                 if (value instanceof Array) {
                     const [valueText, valueHTML] = value;
-                    // safe
+                    // xss safe
                     $row.append(this.$renderCell(valueText, valueHTML));
                 } else {
-                    // safe
+                    // xss safe
                     $row.append(this.$renderCell(value, null));
                 }
             });
@@ -202,7 +202,7 @@ define([
 
         showSummary() {
             const self = this;
-            // safe
+            // xss safe
             const $summaryDiv = $('<div>').append(this.loading());
             const pangenomeClient = new DynamicServiceClient({
                 module: 'PanGenomeAPI',
@@ -216,11 +216,11 @@ define([
                     const $topTable = $('<table class="table table-hover table-striped table-bordered">');
 
                     $topTable
-                        // safe
+                        // xss safe
                         .append(self.$tableRow(['Pan-genome object Id', self.options.name]))
-                        // safe
+                        // xss safe
                         .append(self.$tableRow(['Total # of genomes', data.genomes_count]))
-                        // safe
+                        // xss safe
                         .append(self.$tableRow(['Total # of protein coding genes', null, [
                             '<b>',
                             content.niceNumber(data.genes.genes_count),
@@ -230,7 +230,7 @@ define([
                             content.niceNumber(data.genes.singleton_family_genes_count),
                             '</b> are in singleton families'
                         ].join(' ')]))
-                        // safe
+                        // xss safe
                         .append(self.$tableRow(['Total # of families', null, [
                             '<b>',
                             content.niceNumber(data.families.families_count),
@@ -242,23 +242,23 @@ define([
                         ].join(' ')]));
 
                     const $genomeTable = $('<table class="table table-hover table-striped table-bordered">')
-                        // safe
+                        // xss safe
                         .append($('<tr>')
-                            // safe
+                            // xss safe
                             .append($('<th>Genome</th>'))
-                            // safe
+                            // xss safe
                             .append($('<th># Genes</th>'))
-                            // safe
+                            // xss safe
                             .append($('<th># Genes in Homologs</th>'))
-                            // safe
+                            // xss safe
                             .append($('<th># Genes in Singletons</th>'))
-                            // safe
+                            // xss safe
                             .append($('<th># Homolog Families</th>'))
                         );
 
                     Object.keys(data.genomes).forEach((genome) => {
                         const genomeData = data.genomes[genome];
-                        // safe
+                        // xss safe
                         $genomeTable.append(self.$tableRowN([
                             genome,
                             content.niceNumber(genomeData.genome_genes),
@@ -268,12 +268,12 @@ define([
                         ]));
                     });
 
-                    // safe
+                    // xss safe
                     $summaryDiv.empty().append($topTable).append($genomeTable);
                 })
                 .catch((error) => {
                     $summaryDiv
-                        // safe
+                        // xss safe
                         .html(createError('Pangenome data summary error', error));
                 });
             return $summaryDiv;
@@ -281,7 +281,7 @@ define([
 
         showHomologFamilies() {
             const self = this;
-            // safe
+            // xss safe
             const $homologDiv = $('<div>').html(this.loading());
             const pangenomeClient = new DynamicServiceClient({
                 module: 'PanGenomeAPI',
@@ -314,18 +314,18 @@ define([
                     }
 
                     const $prettyTable = $('<table class="table table-hover table-striped table-bordered">');
-                    // safe
+                    // xss safe
                     $prettyTable.append($('<tr>').append(header.join()));
                     for (let i=0; i<numberTable.length; i++) {
-                        // safe
+                        // xss safe
                         $prettyTable.append(self.$tableRowN(numberTable[i]));
                     }
-                    // safe
+                    // xss safe
                     $homologDiv.empty().append($prettyTable);
                 })
                 .catch((error) => {
                     $homologDiv
-                        // safe
+                        // xss safe
                         .html(createError('Pangenome homolog family data error', error));
                 });
             return $homologDiv;
@@ -407,7 +407,7 @@ define([
         },
 
         createProteinFamilyTab(fam) {
-            // safe
+            // xss safe
             const $div = $('<div>').append(this.loading());
             const colMap = {
                 genome: 0,
@@ -564,7 +564,7 @@ define([
                         });
                 })
                 .catch((err) => {
-                    // safe
+                    // xss safe
                     $div.html(createError('Error fetching family features', err));
                 });
             return $div;

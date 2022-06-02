@@ -27,10 +27,10 @@ define([
         render() {
             const self = this;
             const row = $('<div class="row">');
-            // safe
+            // xss safe
             self.$elem.append(row);
             const $overview = $('<div class="col-md-4">');
-            // safe
+            // xss safe
             row.append($overview);
 
             $overview.KBaseAMAOverview({

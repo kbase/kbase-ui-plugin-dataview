@@ -51,19 +51,19 @@ define([
             };
             ///////////////////////////////////////////////////////////////////////////////
             const cell1 = $('<div panel panel-default">');
-            // safe
+            // xss safe
             self.$elem.append(cell1);
             const panel1 = self.makePleaseWaitPanel();
             self.makeDecoration(cell1, 'Feature Overview', panel1);
             ///////////////////////////////////////////////////////////////////////////////
             const cell2 = $('<div panel panel-default">');
-            // safe
+            // xss safe
             self.$elem.append(cell2);
             const panel2 = self.makePleaseWaitPanel();
             self.makeDecoration(cell2, 'Biochemistry', panel2);
             ///////////////////////////////////////////////////////////////////////////////
             const cell3 = $('<div panel panel-default">');
-            // safe
+            // xss safe
             self.$elem.append(cell3);
             const panel3 = self.makePleaseWaitPanel();
             self.makeDecoration(cell3, 'Sequence', panel3);
@@ -187,20 +187,20 @@ define([
             );
         },
         makePleaseWaitPanel() {
-            // safe
+            // xss safe
             return $('<div>').html(html.loading('loading...'));
         },
         makeDecoration($panel, title, $widgetDiv) {
             const id = this.genUUID();
-            // safe
+            // xss safe
             $panel.append(
                 $(
                     `<div class="panel-group" id="accordion_${id}" role="tablist" aria-multiselectable="true">`
                 )
-                    // safe
+                    // xss safe
                     .append(
                         $('<div class="panel panel-default kb-widget">')
-                            // safe
+                            // xss safe
                             .append(`<div class="panel-heading" role="tab" id="heading_${id}">
                                         <h4 class="panel-title">
                                             <span data-toggle="collapse" 
@@ -211,14 +211,14 @@ define([
                                                 style="cursor:pointer;">${domSafeText(title)}</span>
                                         </h4>
                                     </div>`)
-                            // safe
+                            // xss safe
                             .append(
                                 $(`<div id="collapse_${id}" 
                                         class="panel-collapse collapse in" 
                                         role="tabpanel" 
                                         aria-labelledby="heading_${id}" 
                                         area-expanded="true">`)
-                                    // safe
+                                    // xss safe
                                     .append($('<div class="panel-body">').append($widgetDiv))
                             )
                     )
@@ -233,7 +233,7 @@ define([
             };
         },
         showError(panel, e) {
-            // safe
+            // xss safe
             panel.html($errorAlert(e));
         },
         genUUID() {

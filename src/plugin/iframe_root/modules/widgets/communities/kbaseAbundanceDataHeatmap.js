@@ -33,11 +33,11 @@ define([
             const container = this.$elem;
             container.empty();
             if (!this.runtime.service('session').isLoggedIn()) {
-                // safe
+                // xss safe
                 container.append('<div>[Error] You\'re not logged in</div>');
                 return;
             }
-            // safe
+            // xss safe
             container.append(html.loading('loading data...'));
 
             const kbws = new Workspace(this.runtime.getConfig('services.workspace.url'), {
@@ -51,13 +51,13 @@ define([
                     if (data.length === 0) {
                         const msg =
                             `[Error] Object ${self.options.id} does not exist in workspace ${self.options.ws}`;
-                        // safe
+                        // xss safe
                         container.append(`<div><p>${msg}>/p></div>`);
                     } else {
                         const heatdata = data[0].data;
                         // HEATMAP
                         const heatmapId = html.genId();
-                        // safe
+                        // xss safe
                         container.append(`<div id='outputHeatmap${heatmapId}' style='width: 95%;'></div>`);
                         const heatTest = Heatmap.create({
                             target: $(`#outputHeatmap${heatmapId}`).get(0),
@@ -67,7 +67,7 @@ define([
                     }
                 },
                 (error) => {
-                    // safe
+                    // xss safe
                     container.html($errorAlert(error));
                 }
             );

@@ -83,7 +83,7 @@ define([
                 $elem.css('position', 'relative');
 
                 //XXX godawful hack to pop the tooltips to the top.
-                // safe
+                // xss safe
                 $elem.append($.jqElem('style').text('.tooltip { position : fixed }'));
             }
 
@@ -100,7 +100,7 @@ define([
                     .attr('z-index', 10000);
             }
 
-            // safe
+            // xss safe
             $elem.prepend($controlButtons);
 
             this._rewireIds($elem, this);
@@ -205,7 +205,7 @@ define([
                         .css('padding-top', '1px')
                         .css('padding-bottom', '1px')
                         .attr('class', btnClass)
-                        // safe
+                        // xss safe
                         .append($('<i>').addClass(val.icon))
                         .tooltip(tooltip) //{title : val.tooltip})
                         .on('click', function (e) {
@@ -243,7 +243,7 @@ define([
                         $button.data('id', this.options.id);
                     }
 
-                    // safe
+                    // xss safe
                     this.data('control-buttons').append($button);
                 }, this)
             );
