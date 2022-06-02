@@ -5,13 +5,80 @@ define([
     'kb_common/utils',
     'kb_service/client/workspace',
     'kb_service/workspaceClient',
-    'lib/domUtils',
+    'lib/jqueryUtils',
 
     // For effect
     'kbaseUI/widget/legacy/widget',
     'kbaseUI/widget/legacy/tabs',
     'datatables_bootstrap'
-], ($, Promise, html, Utils, Workspace, workspaceClient, {domSafeText}) => {
+], ($, Promise, html, Utils, Workspace, workspaceClient, {$errorAlert}) => {
+
+    function objTable({obj, keys, labels, keysAsLabels, bold}) {
+        // const obj = p.obj,
+        //     keys = p.keys;
+
+        // option to use nicely formated keys as labels
+        if (keysAsLabels) {
+            const labels = [];
+            for (const i in keys) {
+                const str = keys[i].key.replace(/(id|Id)/g, 'ID');
+                const words = str.split(/_/g);
+                for (const j in words) {
+                    words[j] = words[j].charAt(0).toUpperCase() + words[j].slice(1);
+                }
+                const name = words.join(' ');
+                labels.push(name);
+            }
+        } else if ('labels' in p) {
+            const labels = labels;
+        } else {
+            // if labels are specified in key objects, use them
+            for (const i in keys) {
+                const key_obj = keys[i];
+                if ('label' in key_obj) {
+                    labels.push(key_obj.label);
+                } else {
+                    labels.push(key_obj.key);
+                }
+
+            }
+        }
+
+        const table = $('<table class="table table-striped table-bordered">');
+
+        for (const i in keys) {
+            const key = keys[i];
+            const $row = $('<tr>');
+
+            let $labelCell;
+            if (bold) {
+                $labelCell = $('<td>').css('font-weight', 'bold').text(labels);
+            } else {
+                $labelCell = $('<td>').text(labels[i]);
+            }
+            // safe
+            $row.append($labelCell);
+
+            const $valueCell = $('<td>');
+            if ('format' in key) {
+                const val = key.format(obj);
+                $valueCell.text(val);
+            } else if (key.type === 'bool') {
+                $valueCell.text((obj[key.key] === 1 ? 'True' : 'False'));
+            } else {
+                $valueCell.text(obj[key.key]);
+            }
+            // safe
+            $row.append($valueCell);
+
+            // safe
+            table.append($row);
+        }
+
+        return table;
+    }
+
+
     $.KBWidget({
         name: 'kbaseExpressionSeries',
         parent: 'kbaseWidget',
@@ -78,10 +145,11 @@ define([
                             'Owner',
                             'Creation date'
                         ],
-                        table = Utils.objTable({obj: phenooverdata, keys, labels}),
+                        table = objTable({obj: phenooverdata, keys, labels}),
                         series = wsObj.data.genome_expression_sample_ids_map[genome],
                         sample_refs = [];
 
+                    // safe
                     tabs.tabContent('Overview').append(table);
 
                     for (let i = 0; i < series.length; i++) {
@@ -128,7 +196,8 @@ define([
                 })
                 .catch((e) => {
                     console.error(e);
-                    container.append(`<div class="alert alert-danger">${domSafeText(e.error.message)}</div>`);
+                    // safe
+                    container.html($errorAlert(e));
                 });
 
             return this;
