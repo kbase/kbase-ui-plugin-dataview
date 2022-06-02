@@ -30,10 +30,10 @@
 
 define([
     'jquery',
-    './widget',
     'lib/domUtils',
 
     // For effect
+    './widget',
     './prompt'
 ], (
     $,
