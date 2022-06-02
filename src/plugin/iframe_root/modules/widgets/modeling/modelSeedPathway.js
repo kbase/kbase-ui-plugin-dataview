@@ -613,6 +613,7 @@ define([
             }
         }
 
+        // xss ignore
         function wrap(text, width) {
             //var dy = 3;
             const dy = 0;
@@ -867,7 +868,7 @@ define([
                 $('#x-pos').text(x);
                 $('#y-pos').text(y);
             });
-            // safe
+            // xss safe
             container.prepend(edit_opts);
 
             // event for options
@@ -1117,6 +1118,7 @@ define([
                     msg.css('padding', '7px'); // one exception for putting this in js
                     msg.css('margin-left', '10px');
                     msg.css('margin-bottom', 0);
+                    // xss safe
                     container.find('.map-opts').after(msg);
                     msg.delay(3000).fadeOut(500);
 
@@ -1125,7 +1127,7 @@ define([
                     return null;
                 })
                 .catch((e) => {
-                    // safe
+                    // xss safe
                     container.prepend($errorAlert(e));
                 });
         }
@@ -1322,7 +1324,7 @@ define([
         // }
 
         function drawMap() {
-            // safe usage of html
+            // xss safe usage of html
             container.html('');
 
             svg = d3

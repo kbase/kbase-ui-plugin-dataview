@@ -120,9 +120,9 @@ define([
             // display area.
             const $errorBox = $('<div>')
                 .css('clear', 'both');
-            // safe
+            // xss safe
             $errorBox.html($errorAlert(err));
-            // safe
+            // xss safe
             this.$elem.append($errorBox);
         },
 
@@ -145,15 +145,15 @@ define([
             return $('<table>')
                 .addClass('table table-small')
                 .css('width', 'fit-content')
-                // safe
+                // xss safe
                 .append($('<tbody>')
-                    // safe
+                    // xss safe
                     .append(
                         aliases.map(([a, b]) => {
                             return $('<tr>')
-                                // safe
+                                // xss safe
                                 .append($('<td>').text(a))
-                                // safe
+                                // xss safe
                                 .append($('<td>').text(b));
                         })));
         },
@@ -230,7 +230,7 @@ define([
             };
 
             const $resultDiv = $('<div>');
-            // safe
+            // xss safe
             const $noResultsDiv = $('<div>').html('<center>No matching features found.</center>').hide();
             const $loadingDiv = $('<div>');
             const $errorDiv = $('<div>');
@@ -238,49 +238,49 @@ define([
             const $resultsInfoDiv = $('<div>');
 
             const $container = $('<div>').addClass('container-fluid').css({margin:'15px 0px', 'max-width':'100%'});
-            // safe
+            // xss safe
             $div.append($container);
             const $headerRow = $('<div>').addClass('row')
-                // safe
+                // xss safe
                 .append($('<div>').addClass('col-md-4').append($pagenateDiv))
-                // safe
+                // xss safe
                 .append($('<div>').addClass('col-md-4').append($loadingDiv))
-                // safe
+                // xss safe
                 .append($('<div>').addClass('col-md-4').append($input));
             const $resultsRow = $('<div>').addClass('row').css({'margin-top':'15px'})
-                // safe
+                // xss safe
                 .append($('<div>').addClass('col-md-12').append($resultDiv));
             const $noResultsRow = $('<div>').addClass('row')
-                // safe
+                // xss safe
                 .append($('<div>').addClass('col-md-12').append($noResultsDiv));
             // var $errorRow = $('<div>').addClass('row')
             //     .append($('<div>').addClass('col-md-8').append($errorDiv));
-                // safe
+                // xss safe
             const $infoRow = $('<div>').addClass('row')
-                // safe
+                // xss safe
                 .append($('<div>').addClass('col-md-4').append($resultsInfoDiv))
-                // safe
+                // xss safe
                 .append($('<div>').addClass('col-md-8'));
             $container
-                // safe
+                // xss safe
                 .append($headerRow)
-                // safe
+                // xss safe
                 .append($resultsRow)
-                // safe
+                // xss safe
                 .append($errorDiv)
-                // safe
+                // xss safe
                 .append($noResultsRow)
-                // safe
+                // xss safe
                 .append($infoRow);
 
-            // safe
+            // xss safe
             const $pageBack = $('<button class="btn btn-default">').append('<i class="fa fa-caret-left" aria-hidden="true">');
-            // safe
+            // xss safe
             const $pageForward = $('<button class="btn btn-default">').append('<i class="fa fa-caret-right" aria-hidden="true">');
 
-            // safe
+            // xss safe
             $pagenateDiv.append($pageBack);
-            // safe
+            // xss safe
             $pagenateDiv.append($pageForward);
             $pagenateDiv.hide();
 
@@ -293,8 +293,9 @@ define([
             const setToLoad = function ($panel) {
                 //clearInfo();
                 $panel.empty();
+                // xss safe
                 const $loadingDiv = $('<div>').attr('align', 'left').append($('<i class="fa fa-spinner fa-spin fa-2x">'));
-                // safe
+                // xss safe
                 $panel.append($loadingDiv);
             };
 
@@ -317,7 +318,7 @@ define([
                     })
                     .catch((err) => {
                         console.error(err);
-                        // safe
+                        // xss safe
                         $errorDiv.html($errorAlert(err), 'Error Searching');
                         throw err;
                     });
@@ -329,7 +330,7 @@ define([
 
             const showViewInfo = function (start, num_showing, num_found) {
                 $resultsInfoDiv.empty();
-                // safe
+                // xss safe
                 $resultsInfoDiv.append(`Showing ${start+1} to ${start+num_showing} of ${num_found}`);
             };
             const showNoResultsView = function () {
@@ -346,19 +347,19 @@ define([
 
                 if (idClick) {
                     const getCallback = function (rowData) { return function () {idClick(rowData);};};
-                    // safe
+                    // xss safe
                     $tr.append($('<td>').append(
-                        // safe
+                        // xss safe
                         $('<a>').css('cursor','pointer').append(domSafeText(rowData['feature_id']))
                             .on('click',getCallback(rowData)))
                     );
                 } else {
-                    // safe
+                    // xss safe
                     $tr.append($('<td>').append($('<div>').css('word-break','break-all').text(rowData['feature_id'])));
                 }
-                // safe
+                // xss safe
                 $tr.append($('<td>').text(rowData['feature_type']));
-                // safe
+                // xss safe
                 $tr.append($('<td>').text(rowData['function']));
                 if (rowData['function']) { hasFunc = true; }
 
@@ -368,46 +369,46 @@ define([
 
                 // TODO: implement; was fully unimplemented (just empty cell); I don't currently
                 // have access to an AMA with features with descriptions.
-                // safe
+                // xss safe
                 const $functionalDescriptions = $('<td>').html(this.$notImplemented());
 
-                // safe
+                // xss safe
                 $tr.append($functionalDescriptions);
 
                 // TODO: implement; was fully unimplemented (just empty cell); I don't currently
                 // have access to an AMA with aliases.
-                // safe
+                // xss safe
                 const $aliases = $('<td>').html(rowData.aliases ? this.$renderAliases(rowData.aliases) : this.$noData());
 
-                // safe
+                // xss safe
                 $tr.append($aliases);
 
                 if (rowData['global_location']['contig_id']) {
                     const loc = rowData['global_location'];
-                    // safe
+                    // xss safe
                     $tr.append($('<td>').text(numberWithCommas(loc['start'])));
-                    // safe
+                    // xss safe
                     $tr.append($('<td>').text(loc['strand']));
-                    // safe
+                    // xss safe
                     $tr.append($('<td>').text(numberWithCommas(loc['stop'])));
                     if (contigClick) {
                         const getCallback = function () { return function () {contigClick(loc['contig_id']);};};
-                        // safe
+                        // xss safe
                         $tr.append($('<td>').append(
-                            // safe
+                            // xss safe
                             $('<div>')
                                 .css({'word-break':'break-all'})
-                                // safe
+                                // xss safe
                                 .html(
                                     $('<a>').css('cursor','pointer')
                                         .text(loc['contig_id'])
                                         .on('click',getCallback(loc['contig_id'])))));
                     } else {
-                        // safe
+                        // xss safe
                         $tr.append($('<td>').append($('<div>').css('word-break','break-all').text(loc['contig_id'])));
                     }
                 } else {
-                    // safe
+                    // xss safe
                     $tr.append($('<td>')).append($('<td>')).append($('<td>')).append($('<td>'));
                 }
 
@@ -432,7 +433,7 @@ define([
                     let hasAlias = false;
                     for (let k=0; k<features.length; k++) {
                         const row = buildRow(features[k]);
-                        // safe
+                        // xss safe
                         $table.append(row.$tr);
                         if (row.hasFunc) { hasFunc = true; }
                         if (row.hasOntology) { hasOntology = true; }
@@ -466,16 +467,16 @@ define([
             const $table = $('<table>')
                 .addClass('table table-striped table-bordered table-hover')
                 .css({'margin-left':'auto', 'margin-right':'auto'});
-            // safe
+            // xss safe
             $resultDiv.append($table);
 
 
             const buildColumnHeader = function (name, id, click_event) {
                 const $sortIcon = $('<i>').css('margin-left','8px');
                 const $th = $('<th>')
-                    // safe
+                    // xss safe
                     .append(`<b>${name}</b>`)
-                    // safe
+                    // xss safe
                     .append($sortIcon);
                 if (click_event) {
                     $th
@@ -536,9 +537,10 @@ define([
                 };
 
                 const buildSingleColHeader = function (key, title, width, showSortedIcon, sortEvent, target) {
+                    // xss safe
                     target.$colgroup.append($('<col span=1>').addClass(`feature-tbl-${key}`).css('width',width));
                     const h = buildColumnHeader(title, key, sortEvent);
-                    // safe
+                    // xss safe
                     target.$tr.append(h.$th);
                     if (showSortedIcon) {
                         h.$sortIcon.addClass('fa fa-sort-desc');
@@ -566,9 +568,9 @@ define([
             };
 
             const headers = buildTableHeader();
-            // safe
+            // xss safe
             $table.append(headers.$colgroup);
-            // safe
+            // xss safe
             $table.append(headers.$theader);
 
 
@@ -682,7 +684,7 @@ define([
             };
 
             const $resultDiv = $('<div>');
-            // safe
+            // xss safe
             const $noResultsDiv = $('<div>').append('<center>No matching contigs found.</center>').hide();
             const $loadingDiv = $('<div>');
             const $errorDiv = $('<div>');
@@ -690,48 +692,48 @@ define([
             const $resultsInfoDiv = $('<div>');
 
             const $container = $('<div>').addClass('container-fluid').css({margin:'15px 0px', 'max-width':'100%'});
-            // safe
+            // xss safe
             $div.html($container);
             const $headerRow = $('<div>').addClass('row')
-                // safe
+                // xss safe
                 .append($('<div>').addClass('col-md-4').append($pagenateDiv))
-                // safe
+                // xss safe
                 .append($('<div>').addClass('col-md-4').append($loadingDiv));
                 // .append($('<div>').addClass('col-md-4').append($input));
             const $resultsRow = $('<div>').addClass('row').css({'margin-top':'15px'})
-                // safe
+                // xss safe
                 .append($('<div>').addClass('col-md-12').append($resultDiv));
             const $noResultsRow = $('<div>').addClass('row')
-                // safe
+                // xss safe
                 .append($('<div>').addClass('col-md-12').append($noResultsDiv));
             // var $errorRow = $('<div>').addClass('row')
             //     .append($('<div>').addClass('col-md-8').append($errorDiv));
             const $infoRow = $('<div>').addClass('row')
-                // safe
+                // xss safe
                 .append($('<div>').addClass('col-md-4').append($resultsInfoDiv))
-                // safe
+                // xss safe
                 .append($('<div>').addClass('col-md-8'));
-                // safe
+                // xss safe
             $container
-                // safe
+                // xss safe
                 .append($headerRow)
-                // safe
+                // xss safe
                 .append($resultsRow)
-                // safe
+                // xss safe
                 .append($errorDiv)
-                // safe
+                // xss safe
                 .append($noResultsRow)
-                // safe
+                // xss safe
                 .append($infoRow);
 
-            // save
+            // xss safe
             const $pageBack = $('<button class="btn btn-default">').html('<i class="fa fa-caret-left" aria-hidden="true">');
-            // safe
+            // xss safe
             const $pageForward = $('<button class="btn btn-default">').html('<i class="fa fa-caret-right" aria-hidden="true">');
 
-            // safe
+            // xss safe
             $pagenateDiv.append($pageBack);
-            // safe
+            // xss safe
             $pagenateDiv.append($pageForward);
             $pagenateDiv.hide();
 
@@ -744,9 +746,9 @@ define([
             const setToLoad = function ($panel) {
                 //clearInfo();
                 $panel.empty();
-                // safe
+                // xss safe
                 const $loadingDiv = $('<div>').attr('align', 'left').append($('<i class="fa fa-spinner fa-spin fa-2x">'));
-                // safe
+                // xss safe
                 $panel.append($loadingDiv);
             };
 
@@ -762,7 +764,7 @@ define([
                     .spread((d) => {return d;})
                     .catch((err)=> {
                         console.error(err);
-                        // safe
+                        // xss safe
                         $errorDiv.html($errorAlert(err));
                     });
             }
@@ -772,7 +774,7 @@ define([
             };
 
             const showViewInfo = function (start, num_showing, num_found) {
-                // safe
+                // xss safe
                 $resultsInfoDiv.text(`Showing ${start+1} to ${start+num_showing} of ${num_found}`);
             };
             const showNoResultsView = function () {
@@ -785,7 +787,7 @@ define([
                 const $tr = $('<tr>');
                 if (contigClick) {
                     const getCallback = function (rowData) { return function () { contigClick(rowData['contig_id']); };};
-                    // safe
+                    // xss safe
                     $tr.append($('<td>').append(
                         $('<a>').css('cursor','pointer').text(rowData['contig_id'])
                             .on('click',getCallback(rowData)))
@@ -793,9 +795,9 @@ define([
                 } else {
                     $tr.append($('<td>').text(rowData['contig_id']));
                 }
-                // safe
+                // xss safe
                 $tr.append($('<td>').text(numberWithCommas(rowData['length'])));
-                // safe
+                // xss safe
                 $tr.append($('<td>').text(numberWithCommas(rowData['feature_count'])));
 
                 return $tr;
@@ -810,7 +812,7 @@ define([
                 const contigs = results['contigs'];
                 if (contigs.length>0) {
                     for (let k=0; k<contigs.length; k++) {
-                        // safe
+                        // xss safe
                         $table.append(buildRow(contigs[k]));
                     }
                     n_results = results['num_found'];
@@ -825,16 +827,16 @@ define([
             const $table = $('<table>')
                 .addClass('table table-striped table-bordered table-hover')
                 .css({'margin-left':'auto', 'margin-right':'auto'});
-            // safe
+            // xss safe
             $resultDiv.append($table);
 
 
             const buildColumnHeader = function (name, id, click_event) {
                 const $sortIcon = $('<i>').css('margin-left','8px');
                 const $th = $('<th>')
-                    // safe
+                    // xss safe
                     .append(`<b>${name}</b>`)
-                    // safe
+                    // xss safe
                     .append($sortIcon);
                 if (click_event) {
                     $th
@@ -890,26 +892,26 @@ define([
                         .catch(()=> { inFlight=false; });
                 };
 
-                // safe
+                // xss safe
                 $colgroup.append($('<col span=1>').css('width','20%'));
                 let h = buildColumnHeader('Contig ID', 'contig_id', sortEvent);
-                // safe
+                // xss safe
                 $tr.append(h.$th);
                 h.$sortIcon.addClass('fa fa-sort-desc');
                 cols[h.id] = h;
 
-                // safe
+                // xss safe
                 $colgroup.append($('<col span=1>').css('width','5%'));
                 h = buildColumnHeader('Length', 'length', sortEvent);
-                // safe
+                // xss safe
                 $tr.append(h.$th);
                 cols[h.id] = h;
 
 
-                // safe
+                // xss safe
                 $colgroup.append($('<col span=1>').css('width','20%'));
                 h = buildColumnHeader('Feature Count', 'feature_count', sortEvent);
-                // safe
+                // xss safe
                 $tr.append(h.$th);
                 cols[h.id] = h;
 
@@ -917,9 +919,9 @@ define([
             };
 
             const headers = buildTableHeader();
-            // safe
+            // xss safe
             $table.append(headers.$colgroup);
-            // safe
+            // xss safe
             $table.append(headers.$theader);
 
 
@@ -971,15 +973,15 @@ define([
                 }])
                 .spread((result) => {
                     const contigData = result['contig'];
-                    // safe
+                    // xss safe
                     $length.text(numberWithCommas(result['contig']['length']));
-                    // safe
+                    // xss safe
                     $n_features.text(numberWithCommas(result['contig']['feature_count']));
                     return contigData;
                 })
                 .catch((err) => {
                     console.error(err);
-                    // safe
+                    // xss safe
                     $length.html($errorAlert(err));
                 });
         },
@@ -1066,13 +1068,13 @@ define([
                         cgb.data.$elem.show(()=> {
                             cgb.data.update();
                         });
-                        // safe
+                        // xss safe
                         $div.append(cgb.data.$elem);
                         cgb.data.init();
                     })
                     .catch((err) => {
                         console.error(err);
-                        // safe
+                        // xss safe
                         $div.html($errorAlert(err));
                     });
             }
@@ -1085,55 +1087,55 @@ define([
 
                 const $tbl = $('<table>').addClass('table table-striped table-bordered table-hover')
                     .css({'margin-left':'auto', 'margin-right':'auto'});
-                // safe
+                // xss safe
                 $tbl.append($('<colgroup>').append($('<col span=1>').css('width','15%')));
                 const $browserCtrlDiv = $('<div>');
                 const $browserDiv = $('<div>');
 
                 // basic layout
                 const $container = $('<div>').addClass('container-fluid').css({margin:'15px 0px', 'max-width':'100%'});
-                // safe
+                // xss safe
                 $div.append($container);
                 const $tblRow = $('<div>').addClass('row')
-                    // safe
+                    // xss safe
                     .append($('<div>').addClass('col-md-12').append($tbl));
                 const $browserCtrlRow = $('<div>').addClass('row').css({'margin-top':'15px', 'text-align':'center'})
-                    // safe
+                    // xss safe
                     .append($('<div>').addClass('col-md-12').append($browserCtrlDiv));
                 const $browserRow = $('<div>').addClass('row').css({'margin-top':'15px', 'text-align':'center'})
-                    // safe
+                    // xss safe
                     .append($('<div>').addClass('col-md-12').append($browserDiv));
-                // safe
+                // xss safe
                 $container.append($tblRow).append($browserCtrlRow).append($browserRow);
 
 
                 // ID
                 const $id = $('<tr>')
-                    // safe
+                    // xss safe
                     .append($('<td>').append('<b>Contig ID</b>'))
-                    // safe
+                    // xss safe
                     .append($('<td>').text(contig_id));
-                // safe
+                // xss safe
                 $tbl.append($id);
 
                 // Length
                 const $lengthField = $('<div>');
                 const $len = $('<tr>')
-                    // safe
+                    // xss safe
                     .append($('<td>').append('<b>Length</b>'))
-                    // safe
+                    // xss safe
                     .append($('<td>').append($lengthField));
-                // safe
+                // xss safe
                 $tbl.append($len);
 
                 // N Features
                 const $featureField = $('<div>');
                 const $nf = $('<tr>')
-                    // safe
+                    // xss safe
                     .append($('<td>').append('<b>Number of Features</b>'))
-                    // safe
+                    // xss safe
                     .append($('<td>').append($featureField));
-                // safe
+                // xss safe
                 $tbl.append($nf);
 
                 self.renderContigData(metagenome_ref, contig_id, {
@@ -1142,7 +1144,7 @@ define([
                 })
                     .then((contigData) => {
                         // Browser
-                        // safe
+                        // xss safe
                         $browserRow.append($('<i class="fa fa-spinner fa-spin fa-2x">'));
                         let start = 0;
                         // var tenKb = 10000;
@@ -1151,13 +1153,14 @@ define([
                         const contig_length = contigData['length'];
 
                         const $contigScrollBack = $('<button class="btn btn-default">')
-                            // safe
+                            // xss safe
                             .append('<i class="fa fa-caret-left" aria-hidden="true">')
                             .text(' back 20kb')
                             .on('click', () => {
                                 if (start-twentyKb < 0) {
                                     return;
                                 }
+                                // xss safe
                                 $browserRow.append($('<i class="fa fa-spinner fa-spin fa-2x">'));
                                 start = start - twentyKb;
                                 length = twentyKb;
@@ -1166,12 +1169,13 @@ define([
 
                         const $contigScrollForward = $('<button class="btn btn-default">')
                             .text('forward 20kb ')
-                            // safe
+                            // xss safe
                             .append('<i class="fa fa-caret-right" aria-hidden="true">')
                             .on('click', () => {
                                 if (start+twentyKb>contig_length) {
                                     return;
                                 }
+                                // xss safe
                                 $browserRow.append($('<i class="fa fa-spinner fa-spin fa-2x">'));
                                 if (start+twentyKb>contig_length) {
                                     return;
@@ -1181,7 +1185,7 @@ define([
                                 getFeaturesInRegionAndRenderBrowser(metagenome_ref, contig_id, start, length, contig_length, $browserRow);
                             });
 
-                        // safe
+                        // xss safe
                         $browserCtrlDiv.append($contigScrollBack).append($contigScrollForward);
 
                         getFeaturesInRegionAndRenderBrowser(metagenome_ref, contig_id, start, length, contig_length, $browserRow);
@@ -1221,7 +1225,7 @@ define([
             const ready = function () {
                 container.empty();
                 const $tabPane = $(`<div id="${pref}tab-content">`);
-                // safe
+                // xss safe
                 container.append($tabPane);
                 // var tabObj = new kbaseTabs($tabPane, {canDelete : true, tabs : []});
                 const tabObj = $tabPane.kbaseTabs($tabPane, {canDelete : true, tabs : []});
@@ -1274,7 +1278,7 @@ define([
                 }
             };
             container.empty();
-            // safe
+            // xss safe
             container.append($('<div>').attr('align', 'center').append($('<i class="fa fa-spinner fa-spin fa-2x">')));
 
             ready();
@@ -1373,21 +1377,21 @@ define([
                 let lines=1;
                 for (let i = 0; i < sequence.length; i++) {
                     if (i>0 && i%charWrap===0) {
-                        // safe
+                        // xss safe
                         $posTD.append('<br>').append(i+1).append(':&nbsp;');
-                        // safe
+                        // xss safe
                         $seqTD.append('<br>');
                         lines++;
                     } else if (i==0) {
-                        // safe
+                        // xss safe
                         $posTD.append(i+1).append(':&nbsp;');
                     }
                     const base = sequence[i];
                     $seqTD.append(domSafeText(base));
                 }
-                // safe
+                // xss safe
                 $div.append($('<table>').css({border:'0','border-collapse':'collapse'}).append(
-                    // safe
+                    // xss safe
                     $('<tr>').css({border:'0'}).append($posTD).append($seqTD)));
                 if (lines>5) {
                     $div.css({height:'6em', overflow:'auto', resize:'vertical'});
@@ -1424,18 +1428,18 @@ define([
                 }
                 const $tbl = $('<table>').addClass('table table-striped table-bordered table-hover')
                     .css({'margin-left':'auto', 'margin-right':'auto'});
-                // safe
+                // xss safe
                 $tbl.append($('<colgroup>').append($('<col span=1>').css('width','15%')));
 
 
                 // basic layout
                 const $container = $('<div>').addClass('container-fluid').css({margin:'15px 0px', 'max-width':'100%'});
-                // safe
+                // xss safe
                 $div.append($container);
                 const $tblRow = $('<div>').addClass('row')
-                    // safe
+                    // xss safe
                     .append($('<div>').addClass('col-md-12').append($tbl));
-                // safe
+                // xss safe
                 $container.append($tblRow);
 
                 const tblLabels = [];
@@ -1449,21 +1453,21 @@ define([
                 tblLabels.push('Aliases');
                 const $aliases = $('<div>');
                 if (featureData['aliases']) {
-                    // safe
+                    // xss safe
                     $aliases.html($('<table>').addClass('table table-small').css('width', 'fit-content')
-                        // safe
+                        // xss safe
                         .append($('<tbody>')
-                            // safe
+                            // xss safe
                             .append(
                                 featureData.aliases.map(([a, b]) => {
                                     return $('<tr>')
-                                        // safe
+                                        // xss safe
                                         .append($('<td>').text(a))
-                                        // safe
+                                        // xss safe
                                         .append($('<td>').text(b));
                                 }))));
                 } else {
-                    // safe
+                    // xss safe
                     $aliases.html($none());
                 }
                 tblData.push($aliases);
@@ -1485,11 +1489,11 @@ define([
                 tblLabels.push('Location');
                 const $loc = $('<div>');
                 if (featureData['global_location']['contig_id']) {
-                    // safe
+                    // xss safe
                     $loc.append($('<div>')
-                        // safe
+                        // xss safe
                         .append($('<span>').text('Contig: '))
-                        // safe
+                        // xss safe
                         .append($('<a>').text(featureData['global_location']['contig_id'])
                             .css({cursor:'pointer'})
                             .on('click', () => {
@@ -1501,21 +1505,21 @@ define([
                         const $locDiv = $('<div>');
                         let crop = false;
                         for (let i=0; i<locs.length; i++) {
-                            // safe
+                            // xss safe
                             if (i>0) { $locDiv.append('<br>'); }
                             if (i>6) { crop=true; }
                             const loc = locs[i];
                             const bounds = getFeatureLocationBounds(loc);
                             $locDiv.text(`${numberWithCommas(bounds['start'])} - ${ numberWithCommas(bounds['end'])} (${loc['strand']} Strand)`);
                         }
-                        // safe
+                        // xss safe
                         $loc.append($locDiv);
                         if (crop) {
                             $locDiv.css({height:'10em', overflow:'auto', resize:'vertical'});
                         }
                     }
                 } else {
-                    // safe
+                    // xss safe
                     $loc.html($none());
                 }
 
@@ -1523,7 +1527,7 @@ define([
 
                 const $contigBrowser = $('<div>');
 
-                // safe
+                // xss safe
                 $contigBrowser.html($loadingAlert('Fetching nearby feature data...'));
 
                 tblLabels.push('Feature Context');
@@ -1547,11 +1551,11 @@ define([
 
 
                 for (let i=0; i<tblLabels.length; i++) {
-                    // safe
+                    // xss safe
                     $tbl.append($('<tr>')
-                        // safe
+                        // xss safe
                         .append($('<td>').append($('<b>').append(tblLabels[i])))
-                        // safe
+                        // xss safe
                         .append($('<td>').append(tblData[i])));
                 }
 
@@ -1559,30 +1563,30 @@ define([
                     $dnaLen.text(numberWithCommas(featureData['size']));
                 }
                 if (featureData['dna_sequence']){
-                    // safe
+                    // xss safe
                     $dnaSeq.html(printDNA(domSafeValue(featureData['dna_sequence']), 100));
                 } else {
-                    // safe
+                    // xss safe
                     $warnings.html($none('Not Available'));
                 }
                 if (featureData['warnings']){
-                    // safe
+                    // xss safe
                     $warnings.html(featureData['warnings'].map((value) => {return domSafeValue(value);}).join('<br>'));
                 } else {
-                    // safe
+                    // xss safe
                     $warnings.html($none());
                 }
                 if (featureData['functional_descriptions']) {
-                    // safe
+                    // xss safe
                     $functions.html(featureData['functional_descriptions'].map((value) => {return domSafeValue(value);}).join('<br>'));
                 } else {
-                    // safe
+                    // xss safe
                     $functions.html($none());
                 }
                 if (featureData['parent_gene']) {
                     $relationships.text(`Parent Gene: ${featureData['parent_gene']}`);
                 } else {
-                    // safe
+                    // xss safe
                     $relationships.html($none());
                 }
                 if (featureData['inference_data']) {
@@ -1663,13 +1667,13 @@ define([
                             cgb.data.$elem.show(()=> {
                                 cgb.data.update();
                             });
-                            // safe
+                            // xss safe
                             $contigBrowser.append(cgb.data.$elem);
                             cgb.data.init();
                         })
                         .catch((err) => {
                             console.error(err);
-                            // safe
+                            // xss safe
                             $contigBrowser.html($errorAlert(err));
                         });
                 }

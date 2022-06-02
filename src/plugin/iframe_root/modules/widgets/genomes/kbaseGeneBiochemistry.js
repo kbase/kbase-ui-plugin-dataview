@@ -45,13 +45,13 @@ define([
         },
         render() {
             this.$messagePane = $('<div/>').addClass('kbwidget-message-pane kbwidget-hide-message');
-            // safe
+            // xss safe
             this.$elem.append(this.$messagePane);
 
             this.$infoPanel = $('<div>').css('overflow', 'auto');
             this.$infoTable = $('<table>').addClass('table table-striped table-bordered');
 
-            // safe
+            // xss safe
             this.$elem.append(this.$infoPanel.append(this.$infoTable));
         },
 
@@ -65,13 +65,13 @@ define([
         $renderCell(valueText, valueHTML) {
             const $valueCell = $('<td>');
             if (valueText) {
-                // safe
+                // xss safe
                 $valueCell.text(valueText);
             } else if (valueHTML) {
-                // safe (trusting valueHTML as good html text or jquery object)
+                // xss safe (trusting valueHTML as good html text or jquery object)
                 $valueCell.html(valueHTML);
             } else {
-                // safe
+                // xss safe
                 $valueCell.html(this.$noData());
             }
             return $valueCell;
@@ -79,9 +79,9 @@ define([
 
         $renderRow(headerText, valueText, valueHTML) {
             return $('<tr>')
-                // safe
+                // xss safe
                 .append($('<th>').text(headerText))
-                // safe
+                // xss safe
                 .append(this.$renderCell(valueText, valueHTML));
         },
 
@@ -138,7 +138,7 @@ define([
                     func = 'Unknown';
                 }
 
-                // safe
+                // xss safe
                 this.$infoTable.append(this.$renderRow('Function', func));
 
                 // Subsystems, single string
@@ -164,7 +164,7 @@ define([
                 } else {
                     subsysDataStr = this.$noData('No subsystem data found.');
                 }
-                // safe
+                // xss safe
                 this.$infoTable.append(this.$renderRow('Subsystems', null, subsysDataStr));
 
                 // Annotation
@@ -179,7 +179,7 @@ define([
                 } else {
                     annotationsStr = this.$noData('No annotation comments found.');
                 }
-                // safe
+                // xss safe
                 this.$infoTable.append(this.$renderRow('Annotation Comments', null, annotationsStr));
 
                 // Protein families list.
@@ -231,7 +231,7 @@ define([
         },
         showMessage(message) {
             this.$messagePane
-                // safe (usages)
+                // xss safe (usages)
                 .html($('<div>').html(message))
                 .removeClass('hide');
         },
@@ -251,11 +251,11 @@ define([
             const errString = this.makeErrorString(error),
                 $errorDiv = $('<div>')
                     .addClass('alert alert-danger')
-                    // safe
+                    // xss safe
                     .append('<b>Error:</b>')
-                    // safe
+                    // xss safe
                     .append(`<br>${domSafeText(errString)}`);
-            // safe
+            // xss safe
             this.$elem.html($errorDiv);
         }
     });

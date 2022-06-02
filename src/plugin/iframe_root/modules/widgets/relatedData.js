@@ -55,7 +55,7 @@ define([
             //     icon: 'copy',
             //     collapsed: true
             // });
-            // safe
+            // xss safe
             this.container.innerHTML = this.dataLayout();
             const iframeElm = this.container.querySelector('iframe');
             const config = {

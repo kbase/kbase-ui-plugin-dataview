@@ -9,7 +9,7 @@ define([
     const donorNode = document.createElement('div');
     function domSafeText(rawContent) {
         donorNode.innerText = rawContent;
-        // safe
+        // xss safe
         return donorNode.innerHTML;
     }
 

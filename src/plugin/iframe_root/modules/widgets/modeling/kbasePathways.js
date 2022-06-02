@@ -108,7 +108,7 @@ define([
                     })
                     .catch((err) => {
                         console.error(err);
-                        // safe
+                        // xss safe
                         container.prepend($errorAlert(err));
                         return false;
                     });
@@ -144,11 +144,11 @@ define([
                         const image = imgRes[0].data.id,
                             mapData = mapRes[0].data;
                         // no need to decode...
-                        // safe
+                        // xss safe
                         container.append(
                             `<img src="data:image/png;base64,${image}" style="display: inline-block;">`
                         );
-                        // safe
+                        // xss safe
                         container.append(`<div id="pathway-${elemID}" style="position:absolute; top:0;">`);
                         container.rmLoading();
                         const modelSeedPathway = new ModelSeedPathway({

@@ -9,18 +9,18 @@
  tabs : [
  {
  tab : 'T1',                                     //name of the tab
- // safe
+ // xss safe
  content : $('<div></div>').html("I am a tab"),  //jquery object to stuff into the content
  canDelete : false,                              //override the canDelete param on a per tab basis
  },
  {
  tab : 'T2',
- // safe
+ // xss safe
  content : $('<div></div>').html("I am a tab 2"),
  },
  {
  tab : 'T3',
- // safe
+ // xss safe
  content : $('<div></div>').html("I am a tab 3"),
  show : true,                                    //boolean. This tab gets shown by default. If not specified, the first tab is shown
  },
@@ -78,12 +78,12 @@ define([
                 .addClass('nav nav-tabs')
                 .attr('id', 'tabs-nav');
 
-            // safe
+            // xss safe
             $block.append($nav).append($tabs);
 
             this._rewireIds($block, this);
 
-            // safe
+            // xss safe
             $elem.append($block);
 
             if (tabs) {
@@ -104,10 +104,10 @@ define([
                 .addClass('tab-pane');
 
             if (tab.content) {
-                // safe (need to trust)
+                // xss safe (need to trust)
                 $tab.append(tab.content);
             } else if (tab.showContentCallback) {
-                // safe (need to trust)
+                // xss safe (need to trust)
                 $tab.append(tab.showContentCallback());
             }
 
@@ -121,7 +121,7 @@ define([
 
             const $nav = $('<li></li>')
                 .css('white-space', 'nowrap')
-                // safe
+                // xss safe
                 .append(
                     $('<a></a>')
                         .attr('href', '#')
@@ -154,11 +154,11 @@ define([
                                 });
                             });
                         })
-                        // safe
+                        // xss safe
                         .append(
                             $('<button></button>')
                                 .addClass('btn btn-default btn-xs')
-                                // safe
+                                // xss safe
                                 .append($('<i></i>').addClass(this.closeIcon()))
                                 .css('padding', '0px')
                                 .css('width', '22px')
@@ -187,9 +187,9 @@ define([
             this.data('tabs')[tab.tab] = $tab;
             this.data('nav')[tab.tab] = $nav;
 
-            // safe
+            // xss safe
             this.data('tabs-content').append($tab);
-            // safe
+            // xss safe
             this.data('tabs-nav').append($nav);
 
             const tabCount = Object.keys(this.data('tabs')).length;

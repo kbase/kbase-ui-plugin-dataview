@@ -140,7 +140,7 @@ define([
                                 data: self.obj[tab.key]
                             });
                             tabPane.rmLoading();
-                            // safe
+                            // xss safe
                             tabPane.append(table);
                         }
                     }
@@ -263,9 +263,9 @@ define([
 
             function createErrorMessage(tabPane, error) {
                 tabPane.empty();
-                // safe
+                // xss safe
                 tabPane.append('<br>');
-                // safe
+                // xss safe
                 tabPane.append(
                     html.makePanel({
                         title: 'Error',
@@ -280,7 +280,7 @@ define([
                 tabPane.rmLoading();
 
                 // note: must add table first
-                // safe
+                // xss safe
                 tabPane.append(
                     table({
                         class: 'table table-bordered table-striped',
@@ -355,11 +355,11 @@ define([
                             }).then((rows) => {
                                 contentDiv.rmLoading();
                                 if (!rows) {
-                                    // safe
+                                    // xss safe
                                     contentDiv.append(`<br>No data found for ${info.id}`);
                                 } else {
                                     const table = self.verticalTable({rows});
-                                    // safe
+                                    // xss safe
                                     contentDiv.append(table);
                                     newTabEvents(info.id);
                                 }
@@ -373,7 +373,7 @@ define([
                         }
                     }).catch((err) => {
                         console.error(err);
-                        // safe
+                        // xss safe
                         contentDiv.html($errorAlert(err));
                     });
                 });
@@ -531,7 +531,7 @@ define([
                     }
 
                     const r = $('<tr>');
-                    // safe
+                    // xss safe
                     r.append(`<td><b>${domSafeText(row.label)}</b></td>`);
 
                     // if the data is in the row definition, use it
@@ -551,21 +551,21 @@ define([
                             }
                             return row.data;
                         })() || content.na();
-                        // safe (trusting usage)
+                        // xss safe (trusting usage)
                         r.append(`<td>${value}</td>`);
                     } else if ('key' in row) {
                         if (row.type === 'wstype') {
                             const ref = data[row.key];
 
                             const cell = $(`<td data-ref="${ref}">loading...</td>`);
-                            // safe
+                            // xss safe
                             r.append(cell);
 
                             getLink(ref)
                                 .then(({ref, name}) => {
                                     table
                                         .find(`[data-ref="${ref}"]`)
-                                        // safe usage of html
+                                        // xss safe usage of html
                                         .html(`<a href="${DATAVIEW_URL}/${ref}" target="_blank">${name ? domSafeText(name) : content.na()}</a>`);
                                     return null;
                                 })
@@ -573,21 +573,21 @@ define([
                                     console.error(err);
                                     table
                                         .find(`[data-ref="${ref}"]`)
-                                        // safe usage of html
+                                        // xss safe usage of html
                                         .html(`<span title="${domSafeError(err)}" style="cursor: help">error fetching</span>`);
                                     return null;
                                 });
                         } else {
                             // Plain column
-                            // safe
+                            // xss safe
                             r.append(`<td data-k-b-testhook-field="${row.key}">${domSafeText(data[row.key])}</td>`);
                         }
                     } else if (row.type === 'pictureEquation') {
-                        // safe
+                        // xss safe
                         r.append($('<td></td>').append(this.pictureEquation(row.data)));
                     }
 
-                    // safe
+                    // xss safe
                     table.append(r);
                 }
 
@@ -661,7 +661,7 @@ define([
                     const cpd = cpds.left[i];
                     const img_url = `${IMAGE_URL + cpd  }.jpeg`;
                     /* TODO: this is going to fail ... there is no panel node around unless it is set globally in some dependency ... */
-                    // safe
+                    // xss safe
                     panel.append(
                         `<div class="pull-left text-center">\
                                     <img src="${img_url}" width=150 ><br>\
@@ -673,20 +673,20 @@ define([
                     plus.css('margin', '30px 0 0 0');
 
                     if (i < cpds.left.length - 1) {
-                        // safe
+                        // xss safe
                         panel.append(plus);
                     }
                 }
 
                 const direction = $('<div class="pull-left text-center"><=></div>');
                 direction.css('margin', '25px 0 0 0');
-                // safe
+                // xss safe
                 panel.append(direction);
 
                 for (let i = 0; i < cpds.right.length; i++) {
                     const cpd = cpds.right[i];
                     const img_url = `${IMAGE_URL + cpd  }.jpeg`;
-                    // safe
+                    // xss safe
                     panel.append(
                         `<div class="pull-left text-center">\
                                     <img src="${img_url}" data-cpd="${cpd}" width=150 ><br>\
@@ -698,7 +698,7 @@ define([
                     plus.css('margin', '25px 0 0 0');
 
                     if (i < cpds.right.length - 1) {
-                        // safe
+                        // xss safe
                         panel.append(plus);
                     }
                 }
@@ -712,7 +712,7 @@ define([
                         }
 
                         $('.cpd-id').each(function () {
-                            // safe - I think
+                            // xss safe - I think
                             $(this).html(map[$(this).data('cpd')]);
                         });
                         return null;

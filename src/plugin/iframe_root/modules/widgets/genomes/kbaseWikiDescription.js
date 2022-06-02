@@ -69,7 +69,7 @@ define([
                 return this;
             }
             this.$messagePane = $('<div>');
-            // safe
+            // xss safe
             this.$elem.append(this.$messagePane);
 
             this.workspaceClient = new Workspace(
@@ -152,17 +152,17 @@ define([
                             }
 
                             $taxonDescription
-                                // safe
+                                // xss safe
                                 .append($descHeader)
-                                // safe
+                                // xss safe
                                 .append($descDiv)
-                                // safe
+                                // xss safe
                                 .append($descFooter);
-                            // safe
+                            // xss safe
                             $taxonImage.append(imageHtml);
                         } else {
                             const $descHeader = $(this.notFoundHeader(strainName, desc.searchTerm, desc.redirectFrom));
-                            // safe
+                            // xss safe
                             $taxonDescription.append($descHeader);
                             $taxonImage.append('Unable to find an image.');
                         }
@@ -170,22 +170,22 @@ define([
 
                     this.hideMessage();
 
-                    // safe
+                    // xss safe
                     this.$elem.append(
                         $('<div id="mainview">')
                             .css('overflow', 'auto')
-                            // safe
+                            // xss safe
                             .append(
-                                // safe
+                                // xss safe
                                 $('<table cellpadding=4, cellspacing=2, border=0 style="width:100%">').append(
                                     $('<tr>')
-                                        // safe
+                                        // xss safe
                                         .append($('<td style="vertical-align:top">').append($taxonDescription))
-                                        // safe
+                                        // xss safe
                                         .append($('<td style="vertical-align:top">').append($taxonImage))
                                 )
                             )
-                            // safe
+                            // xss safe
                             .append($('<br>'))
                     );
                 }, this),
@@ -349,9 +349,9 @@ define([
          * @private
          */
         showMessage(message) {
-            // safe (usages)
+            // xss safe (usages)
             const span = $('<span>').html(message);
-            // safe
+            // xss safe
             this.$messagePane.html(span);
             this.$messagePane.removeClass('kbwidget-hide-message');
         },
@@ -396,11 +396,11 @@ define([
 
             const $errorDiv = $('<div>')
                 .addClass('alert alert-danger')
-                // safe
+                // xss safe
                 .append('<b>Error:</b>')
-                // safe
+                // xss safe
                 .append(`<br>${domSafeText(errString)}`);
-            // safe
+            // xss safe
             this.$elem.heml($errorDiv);
         },
         searchedOnce: false,
@@ -468,12 +468,12 @@ define([
                             const hit = {searchTerm};
 
                             // Our abstract is the whole text part.
-                            // safe - as long as we trust WikiPedia
+                            // xss safe - as long as we trust WikiPedia
                             const $abstract = $('<div>').html(data.parse.text['*']);
 
                             // Remove active links to avoid confusion
                             $abstract.find('a').each(function () {
-                                // safe
+                                // xss safe
                                 $(this).replaceWith($(this).html());
                             });
                             // Remove Wiki page references
@@ -488,7 +488,7 @@ define([
                             // Top level child is a div wrapper.
                             if ($abstract.children().length === 1) {
                                 $abstract.children().children('p').each((idx, val) => {
-                                    // safe
+                                    // xss safe
                                     hit['description'] += `<p>${$(val).html()}</p>`;
                                 });
                             } else {

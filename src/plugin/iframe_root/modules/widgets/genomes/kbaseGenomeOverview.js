@@ -35,7 +35,7 @@ define([
             this._super(options);
 
             this.$messagePane = $('<div/>').hide();
-            // safe
+            // xss safe
             this.$elem.append(this.$messagePane);
 
             this.render();
@@ -45,18 +45,18 @@ define([
             this.$infoPanel = $('<div>');
 
             this.$infoTable = $('<table>').addClass('table table-striped table-bordered');
-            // safe
+            // xss safe
             this.$infoPanel.append(
                 $('<div>')
                     .css('overflow', 'auto')
-                    // safe
+                    // xss safe
                     .append(this.$infoTable)
             );
 
             this.$contigSelect = $('<select>')
                 .addClass('form-control')
                 .css({width: '60%', 'margin-right': '5px'})
-                // safe
+                // xss safe
                 .append(
                     $('<option>')
                         .attr('id', this.noContigs)
@@ -64,21 +64,21 @@ define([
                 );
 
             this.$infoPanel.hide();
-            // safe
+            // xss safe
             this.$elem.append(this.$infoPanel);
             this.renderWorkspace();
         },
         addInfoRow(a, b) {
             return $('<tr>')
-                // safe
+                // xss safe
                 .append($('<th>').text(a))
-                // safe
+                // xss safe
                 .append($('<th>').text(b));
         },
         populateContigSelector(contigsToLengths) {
             this.$contigSelect.empty();
             if (!contigsToLengths || contigsToLengths.length === 0) {
-                // safe
+                // xss safe
                 this.$contigSelect.append(
                     $('<option>')
                         .attr('id', this.noContigs)
@@ -86,7 +86,7 @@ define([
                 );
             }
             for (const contig in contigsToLengths) {
-                // safe
+                // xss safe
                 this.$contigSelect.append(
                     $('<option>')
                         .attr('id', contig)
@@ -166,23 +166,23 @@ define([
 
             this.$infoTable
                 .empty()
-                // safe
+                // xss safe
                 .append(this.addInfoRow('Name', genome.scientific_name))
-                // safe
+                // xss safe
                 .append(this.addInfoRow('KBase Genome ID', genome.id))
-                // safe
+                // xss safe
                 .append(this.addInfoRow('Domain', genome.domain))
-                // safe
+                // xss safe
                 .append(this.addInfoRow('DNA Length', numeral(dnaLength).format('0,0')))
-                // safe
+                // xss safe
                 .append(this.addInfoRow('Source ID', `${genome.source  }: ${  genome.source_id}`))
-                // safe
+                // xss safe
                 .append(this.addInfoRow('Number of Contigs', numeral(num_contigs).format('0,0')))
-                // safe
+                // xss safe
                 .append(this.addInfoRow('GC Content', gcContent))
-                // safe
+                // xss safe
                 .append(this.addInfoRow('Genetic Code', genome.genetic_code))
-                // safe
+                // xss safe
                 .append(this.addInfoRow('Number of features', numeral(nFeatures).format('0,0')));
 
             self.alreadyRenderedTable = true;
@@ -200,11 +200,11 @@ define([
         },
         showMessage(message) {
             // kbase panel now does this for us, should probably remove this
-            // safe (usage)
+            // xss safe (usage)
             const span = $('<span>').append(message);
 
             this.$messagePane
-                // safe
+                // xss safe
                 .html(span)
                 .show();
         },
@@ -229,11 +229,11 @@ define([
 
             const $errorDiv = $('<div>')
                 .addClass('alert alert-danger')
-                // safe
+                // xss safe
                 .append('<b>Error:</b>')
-                // safe
+                // xss safe
                 .append(`<br>${domSafeText(errString)}`);
-            // safe
+            // xss safe
             this.$elem.html($errorDiv);
         }
     });

@@ -57,7 +57,7 @@ define([
 
         renderLineageTable({lineage, taxonRef, scientificName}) {
             const taxonURL = `/#taxonomy/taxon/${taxonRef.ns}/${taxonRef.id}/${taxonRef.ts}`;
-            // safe
+            // xss safe
             this.$elem.empty().append(
                 table(
                     {
@@ -173,7 +173,7 @@ define([
 
         renderLoading() {
             this.$elem.empty();
-            // safe
+            // xss safe
             this.$elem.append(div({
                 style: {
                     textAlign: 'left',
@@ -193,12 +193,12 @@ define([
         },
 
         renderError(error, title) {
-            // safe
+            // xss safe
             this.$elem.html($errorAlert(error, title));
         },
 
         renderNoLineage() {
-            // safe
+            // xss safe
             this.$elem.html(
                 div({class: 'alert alert-info'},
                     'No lineage found'

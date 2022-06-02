@@ -9,7 +9,7 @@ define(['jquery', 'kb_lib/html', 'kb_lib/htmlBuilders'], ($, html, htmlBuilders)
     $.fn.loading = function (text) {
         const div = html.tag('div');
         $(this).rmLoading();
-        // safe
+        // xss safe
         $(this).append(div({class: 'loader'}, htmlBuilders.loading(text)));
         return this;
     };

@@ -201,7 +201,7 @@ define([
             container.style['flex-direction'] = 'column';
             container.style['min-height'] = '0';
             mount.appendChild(container);
-            // safe
+            // xss safe
             container.innerHTML = layout;
         }
 
@@ -235,7 +235,7 @@ define([
                     return Promise.all([objectInfo, widgetSet.start(params)]);
                 })
                 .catch((error) => {
-                    // safe
+                    // xss safe
                     container.innerHTML = '';
                     console.error('ERROR', error);
                     preact.render(preact.h(ErrorView, {runtime, error}), container);
@@ -270,7 +270,7 @@ define([
                     return Promise.all([objectInfo, widgetSet.start(params)]);
                 })
                 .catch((error) => {
-                    // safe
+                    // xss safe
                     container.innerHTML = '';
                     console.error('ERROR', error);
                     preact.render(preact.h(ErrorView, {runtime, error}), container);
@@ -285,7 +285,7 @@ define([
             return widgetSet.detach().finally(() => {
                 if (mount && container) {
                     mount.removeChild(container);
-                    // safe
+                    // xss safe
                     container.innerHTML = '';
                 }
             });

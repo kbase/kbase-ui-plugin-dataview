@@ -32,7 +32,7 @@ define([
             this._super(options);
 
             this.$root = $('<div>');
-            // safe
+            // xss safe
             this.$elem.html(this.$root);
 
             this.render();
@@ -40,11 +40,11 @@ define([
         },
         render() {
             try {
-                // safe
+                // xss safe
                 this.$root.html(this.$renderData(this.options.genomeInfo.data, this.options.genomeInfo.info[10]));
             } catch (e) {
                 console.error(e);
-                // safe
+                // xss safe
                 this.$root.html($errorAlert(e));
             }
         },
@@ -95,21 +95,21 @@ define([
             }
 
             return $('<table>').addClass('table table-striped table-hover table-bordered')
-                // safe
+                // xss safe
                 .append($('<tbody>')
-                    // safe
+                    // xss safe
                     .append(this.addInfoRow('Original Source File Name', genome.original_source_file_name || 'n/a'))
-                    // safe
+                    // xss safe
                     .append(this.addInfoRow('DNA Length', numeral(dnaLength).format('0,0')))
-                    // safe
+                    // xss safe
                     .append(this.addInfoRow('Source ID', `${genome.source || 'n/a'}: ${genome.source_id}`))
-                    // safe
+                    // xss safe
                     .append(this.addInfoRow('Number of Contigs', numeral(num_contigs).format('0,0')))
-                    // safe
+                    // xss safe
                     .append(this.addInfoRow('GC Content', gcContent))
-                    // safe
+                    // xss safe
                     .append(this.addInfoRow('Genetic Code', genome.genetic_code))
-                    // safe
+                    // xss safe
                     .append(this.addInfoRow('Number of features', numeral(nFeatures).format('0,0'))));
 
         },

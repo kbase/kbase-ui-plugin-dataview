@@ -50,7 +50,7 @@ define([
 
             const container = this.$elem;
             if (self.token === null) {
-                // safe
+                // xss safe
                 container.html('<div>[Error] You\'re not logged in</div>');
                 return;
             }
@@ -59,7 +59,7 @@ define([
 
             const ready = function () {
                 container.empty();
-                // safe
+                // xss safe
                 container.append(html.loading('loading data...'));
                 const objname = self.ws_id;
                 // commented this out ... can't think of how this ever worked. eap.
@@ -74,11 +74,11 @@ define([
                         let report_div = '<div class="" style="margin-top:15px">';
                         const report = data[0].data.report;
                         report_div += `<pre><code>${domSafeText(report)}</code></pre><br>`; // code block behaves differently in LP and Narrative, needed to add <pre> block --mike
-                        // safe
+                        // xss safe
                         container.html(report_div);
                     },
                     (data) => {
-                        // safe
+                        // xss safe
                         container.html(`<p>[Error] ${domSafeText(data.error.message)}</p>`);
                     }
                 );

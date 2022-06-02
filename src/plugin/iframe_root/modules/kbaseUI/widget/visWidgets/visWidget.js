@@ -575,7 +575,7 @@ define([
                     $vis.$elem.empty();
                     $vis.$elem
                         .addClass('alert alert-danger')
-                        // safe
+                        // xss safe
                         .html(`Could not load JSON ${json_url} : ${domSafeText(d.responseText)}`);
                 });
         },
@@ -809,10 +809,10 @@ define([
             this.renderedXAxis = true;
         },
         svg2HTML: function svg2HTML() {
-            // safe
+            // xss safe
             const $container = $.jqElem('div').append(this.data('$svg'));
 
-            // safe
+            // xss safe
             return $container.html();
         },
         renderYAxis: function renderYAxis() {
@@ -914,9 +914,9 @@ define([
             let D3svg;
 
             if (!this.options.parent) {
-                // safe
+                // xss safe
                 $elem.append(
-                    // safe
+                    // xss safe
                     $.jqElem('style').html(
                         `.axis path, .axis line {fill : none; stroke : black; shape-rendering : crispEdges;} .axis text 
                             {font-family : sans-serif; font-size : 11px}`
@@ -1223,7 +1223,7 @@ define([
 
             d3.selectAll('.visToolTip')
                 .style('display', 'block')
-                // safe
+                // xss safe
                 .text(args.label)
                 .style('left', `${args.event.pageX + 10  }px`)
                 .style('top', `${args.event.pageY - 10  }px`)
@@ -1431,6 +1431,7 @@ define([
 
             return (this.linearGradients()[gradKey] = grad.id);
         },
+        // xss ignore
         wrap: function wrap(text, width, xCoord) {
             if (xCoord === undefined) {
                 xCoord = function () {

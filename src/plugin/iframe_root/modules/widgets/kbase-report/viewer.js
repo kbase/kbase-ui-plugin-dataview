@@ -26,7 +26,7 @@ define([
         }
 
         loadRootComponent() {
-            // safe, uses bindings
+            // xss safe, uses bindings
             this.node.innerHTML = div({
                 dataBind: {
                     component: {
@@ -68,7 +68,7 @@ define([
             this.vm.objectId = this.objectId;
             this.vm.objectVersion = this.objectVersion;
 
-            // safe
+            // xss safe
             this.node.innerHTML = htmlBuilders.loading();
 
             this.model = new Model({
@@ -95,7 +95,7 @@ define([
         stop() {}
 
         detach() {
-            // safe
+            // xss safe
             this.node.innerHTML = '';
         }
     }

@@ -53,7 +53,7 @@ define([
 
         render() {
             this.$elem
-                // safe
+                // xss safe
                 .html(
                     table(
                         {
@@ -126,7 +126,7 @@ define([
         },
 
         renderError(error) {
-            // safe
+            // xss safe
             this.$elem.html($errorAlert(error));
         }
     });

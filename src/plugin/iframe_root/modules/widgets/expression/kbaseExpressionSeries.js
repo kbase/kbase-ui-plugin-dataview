@@ -56,7 +56,7 @@ define([
             } else {
                 $labelCell = $('<td>').text(labels[i]);
             }
-            // safe
+            // xss safe
             $row.append($labelCell);
 
             const $valueCell = $('<td>');
@@ -68,10 +68,10 @@ define([
             } else {
                 $valueCell.text(obj[key.key]);
             }
-            // safe
+            // xss safe
             $row.append($valueCell);
 
-            // safe
+            // xss safe
             table.append($row);
         }
 
@@ -97,7 +97,7 @@ define([
                 }),
                 container = this.$elem;
 
-            // safe
+            // xss safe
             container.html(html.loading());
 
             function buildTable(data) {
@@ -149,7 +149,7 @@ define([
                         series = wsObj.data.genome_expression_sample_ids_map[genome],
                         sample_refs = [];
 
-                    // safe
+                    // xss safe
                     tabs.tabContent('Overview').append(table);
 
                     for (let i = 0; i < series.length; i++) {
@@ -196,7 +196,7 @@ define([
                 })
                 .catch((e) => {
                     console.error(e);
-                    // safe
+                    // xss safe
                     container.html($errorAlert(e));
                 });
 

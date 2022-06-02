@@ -6,7 +6,8 @@
   "scripts": {
     "build": "bash scripts/build-plugin.bash",
     "build-dev": "bash scripts/build-plugin-dev.bash",
-    "watch": "nodemon --watch ./src --ext js,css,yml,yaml,json --exec 'npm run build-dev'"
+    "watch": "nodemon --watch ./src --ext js,css,yml,yaml,json --exec 'npm run build-dev'",
+    "check-js": "bash tools/dom-safe/check-js.sh"
   },
   "repository": {
     "type": "git",

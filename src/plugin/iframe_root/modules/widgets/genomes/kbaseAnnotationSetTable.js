@@ -34,11 +34,11 @@ define([
             const container = this.$elem;
             container.empty();
             if (!this.runtime.service('session').isLoggedIn()) {
-                // safe
+                // xss safe
                 container.append('<div>[Error] You\'re not logged in</div>');
                 return;
             }
-            // safe
+            // xss safe
             container.append(html.loading('loading data...'));
 
             const kbws = new Workspace(this.runtime.getConfig('services.workspace.url'), {
@@ -54,7 +54,7 @@ define([
 
                         // We are moving away from "workspace"
                         const msg = `[Error] Object ${self.options.id} can not be found`;
-                        // safe
+                        // xss safe
                         container.append(`<div><p>${domSafeText(msg)}>/p></div>`);
                     } else {
                         const otus = data[0].data.otus;
@@ -82,13 +82,13 @@ define([
                             class: 'table table-striped'
                         };
                         const table = html.makeTable(options);
-                        // safe useage of html(), as determined by the table created above
+                        // xss safe useage of html(), as determined by the table created above
                         container.html(table);
                         $(`#${options.generated.id}`).dataTable();
                     }
                 },
                 (error) => {
-                    // safe
+                    // xss safe
                     container.html($errorAlert(error));
                 }
             );

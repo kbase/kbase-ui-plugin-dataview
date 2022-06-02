@@ -41,7 +41,7 @@ define([
 
             const container = this.$elem;
 
-            // safe
+            // xss safe
             container.append(html.loading('loading genes data...'));
 
             const genomeRef = `${String(this.options.ws_name)  }/${  String(this.options.genome_id)}`;
@@ -50,11 +50,11 @@ define([
                 function showGenes() {
                     container.empty();
                     ////////////////////////////// Genes Tab //////////////////////////////
-                    // safe
+                    // xss safe
                     container.append(
                         $('<div />')
                             .css('overflow', 'auto')
-                            // safe
+                            // xss safe
                             .append(
                                 `<table cellpadding="0" cellspacing="0" border="0" id="${
                                     pref
@@ -154,7 +154,7 @@ define([
 
                 if (gnm.features.length > 35000) {
                     const btnId = `btn_show_genes${pref}`;
-                    // safe
+                    // xss safe
                     container.html(
                         'There are many features in this genome, so displaying the full, ' +
                             'sortable gene list may cause your web browser to run out of memory and become ' +
@@ -187,7 +187,7 @@ define([
                     })
                     .catch((err) => {
                         console.error(err);
-                        // safe
+                        // xss safe
                         container.html($errorAlert(err));
                     });
             }

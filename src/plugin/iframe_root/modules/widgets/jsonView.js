@@ -287,7 +287,7 @@ define([
 
         function render() {
             events.detachEvents();
-            // safe - text protected in rendered content
+            // xss safe - text protected in rendered content
             container.innerHTML = div({class: 'container-fluid'}, [
                 div({class: 'row'}, [
                     div({class: 'col-md-12'}, [
@@ -315,7 +315,7 @@ define([
 
         function attach(node) {
             container = node;
-            // safe
+            // xss safe
             container.innerHTML = div({class: 'container-fluid'}, [
                 div({class: 'row'}, [
                     div({class: 'col-md-12'}, div({class: 'well'}, html.loading('Loading object...')))

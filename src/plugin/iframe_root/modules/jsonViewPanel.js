@@ -39,7 +39,7 @@ define(['kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'], (html, WidgetSet, u
 
         function attach(node) {
             container = node;
-            // safe
+            // xss safe
             container.innerHTML = layout;
             return widgetSet.attach(container);
         }
@@ -54,7 +54,7 @@ define(['kb_lib/html', 'kbaseUI/widget/widgetSet', 'utils'], (html, WidgetSet, u
         }
 
         function stop() {
-            // safe
+            // xss safe
             container.innerHTML = '';
             return widgetSet.stop();
         }

@@ -32,11 +32,11 @@ define([
             const container = this.$elem;
             container.empty();
             if (self.token === null) {
-                // safe
+                // xss safe
                 container.append('<div>[Error] You\'re not logged in</div>');
                 return;
             }
-            // safe
+            // xss safe
             container.append(html.loading('loading data...'));
 
             const kbws = new Workspace(this.runtime.getConfig('services.workspace.url'), {token: self.token});
@@ -48,7 +48,7 @@ define([
                     if (data.length === 0) {
                         const msg =
                             `[Error] Object ${self.options.id} does not exist in workspace ${self.options.ws}`;
-                        // safe (id and ws can't be invalid here)
+                        // xss safe (id and ws can't be invalid here)
                         container.append(`<div><p>${msg}>/p></div>`);
                     } else {
                         const biom = data[0].data;
@@ -133,14 +133,14 @@ define([
                         });
                         const $tabs = $('<ul>')
                             .addClass('nav nav-tabs')
-                            // safe
+                            // xss safe
                             .append(
                                 $('<li>')
                                     .addClass('active')
-                                    // safe
+                                    // xss safe
                                     .append($graphTab)
                             )
-                            // safe
+                            // xss safe
                             .append($('<li>').append($tableTab));
 
                         const divs =
@@ -151,7 +151,7 @@ define([
                             `<div class='tab-pane' id='outputTable${
                                 graphId
                             }' style='width: 95%;'></div></div>`;
-                        // safe
+                        // xss safe
                         container.append($tabs).append(divs);
                         // TABLE
 
@@ -174,7 +174,7 @@ define([
                             rows: tdata,
                             classes: ['table', 'table-striped']
                         });
-                        // safe - the table data is made dom safe (see above).
+                        // xss safe - the table data is made dom safe (see above).
                         document.getElementById(`outputTable${graphId}`).innerHTML = tableTest;
                         $(`#outputTable${graphId}>table`).dataTable();
 
@@ -196,7 +196,7 @@ define([
                     }
                 },
                 (error) => {
-                    // safe
+                    // xss safe
                     container.html($errorAlert(error));
                 }
             );

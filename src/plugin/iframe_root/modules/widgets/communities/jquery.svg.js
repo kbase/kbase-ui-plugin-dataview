@@ -116,12 +116,12 @@ define([
                         container.id = 'svg' + (this._uuid++);
                     }
                     this._settings[container.id] = settings;
-                    // safe
+                    // xss safe
                     container.innerHTML = '<embed type="image/svg+xml" width="100%" ' +
                         'height="100%" src="' + (settings.initPath || '') + 'blank.svg" ' +
                         'pluginspage="http://www.adobe.com/svg/viewer/install/main.html"/>';
                 } else {
-                    // safe ish
+                    // xss safe ish
                     container.innerHTML = '<p class="svg_error">' +
                         this.local.notSupportedText + '</p>';
                 }
@@ -541,7 +541,7 @@ define([
                 {type: 'text/css'}, args.settings || {}));
             node.appendChild(this._svg.ownerDocument.createTextNode(args.styles));
             if (jQuery.browser.opera) {
-                // safe
+                // xss safe
                 jQuery('head').append('<style type="text/css">' + args.styles + '</style>');
             }
             return node;
@@ -4104,7 +4104,7 @@ define([
     // css
     jQuery("<style>")
         .prop("type", "text/css")
-        // safe
+        // xss safe
         .html("\
 svg:svg {\
     display: none;\

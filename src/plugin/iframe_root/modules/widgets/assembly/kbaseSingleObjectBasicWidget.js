@@ -38,15 +38,15 @@ define([
             this.$errorPane = $('<div>')
                 .addClass('alert alert-danger')
                 .hide();
-            // safe
+            // xss safe
             this.$elem.append(this.$errorPane);
 
             this.$messagePane = $('<div>');
-            // safe
+            // xss safe
             this.$elem.append(this.$messagePane);
 
             this.$mainPane = $('<div>');
-            // safe
+            // xss safe
             this.$elem.append(this.$mainPane);
 
             return this;
@@ -97,16 +97,16 @@ define([
             const $table = $('<table class="table table-striped table-bordered" />')
                 .css('width', '100%')
                 .css('margin', ' 1em 0 0 0');
-            // safe
+            // xss safe
             $container.append($table);
 
             for (let i = 0; i < dataModel.items.length; i++) {
                 const item = dataModel.items[i];
                 if (item.header) {
-                    // safe
+                    // xss safe
                     $table.append(this.makeHeaderRow(item.name, item.value));
                 } else {
-                    // safe
+                    // xss safe
                     $table.append(this.makeRow(item.name, item.value));
                 }
             }
@@ -125,22 +125,22 @@ define([
             };
         },
         makeHeaderRow(name) {
-            // safe
+            // xss safe
             return $('<tr>').html(
                 $('<td colspan=\'2\'/>')
-                    // safe
+                    // xss safe
                     .html($('<b/>').text(name))
             );
         },
         makeRow(name, value) {
             return $('<tr>')
-                // safe
+                // xss safe
                 .append(
                     $('<th>')
                         .css('width', '20%')
                         .text(name)
                 )
-                // safe
+                // xss safe
                 .append($('<td>').text(value));
         },
         /*
@@ -158,7 +158,7 @@ define([
             else this.hideMessage();
         },
         showMessage(message) {
-            // safe
+            // xss safe
             this.$messagePane.append($('<span>').html(message));
             this.$messagePane.show();
         },
@@ -184,11 +184,11 @@ define([
         },
         showError(error) {
             this.$errorPane.empty();
-            // safe
+            // xss safe
             this.$errorPane.append('<strong>Error when retrieving data.</strong><br><br>');
-            // safe
+            // xss safe
             this.$errorPane.append(domSafeText(error.error.message));
-            // safe
+            // xss safe
             this.$errorPane.append('<br>');
             this.$errorPane.show();
         }

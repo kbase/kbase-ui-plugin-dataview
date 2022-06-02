@@ -24,10 +24,10 @@ define([
         render() {
             const self = this;
             const $row1 = $('<div class="row">');
-            // safe
+            // xss safe
             self.$elem.append($row1);
             const genetable = $('<div>');
-            // safe
+            // xss safe
             $row1.append(genetable);
             genetable.kbaseAnnotatedMetagenomeAssemblyView({
                 ws: self.options.genomeInfo.info[6],

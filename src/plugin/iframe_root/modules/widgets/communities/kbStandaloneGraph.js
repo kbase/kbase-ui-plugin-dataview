@@ -336,7 +336,7 @@ define(['jquery', 'widgets/communities/jquery.svg'], ($) => {
         render() {
             // get the target div
             const target = this.settings.target;
-            // safe
+            // xss safe
             target.innerHTML = '<div class=\'graph_div\'></div>';
             target.firstChild.setAttribute(
                 'style',

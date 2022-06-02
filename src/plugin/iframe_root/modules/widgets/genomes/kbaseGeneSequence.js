@@ -51,27 +51,27 @@ define([
         },
         render() {
             this.$messagePane = $('<div/>').addClass('kbwidget-message-pane hide');
-            // safe
+            // xss safe
             this.$elem.append(this.$messagePane);
 
             this.$infoPanel = $('<div>').css('overflow', 'auto');
             this.$infoTable = $('<table>').addClass('table table-striped table-bordered');
 
-            // safe
+            // xss safe
             this.$elem.append(this.$infoPanel.append(this.$infoTable));
         },
         makeRow(name, value, color) {
             const $row = $('<tr>')
-                // safe
+                // xss safe
                 .append($('<th>').text(name))
-                // safe
+                // xss safe
                 .append(
-                    // safe
+                    // xss safe
                     $('<td>').append(
                         $(
                             `<div style='max-height:${this.options.seq_cell_height}px; overflow:scroll; font-family:monospace; background-color:${color}; border:1px solid transparent'>`
                         )
-                            // safe
+                            // xss safe
                             .append(DOMPurify.sanitize(value))
                     )
                 );
@@ -136,7 +136,7 @@ define([
                         dnaSequenceStr = dnaDispStr;
                     }
                 }
-                // safe
+                // xss safe
                 this.$infoTable.append(this.makeRow('Gene', dnaSequenceStr, 'white'));
                 // end gene sequence
 
@@ -164,7 +164,7 @@ define([
                         proteinTranslationStr = protDispStr;
                     }
                 }
-                // safe
+                // xss safe
                 this.$infoTable.append(
                     this.makeRow('Protein', proteinTranslationStr, '#f9f9f9')
                     //.each(function(){$(this).css('font-family','monospace')})
@@ -205,11 +205,11 @@ define([
             };
         },
         showMessage(message) {
-            // safe
+            // xss safe
             const span = $('<span/>').append(message);
 
             this.$messagePane
-                // safe
+                // xss safe
                 .html(span)
                 .removeClass('hide');
         },
@@ -223,11 +223,11 @@ define([
 
             const $errorDiv = $('<div>')
                 .addClass('alert alert-danger')
-                // safe
+                // xss safe
                 .append('<b>Error:</b>')
-                // safe
+                // xss safe
                 .append(`<br>${domSafeText(errString)}`);
-            // safe
+            // xss safe
             this.$elem.html($errorDiv);
         }
     });

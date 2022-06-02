@@ -157,7 +157,7 @@ define([
             } else {
                 content = 'Unknown Error';
             }
-            // safe
+            // xss safe
             container.innerHTML = BS.buildPanel({
                 title: 'Error',
                 body: domSafeText(content),
@@ -189,7 +189,7 @@ define([
                         const temp = container.appendChild(document.createElement('div')),
                             widgetParentId = html.genId();
 
-                        // safe
+                        // xss safe
                         temp.innerHTML = BS.buildPanel({
                             name: 'data-view',
                             type: 'default',

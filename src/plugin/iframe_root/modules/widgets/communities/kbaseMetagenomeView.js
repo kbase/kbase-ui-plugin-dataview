@@ -41,11 +41,11 @@ define([
             const container = this.$elem;
             container.empty();
             if (self.token === null) {
-                // safe
+                // xss safe
                 container.append('<div>[Error] You\'re not logged in</div>');
                 return;
             }
-            // safe
+            // xss safe
             container.append(html.loading('loading data...'));
 
             const kbws = new Workspace(this.runtime.getConfig('services.workspace.url'), {
@@ -59,7 +59,7 @@ define([
                     if (data.length === 0) {
                         const msg =
                             `[Error] Object ${self.options.id} does not exist in workspace ${self.options.ws}`;
-                        // safe
+                        // xss safe
                         container.append(`<div><p>${msg}>/p></div>`);
                     } else {
                         // parse data
@@ -143,7 +143,7 @@ define([
 
                         // set tabs
                         const tabPane = $(`<div id="${  pref  }tab-content">`);
-                        // safe
+                        // xss safe
                         container.append(tabPane);
                         tabPane.kbaseTabs({canDelete: false, tabs: []});
 
@@ -191,7 +191,7 @@ define([
                             }%) containe ribosomal RNA genes.${
                                 is_rna ? '' : ptext
                             }${ftext}</p>`;
-                        // safe
+                        // xss safe
                         $(`#${pref}overview`).append(overviewTable);
 
                         // metadata tab
@@ -218,7 +218,7 @@ define([
                             class: 'table table-striped'
                         };
                         const table = html.makeTable(tableOptions);
-                        // safe - table row values made safe above
+                        // xss safe - table row values made safe above
                         $(`#${pref}metadata`).html(table);
                         $(`#${tableOptions.generated.id}`).dataTable();
 
@@ -322,7 +322,7 @@ define([
                                 formatNumber(stats.sequence_count_ontology)
                             }</td></tr>`;
                         statsTable += '</table></p>';
-                        // safe
+                        // xss safe
                         $(`#${pref}stats`).append(statsTable);
 
                         // drisee tab
@@ -482,7 +482,7 @@ define([
                     }
                 },
                 (error) => {
-                    // safe
+                    // xss safe
                     container.html($errorAlert(error));
                 }
             );

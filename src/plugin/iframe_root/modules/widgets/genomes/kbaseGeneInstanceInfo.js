@@ -71,7 +71,7 @@ define([
             };
 
             this.$messagePane = $('<div/>').addClass('kbwidget-message-pane kbwidget-hide-message');
-            // safe
+            // xss safe
             this.$elem.append(this.$messagePane);
 
             this.$infoPanel = $('<div>').css('overflow', 'auto');
@@ -81,21 +81,21 @@ define([
                 .addClass('btn-group')
                 //.append(makeButton("domains"))
                 //.append(makeButton("operons"))
-                // safe
+                // xss safe
                 .append(makeButton('sequence'))
-                // safe
+                // xss safe
                 .append(makeButton('biochemistry'))
-                // safe
+                // xss safe
                 .append(makeButton('structure'));
 
-            // safe
+            // xss safe
             this.$infoPanel.append(this.$infoTable);
             if (!this.options.hideButtons) {
-                // safe
+                // xss safe
                 this.$infoPanel.append(this.$buttonPanel);
             }
 
-            // safe
+            // xss safe
             this.$elem.append(this.$infoPanel);
         },
 
@@ -149,20 +149,20 @@ define([
                     if (!func) {
                         func = 'Unknown';
                     }
-                    // safe
+                    // xss safe
                     this.$infoTable.append(this.$renderRow('Function', func));
 
                     // Show the genome and a button for it.
-                    // safe
+                    // xss safe
                     this.$infoTable.append(
                         this.$renderRow(
                             'Genome', null,
                             $('<div/>')
-                                // safe
+                                // xss safe
                                 .append(domSafeText(genome.data.scientific_name))
-                                // safe
+                                // xss safe
                                 .append('<br>')
-                                // safe
+                                // xss safe
                                 .append(this.makeGenomeButton(this.options.genomeID, this.options.workspaceID))
                         )
                     );
@@ -182,12 +182,12 @@ define([
                     if (feature.protein_translation) {
                         len += `, ${  feature.protein_translation.length  } aa`;
                     }
-                    // safe
+                    // xss safe
                     this.$infoTable.append(this.$renderRow('Length', len));
 
-                    // safe
+                    // xss safe
                     this.$infoTable.append(
-                        // safe
+                        // xss safe
                         this.$renderRow('Location', null, $('<div/>').append(this.parseLocation(feature.location)))
                     );
                     //.append(this.parseLocation(feature.location))
@@ -196,7 +196,7 @@ define([
                     let aliasesStr = 'No known aliases';
                     if (feature.aliases)
                         aliasesStr = feature.aliases.join(', ');
-                    // safe
+                    // xss safe
                     self.$infoTable.append(self.$renderRow('Aliases', domSafeText(aliasesStr)));
                     // end Aliases
                     // LOL GC content. Does anyone even care these days?
@@ -216,7 +216,7 @@ define([
                         }
                     }
                     if (proteinFamilies) {
-                        // safe
+                        // xss safe
                         this.$infoTable.append(this.$renderRow('Protein Families', proteinFamilies));
                     }
 
@@ -303,13 +303,13 @@ define([
         $renderCell(valueText, valueHTML) {
             const $valueCell = $('<td>');
             if (valueText) {
-                // safe
+                // xss safe
                 $valueCell.text(valueText);
             } else if (valueHTML) {
-                // safe (trusting valueHTML)
+                // xss safe (trusting valueHTML)
                 $valueCell.html(valueHTML);
             } else {
-                // safe
+                // xss safe
                 $valueCell.html(this.$noData());
             }
             return $valueCell;
@@ -317,9 +317,9 @@ define([
 
         $renderRow(headerText, valueText, valueHTML) {
             return $('<tr>')
-                // safe
+                // xss safe
                 .append($('<th>').text(headerText))
-                // safe
+                // xss safe
                 .append(this.$renderCell(valueText, valueHTML));
         },
 
@@ -359,7 +359,7 @@ define([
                 workspaceID = null;
             }
 
-            // safe
+            // xss safe
             return $('<div>').append(
                 `<a href="/#dataview/${domSafeText(workspaceID)}/${domSafeText(genomeID)}" target="_blank">${domSafeText(workspaceID)}/<wbr>${domSafeText(genomeID)}</a>`
             );
@@ -407,11 +407,11 @@ define([
             return locStr;
         },
         showMessage(message) {
-            // safe (trusting message)
+            // xss safe (trusting message)
             const span = $('<span/>').html(message);
 
             this.$messagePane
-                // safe
+                // xss safe
                 .html(span)
                 .removeClass('hide');
         },
@@ -436,11 +436,11 @@ define([
 
             const $errorDiv = $('<div>')
                 .addClass('alert alert-danger')
-                // safe
+                // xss safe
                 .append('<b>Error:</b>')
-                // safe
+                // xss safe
                 .append(`<br>${domSafeText(errString)}`);
-            // safe
+            // xss safe
             this.$elem.html($errorDiv);
         },
         buildObjectIdentity(workspaceID, objectID) {

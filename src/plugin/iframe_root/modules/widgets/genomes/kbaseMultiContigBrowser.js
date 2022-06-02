@@ -128,7 +128,7 @@ define([
             }
 
             this.$messagePane = $('<div/>');
-            // safe
+            // xss safe
             this.$elem.append(this.$messagePane);
             this.showMessage(html.loading('loading contig details'));
 
@@ -138,7 +138,7 @@ define([
             this.$contigSelect = $('<select>')
                 .addClass('form-control')
                 .css({width: '60%', 'margin-right': '5px'})
-                // safe
+                // xss safe
                 .append(
                     $('<option>')
                         .attr('value', this.noContigs)
@@ -153,35 +153,35 @@ define([
                 }
             });
             this.$selectPanel = $('<div class="col-md-3"/>');
-            // safe
+            // xss safe
             this.$selectPanel.append(
                 $('<div>')
                     .addClass('form-inline')
-                    // safe
+                    // xss safe
                     .append(this.$contigSelect)
-                    // safe
+                    // xss safe
                     .append(this.$contigButton)
             );
-            // safe
+            // xss safe
             $maindiv.append(this.$selectPanel);
 
             // panel where contig browser is defined
             const $contigViewPanelWrapper = $('<div class="col-md-6"/>');
             this.$contigViewPanel = $('<div id="contigmainview" align="center"/>').css({overflow: 'auto'});
             $contigViewPanelWrapper
-            // safe
+            // xss safe
                 .append(this.$contigViewPanel)
-                // safe
+                // xss safe
                 .append('<div>')
                 .KBaseContigBrowserButtons({browser: self});
 
-            // safe
+            // xss safe
             $maindiv.append($contigViewPanelWrapper);
 
             // panel where feature info is displayed
-            // safe usage of html
+            // xss safe usage of html
             this.$featureInfoPanel = $('<div class="col-md-3"/>').html('<b>Click on a feature to view details</b>');
-            // safe
+            // xss safe
             $maindiv.append(this.$featureInfoPanel);
 
             self.showData(self.options.genomeInfo.data, $maindiv);
@@ -191,7 +191,7 @@ define([
                     self.$featureInfoPanel.empty();
                     const $infoTable = $('<table>').addClass('table table-striped table-bordered');
                     if (d.id) {
-                        // safe
+                        // xss safe
                         $infoTable.append(
                             self.addInfoRow(
                                 'Feature ID', null,
@@ -200,14 +200,14 @@ define([
                         );
                     }
                     if (d.type) {
-                        // safe
+                        // xss safe
                         $infoTable.append(self.addInfoRow('Type', d.type));
                     }
                     if (d.function) {
-                        // safe
+                        // xss safe
                         $infoTable.append(self.addInfoRow('Function', d.function));
                     }
-                    // safe
+                    // xss safe
                     self.$featureInfoPanel.append($infoTable);
                 };
             }
@@ -241,7 +241,7 @@ define([
             }
 
             self.populateContigSelector(contigsToLengths);
-            // safe
+            // xss safe
             self.$elem.append($maindiv);
 
             self.hideMessage();
@@ -255,16 +255,16 @@ define([
         },
         addInfoRow(headerText, infoText, infoHTML) {
             const $row = $('<tr>')
-                // safe
+                // xss safe
                 .append($('<th>').text(headerText));
             if (infoText) {
-                // safe
+                // xss safe
                 $row.append($('<td>').text(infoText));
             } else if (infoHTML) {
-                // safe (trusing infoHTML)
+                // xss safe (trusing infoHTML)
                 $row.append($('<td>').html(infoHTML));
             } else {
-                // safe
+                // xss safe
                 $row.$row.append($('<td>').text('n/a'));
             }
         },
@@ -332,14 +332,14 @@ define([
         populateContigSelector(contigsToLengths) {
             this.$contigSelect.empty();
             if (!contigsToLengths || contigsToLengths.length === 0)
-                // safe
+                // xss safe
                 this.$contigSelect.append(
                     $('<option>')
                         .attr('value', this.noContigs)
                         .text(this.noContigs)
                 );
             for (const contig in contigsToLengths) {
-                // safe
+                // xss safe
                 this.$contigSelect.append(
                     $('<option>')
                         .attr('value', contig)
@@ -1075,7 +1075,7 @@ define([
         },
         showMessage(message) {
             this.$messagePane
-                // safe (trusing message)
+                // xss safe (trusing message)
                 .html($('<span/>').html(message))
                 .show();
         },
@@ -1092,7 +1092,7 @@ define([
             };
         },
         renderError(error) {
-            // safe
+            // xss safe
             this.$elem.html($errorAlert(error));
         },
         buildObjectIdentity(workspaceID, objectId) {

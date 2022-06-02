@@ -158,7 +158,7 @@ define([
                 }
 
                 if (totalGenesWithFunctionalRoles === 0) {
-                    // safe
+                    // xss safe
                     self.$mainview.prepend(
                         '<b>No Functional Categories assigned, you can add them using the Narrative.</b>'
                     );
@@ -211,7 +211,7 @@ define([
 
             const nodeEnter = node
                 .enter()
-                // safe
+                // xss safe
                 .append('g')
                 .attr('class', 'KBSnode')
                 .attr('transform', () => {
@@ -235,7 +235,7 @@ define([
 
             // Enter any new nodes at the parent's previous position.
             nodeEnter
-                // safe
+                // xss safe
                 .append('rect')
                 .attr('y', -self.barHeight / 2)
                 .attr('x', 300)
@@ -250,7 +250,7 @@ define([
                 );
 
             nodeEnter
-                // safe
+                // xss safe
                 .append('text')
                 .attr('dy', 3.5)
                 .attr('dx', 300 + 5.5)
@@ -259,7 +259,7 @@ define([
                 });
 
             nodeEnter
-                // safe
+                // xss safe
                 .append('rect')
                 .attr('y', -self.barHeight / 2)
                 .attr('x', (d) => {
@@ -278,7 +278,7 @@ define([
                 );
 
             nodeEnter
-                // safe
+                // xss safe
                 .append('text')
                 .attr('dy', 3.5)
                 .attr('x', 278)
@@ -404,7 +404,7 @@ define([
 
             // doesn't work for Euks yet
             if (tax_domain === 'Eukaryota') {
-                // safe
+                // xss safe
                 container.prepend(`<b>Functional Categories not yet available for ${tax_domain}</b>`);
                 return this;
             }
@@ -412,15 +412,15 @@ define([
             this.tree = d3.layout.tree().nodeSize([0, this.stepSize]);
 
             this.$mainview = $('<div>').css({'overflow-x': 'scroll'});
-            // safe
+            // xss safe
             container.append(this.$mainview);
 
             this.svg = d3
                 .select(this.$mainview[0])
-                // safe
+                // xss safe
                 .append('svg')
                 .attr('width', width + margin.left + margin.right)
-                // safe
+                // xss safe
                 .append('g')
                 .attr('transform', `translate(${margin.left},${margin.top})`);
 

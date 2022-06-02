@@ -63,7 +63,7 @@ define([
 
             const ready = function () {
                 container.empty();
-                // safe
+                // xss safe
                 container.append(html.loading('loading data...'));
 
                 // var p = kb.req('ws', 'get_object_subset', [{ref: self.ws_name + "/" + self.ws_id, included: ['contigs/[*]/id', 'contigs/[*]/length', 'id', 'name', 'source', 'source_id', 'type']}]);
@@ -90,29 +90,29 @@ define([
                             tabNames = ['Overview', 'Contigs'],
                             tabIds = ['overview', 'contigs'],
                             tabs = $(`<ul id="${pref}table-tabs" class="nav nav-tabs"/>`);
-                        // safe
+                        // xss safe
                         tabs.append(
                             `<li class="active"><a href="#${pref}${tabIds[0]
                             }" data-toggle="tab" >${tabNames[0]}</a></li>`
                         );
                         for (let i = 1; i < tabIds.length; i += 1) {
-                            // safe
+                            // xss safe
                             tabs.append(
                                 `<li><a href="#${pref}${tabIds[i]  }" data-toggle="tab">${tabNames[i]}</a></li>`
                             );
                         }
-                        // safe
+                        // xss safe
                         container.append(tabs);
 
                         // tab panel
                         const tab_pane = $(`<div id="${pref}tab-content" class="tab-content"/>`);
-                        // safe
+                        // xss safe
                         tab_pane.append(`<div class="tab-pane in active" id="${pref}${tabIds[0]}"/>`);
                         for (let i = 1; i < tabIds.length; i += 1) {
-                            // safe
+                            // xss safe
                             tab_pane.append($(`<div class="tab-pane in" id="${pref}${tabIds[i]}"/>`));
                         }
-                        // safe
+                        // xss safe
                         container.append(tab_pane);
 
                         $(`#${  pref  }table-tabs a`).click(function (e) {
@@ -121,7 +121,7 @@ define([
                         });
 
                         ////////////////////////////// Overview Tab //////////////////////////////
-                        // safe
+                        // xss safe
                         $(`#${pref}overview`).append(
                             '<table class="table table-striped table-bordered" ' +
                                 `style="margin-left: auto; margin-right: auto;" id="${
@@ -132,14 +132,14 @@ define([
                         const overviewData = [cs.id, cs.name, self.ws_id, cs.source, cs.source_id, cs.type];
                         const overviewTable = $(`#${  pref  }overview-table`);
                         for (let i = 0; i < overviewData.length; i += 1) {
-                            // safe
+                            // xss safe
                             overviewTable.append(
                                 `<tr><td>${  overviewLabels[i]  }</td> ` + `<td>${  overviewData[i]  }</td></tr>`
                             );
                         }
 
                         ////////////////////////////// Contigs Tab //////////////////////////////
-                        // safe
+                        // xss safe
                         $(`#${  pref  }contigs`).append(
                             `<table id="${
                                 pref
@@ -170,7 +170,7 @@ define([
                     })
                     .catch((err) => {
                         container.empty();
-                        // safe
+                        // xss safe
                         container.append(
                             `<div class="alert alert-danger"><p>[Error] ${domSafeErrorMessage(err)}</p></div>`
                         );

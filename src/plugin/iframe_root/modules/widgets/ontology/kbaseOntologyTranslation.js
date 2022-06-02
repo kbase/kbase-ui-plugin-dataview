@@ -78,14 +78,14 @@ define([
                         }
 
                         $commentsTable = $('<table>').addClass('table')
-                            // safe
+                            // xss safe
                             .append($('<tbody>')
-                                // safe
+                                // xss safe
                                 .append(Object.entries(comments).map(([key, value]) => {
                                     return $('<tr>')
-                                        // safe
+                                        // xss safe
                                         .append($('<th>').text(key))
-                                        // safe
+                                        // xss safe
                                         .append($('<td>').text(value));
                                 })));
                     }
@@ -102,34 +102,34 @@ define([
                     };
 
                     const $metaTable = $('<table>').addClass('table')
-                        // safe
+                        // xss safe
                         .append($('<tbody>')
-                            // safe
+                            // xss safe
                             .append($('<tr>')
-                                // safe
+                                // xss safe
                                 .append($('<th>').text('Ontology 1'))
-                                // safe
+                                // xss safe
                                 .append($('<td>').html(dict_links[data.ontology1] ? $.jqElem('a')
                                     .attr('href', `/#dataview/${  dict_links[data.ontology1]}`)
                                     .attr('target', '_blank')
                                     .text(data.ontology1)
                                     : data.ontology1)))
-                            // safe
+                            // xss safe
                             .append($('<tr>')
-                                // safe
+                                // xss safe
                                 .append($('<th>').text('Ontology 2'))
-                                // safe
+                                // xss safe
                                 .append($('<td>').html(dict_links[data.ontology2] ? $.jqElem('a')
                                     .attr('href', `/#dataview/${  dict_links[data.ontology2]}`)
                                     .attr('target', '_blank')
                                     .text(data.ontology2)
                                     : data.ontology1)))
 
-                            // safe
+                            // xss safe
                             .append($('<tr>')
-                                // safe
+                                // xss safe
                                 .append($('<th>').text('Comments'))
-                                // safe
+                                // xss safe
                                 .append($('<td>').html($commentsTable || data.comment))));
 
                     // const $metaTable = $.jqElem('div').kbaseTable({
@@ -158,7 +158,7 @@ define([
                     //     }
                     // });
 
-                    // safe
+                    // xss safe
                     $metaElem.append($metaTable);
 
                     const table_data = [];
@@ -180,7 +180,7 @@ define([
                         ],
                         createdRow(row, data) {
                             const $linkCell = $('td', row).eq(2);
-                            // safe
+                            // xss safe
                             $linkCell.html($self.termLink(data[2], equivalent_dictionary));
                         }
                     });
@@ -192,7 +192,7 @@ define([
                 })
                 .catch((err) => {
                     $self.$elem.empty();
-                    // safe
+                    // xss safe
                     $self.$elem.addClass('alert alert-danger').text(`Could not load object : ${errorMessage(err)}`);
                 });
 
@@ -213,23 +213,23 @@ define([
         },
 
         appendUI: function appendUI($elem) {
-            // safe
+            // xss safe
             $elem.append($.jqElem('style').text('.ontology-top { vertical-align : top }'));
 
             const $self = this;
 
             const $loaderElem = $.jqElem('div')
-                // safe
+                // xss safe
                 .append(
                     '<br>&nbsp;Loading data...<br>&nbsp;please wait...<br>&nbsp;Data parsing may take upwards of 30 seconds, during which time this page may be unresponsive.'
                 )
-                // safe
+                // xss safe
                 .append($.jqElem('br'))
-                // safe
+                // xss safe
                 .append(
                     $.jqElem('div')
                         .attr('align', 'center')
-                        // safe
+                        // xss safe
                         .append(
                             $.jqElem('i')
                                 .addClass('fa fa-spinner')
@@ -238,11 +238,11 @@ define([
                 );
 
             $self.data('loaderElem', $loaderElem);
-            // safe
+            // xss safe
             $elem.append($loaderElem);
 
             const $globalContainer = $self.data('globalContainerElem', $.jqElem('div').css('display', 'none'));
-            // safe
+            // xss safe
             $elem.append($globalContainer);
 
             const $metaElem = $self.data('metaElem', $.jqElem('div'));
@@ -251,7 +251,7 @@ define([
 
             $self.data('metaContainerElem', $metaContainerElem);
 
-            // safe
+            // xss safe
             $globalContainer.append($metaContainerElem);
 
             const $tableElem = $.jqElem('table')
@@ -264,7 +264,7 @@ define([
             const $containerElem = $self.createContainerElem('Translation Dictionary', $tableElem);
 
             $self.data('containerElem', $containerElem);
-            // safe
+            // xss safe
             $globalContainer.append($containerElem);
 
             return $elem;
@@ -275,13 +275,13 @@ define([
 
             const $panelBody = $.jqElem('div').addClass('panel-body collapse in');
 
-            // safe
+            // xss safe
             $panelBody.html($content);
 
             const $containerElem = $.jqElem('div')
                 .addClass('panel panel-default')
                 .css('display', display)
-                // safe
+                // xss safe
                 .append(
                     $.jqElem('div')
                         .addClass('panel-heading')
@@ -295,11 +295,11 @@ define([
                                 .find('i')
                                 .toggleClass('fa-rotate-90');
                         })
-                        // safe
+                        // xss safe
                         .html(
                             $.jqElem('h4')
                                 .addClass('panel-title')
-                                // safe
+                                // xss safe
                                 .html(
                                     $.jqElem('span')
                                         .attr('data-toggle', 'collapse')
@@ -307,7 +307,7 @@ define([
                                         .attr('aria-expanded', 'true')
                                         .attr('aria-controls', `#${panelCollapseId}`)
                                         .css('cursor', 'pointer')
-                                        // safe
+                                        // xss safe
                                         .html(
                                             $.jqElem('span')
                                                 .text(name)
@@ -316,14 +316,14 @@ define([
                                 )
                         )
                 )
-                // safe
+                // xss safe
                 .append(
                     $.jqElem('div')
                         .addClass('panel-collapse collapse in')
                         .attr('id', panelCollapseId)
                         .attr('role', 'tabpanel')
                         .attr('aria-expanded', 'true')
-                        // safe
+                        // xss safe
                         .html($panelBody)
                 );
 

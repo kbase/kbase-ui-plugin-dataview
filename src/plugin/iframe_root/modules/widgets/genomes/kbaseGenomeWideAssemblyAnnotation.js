@@ -26,10 +26,10 @@ define([
         render() {
             const self = this;
             const row0 = $('<div class="row">');
-            // safe
+            // xss safe
             self.$elem.append(row0);
             const contigbrowser = $('<div class="col-md-12">');
-            // safe
+            // xss safe
             row0.append(contigbrowser);
             contigbrowser.KBaseMultiContigBrowser({
                 genomeID: self.options.genomeID,
@@ -39,13 +39,13 @@ define([
                 runtime: self.runtime
             });
             const row1 = $('<div class="row">');
-            // safe
+            // xss safe
             self.$elem.append(row1);
             const seedannotations = $('<div class="col-md-6">');
-            // safe
+            // xss safe
             row1.append(seedannotations);
             const genetable = $('<div class="col-md-6">');
-            // safe
+            // xss safe
             row1.append(genetable);
             seedannotations.KBaseSEEDFunctions({
                 objNameOrId: self.options.genomeID,
