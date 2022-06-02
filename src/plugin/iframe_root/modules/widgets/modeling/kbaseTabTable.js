@@ -8,6 +8,7 @@ define([
     'widgets/modeling/KBModeling',
     'lib/domUtils',
     'content',
+    'lib/jqueryUtils',
 
     // for effect
     'kbaseUI/widget/legacy/tabs',
@@ -30,7 +31,8 @@ define([
     FBA,
     KBModeling,
     {domSafeText},
-    content
+    content,
+    {$errorAlert}
 ) => {
     const IMAGE_URL = 'http://bioseed.mcs.anl.gov/~chenry/jpeg/';
 
@@ -138,6 +140,7 @@ define([
                                 data: self.obj[tab.key]
                             });
                             tabPane.rmLoading();
+                            // safe
                             tabPane.append(table);
                         }
                     }
@@ -237,7 +240,7 @@ define([
                                     return;
                                 } catch (ex) {
                                     console.error('Error invoking tab pane', tabSpec, ex);
-                                    createErrorMessage(tabPane, ex.message);
+                                    createErrorMessage(tabPane, ex);
                                 }
                             }
 
@@ -250,7 +253,7 @@ define([
                                 })
                                 .catch((err) => {
                                     console.error('Error in preProcessDataTable', err);
-                                    createErrorMessage(tabPane, err.message || err.error.message);
+                                    createErrorMessage(tabPane, err);
                                     return null;
                                 });
                         });
@@ -258,13 +261,15 @@ define([
                 );
             }
 
-            function createErrorMessage(tabPane, message) {
+            function createErrorMessage(tabPane, error) {
                 tabPane.empty();
+                // safe
                 tabPane.append('<br>');
+                // safe
                 tabPane.append(
                     html.makePanel({
                         title: 'Error',
-                        content: message
+                        content: $errorAlert(error)
                     })
                 );
             }
@@ -275,6 +280,7 @@ define([
                 tabPane.rmLoading();
 
                 // note: must add table first
+                // safe
                 tabPane.append(
                     table({
                         class: 'table table-bordered table-striped',
@@ -349,9 +355,11 @@ define([
                             }).then((rows) => {
                                 contentDiv.rmLoading();
                                 if (!rows) {
-                                    contentDiv.append(`<br>No data found for ${  info.id}`);
+                                    // safe
+                                    contentDiv.append(`<br>No data found for ${info.id}`);
                                 } else {
                                     const table = self.verticalTable({rows});
+                                    // safe
                                     contentDiv.append(table);
                                     newTabEvents(info.id);
                                 }
@@ -365,12 +373,8 @@ define([
                         }
                     }).catch((err) => {
                         console.error(err);
-                        contentDiv.empty();
-                        contentDiv
-                            .append(`ERROR: ${  err.message}`)
-                            .css('color', 'red')
-                            .css('text-align', 'center')
-                            .css('padding', '10px');
+                        // safe
+                        contentDiv.html($errorAlert(err));
                     });
                 });
             }
@@ -527,6 +531,7 @@ define([
                     }
 
                     const r = $('<tr>');
+                    // safe
                     r.append(`<td><b>${domSafeText(row.label)}</b></td>`);
 
                     // if the data is in the row definition, use it
@@ -546,12 +551,14 @@ define([
                             }
                             return row.data;
                         })() || content.na();
+                        // safe (trusting usage)
                         r.append(`<td>${value}</td>`);
                     } else if ('key' in row) {
                         if (row.type === 'wstype') {
                             const ref = data[row.key];
 
                             const cell = $(`<td data-ref="${ref}">loading...</td>`);
+                            // safe
                             r.append(cell);
 
                             getLink(ref)
@@ -572,12 +579,15 @@ define([
                                 });
                         } else {
                             // Plain column
+                            // safe
                             r.append(`<td data-k-b-testhook-field="${row.key}">${domSafeText(data[row.key])}</td>`);
                         }
                     } else if (row.type === 'pictureEquation') {
+                        // safe
                         r.append($('<td></td>').append(this.pictureEquation(row.data)));
                     }
 
+                    // safe
                     table.append(r);
                 }
 
@@ -651,6 +661,7 @@ define([
                     const cpd = cpds.left[i];
                     const img_url = `${IMAGE_URL + cpd  }.jpeg`;
                     /* TODO: this is going to fail ... there is no panel node around unless it is set globally in some dependency ... */
+                    // safe
                     panel.append(
                         `<div class="pull-left text-center">\
                                     <img src="${img_url}" width=150 ><br>\
@@ -662,21 +673,24 @@ define([
                     plus.css('margin', '30px 0 0 0');
 
                     if (i < cpds.left.length - 1) {
+                        // safe
                         panel.append(plus);
                     }
                 }
 
-                const direction = $('<div class="pull-left text-center">' + '<=>' + '</div>');
+                const direction = $('<div class="pull-left text-center"><=></div>');
                 direction.css('margin', '25px 0 0 0');
+                // safe
                 panel.append(direction);
 
                 for (let i = 0; i < cpds.right.length; i++) {
                     const cpd = cpds.right[i];
                     const img_url = `${IMAGE_URL + cpd  }.jpeg`;
+                    // safe
                     panel.append(
                         `<div class="pull-left text-center">\
                                     <img src="${img_url}" data-cpd="${cpd}" width=150 ><br>\
-                                    <div class="cpd-id" data-cpd="${cpd}">${cpd}</div>\
+                                    <div class="cpd-id" data-cpd="${cpd}">${domSafeText(cpd)}</div>\
                                 </div>`
                     );
 
@@ -684,6 +698,7 @@ define([
                     plus.css('margin', '25px 0 0 0');
 
                     if (i < cpds.right.length - 1) {
+                        // safe
                         panel.append(plus);
                     }
                 }

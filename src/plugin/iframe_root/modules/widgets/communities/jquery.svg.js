@@ -541,6 +541,7 @@ define([
                 {type: 'text/css'}, args.settings || {}));
             node.appendChild(this._svg.ownerDocument.createTextNode(args.styles));
             if (jQuery.browser.opera) {
+                // safe
                 jQuery('head').append('<style type="text/css">' + args.styles + '</style>');
             }
             return node;

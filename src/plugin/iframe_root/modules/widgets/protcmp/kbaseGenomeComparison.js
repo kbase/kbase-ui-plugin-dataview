@@ -106,8 +106,8 @@ define([
                     });
             };
             const cmpIsLoaded = function () {
-                container.empty();
-                container.append(html.loading('loading comparison data...'));
+                // safe
+                container.html(html.loading('loading comparison data...'));
                 return gaapi.callFunc('get_genome_v1', [{
                     genomes: [{ref: self.cmp.genome1ref}, {ref: self.cmp.genome2ref}],
                     included_fields: ['scientific_name']
@@ -125,13 +125,28 @@ define([
                         const genome2id = genomes[1].data.scientific_name;
                         container.empty();
                         const $nc = $('#root');
+                        // safe
                         $nc.append(`<div id="widget-tooltip_${self.pref}" class="dataview-tooltip">Test message</div>`);
                         const table = $('<table/>')
                             .addClass('table table-bordered')
                             .css({'margin-left': 'auto', 'margin-right': 'auto'});
+                        // safe
                         container.append(table);
-                        const createTableRow = function (name, value) {
-                            return `<tr><td>${  name  }</td><td>${  value  }</td></tr>`;
+                        const $createTableRow = function (label, textValue, htmlValue) {
+                            const $row = $('<tr>')
+                                .append($('<th>').text(label));
+
+                            const $valueCell = $('<td>');
+
+                            if (textValue) {
+                                $valueCell.text(textValue);
+                            } else {
+                                // safe (usages)
+                                $valueCell.html(htmlValue);
+                            }
+                            // safe
+                            $row.append($valueCell);
+                            return $row;
                         };
                         let count1hits = 0;
                         for (const i in self.cmp.data1) {
@@ -143,11 +158,14 @@ define([
                             if (self.cmp.data2[i].length > 0)
                                 count2hits++;
                         }
-                        table.append(createTableRow('Comparison object', self.ws_id));
-                        table.append(createTableRow('Genome1 (x-axis)', `<a href="/#dataview/${self.genome1Ref}" target="_blank">${  genome1id  }</a>` +
+                        // safe
+                        table.append($createTableRow('Comparison object', self.ws_id));
+                        // safe
+                        table.append($createTableRow('Genome1 (x-axis)',null,  `<a href="/#dataview/${self.genome1Ref}" target="_blank">${domSafeValue(genome1id)}</a>` +
                         ` (${  self.cmp.proteome1names.length  } genes, ${  count1hits  } have hits)`));
-                        table.append(createTableRow('Genome2 (y-axis)', `<a href="/#dataview/${self.genome2Ref}" target="_blank">${  genome2id  }</a>` +
-                        ` (${  self.cmp.proteome2names.length  } genes, ${  count2hits  } have hits)`));
+                        // safe
+                        table.append($createTableRow('Genome2 (y-axis)', null, `<a href="/#dataview/${self.genome2Ref}" target="_blank">${domSafeValue(genome2id)}</a>` +
+                        ` (${self.cmp.proteome2names.length} genes, ${count2hits} have hits)`));
                         if (self.scale == null)
                             self.scale = self.size * 100 / Math.max(self.cmp.proteome1names.length, self.cmp.proteome2names.length);
                         const st = ' style="border: 0px; margin: 0px; padding: 0px;"';
@@ -155,6 +173,7 @@ define([
                         const sd = ' style="border: 0px; margin: 0px; padding: 1px;"';
                         const sb = ' style="width: 27px;"';
 
+                        // safe
                         table.append('<tr><td>' +
                             '<center>' +
                             `<button id="${self.pref}btn-zi">Zoom +</button>`+
@@ -438,8 +457,8 @@ define([
                 }
             }
             svg += '</svg>';
-            $svg.empty();
-            $svg.append($(svg));
+            // safe
+            $svg.html($(svg));
         },
 
         refreshGenes() {
@@ -449,7 +468,8 @@ define([
             const st = ' style="border: 0px; margin: 0px; padding: 0px;"';
             if (self.geneI < 0 || self.geneJ < 0) {
                 self.refreshDetailedRect();
-                tbl.append(`<tr${st}><td${st}>${  self.selectHitsMessage  }</td></tr>`);
+                // safe
+                tbl.append(`<tr${st}><td${st}>${self.selectHitsMessage}</td></tr>`);
                 return;
             }
             const half = Math.floor(self.geneRows / 2);
@@ -464,6 +484,7 @@ define([
             const sr = ' style="border: 0px; margin: 0px; padding: 0px;"';
             // const sd = ' style="border: 0px; margin: 0px; padding: 1px;"';
             const sb = ' style="width: 27px;"';
+            // safe
             tbl.append(`<tr${sr}>`+
                 `<td rowspan="${self.geneRows+2}" width="10" style="border: 0px; margin: 0px; padding: 0px; text-align: center; vertical-align: middle;"><button id="${self.pref}btn-dirI"${sb}>${arrowI}</button></td>`+
                 `<td style="border: 0px; margin: 0px; padding: 0px; text-align: center; vertical-align: middle;"><button id="${self.pref}btn-i-up"${sb}>&#8593;</button></td>`+
@@ -491,6 +512,7 @@ define([
                 if (rowPos == 0)
                     tds += `<td id="${self.pref}glinks" rowspan="${self.geneRows}" width="30"${sr}/>`;
                 tds += `<td ${tdSt}>` + `<a href="/#dataview/${self.genome2Ref}?sub=Feature&subid=${self.cmp.proteome2names[j]}" target="_blank">${labelJ}</a>` + '</td>';
+                // safe
                 tbl.append(`<tr${sr}>${tds}</tr>`);
                 const y1 = rowPos * (self.geneRowH + 0.2) + rowHalf;
                 for (const tuplePos in self.cmp.data1[i]) {
@@ -507,6 +529,7 @@ define([
                     }
                 }
             }
+            // safe
             tbl.append(`<tr${sr}>`+
                 `<td style="border: 0px; margin: 0px; padding: 0px; text-align: center; vertical-align: middle;"><button id="${self.pref}btn-i-dn"${sb}>&#8595;</button></td>`+
                 `<td style="border: 0px; margin: 0px; padding: 0px; text-align: center; vertical-align: middle;"><button id="${self.pref}btn-both-dn"${sb}>&#8595;&#8595;</button></td>`+
@@ -514,6 +537,7 @@ define([
                 '</tr>');
             const svgTd = $(`#${self.pref}glinks`);
             const svgH = self.geneRows * self.geneRowH;
+            // safe
             svgTd.append(`<svg width="30" height="${svgH}">${svgLines}</svg>`);
             svgTd
                 .hover(

@@ -52,8 +52,7 @@
 
  */
 
-define(['jquery', './widget'], function ($) {
-    'use strict';
+define(['jquery', './widget'], ($) => {
     $.KBWidget({
         name: 'kbasePrompt',
         version: '1.0.0',
@@ -62,83 +61,94 @@ define(['jquery', './widget'], function ($) {
             modalClass: 'fade',
             keyboard: true
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
 
             return this;
         },
-        openPrompt: function () {
-            this.dialogModal().modal({ keyboard: this.options.keyboard });
+        openPrompt() {
+            this.dialogModal().modal({keyboard: this.options.keyboard});
         },
-        closePrompt: function () {
+        closePrompt() {
             this.dialogModal().modal('hide');
         },
-        cancelButton: function () {
+        cancelButton() {
             return {
                 name: 'Cancel',
-                callback: function (e, $prompt) {
+                callback(e, $prompt) {
                     $prompt.closePrompt();
                 }
             };
         },
-        okayButton: function () {
+        okayButton() {
             return {
                 name: 'Okay',
                 type: 'primary',
-                callback: function (e, $prompt) {
+                callback(e, $prompt) {
                     $prompt.closePrompt();
                 }
             };
         },
-        dialogModal: function () {
+        dialogModal() {
             if (this.data('dialogModal') !== undefined) {
                 return this.data('dialogModal');
             }
 
-            var $dialogModal = $('<div></div>')
-                .attr('class', 'modal ' + this.options.modalClass)
+            const $dialogModal = $('<div></div>')
+                .attr('class', `modal ${  this.options.modalClass}`)
                 .attr('tabindex', '-1')
+                // safe
                 .append(
                     $.jqElem('div')
                         .addClass('modal-dialog')
+                        // safe
                         .append(
                             $.jqElem('div')
                                 .addClass('modal-content')
+                                // safe
                                 .append(
                                     $('<div></div>')
                                         .attr('class', 'modal-header')
+                                        // safe
                                         .append(
                                             $('<button></button>')
                                                 .attr('type', 'button')
                                                 .attr('class', 'close')
                                                 .attr('data-dismiss', 'modal')
                                                 .attr('aria-hidden', 'true')
+                                                // safe
                                                 .append('x\n')
                                         )
+                                        // safe
                                         .append(
                                             $('<h3></h3>')
                                                 .addClass('modal-title')
                                                 .attr('id', 'title')
                                         )
                                 )
+                                // safe
                                 .append(
                                     $('<div></div>')
                                         .attr('class', 'modal-body')
                                         .attr('id', 'body')
                                 )
+                                // safe
                                 .append(
                                     $('<div></div>')
                                         .attr('class', 'modal-footer')
+                                        // safe
                                         .append(
                                             $('<div></div>')
                                                 .addClass('row')
                                                 .addClass('form-horizontal')
+                                                // safe
                                                 .append(
                                                     $('<div></div>')
                                                         .addClass('col-sm-5')
                                                         .addClass('text-left')
                                                         .attr('id', 'footer')
                                                 )
+                                                // safe
                                                 .append(
                                                     $('<div></div>')
                                                         .addClass('col-sm-7')
@@ -151,7 +161,7 @@ define(['jquery', './widget'], function ($) {
                 );
 
             $dialogModal.unbind('keypress');
-            $dialogModal.keypress(function (e) {
+            $dialogModal.keypress((e) => {
                 if (e.keyCode === 13) {
                     e.stopPropagation();
                     e.preventDefault();
@@ -159,36 +169,38 @@ define(['jquery', './widget'], function ($) {
                 }
             });
 
-            //$deleteModal.modal({'keyboard' : true});
-
             this._rewireIds($dialogModal, $dialogModal);
 
             if (this.options.title) {
+                // safe (need to trust)
                 $dialogModal.data('title').append(this.options.title);
             }
 
             if (this.options.body) {
+                // safe (need to trust)
                 $dialogModal.data('body').append(this.options.body);
             }
 
             if (this.options.footer) {
+                // safe (need to trust)
                 $dialogModal.data('footer').append(this.options.footer);
             }
 
-            var $prompt = this;
+            const $prompt = this;
 
-            $.each(this.options.controls, function (idx, val) {
+            $.each(this.options.controls, (idx, val) => {
                 if (typeof val === 'string') {
                     val = $prompt[val]();
                 }
-                var btnClass = 'btn btn-default';
+                let btnClass = 'btn btn-default';
                 if (val.type) {
-                    btnClass = btnClass + ' btn-' + val.type;
+                    btnClass = `${btnClass  } btn-${  val.type}`;
                 }
 
-                var $button = $('<a></a>')
+                const $button = $('<a></a>')
                     .attr('href', '#')
                     .attr('class', btnClass)
+                    // safe (need to trust)
                     .append(val.name)
                     .bind('click', function (e) {
                         e.preventDefault();
@@ -200,6 +212,7 @@ define(['jquery', './widget'], function ($) {
                     $button.attr('id', val.id);
                 }
 
+                // safe
                 $dialogModal.data('controls').append($button);
             });
 
@@ -207,13 +220,13 @@ define(['jquery', './widget'], function ($) {
 
             this.data('dialogModal', $dialogModal);
 
-            var $firstField = undefined;
-            var selection = false;
+            let $firstField;
+            let selection = false;
 
             $dialogModal.on(
                 'shown.bs.modal',
-                $.proxy(function () {
-                    $.each($dialogModal.find('input[type=text],input[type=password],textarea'), function (idx, val) {
+                $.proxy(() => {
+                    $.each($dialogModal.find('input[type=text],input[type=password],textarea'), (idx, val) => {
                         if ($firstField === undefined) {
                             $firstField = $(val);
                         }

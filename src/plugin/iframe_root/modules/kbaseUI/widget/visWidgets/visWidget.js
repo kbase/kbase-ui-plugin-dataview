@@ -809,6 +809,7 @@ define([
             this.renderedXAxis = true;
         },
         svg2HTML: function svg2HTML() {
+            // safe
             const $container = $.jqElem('div').append(this.data('$svg'));
 
             // safe
@@ -913,6 +914,7 @@ define([
             let D3svg;
 
             if (!this.options.parent) {
+                // safe
                 $elem.append(
                     // safe
                     $.jqElem('style').html(

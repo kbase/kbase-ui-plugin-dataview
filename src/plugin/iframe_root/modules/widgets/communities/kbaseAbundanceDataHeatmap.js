@@ -7,11 +7,12 @@ define([
     'kb_service/client/workspace',
     'kb_common/html',
     'widgets/communities/kbStandaloneHeatmap',
-    // no parameters
+    'lib/jqueryUtils',
+
+    // for effect
     'datatables_bootstrap',
     'kbaseUI/widget/legacy/authenticatedWidget'
-], function ($, Promise, Workspace, html, Heatmap) {
-    'use strict';
+], ($, Promise, Workspace, html, Heatmap, {$errorAlert}) => {
     $.KBWidget({
         name: 'AbundanceDataHeatmap',
         parent: 'kbaseAuthenticatedWidget',
@@ -22,64 +23,62 @@ define([
             ws: null,
             rows: 0
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
             return this;
         },
-        render: function () {
-            var self = this;
+        render() {
+            const self = this;
 
-            var container = this.$elem;
+            const container = this.$elem;
             container.empty();
             if (!this.runtime.service('session').isLoggedIn()) {
+                // safe
                 container.append('<div>[Error] You\'re not logged in</div>');
                 return;
             }
+            // safe
             container.append(html.loading('loading data...'));
 
-            var kbws = new Workspace(this.runtime.getConfig('services.workspace.url'), {
+            const kbws = new Workspace(this.runtime.getConfig('services.workspace.url'), {
                 token: this.runtime.service('session').getAuthToken()
             });
             kbws.get_objects(
-                [{ ref: self.options.ws + '/' + self.options.id }],
-                function (data) {
+                [{ref: `${self.options.ws  }/${  self.options.id}`}],
+                (data) => {
                     container.empty();
                     // parse data
                     if (data.length === 0) {
-                        var msg =
-                            '[Error] Object ' + self.options.id + ' does not exist in workspace ' + self.options.ws;
-                        container.append('<div><p>' + msg + '>/p></div>');
+                        const msg =
+                            `[Error] Object ${self.options.id} does not exist in workspace ${self.options.ws}`;
+                        // safe
+                        container.append(`<div><p>${msg}>/p></div>`);
                     } else {
-                        var heatdata = data[0].data;
+                        const heatdata = data[0].data;
                         // HEATMAP
-                        var heatmapId = html.genId();
-                        container.append('<div id=\'outputHeatmap' + heatmapId + '\' style=\'width: 95%;\'></div>');
-                        var heatTest = Heatmap.create({
-                            target: $('#outputHeatmap' + heatmapId).get(0),
+                        const heatmapId = html.genId();
+                        // safe
+                        container.append(`<div id='outputHeatmap${heatmapId}' style='width: 95%;'></div>`);
+                        const heatTest = Heatmap.create({
+                            target: $(`#outputHeatmap${heatmapId}`).get(0),
                             data: heatdata
                         });
                         heatTest.render();
                     }
                 },
-                function (data) {
-                    container.empty();
-                    var main = $('<div>');
-                    main.append(
-                        $('<p>')
-                            .css({ padding: '10px 20px' })
-                            .text('[Error] ' + data.error.message)
-                    );
-                    container.append(main);
+                (error) => {
+                    // safe
+                    container.html($errorAlert(error));
                 }
             );
             return self;
         },
-        loggedInCallback: function (event, auth) {
+        loggedInCallback(event, auth) {
             this.token = auth.token;
             this.render();
             return this;
         },
-        loggedOutCallback: function (event, auth) {
+        loggedOutCallback() {
             this.token = null;
             this.render();
             return this;

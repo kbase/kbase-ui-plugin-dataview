@@ -9,12 +9,13 @@ define([
     'widgets/communities/kbStandaloneGraph',
     'widgets/communities/kbStandalonePlot',
     'lib/domUtils',
+    'lib/jqueryUtils',
 
     // these don't need a parameter
     'kbaseUI/widget/legacy/authenticatedWidget',
     'kbaseUI/widget/legacy/kbaseTabs',
     'datatables_bootstrap'
-], ($, GooglePalette, Workspace, html, Graph, Plot, {domSafeValue}) => {
+], ($, GooglePalette, Workspace, html, Graph, Plot, {domSafeValue}, {$errorAlert}) => {
 
     function formatNumber(value) {
         return Intl.NumberFormat('en-us', {useGrouping: true}).format(value);
@@ -40,9 +41,11 @@ define([
             const container = this.$elem;
             container.empty();
             if (self.token === null) {
+                // safe
                 container.append('<div>[Error] You\'re not logged in</div>');
                 return;
             }
+            // safe
             container.append(html.loading('loading data...'));
 
             const kbws = new Workspace(this.runtime.getConfig('services.workspace.url'), {
@@ -55,8 +58,9 @@ define([
                     // parse data
                     if (data.length === 0) {
                         const msg =
-                            `[Error] Object ${  self.options.id  } does not exist in workspace ${  self.options.ws}`;
-                        container.append(`<div><p>${  msg  }>/p></div>`);
+                            `[Error] Object ${self.options.id} does not exist in workspace ${self.options.ws}`;
+                        // safe
+                        container.append(`<div><p>${msg}>/p></div>`);
                     } else {
                         // parse data
                         const d = data[0].data;
@@ -139,6 +143,7 @@ define([
 
                         // set tabs
                         const tabPane = $(`<div id="${  pref  }tab-content">`);
+                        // safe
                         container.append(tabPane);
                         tabPane.kbaseTabs({canDelete: false, tabs: []});
 
@@ -185,9 +190,9 @@ define([
                                 ((ann_rna_reads / raw_seqs) * 100).toFixed(2)
                             }%) containe ribosomal RNA genes.${
                                 is_rna ? '' : ptext
-                            }${ftext
-                            }</p>`;
-                        $(`#${  pref  }overview`).append(overviewTable);
+                            }${ftext}</p>`;
+                        // safe
+                        $(`#${pref}overview`).append(overviewTable);
 
                         // metadata tab
                         const mTabDiv = $(`<div id="${pref}metadata" style="width: 95%;">`);
@@ -317,7 +322,8 @@ define([
                                 formatNumber(stats.sequence_count_ontology)
                             }</td></tr>`;
                         statsTable += '</table></p>';
-                        $(`#${  pref  }stats`).append(statsTable);
+                        // safe
+                        $(`#${pref}stats`).append(statsTable);
 
                         // drisee tab
                         const drisee_cols = d.statistics.qc.drisee.percents.columns;
@@ -475,15 +481,9 @@ define([
                         tabPane.kbaseTabs('showTab', 'Overview');
                     }
                 },
-                (data) => {
-                    container.empty();
-                    const main = $('<div>');
-                    main.append(
-                        $('<p>')
-                            .css({padding: '10px 20px'})
-                            .text(`[Error] ${  data.error.message}`)
-                    );
-                    container.append(main);
+                (error) => {
+                    // safe
+                    container.html($errorAlert(error));
                 }
             );
             return self;

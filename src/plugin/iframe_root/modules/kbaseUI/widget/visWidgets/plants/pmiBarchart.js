@@ -14,7 +14,7 @@ define([
     d3,
     Promise,
     Workspace,
-    {errorMessage}
+    {errorMessage, domSafeText}
 ) => {
     $.KBWidget({
         name: 'kbasePMIBarchart',
@@ -50,12 +50,13 @@ define([
                     const group = name.replace(/:.+/, '');
                     const sub_name = name.replace(/.+:\s*/, '');
 
+                    // safe
                     this.data('selectbox').append(
                         $.jqElem('option')
                             .attr('value', func)
                             .prop('selected', f === 0)
                             .css('background-color', colorScale(f))
-                            .append(name)
+                            .text(name)
                     );
 
                     for (let bar = 0; bar < newDataset.subsystems[func].length; bar++) {
@@ -66,17 +67,20 @@ define([
                         const $groupButton = $.jqElem('div')
                             .addClass('btn-group dropup')
                             .css({'padding-right': '5px'})
+                            // safe
                             .append(
                                 $.jqElem('button')
                                     .attr('type', 'button')
                                     .addClass('btn btn-sm btn-default')
+                                    // safe
                                     .append(
                                         $.jqElem('span')
                                             .css('display', 'none')
                                             .addClass('check fa fa-check')
+                                            // safe
                                             .append('&nbsp;')
                                     )
-                                    .append(group)
+                                    .append(domSafeText(group))
                                     .on('click', function () {
                                         /*var isOpen = $(this).parent().hasClass('open');
                                      $pmi.data('formElem').find('.btn-group').removeClass('open');
@@ -143,10 +147,12 @@ define([
                                         $pmi.displaySubsystems(selected_subsystems);
                                     })
                             )
+                            // safe
                             .append(
                                 $.jqElem('button')
                                     .attr('type', 'button')
                                     .addClass('btn btn-sm btn-default dropdown-toggle')
+                                    // safe
                                     .append($.jqElem('span').addClass('fa fa-caret-up'))
                                     .on('click', function () {
                                         const isOpen = $(this)
@@ -203,20 +209,24 @@ define([
                                         $pmi.displaySubsystems(selected_subsystems);
                                     })
                             )
+                            // safe
                             .append(
                                 $.jqElem('ul')
                                     .addClass('dropdown-menu')
                                     .css({width: '450px', 'padding-left': '5px', 'text-align': 'left'})
                             );
-
+                        // safe
                         this.data('formElem').append($groupButton);
 
                         groups[group] = $groupButton;
                     }
 
+                    // safe
                     groups[group].find('ul').append(
+                        // safe
                         $.jqElem('li').append(
                             $.jqElem('label')
+                                // safe
                                 .append(
                                     $.jqElem('input')
                                         .attr('type', 'checkbox')
@@ -257,10 +267,12 @@ define([
                                             //$pmi.displaySubsystems(selected_subsystems);
                                         })
                                 )
+                                // safe
                                 .append(
                                     $.jqElem('span')
                                         .css('color', colorScale(f))
-                                        .append(`&nbsp;&nbsp;${  sub_name}`)
+                                        // safe
+                                        .append(`&nbsp;&nbsp;${domSafeText(sub_name)}`)
                                 )
                         )
                     );
@@ -492,16 +504,21 @@ define([
             const $pmi = this;
 
             const $container = $.jqElem('div')
+                // safe
                 .append(
                     $.jqElem('div')
                         .css('display', 'none')
                         .attr('id', 'old-formElem')
+                        // safe
                         .append(
                             $.jqElem('span')
+                            // safe
                                 .append('Select subsystem(s):&nbsp;&nbsp;')
                                 .css('float', 'left')
                         )
+                        // safe
                         .append(
+                            // safe
                             $.jqElem('form').append(
                                 $.jqElem('select')
                                     .attr('id', 'selectbox')
@@ -515,6 +532,7 @@ define([
                             )
                         )
                 )
+                // safe
                 .append(
                     $.jqElem('div')
                         .attr('id', 'barchartElem')
@@ -522,21 +540,27 @@ define([
                         .css('width', 1100) //$elem.width())
                         .css('height', 500) //$elem.height() - 30)
                 )
+                // safe
                 .append(
                     $.jqElem('div')
                         .attr('id', 'formElem')
                         .css({width: '100%', 'text-align': 'center'})
                 )
+                // safe
                 .append(
                     $.jqElem('div')
                         .attr('id', 'loader')
+                        // safe
                         .append(
                             '<br>&nbsp;Loading data...<br>&nbsp;please wait...<br>&nbsp;Data parsing may take upwards of 30 seconds, during which time this window may be unresponsive.'
                         )
+                        // safe
                         .append($.jqElem('br'))
+                        // safe
                         .append(
                             $.jqElem('div')
                                 .attr('align', 'center')
+                                // safe
                                 .append(
                                     $.jqElem('i')
                                         .addClass('fa fa-spinner')
@@ -597,6 +621,7 @@ define([
                 this.setDataset(this.dataset());
             }
 
+            // safe
             $elem.append($container);
         }
     });

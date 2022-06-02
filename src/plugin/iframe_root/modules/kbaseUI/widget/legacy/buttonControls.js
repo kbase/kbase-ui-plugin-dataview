@@ -1,5 +1,3 @@
-/*global define*/
-/*jslint browser:true,white:true*/
 /*
  control to tack on arbitrary command groups to any container element.
  This lets you mouse over and display buttons (with icons) in the upper right.
@@ -38,8 +36,7 @@ define([
     'bootstrap',
     'css!font_awesome',
     './widget'
-], function ($, Rectangle, Point, Size) {
-    'use strict';
+], ($, Rectangle, Point, Size) => {
     $.KBWidget({
         name: 'kbaseButtonControls',
         version: '1.0.0',
@@ -50,24 +47,23 @@ define([
             type: 'floating',
             posOffset: '0px'
         },
-        init: function (options) {
+        init(options) {
             this._super(options);
             this._controls = {};
             this.appendUI($(this.$elem));
 
             return this;
         },
-        bounds: function ($e) {
-            var offset = $e.offset();
-
+        bounds($e) {
+            const offset = $e.offset();
             return new Rectangle(new Point(offset.left, offset.top), new Size($e.width(), $e.height()));
         },
-        visibleBounds: function ($e) {
-            var rect = this.bounds($e);
-            var throttle = 0;
+        visibleBounds($e) {
+            let rect = this.bounds($e);
+            let throttle = 0;
 
             while (($e = $e.parent())) {
-                var parentRect = this.bounds($e);
+                const parentRect = this.bounds($e);
                 rect = rect.intersectRect(parentRect);
 
                 //just being paranoid
@@ -82,15 +78,16 @@ define([
 
             return rect;
         },
-        appendUI: function ($elem) {
+        appendUI($elem) {
             if (this.options.type == 'floating') {
                 $elem.css('position', 'relative');
 
                 //XXX godawful hack to pop the tooltips to the top.
+                // safe
                 $elem.append($.jqElem('style').text('.tooltip { position : fixed }'));
             }
 
-            var $controlButtons = $('<div></div>')
+            const $controlButtons = $('<div></div>')
                 .addClass('btn-group btn-group-xs')
                 .attr('id', 'control-buttons');
 
@@ -103,12 +100,13 @@ define([
                     .attr('z-index', 10000);
             }
 
+            // safe
             $elem.prepend($controlButtons);
 
             this._rewireIds($elem, this);
 
             if (this.options.onMouseover && this.options.type == 'floating') {
-                var $controls = this;
+                const $controls = this;
 
                 $elem
                     .mouseover(function (e) {
@@ -126,12 +124,12 @@ define([
 
                         window._active_kbaseButtonControls = $controlButtons;
                     })
-                    .mouseout(function (e) {
+                    .mouseout((e) => {
                         e.preventDefault();
                         e.stopPropagation();
 
                         $controls.bounds($controlButtons);
-                        var controlBoundsV = $controls.visibleBounds($controlButtons);
+                        const controlBoundsV = $controls.visibleBounds($controlButtons);
                         $controls.bounds($elem);
 
                         if (!controlBoundsV.containsPoint(new Point(e.pageX, e.pageY))) {
@@ -151,20 +149,20 @@ define([
 
             return this;
         },
-        controls: function (control) {
+        controls(control) {
             if (control) {
                 return this._controls[control];
-            } else {
-                return this._controls;
             }
+            return this._controls;
+
         },
-        setControls: function (controls) {
+        setControls(controls) {
             this.data('control-buttons').empty();
-            for (var control in this._controls) {
+            for (const control in this._controls) {
                 this._controls[control] = undefined;
             }
 
-            var $buttonControls = this;
+            const $buttonControls = this;
 
             $.each(
                 controls,
@@ -175,15 +173,15 @@ define([
                         }
                     }
 
-                    var btnClass = 'btn btn-default';
+                    let btnClass = 'btn btn-default';
                     if (val.type) {
-                        btnClass = btnClass + ' btn-' + val.type;
+                        btnClass = `${btnClass  } btn-${  val.type}`;
                     }
 
-                    var tooltip = val.tooltip;
+                    let tooltip = val.tooltip;
 
                     if (typeof val.tooltip == 'string') {
-                        tooltip = { title: val.tooltip };
+                        tooltip = {title: val.tooltip};
                     }
 
                     if (tooltip != undefined && tooltip.container == undefined) {
@@ -202,12 +200,13 @@ define([
                         tooltip.delay = 1;
                     }
 
-                    var $button = $('<button></button>')
+                    const $button = $('<button>')
                         .attr('href', '#')
                         .css('padding-top', '1px')
                         .css('padding-bottom', '1px')
                         .attr('class', btnClass)
-                        .append($('<i></i>').addClass(val.icon))
+                        // safe
+                        .append($('<i>').addClass(val.icon))
                         .tooltip(tooltip) //{title : val.tooltip})
                         .on('click', function (e) {
                             e.preventDefault();
@@ -244,6 +243,7 @@ define([
                         $button.data('id', this.options.id);
                     }
 
+                    // safe
                     this.data('control-buttons').append($button);
                 }, this)
             );

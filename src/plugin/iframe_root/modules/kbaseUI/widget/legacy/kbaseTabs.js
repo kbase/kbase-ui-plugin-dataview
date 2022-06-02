@@ -78,10 +78,12 @@ define([
                 .addClass('nav nav-tabs')
                 .attr('id', 'tabs-nav');
 
+            // safe
             $block.append($nav).append($tabs);
 
             this._rewireIds($block, this);
 
+            // safe
             $elem.append($block);
 
             if (tabs) {
@@ -102,8 +104,10 @@ define([
                 .addClass('tab-pane');
 
             if (tab.content) {
+                // safe (need to trust)
                 $tab.append(tab.content);
             } else if (tab.showContentCallback) {
+                // safe (need to trust)
                 $tab.append(tab.showContentCallback());
             }
 
@@ -117,6 +121,7 @@ define([
 
             const $nav = $('<li></li>')
                 .css('white-space', 'nowrap')
+                // safe
                 .append(
                     $('<a></a>')
                         .attr('href', '#')
@@ -149,9 +154,11 @@ define([
                                 });
                             });
                         })
+                        // safe
                         .append(
                             $('<button></button>')
                                 .addClass('btn btn-default btn-xs')
+                                // safe
                                 .append($('<i></i>').addClass(this.closeIcon()))
                                 .css('padding', '0px')
                                 .css('width', '22px')
@@ -180,7 +187,9 @@ define([
             this.data('tabs')[tab.tab] = $tab;
             this.data('nav')[tab.tab] = $nav;
 
+            // safe
             this.data('tabs-content').append($tab);
+            // safe
             this.data('tabs-nav').append($nav);
 
             const tabCount = Object.keys(this.data('tabs')).length;

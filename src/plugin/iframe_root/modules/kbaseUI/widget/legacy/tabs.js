@@ -37,7 +37,18 @@
  tabs.showTab('tab_name');
  */
 
-define(['jquery', 'kb_lib/html', './widget'], ($, html) => {
+define([
+    'jquery',
+    'kb_lib/html',
+    'lib/domUtils',
+
+    // for effect
+    './widget'
+], (
+    $,
+    html,
+    {domSafeText}
+) => {
     const t = html.tag,
         a = t('a'),
         div = t('div');
@@ -52,8 +63,9 @@ define(['jquery', 'kb_lib/html', './widget'], ($, html) => {
             }
             const container = this.$elem,
                 self = this,
-                tabs = $(`<ul class="nav nav-${  options.pills ? 'pills' : 'tabs'  }">`),
+                tabs = $(`<ul class="nav nav-${options.pills ? 'pills' : 'tabs'}">`),
                 tab_contents = $('<div class="tab-content">');
+            // safe
             container.append(tabs, tab_contents);
 
             this.tabHistory = [];
@@ -73,16 +85,20 @@ define(['jquery', 'kb_lib/html', './widget'], ($, html) => {
                                 dataId: p.name,
                                 dataKBTesthookTab: p.key
                             },
-                            p.name
+                            domSafeText(p.name)
                         )
                     );
 
                 // animate by sliding tab up
                 if (p.animate === false) {
+                    // safe
                     tab.append(tab_link);
+                    // safe
                     tabs.append(tab);
                 } else {
+                    // safe
                     tab.append(tab_link);
+                    // safe
                     tabs.append(tab);
                     // eap 7/6/15 - disable the following line; must be a hook into
                     // the bootstrap tab plugin; but it does not work with BS 3.
@@ -94,6 +110,7 @@ define(['jquery', 'kb_lib/html', './widget'], ($, html) => {
                     const rm_btn = $(
                         '<button type="button" class="close" style="margin-left: 6px; vertical-align: bottom; ">&times;</button>'
                     );
+                    // safe
                     tab_link.append(rm_btn);
 
                     rm_btn.click(() => {
@@ -109,7 +126,9 @@ define(['jquery', 'kb_lib/html', './widget'], ($, html) => {
                         dataKBTesthookTabpane: p.key
                     })
                 );
+                // safe (need to trust)
                 contentPane.append(p.content || '');
+                // safe
                 tab_contents.append(contentPane);
 
                 tab.click(function (e) {
@@ -168,14 +187,15 @@ define(['jquery', 'kb_lib/html', './widget'], ($, html) => {
             // adds content to existing tab pane; useful for ajax
             this.addContent = function (p) {
                 const tab = tab_contents.children(`[data-id="${  p.name  }"]`);
+                // safe (need to trust)
                 tab.append(p.content || '');
                 return tab;
             };
 
             this.setContent = function (p) {
                 const tab = tab_contents.children(`[data-id="${  p.name  }"]`);
-                tab.empty();
-                tab.append(p.content || '');
+                // safe (need to trust)
+                tab.html(p.content || '');
                 /* TODO: probably better to return this to support chaining... */
                 return tab;
             };
