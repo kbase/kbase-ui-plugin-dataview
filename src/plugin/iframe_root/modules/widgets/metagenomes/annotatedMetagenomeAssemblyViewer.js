@@ -113,7 +113,7 @@ define([
             });
         },
 
-        showError(err) {
+        showError(err, title) {
             this.$elem.empty();
             // This wrapper is required because the output widget displays a "Details..." button
             // with float right; without clearing this button will reside inside the error
@@ -121,7 +121,7 @@ define([
             const $errorBox = $('<div>')
                 .css('clear', 'both');
             // xss safe
-            $errorBox.html($errorAlert(err));
+            $errorBox.html($errorAlert(err, title));
             // xss safe
             this.$elem.append($errorBox);
         },
@@ -583,7 +583,11 @@ define([
                     (results) => {
                         $input.prop('disabled', false);
                         renderResult($table, results);
-                    });
+                    })
+                .catch((error) => {
+                    $loadingDiv.empty();
+                    $errorDiv.html($errorAlert(error, 'Error performing initial search'));
+                });
 
 
 
