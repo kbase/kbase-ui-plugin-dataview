@@ -219,7 +219,6 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
     error_alert_count = 0
     purified_text = 0
     total_lines_inspected = 0
-    total_lines_ignored = 0
     total_lines_detected = 0
     total_file_count = 0
     total_line_count = 0
@@ -248,7 +247,6 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
             
             for line_number, raw_line in enumerate(lines):
                 line = raw_line.rstrip()
-                total_lines_inspected += 1
 
                 if block_comment:
                     if re.search('^[*]/\s*$', line):
@@ -266,6 +264,8 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
                     block_comment = True
                     block_comment_count += 1
                     continue
+
+                total_lines_inspected += 1
 
                 handled = False
                 for jquery_method in jquery_methods:
