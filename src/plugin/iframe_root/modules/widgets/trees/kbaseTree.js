@@ -14,7 +14,7 @@ define([
 
     // for effect
     'kbaseUI/widget/legacy/authenticatedWidget'
-], ($, Uuid, html, Workspace, UserAndJobState, EasyTree, {domSafeText, errorMessage, domSafeValue}, {$errorAlert}) => {
+], ($, Uuid, html, Workspace, UserAndJobState, EasyTree, {domSafeText, errorMessage}, {$errorAlert}) => {
     $.KBWidget({
         name: 'kbaseTree',
         parent: 'kbaseAuthenticatedWidget',
@@ -79,9 +79,9 @@ define([
                 // xss safe
                 panel.append(table);
                 // xss safe
-                table.append(`<tr><td>Job was created with id</td><td>${domSafeValue(self.options.jobID)}</td></tr>`);
+                table.append(`<tr><td>Job was created with id</td><td>${domSafeText(self.options.jobID)}</td></tr>`);
                 // xss safe
-                table.append(`<tr><td>Output result will be stored as</td><td>${domSafeValue(self.options.treeID)}</td></tr>`);
+                table.append(`<tr><td>Output result will be stored as</td><td>${domSafeText(self.options.treeID)}</td></tr>`);
                 // xss safe
                 table.append(`<tr><td>Current job state is</td><td id="${self.pref}job"></td></tr>`);
                 const timeLst = function () {

@@ -20,7 +20,7 @@ define([
     Workspace,
     DynamicServiceClient,
     GenericClient,
-    {domSafeText, errorMessage, domSafeValue},
+    {domSafeText, errorMessage},
     Uuid
 ) => {
     $.KBWidget({
@@ -161,10 +161,10 @@ define([
                         // xss safe
                         table.append($createTableRow('Comparison object', self.ws_id));
                         // xss safe
-                        table.append($createTableRow('Genome1 (x-axis)',null,  `<a href="/#dataview/${self.genome1Ref}" target="_blank">${domSafeValue(genome1id)}</a>` +
+                        table.append($createTableRow('Genome1 (x-axis)',null,  `<a href="/#dataview/${self.genome1Ref}" target="_blank">${domSafeText(genome1id)}</a>` +
                         ` (${  self.cmp.proteome1names.length  } genes, ${  count1hits  } have hits)`));
                         // xss safe
-                        table.append($createTableRow('Genome2 (y-axis)', null, `<a href="/#dataview/${self.genome2Ref}" target="_blank">${domSafeValue(genome2id)}</a>` +
+                        table.append($createTableRow('Genome2 (y-axis)', null, `<a href="/#dataview/${self.genome2Ref}" target="_blank">${domSafeText(genome2id)}</a>` +
                         ` (${self.cmp.proteome2names.length} genes, ${count2hits} have hits)`));
                         if (self.scale == null)
                             self.scale = self.size * 100 / Math.max(self.cmp.proteome1names.length, self.cmp.proteome2names.length);
@@ -323,7 +323,7 @@ define([
                                 const hit = hitSearch(e);
                                 const tip = $(`#widget-tooltip_${  self.pref}`);
                                 if (Number(hit.bestDist) >= 0) {
-                                    const msg = `X-axis: ${domSafeValue(self.cmp.proteome1names[Number(hit.bestI)])}, Y-axis: ${domSafeValue(self.cmp.proteome2names[Number(hit.bestJ)])}<br>click to see details...`;
+                                    const msg = `X-axis: ${domSafeText(self.cmp.proteome1names[Number(hit.bestI)])}, Y-axis: ${domSafeText(self.cmp.proteome2names[Number(hit.bestJ)])}<br>click to see details...`;
                                     // xss safe
                                     tip.html(msg);
                                     tip.css({
@@ -581,7 +581,7 @@ define([
                     const tip = $(`#widget-tooltip_${self.pref}`);
                     if (minDist && minDist <= 2) {
                         const msg = `Gene1: ${domSafeText(bestLine.gene1)}<br>Gene2: ${domSafeText(bestLine.gene2)}<br>` +
-                        `Bit-score: ${domSafeValue(bestLine.bit_score)}<br>Percent of related BBH bit-score: ${domSafeValue(bestLine.percent_of_bbh)}%`;
+                        `Bit-score: ${domSafeText(bestLine.bit_score)}<br>Percent of related BBH bit-score: ${domSafeText(bestLine.percent_of_bbh)}%`;
                         // xss safe
                         tip.html(msg);
                         tip.css({

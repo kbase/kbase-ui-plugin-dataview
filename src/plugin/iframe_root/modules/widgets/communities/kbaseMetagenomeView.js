@@ -15,7 +15,7 @@ define([
     'kbaseUI/widget/legacy/authenticatedWidget',
     'kbaseUI/widget/legacy/kbaseTabs',
     'datatables_bootstrap'
-], ($, GooglePalette, Workspace, html, Graph, Plot, {domSafeValue}, {$errorAlert}) => {
+], ($, GooglePalette, Workspace, html, Graph, Plot, {domSafeText}, {$errorAlert}) => {
 
     function formatNumber(value) {
         return Intl.NumberFormat('en-us', {useGrouping: true}).format(value);
@@ -158,23 +158,23 @@ define([
                         let overviewTable = '<h4>Info</h4>';
                         overviewTable += '<p><table class="table table-striped table-bordered" style="width: 50%;">';
                         overviewTable +=
-                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Metagenome ID</b></td><td>${domSafeValue(d.id)}</td></tr>`;
+                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Metagenome ID</b></td><td>${domSafeText(d.id)}</td></tr>`;
                         overviewTable +=
-                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Metagenome Name</b></td><td>${domSafeValue(d.name)}</td></tr>`;
+                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Metagenome Name</b></td><td>${domSafeText(d.name)}</td></tr>`;
                         overviewTable +=
-                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Project ID</b></td><td>${domSafeValue(d.metadata.project.id)}</td></tr>`;
+                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Project ID</b></td><td>${domSafeText(d.metadata.project.id)}</td></tr>`;
                         overviewTable +=
-                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Project Name</b></td><td>${domSafeValue(d.metadata.project.name)}</td></tr>`;
+                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Project Name</b></td><td>${domSafeText(d.metadata.project.name)}</td></tr>`;
                         overviewTable +=
-                            `<tr><td style="padding-right: 25px; width: 165px;"><b>PI</b></td><td>${domSafeValue(d.metadata.project.data.PI_firstname)} ${domSafeValue(d.metadata.project.data.PI_lastname)}</td></tr>`;
+                            `<tr><td style="padding-right: 25px; width: 165px;"><b>PI</b></td><td>${domSafeText(d.metadata.project.data.PI_firstname)} ${domSafeText(d.metadata.project.data.PI_lastname)}</td></tr>`;
                         overviewTable +=
-                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Organization</b></td><td>${domSafeValue(d.metadata.project.data.PI_organization)}</td></tr>`;
+                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Organization</b></td><td>${domSafeText(d.metadata.project.data.PI_organization)}</td></tr>`;
                         overviewTable +=
-                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Sequence Type</b></td><td>${domSafeValue(d.sequence_type)}</td></tr>`;
+                            `<tr><td style="padding-right: 25px; width: 165px;"><b>Sequence Type</b></td><td>${domSafeText(d.sequence_type)}</td></tr>`;
                         overviewTable += '</table></p>';
                         overviewTable += '<h4>Summary</h4>';
                         overviewTable +=
-                            `<p>The dataset ${domSafeValue(d.name)} was uploaded on ${domSafeValue(d.created)} and contains ${domSafeValue(stats.sequence_count_raw)} sequences totaling ${domSafeValue(stats.bp_count_raw)} basepairs with an average length of ${stats.average_length_raw} bps.</p>`;
+                            `<p>The dataset ${domSafeText(d.name)} was uploaded on ${domSafeText(d.created)} and contains ${domSafeText(stats.sequence_count_raw)} sequences totaling ${domSafeText(stats.bp_count_raw)} basepairs with an average length of ${stats.average_length_raw} bps.</p>`;
                         const ptext =
                             ` Of the remainder, ${ann_aa_reads} sequences (${((ann_aa_reads / raw_seqs) * 100).toFixed(2)}%) contain predicted proteins with known functions and ${unkn_aa_reads} sequences (${((unkn_aa_reads / raw_seqs) * 100).toFixed(2)}%) contain predicted proteins with unknown function.`;
                         const ftext =
@@ -208,7 +208,7 @@ define([
                         for (const c in cats) {
                             if (d.metadata[cats[c]]) {
                                 for (const key in d.metadata[cats[c]].data) {
-                                    rows.push([domSafeValue(cats[c]), domSafeValue(key), domSafeValue(d.metadata[cats[c]].data[key])]);
+                                    rows.push([domSafeText(cats[c]), domSafeText(key), domSafeText(d.metadata[cats[c]].data[key])]);
                                 }
                             }
                         }

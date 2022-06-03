@@ -589,11 +589,9 @@ define([
                     // umm, does nothing.
                     this.extractLink(parts[0]);
                     $relationship
-                        // xss safe
                         .append(domSafeText(parts[0]))
                         // xss safe
                         .append(' ! ')
-                        // xss safe
                         .append(domSafeText(parts[1]))
                         // xss safe
                         .append('<br>');

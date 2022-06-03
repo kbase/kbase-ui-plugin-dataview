@@ -20,7 +20,7 @@ define([
     Uuid,
     DynamicServiceClient,
     ContigBrowserPanel,
-    {domSafeText, domSafeValue},
+    {domSafeText},
     {$errorAlert, $loadingAlert, $none}
 ) => {
     function numberWithCommas(x) {
@@ -347,7 +347,6 @@ define([
                     const getCallback = function (rowData) { return function () {idClick(rowData);};};
                     // xss safe
                     $tr.append($('<td>').append(
-                        // xss safe
                         $('<a>').css('cursor','pointer').append(domSafeText(rowData['feature_id']))
                             .on('click',getCallback(rowData)))
                     );
@@ -1563,21 +1562,21 @@ define([
                 }
                 if (featureData['dna_sequence']){
                     // xss safe
-                    $dnaSeq.html(printDNA(domSafeValue(featureData['dna_sequence']), 100));
+                    $dnaSeq.html(printDNA(domSafeText(featureData['dna_sequence']), 100));
                 } else {
                     // xss safe
                     $warnings.html($none('Not Available'));
                 }
                 if (featureData['warnings']){
                     // xss safe
-                    $warnings.html(featureData['warnings'].map((value) => {return domSafeValue(value);}).join('<br>'));
+                    $warnings.html(featureData['warnings'].map((value) => {return domSafeText(value);}).join('<br>'));
                 } else {
                     // xss safe
                     $warnings.html($none());
                 }
                 if (featureData['functional_descriptions']) {
                     // xss safe
-                    $functions.html(featureData['functional_descriptions'].map((value) => {return domSafeValue(value);}).join('<br>'));
+                    $functions.html(featureData['functional_descriptions'].map((value) => {return domSafeText(value);}).join('<br>'));
                 } else {
                     // xss safe
                     $functions.html($none());

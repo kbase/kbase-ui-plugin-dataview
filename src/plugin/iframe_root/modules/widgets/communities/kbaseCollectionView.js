@@ -9,7 +9,7 @@ define([
     // for effect
     'datatables_bootstrap',
     'kbaseUI/widget/legacy/authenticatedWidget'
-], ($, Workspace, html, {domSafeText, domSafeValue}) => {
+], ($, Workspace, html, {domSafeText}) => {
     $.KBWidget({
         name: 'CollectionView',
         parent: 'kbaseAuthenticatedWidget',
@@ -105,7 +105,7 @@ define([
                                 item.data.mixs.seq_method,
                                 item.data.statistics.sequence_stats.bp_count_raw,
                                 item.data.created
-                            ].map((value) => {return domSafeValue(value);});
+                            ].map((value) => {return domSafeText(value);});
                         }),
                         options = {
                             columns: [
