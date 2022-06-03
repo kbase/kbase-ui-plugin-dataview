@@ -10,10 +10,9 @@ def check_inner_html(dir_to_check, show_files=False, omit_pattern=None, verbose=
         print(f'Using omit pattern {omit_pattern}')
 
     files = glob.iglob('./**/*.js', root_dir=dir_to_check, recursive=True)
-    instances = 0
     comment_count = 0
     safe_count = 0
-    lines_to_fix_count = 0
+    lines_to_investigate_count = 0
     files_to_fix = {}
     for file in files:
         file_path = f'{dir_to_check}/{file}'
@@ -38,10 +37,10 @@ def check_inner_html(dir_to_check, show_files=False, omit_pattern=None, verbose=
                         safe_count += 1
                         handled = True
                     else:
-                        instances += 1
+                        lines_to_investigate_count += 1
 
                     if not handled:
-                        instances += 1
+                        lines_to_investigate_count += 1
                         if file not in files_to_fix:
                             files_to_fix[file] = {
                                 'count': 1,
@@ -58,8 +57,8 @@ def check_inner_html(dir_to_check, show_files=False, omit_pattern=None, verbose=
                             })
                 prev_line = line
 
-    if verbose or instances > 0:
-        print(f'Found: {instances}')
+    if verbose or lines_to_investigate_count > 0:
+        print(f'Found: {lines_to_investigate_count}')
         print(f'Comments: {comment_count}')
         print(f'Safe: {safe_count}')
 
@@ -77,10 +76,12 @@ def check_inner_html(dir_to_check, show_files=False, omit_pattern=None, verbose=
                     for line_stats in record['lines']:
                         print(f'[{line_stats["line_number"] + 1}] {line_stats["line"]}')
 
-    return [instances, 
+    return [lines_to_investigate_count, 
         {
-            'to_investigate': instances,
             'stats': {
+                'total': {
+                    'lines_to_investigate': lines_to_investigate_count
+                },
                 'safe_usages_annotated': {
                     'safe': safe_count
                 }
@@ -95,7 +96,7 @@ def check_preact_usage(dir_to_check, show_files=True, omit_pattern=None, verbose
         print(f'Using omit pattern {omit_pattern}')
 
     files = glob.iglob('./**/*.js', root_dir=dir_to_check, recursive=True)
-    instances = 0
+    lines_to_investigate_count = 0
     comment_count = 0
     safe_count = 0
     ignore_count = 0
@@ -133,7 +134,7 @@ def check_preact_usage(dir_to_check, show_files=True, omit_pattern=None, verbose
                         handled = True
 
                     if not handled:
-                        instances += 1
+                        lines_to_investigate_count += 1
                         if file not in files_to_fix:
                             files_to_fix[file] = {
                                 'count': 1,
@@ -151,7 +152,7 @@ def check_preact_usage(dir_to_check, show_files=True, omit_pattern=None, verbose
 
                 prev_line = line
 
-    if verbose or instances > 0:
+    if verbose or lines_to_investigate_count > 0:
         print('')
         print('Safe usages detected')
         print('--------------------')
@@ -162,10 +163,10 @@ def check_preact_usage(dir_to_check, show_files=True, omit_pattern=None, verbose
         print(f'Safe: {safe_count}')
         print(f'Ingored: {ignore_count}')
         print('')
-        if instances == 0:
+        if lines_to_investigate_count == 0:
             print('Nothing to investigate')
         else:
-            print(f'{instances} instance{"" if instances == 1 else "s"} to investigate')
+            print(f'{lines_to_investigate_count} instance{"" if lines_to_investigate_count == 1 else "s"} to investigate')
             print('')
 
             total = 0
@@ -187,13 +188,14 @@ def check_preact_usage(dir_to_check, show_files=True, omit_pattern=None, verbose
                         print(f'[{line_stats["line_number"] + 1}] {line_stats["line"]}')
 
     return [
-        instances,
+        lines_to_investigate_count,
         {
-            'to_investigate': instances,
             'stats': {
+                'total': {
+                    'lines_to_investigate': lines_to_investigate_count
+                },
                 'safe_usages_annotated': {
-                    'safe': safe_count,
-                    'ignored': ignore_count
+                    'safe': safe_count
                 }
             }
         }
@@ -207,7 +209,7 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
         print(f'Using omit pattern {omit_pattern}')
 
     files = glob.iglob('./**/*.js', root_dir=dir_to_check, recursive=True)
-    instances = 0
+    lines_to_investigate_count = 0
     line_comment_count = 0
     safe_count = 0
     ignore_count = 0
@@ -218,8 +220,7 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
     dom_safe_error_message = 0
     error_alert_count = 0
     purified_text = 0
-    total_lines_inspected = 0
-    total_lines_detected = 0
+    total_lines_analyzed = 0
     total_file_count = 0
     total_line_count = 0
     block_comment_count = 0
@@ -265,7 +266,7 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
                     block_comment_count += 1
                     continue
 
-                total_lines_inspected += 1
+                total_lines_analyzed += 1
 
                 handled = False
                 for jquery_method in jquery_methods:
@@ -313,8 +314,6 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
                                     dom_safe_text += 1
                                 elif re.search(f"{jquery_method}[(]domSafeValue[(].*[)][)]", line):
                                     dom_safe_value += 1
-                                elif re.search(f"{jquery_method}[(]domSafeErrorMessage[(].*[)][)]", line):
-                                    dom_safe_error_message += 1
                                 elif re.search(f"{jquery_method}[(][$]errorAlert[(].*[)][)]", line):
                                     error_alert_count += 1
                                 elif re.search(f"{jquery_method}[(]DOMPurify[.]sanitize[(].*[)][)]", line):
@@ -323,7 +322,7 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
                                     handled = False
 
                         if not handled:
-                            instances += 1
+                            lines_to_investigate_count += 1
                             if file not in files_to_fix:
                                 files_to_fix[file] = {
                                     'count': 1,
@@ -340,7 +339,7 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
                                 })
                 prev_line = line
 
-    if verbose or instances > 0:
+    if verbose or lines_to_investigate_count > 0:
         print('')
         print('Totals')
         print('------')
@@ -368,10 +367,10 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
         print(f'Safe: {safe_count}')
         print(f'Ingored: {ignore_count}')
         print('')
-        if instances == 0:
+        if lines_to_investigate_count == 0:
             print('Nothing to investigate')
         else:
-            print(f'{instances} instance{"" if instances == 1 else "s"} to investigate')
+            print(f'{lines_to_investigate_count} instance{"" if lines_to_investigate_count == 1 else "s"} to investigate')
             print('')
 
             total = 0
@@ -392,14 +391,13 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
                     for line_stats in record['lines']:
                         print(f'[{line_stats["line_number"] + 1}] {line_stats["line"]}')
 
-    return [instances, {
-            'to_investigate': instances,
+    return [lines_to_investigate_count, {
             'stats': {
                 'total': {
                     'files': total_file_count,
                     'lines': total_line_count,
-                    'lines_inspected': total_lines_inspected,
-                    'lines_detected': total_lines_detected
+                    'lines_analyzed': total_lines_analyzed,
+                    'lines_to_investigate': lines_to_investigate_count
                 },
                 'skipped': {
                     'line_comments': line_comment_count,
@@ -410,7 +408,6 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
                     'simple_string': simple_string_count,
                     'simple_tag': simple_tag_count,
                     'domSafeText': dom_safe_text,
-                    'domSafeErrorMessage': dom_safe_error_message,
                     '$errorAlert': error_alert_count,
                     'DOMPurify.sanitize': purified_text
                 },
