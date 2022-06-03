@@ -88,7 +88,6 @@ define([
                     }
                 },
                 (error) => {
-                    // xss safe
                     container.html($errorAlert(error));
                 }
             );

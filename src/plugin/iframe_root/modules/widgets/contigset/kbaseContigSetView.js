@@ -171,9 +171,7 @@ define([
                     .catch((err) => {
                         container.empty();
                         // xss safe
-                        container.append(
-                            `<div class="alert alert-danger"><p>[Error] ${domSafeErrorMessage(err)}</p></div>`
-                        );
+                        container.append(`<div class="alert alert-danger"><p>[Error] ${domSafeErrorMessage(err)}</p></div>`);
                     });
             };
             ready();

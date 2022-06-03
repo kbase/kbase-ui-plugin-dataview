@@ -120,7 +120,6 @@ define([
             // display area.
             const $errorBox = $('<div>')
                 .css('clear', 'both');
-            // xss safe
             $errorBox.html($errorAlert(err, title));
             // xss safe
             this.$elem.append($errorBox);
@@ -318,8 +317,7 @@ define([
                     })
                     .catch((err) => {
                         console.error(err);
-                        // xss safe
-                        $errorDiv.html($errorAlert(err), 'Error Searching');
+                        $errorDiv.html($errorAlert(err, 'Error Searching'));
                         throw err;
                     });
             };
@@ -768,7 +766,6 @@ define([
                     .spread((d) => {return d;})
                     .catch((err)=> {
                         console.error(err);
-                        // xss safe
                         $errorDiv.html($errorAlert(err));
                     });
             }
@@ -985,7 +982,6 @@ define([
                 })
                 .catch((err) => {
                     console.error(err);
-                    // xss safe
                     $length.html($errorAlert(err));
                 });
         },
@@ -1078,7 +1074,6 @@ define([
                     })
                     .catch((err) => {
                         console.error(err);
-                        // xss safe
                         $div.html($errorAlert(err));
                     });
             }
@@ -1677,7 +1672,6 @@ define([
                         })
                         .catch((err) => {
                             console.error(err);
-                            // xss safe
                             $contigBrowser.html($errorAlert(err));
                         });
                 }

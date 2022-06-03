@@ -193,7 +193,6 @@ define([
         },
 
         renderError(error, title) {
-            // xss safe
             this.$elem.html($errorAlert(error, title));
         },
 

@@ -233,7 +233,6 @@ define([
             };
         },
         showError(panel, e) {
-            // xss safe
             panel.html($errorAlert(e));
         },
         genUUID() {
