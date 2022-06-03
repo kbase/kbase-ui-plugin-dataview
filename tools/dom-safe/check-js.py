@@ -9,10 +9,13 @@ def check_inner_html(dir_to_check, show_files=False, omit_pattern=None, verbose=
     if omit_pattern is not None:
         print(f'Using omit pattern {omit_pattern}')
 
-    files = glob.iglob('./**/*.js', root_dir=dir_to_check, recursive=True)
+    files = []
+    files.extend(glob.iglob('./**/*.js', root_dir=dir_to_check, recursive=True))
+    files.extend(glob.iglob('./**/*.ts', root_dir=dir_to_check, recursive=True))
     comment_count = 0
     safe_count = 0
     lines_to_investigate_count = 0
+    candidate_line_count = 0
     files_to_fix = {}
     for file in files:
         file_path = f'{dir_to_check}/{file}'
@@ -28,6 +31,7 @@ def check_inner_html(dir_to_check, show_files=False, omit_pattern=None, verbose=
             for line_number, line in enumerate(lines):
                 handled = False
                 if 'innerHTML' in line:
+                    candidate_line_count += 1
                     # skip lines which are comments (start with //)
                     if re.search('^(\s)*//', line):
                         comment_count += 1
@@ -80,6 +84,7 @@ def check_inner_html(dir_to_check, show_files=False, omit_pattern=None, verbose=
         {
             'stats': {
                 'total': {
+                    'candidate_lines': candidate_line_count,
                     'lines_to_investigate': lines_to_investigate_count
                 },
                 'safe_usages_annotated': {
@@ -95,11 +100,15 @@ def check_preact_usage(dir_to_check, show_files=True, omit_pattern=None, verbose
     if omit_pattern is not None:
         print(f'Using omit pattern {omit_pattern}')
 
-    files = glob.iglob('./**/*.js', root_dir=dir_to_check, recursive=True)
+    files = []
+    files.extend(glob.iglob('./**/*.js', root_dir=dir_to_check, recursive=True))
+    files.extend(glob.iglob('./**/*.ts', root_dir=dir_to_check, recursive=True))
+    candidate_line_count = 0
     lines_to_investigate_count = 0
     comment_count = 0
     safe_count = 0
     ignore_count = 0
+    purified_text = 0
     files_to_fix = {}
     for file in files:
         file_path = f'{dir_to_check}/{file}'
@@ -119,16 +128,21 @@ def check_preact_usage(dir_to_check, show_files=True, omit_pattern=None, verbose
                 line = raw_line.rstrip()
                 handled = False
                 if 'dangerouslySetInnerHTML' in line:
+                    candidate_line_count += 1
                     # skip lines which are comments (start with //)
                     # Safe usage heuristics
                     if re.search('^(\s)*//', line):
                         comment_count += 1
+                        handled = True
+                    elif re.search('', line):
+                        purified_text += 1
                         handled = True
                     # Annotations
                     # check if safe (prev line contains a "safe" comment)
                     elif prev_line is not None and re.search('^(\s)*//\s*xss\s*safe', prev_line):
                         safe_count += 1
                         handled = True
+                    # Or is ignorable
                     elif prev_line is not None and re.search('^(\s)*//\s*xss\s*ignore', prev_line):
                         ignore_count += 1
                         handled = True
@@ -192,7 +206,11 @@ def check_preact_usage(dir_to_check, show_files=True, omit_pattern=None, verbose
         {
             'stats': {
                 'total': {
+                    'candidate_lines': candidate_line_count,
                     'lines_to_investigate': lines_to_investigate_count
+                },
+                'safe_usages_detected': {
+                    'DOMPurify.sanitize': purified_text
                 },
                 'safe_usages_annotated': {
                     'safe': safe_count
@@ -216,7 +234,9 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
     if omit_pattern is not None:
         print(f'Using omit pattern {omit_pattern}')
 
-    files = glob.iglob('./**/*.js', root_dir=dir_to_check, recursive=True)
+    files = []
+    files.extend(glob.iglob('./**/*.js', root_dir=dir_to_check, recursive=True))
+    files.extend(glob.iglob('./**/*.ts', root_dir=dir_to_check, recursive=True))
     lines_to_investigate_count = 0
     line_comment_count = 0
     safe_count = 0
@@ -233,6 +253,7 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
     total_line_count = 0
     block_comment_count = 0
     block_comment_line_count = 0
+    candidate_line_count = 0
     files_to_fix = {}
     for file in files:
         file_path = f'{dir_to_check}/{file}'
@@ -282,6 +303,7 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
                 handled = False
                 for jquery_method in jquery_methods:
                     if f'{jquery_method}(' in line:
+                        candidate_line_count += 1
                         # Safe usage heuristic - skip lines which are comments (start with //)
                         # if re.search('^(\s)*//', line):
                         #     comment_count += 1
@@ -408,6 +430,7 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
                     'files': total_file_count,
                     'lines': total_line_count,
                     'lines_analyzed': total_lines_analyzed,
+                    'candidate_lines': candidate_line_count,
                     'lines_to_investigate': lines_to_investigate_count
                 },
                 'skipped': {
