@@ -409,14 +409,14 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
                 'safe_usages_detected': {
                     'simple_string': simple_string_count,
                     'simple_tag': simple_tag_count,
-                    'dom_safe': dom_safe_text,
-                    'dom_safe_error_message': dom_safe_error_message,
-                    'dom_purify_sanitized': purified_text,
-                    'error_alert': error_alert_count
+                    'domSafeText': dom_safe_text,
+                    'domSafeErrorMessage': dom_safe_error_message,
+                    '$errorAlert': error_alert_count,
+                    'DOMPurify.sanitize': purified_text
                 },
                 'safe_usages_annotated': {
                     'safe': safe_count,
-                    'ingored': ignore_count
+                    'ignored': ignore_count
                 }
             }
         }
@@ -457,6 +457,17 @@ def main():
     total_errors = 0
     total_stats = {}
 
+    # These appear to be all the jquery methods which can insert raw html strings into the DOM.
+    # see https://api.jquery.com/category/manipulation/ 
+
+    jquery_methods = [
+        'append', 'html', 'prepend', 'appendTo', 'prependTo', 'after', 'before', 'insertAfter', 'insertBefore', 'replaceAll', 'replaceWith', 'wrap', 'wrapAll'
+    ]
+    [error_count, stats] = check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pattern=omit_pattern, verbose=verbose)
+    total_errors += error_count
+    update_stats(total_stats, stats)
+
+
     # This checks for raw usage of innerHTML.
     [error_count, stats] = check_inner_html(dir_to_check, show_files, omit_pattern=omit_pattern)
     total_errors += error_count
@@ -467,15 +478,6 @@ def main():
     total_errors += error_count
     update_stats(total_stats, stats)
 
-    # These appear to be all the jquery methods which can insert raw html strings into the DOM.
-    # see https://api.jquery.com/category/manipulation/ 
-
-    jquery_methods = [
-        'append', 'html', 'prepend', 'appendTo', 'prependTo', 'after', 'before', 'insertAfter', 'insertBefore', 'replaceAll', 'replaceWith', 'wrap', 'wrapAll'
-    ]
-    [error_count, stats] = check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pattern=omit_pattern, verbose=verbose)
-    total_errors += error_count
-    update_stats(total_stats, stats)
 
     print('')
     print('===================')
