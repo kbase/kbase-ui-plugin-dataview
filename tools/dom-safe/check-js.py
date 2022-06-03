@@ -201,6 +201,14 @@ def check_preact_usage(dir_to_check, show_files=True, omit_pattern=None, verbose
         }
     ]
 
+def is_block_comment_start(line):
+    return re.search('^(\s)*[\/][*]', line)
+
+def is_block_comment_end(line):
+    return re.search('[*][\/]\s*$', line)
+
+def is_line_comment(line):
+    return re.search('^(\s)*//', line)
 
 def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pattern=None, verbose=False):
     print('')
@@ -250,20 +258,23 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
                 line = raw_line.rstrip()
 
                 if block_comment:
-                    if re.search('^[*]/\s*$', line):
+                    if is_block_comment_end(line):
                         block_comment = False
+                        block_comment_line_count += 1
                         continue
                     else:
                         block_comment_line_count += 1
 
-                if re.search('^(\s)*//', line):
+                if is_line_comment(line):
                         line_comment_count += 1
                         prev_line = line
                         continue
 
-                if re.search('^(\s)*[*]/', line):
-                    block_comment = True
+                if is_block_comment_start(line):
                     block_comment_count += 1
+                    block_comment_line_count += 1
+                    if not is_block_comment_end(line):
+                        block_comment = True
                     continue
 
                 total_lines_analyzed += 1
