@@ -1127,7 +1127,6 @@ define([
                     return null;
                 })
                 .catch((e) => {
-                    // xss safe
                     container.prepend($errorAlert(e));
                 });
         }

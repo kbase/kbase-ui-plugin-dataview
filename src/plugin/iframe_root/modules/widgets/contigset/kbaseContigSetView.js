@@ -9,7 +9,7 @@ define([
     'kb_service/client/workspace',
     'kb_common/html',
     'uuid',
-    'lib/domUtils',
+    'lib/jqueryUtils',
 
     // for effect
     'datatables_bootstrap',
@@ -20,7 +20,7 @@ define([
     Workspace,
     html,
     Uuid,
-    {domSafeErrorMessage}
+    {$errorAlert}
 ) => {
     $.KBWidget({
         name: 'kbaseContigSetView',
@@ -170,10 +170,7 @@ define([
                     })
                     .catch((err) => {
                         container.empty();
-                        // xss safe
-                        container.append(
-                            `<div class="alert alert-danger"><p>[Error] ${domSafeErrorMessage(err)}</p></div>`
-                        );
+                        container.append($errorAlert(err));
                     });
             };
             ready();

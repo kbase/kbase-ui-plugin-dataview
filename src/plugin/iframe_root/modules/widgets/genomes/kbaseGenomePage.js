@@ -445,7 +445,6 @@ define([
                 console.error(title);
             }
             console.error(error);
-            // xss safe
             panel.html($errorAlert(error, title));
         }
     });

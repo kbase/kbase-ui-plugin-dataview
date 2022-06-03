@@ -1092,7 +1092,6 @@ define([
             };
         },
         renderError(error) {
-            // xss safe
             this.$elem.html($errorAlert(error));
         },
         buildObjectIdentity(workspaceID, objectId) {

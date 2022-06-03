@@ -15,7 +15,7 @@ define([
     $,
     html,
     Workspace,
-    {domSafeText, domSafeValue},
+    {domSafeText},
     {$errorAlert}) => {
     $.KBWidget({
         name: 'AnnotationSetTable',
@@ -66,10 +66,10 @@ define([
                             funcs = otus[o].functions;
                             for (f = 0; f < funcs.length; f += 1) {
                                 rows.push([
-                                    funcs[f].reference_genes.map((value) => {return domSafeValue(value);}).join('<br>'),
-                                    domSafeValue(funcs[f].functional_role),
-                                    domSafeValue(funcs[f].abundance),
-                                    domSafeValue(funcs[f].confidence),
+                                    funcs[f].reference_genes.map((value) => {return domSafeText(value);}).join('<br>'),
+                                    domSafeText(funcs[f].functional_role),
+                                    domSafeText(funcs[f].abundance),
+                                    domSafeText(funcs[f].confidence),
                                     domSafeText(otus[o].name)
                                 ]);
                             }
@@ -88,7 +88,6 @@ define([
                     }
                 },
                 (error) => {
-                    // xss safe
                     container.html($errorAlert(error));
                 }
             );

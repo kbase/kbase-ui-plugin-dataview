@@ -186,7 +186,6 @@ define([
             this.$errorPane.empty();
             // xss safe
             this.$errorPane.append('<strong>Error when retrieving data.</strong><br><br>');
-            // xss safe
             this.$errorPane.append(domSafeText(error.error.message));
             // xss safe
             this.$errorPane.append('<br>');

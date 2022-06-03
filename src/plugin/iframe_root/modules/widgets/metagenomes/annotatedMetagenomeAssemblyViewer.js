@@ -20,7 +20,7 @@ define([
     Uuid,
     DynamicServiceClient,
     ContigBrowserPanel,
-    {domSafeText, domSafeValue},
+    {domSafeText},
     {$errorAlert, $loadingAlert, $none}
 ) => {
     function numberWithCommas(x) {
@@ -113,15 +113,14 @@ define([
             });
         },
 
-        showError(err) {
+        showError(err, title) {
             this.$elem.empty();
             // This wrapper is required because the output widget displays a "Details..." button
             // with float right; without clearing this button will reside inside the error
             // display area.
             const $errorBox = $('<div>')
                 .css('clear', 'both');
-            // xss safe
-            $errorBox.html($errorAlert(err));
+            $errorBox.html($errorAlert(err, title));
             // xss safe
             this.$elem.append($errorBox);
         },
@@ -318,8 +317,7 @@ define([
                     })
                     .catch((err) => {
                         console.error(err);
-                        // xss safe
-                        $errorDiv.html($errorAlert(err), 'Error Searching');
+                        $errorDiv.html($errorAlert(err, 'Error Searching'));
                         throw err;
                     });
             };
@@ -349,7 +347,6 @@ define([
                     const getCallback = function (rowData) { return function () {idClick(rowData);};};
                     // xss safe
                     $tr.append($('<td>').append(
-                        // xss safe
                         $('<a>').css('cursor','pointer').append(domSafeText(rowData['feature_id']))
                             .on('click',getCallback(rowData)))
                     );
@@ -583,7 +580,11 @@ define([
                     (results) => {
                         $input.prop('disabled', false);
                         renderResult($table, results);
-                    });
+                    })
+                .catch((error) => {
+                    $loadingDiv.empty();
+                    $errorDiv.html($errorAlert(error, 'Error performing initial search'));
+                });
 
 
 
@@ -764,7 +765,6 @@ define([
                     .spread((d) => {return d;})
                     .catch((err)=> {
                         console.error(err);
-                        // xss safe
                         $errorDiv.html($errorAlert(err));
                     });
             }
@@ -981,7 +981,6 @@ define([
                 })
                 .catch((err) => {
                     console.error(err);
-                    // xss safe
                     $length.html($errorAlert(err));
                 });
         },
@@ -1074,7 +1073,6 @@ define([
                     })
                     .catch((err) => {
                         console.error(err);
-                        // xss safe
                         $div.html($errorAlert(err));
                     });
             }
@@ -1564,21 +1562,21 @@ define([
                 }
                 if (featureData['dna_sequence']){
                     // xss safe
-                    $dnaSeq.html(printDNA(domSafeValue(featureData['dna_sequence']), 100));
+                    $dnaSeq.html(printDNA(domSafeText(featureData['dna_sequence']), 100));
                 } else {
                     // xss safe
                     $warnings.html($none('Not Available'));
                 }
                 if (featureData['warnings']){
                     // xss safe
-                    $warnings.html(featureData['warnings'].map((value) => {return domSafeValue(value);}).join('<br>'));
+                    $warnings.html(featureData['warnings'].map((value) => {return domSafeText(value);}).join('<br>'));
                 } else {
                     // xss safe
                     $warnings.html($none());
                 }
                 if (featureData['functional_descriptions']) {
                     // xss safe
-                    $functions.html(featureData['functional_descriptions'].map((value) => {return domSafeValue(value);}).join('<br>'));
+                    $functions.html(featureData['functional_descriptions'].map((value) => {return domSafeText(value);}).join('<br>'));
                 } else {
                     // xss safe
                     $functions.html($none());
@@ -1673,7 +1671,6 @@ define([
                         })
                         .catch((err) => {
                             console.error(err);
-                            // xss safe
                             $contigBrowser.html($errorAlert(err));
                         });
                 }

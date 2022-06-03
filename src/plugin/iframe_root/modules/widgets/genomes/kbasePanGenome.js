@@ -55,14 +55,11 @@ define([
 
         // If it's a string, just dump the string.
         if (typeof error === 'string') {
-            // xss safe
             $errorPanel.append(domSafeText(error));
         } else if (error instanceof Error) {
             if (error instanceof exceptions.JsonRpcError) {
-                // xss safe
                 $errorPanel.append(domSafeText(error.originalError.message || error.originalError.name));
             } else {
-                // xss safe
                 $errorPanel.append(domSafeText(error.message || error.name));
             }
         } else if (error) {

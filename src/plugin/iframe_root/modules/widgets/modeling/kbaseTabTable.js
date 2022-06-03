@@ -373,7 +373,6 @@ define([
                         }
                     }).catch((err) => {
                         console.error(err);
-                        // xss safe
                         contentDiv.html($errorAlert(err));
                     });
                 });

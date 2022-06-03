@@ -108,7 +108,6 @@ define([
                     })
                     .catch((err) => {
                         console.error(err);
-                        // xss safe
                         container.prepend($errorAlert(err));
                         return false;
                     });

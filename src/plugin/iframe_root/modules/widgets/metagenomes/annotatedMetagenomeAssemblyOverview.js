@@ -44,7 +44,6 @@ define([
                 this.$root.html(this.$renderData(this.options.genomeInfo.data, this.options.genomeInfo.info[10]));
             } catch (e) {
                 console.error(e);
-                // xss safe
                 this.$root.html($errorAlert(e));
             }
         },

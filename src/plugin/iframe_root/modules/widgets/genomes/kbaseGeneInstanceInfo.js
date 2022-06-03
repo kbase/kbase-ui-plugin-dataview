@@ -158,7 +158,6 @@ define([
                         this.$renderRow(
                             'Genome', null,
                             $('<div/>')
-                                // xss safe
                                 .append(domSafeText(genome.data.scientific_name))
                                 // xss safe
                                 .append('<br>')

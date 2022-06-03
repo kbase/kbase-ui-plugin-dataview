@@ -13,29 +13,6 @@ define([
         return donorNode.innerHTML;
     }
 
-    /**
-     * domSafeValue
-     * Returns the provided value as a string, safely
-     * encoded for inclusion into the DOM.
-     */
-    function domSafeValue(value) {
-        switch (typeof value) {
-        case 'string':
-            return domSafeText(value);
-        case 'number':
-            return String(value);
-        case 'undefined':
-            return '';
-        case 'boolean':
-            if (value) {
-                return 'true';
-            }
-            return 'false';
-        default:
-            throw new Error('No dom safe value for this type');
-        }
-    }
-
     function objectInfoToObject(rawObjectInfo) {
         const data = rawObjectInfo.map((value) => {
             if (typeof value === 'string') {
@@ -132,7 +109,6 @@ define([
         objectInfoToObject,
         workspaceInfoToObject,
         domSafeText,
-        domSafeValue,
         domSafeErrorMessage,
         errorMessage
     };
