@@ -138,7 +138,7 @@ define([
                 <tr>
                     <th>Type Version</th>
                     <td>
-                        ${this.props.objectInfo.typeMajorVersion}. ${this.props.objectInfo.typeMinorVersion}
+                        ${this.props.objectInfo.typeMajorVersion}.${this.props.objectInfo.typeMinorVersion}
                     </td>
                 </tr>
             `;
@@ -286,7 +286,7 @@ define([
                     `;
                 }
 
-                if (!this.props.inc_references) {
+                if (!this.props.inc_references || this.props.inc_references.length === 0) {
                     return html`
                         <p>
                             No other data references this data object.
@@ -348,10 +348,10 @@ define([
                     `;
                 }
 
-                if (!this.props.out_references) {
+                if (!this.props.inc_references || this.props.out_references.length === 0) {
                     return html`
                         <p>
-                            No other data references this data object.
+                           This object does not reference any other data object.
                         </p>
                     `;
                 }

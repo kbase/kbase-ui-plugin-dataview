@@ -249,40 +249,41 @@ define([
         },
         init_view() {
             const cell_html = '<div>';
-            const body = '<div data-element="body">';
+            const body = '<div>';
 
             this.view = {
                 panels: [
                     {
                         label: 'Overview',
                         name: 'overview',
-                        outer_div: $(cell_html),
+                        outer_div: $(cell_html).attr('data-element', 'panel-wrapper'),
                         inner_div: $(body)
                     },
                     {
                         order: 2,
                         label: 'Publications',
                         name: 'publications',
-                        outer_div: $(cell_html),
+                        outer_div: $(cell_html).attr('data-element', 'panel-wrapper'),
                         inner_div: $(body)
                     },
                     {
                         order: 3,
                         label: 'Taxonomy',
                         name: 'taxonomy',
-                        outer_div: $(cell_html),
+                        outer_div: $(cell_html).attr('data-element', 'panel-wrapper'),
                         inner_div: $(body)
                     },
                     {
                         order: 4,
                         label: 'Assembly and Annotation',
                         name: 'assembly-annotation',
-                        outer_div: $(cell_html),
+                        outer_div: $(cell_html).attr('data-element', 'panel-wrapper'),
                         inner_div: $(body)
                     }
                 ]
             };
             const that = this;
+            this.$elem.attr('data-element', 'panels-wrapper');
             this.view.panels.forEach((panel) => {
                 that.makeWidgetPanel(panel.outer_div, panel.label, panel.name, panel.inner_div);
                 // xss safe
@@ -389,13 +390,7 @@ define([
             const id = new Uuid(4).format();
             // xss safe
             $panel.append(
-                $(
-                    `<div class="panel-group" id="accordion_${
-                        id
-                    }" role="tablist" aria-multiselectable="true" data-panel="${
-                        domSafeText(name)
-                    }">`
-                )
+                $(`<div class="panel-group" id="accordion_${id}" role="tablist" aria-multiselectable="true" data-panel="${domSafeText(name)}">`)
                     // xss safe
                     .append(
                         $('<div class="panel panel-default kb-widget">')

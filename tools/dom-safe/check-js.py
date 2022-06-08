@@ -3,16 +3,33 @@ import glob
 import re
 import os
 
-def check_inner_html(dir_to_check, show_files=False, omit_pattern=None, verbose=False):
+EXTENSIONS = [
+    'js',
+    'jsx',
+    'ts',
+    'tsx'
+]
+
+VERBOSE=False
+
+def get_files(extensions, dir_to_check):
+    files = []
+    for extension in extensions:
+        files.extend(glob.iglob(f'./**/*.{extension}', root_dir=dir_to_check, recursive=True))
+    return files
+
+def check_inner_html(dir_to_check, show_files=False, omit_pattern=None):
     print('')
     print('Checking for innerHTML...')
     if omit_pattern is not None:
         print(f'Using omit pattern {omit_pattern}')
 
-    files = glob.iglob('./**/*.js', root_dir=dir_to_check, recursive=True)
+    files = get_files(EXTENSIONS, dir_to_check)
+
     comment_count = 0
     safe_count = 0
     lines_to_investigate_count = 0
+    candidate_line_count = 0
     files_to_fix = {}
     for file in files:
         file_path = f'{dir_to_check}/{file}'
@@ -28,6 +45,7 @@ def check_inner_html(dir_to_check, show_files=False, omit_pattern=None, verbose=
             for line_number, line in enumerate(lines):
                 handled = False
                 if 'innerHTML' in line:
+                    candidate_line_count += 1
                     # skip lines which are comments (start with //)
                     if re.search('^(\s)*//', line):
                         comment_count += 1
@@ -57,7 +75,7 @@ def check_inner_html(dir_to_check, show_files=False, omit_pattern=None, verbose=
                             })
                 prev_line = line
 
-    if verbose or lines_to_investigate_count > 0:
+    if VERBOSE or lines_to_investigate_count > 0:
         print(f'Found: {lines_to_investigate_count}')
         print(f'Comments: {comment_count}')
         print(f'Safe: {safe_count}')
@@ -80,6 +98,7 @@ def check_inner_html(dir_to_check, show_files=False, omit_pattern=None, verbose=
         {
             'stats': {
                 'total': {
+                    'candidate_lines': candidate_line_count,
                     'lines_to_investigate': lines_to_investigate_count
                 },
                 'safe_usages_annotated': {
@@ -89,17 +108,20 @@ def check_inner_html(dir_to_check, show_files=False, omit_pattern=None, verbose=
         }
     ]
 
-def check_preact_usage(dir_to_check, show_files=True, omit_pattern=None, verbose=False):
+def check_react_usage(dir_to_check, show_files=True, omit_pattern=None):
     print('')
-    print(f'Checking for potentially unsafe usage of preact ...')
+    print(f'Checking for potentially unsafe usage of react ...')
     if omit_pattern is not None:
         print(f'Using omit pattern {omit_pattern}')
 
-    files = glob.iglob('./**/*.js', root_dir=dir_to_check, recursive=True)
+    files = get_files(EXTENSIONS, dir_to_check)
+
+    candidate_line_count = 0
     lines_to_investigate_count = 0
     comment_count = 0
     safe_count = 0
     ignore_count = 0
+    purified_text = 0
     files_to_fix = {}
     for file in files:
         file_path = f'{dir_to_check}/{file}'
@@ -119,16 +141,21 @@ def check_preact_usage(dir_to_check, show_files=True, omit_pattern=None, verbose
                 line = raw_line.rstrip()
                 handled = False
                 if 'dangerouslySetInnerHTML' in line:
+                    candidate_line_count += 1
                     # skip lines which are comments (start with //)
                     # Safe usage heuristics
                     if re.search('^(\s)*//', line):
                         comment_count += 1
+                        handled = True
+                    elif re.search('', line):
+                        purified_text += 1
                         handled = True
                     # Annotations
                     # check if safe (prev line contains a "safe" comment)
                     elif prev_line is not None and re.search('^(\s)*//\s*xss\s*safe', prev_line):
                         safe_count += 1
                         handled = True
+                    # Or is ignorable
                     elif prev_line is not None and re.search('^(\s)*//\s*xss\s*ignore', prev_line):
                         ignore_count += 1
                         handled = True
@@ -152,7 +179,7 @@ def check_preact_usage(dir_to_check, show_files=True, omit_pattern=None, verbose
 
                 prev_line = line
 
-    if verbose or lines_to_investigate_count > 0:
+    if VERBOSE or lines_to_investigate_count > 0:
         print('')
         print('Safe usages detected')
         print('--------------------')
@@ -192,7 +219,11 @@ def check_preact_usage(dir_to_check, show_files=True, omit_pattern=None, verbose
         {
             'stats': {
                 'total': {
+                    'candidate_lines': candidate_line_count,
                     'lines_to_investigate': lines_to_investigate_count
+                },
+                'safe_usages_detected': {
+                    'DOMPurify.sanitize': purified_text
                 },
                 'safe_usages_annotated': {
                     'safe': safe_count
@@ -210,13 +241,14 @@ def is_block_comment_end(line):
 def is_line_comment(line):
     return re.search('^(\s)*//', line)
 
-def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pattern=None, verbose=False):
+def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pattern=None):
     print('')
     print(f'Checking for potentially unsafe usage of jQuery method "{jquery_methods}"...')
     if omit_pattern is not None:
         print(f'Using omit pattern {omit_pattern}')
 
-    files = glob.iglob('./**/*.js', root_dir=dir_to_check, recursive=True)
+    files = get_files(EXTENSIONS, dir_to_check)
+
     lines_to_investigate_count = 0
     line_comment_count = 0
     safe_count = 0
@@ -233,6 +265,7 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
     total_line_count = 0
     block_comment_count = 0
     block_comment_line_count = 0
+    candidate_line_count = 0
     files_to_fix = {}
     for file in files:
         file_path = f'{dir_to_check}/{file}'
@@ -282,6 +315,7 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
                 handled = False
                 for jquery_method in jquery_methods:
                     if f'{jquery_method}(' in line:
+                        candidate_line_count += 1
                         # Safe usage heuristic - skip lines which are comments (start with //)
                         # if re.search('^(\s)*//', line):
                         #     comment_count += 1
@@ -350,7 +384,7 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
                                 })
                 prev_line = line
 
-    if verbose or lines_to_investigate_count > 0:
+    if VERBOSE or lines_to_investigate_count > 0:
         print('')
         print('Totals')
         print('------')
@@ -408,6 +442,7 @@ def check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pa
                     'files': total_file_count,
                     'lines': total_line_count,
                     'lines_analyzed': total_lines_analyzed,
+                    'candidate_lines': candidate_line_count,
                     'lines_to_investigate': lines_to_investigate_count
                 },
                 'skipped': {
@@ -451,7 +486,7 @@ def print_stats(stats, indent=''):
 
 def main():
     dir_to_check = sys.argv[1]
-    print(f'Checking Javascript files (*.js) in {dir_to_check}')
+    print(f'Checking files ({", ".join(EXTENSIONS)}) in {dir_to_check}')
     if len(sys.argv) == 3:
         omit_pattern = sys.argv[2]
         print(f'Omitting {omit_pattern}')
@@ -460,7 +495,6 @@ def main():
         print(f'without omitting anything')
 
     show_files = True
-    verbose = False
 
     total_errors = 0
     total_stats = {}
@@ -471,7 +505,7 @@ def main():
     jquery_methods = [
         'append', 'html', 'prepend', 'appendTo', 'prependTo', 'after', 'before', 'insertAfter', 'insertBefore', 'replaceAll', 'replaceWith', 'wrap', 'wrapAll'
     ]
-    [error_count, stats] = check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pattern=omit_pattern, verbose=verbose)
+    [error_count, stats] = check_jquery_function(jquery_methods, dir_to_check, show_files=True, omit_pattern=omit_pattern)
     total_errors += error_count
     update_stats(total_stats, stats)
 
@@ -482,7 +516,7 @@ def main():
     update_stats(total_stats, stats)
 
     # This checks for preact usage.
-    [error_count, stats] = check_preact_usage(dir_to_check, show_files, omit_pattern=omit_pattern)
+    [error_count, stats] = check_react_usage(dir_to_check, show_files, omit_pattern=omit_pattern)
     total_errors += error_count
     update_stats(total_stats, stats)
 

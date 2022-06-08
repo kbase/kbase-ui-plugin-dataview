@@ -8,6 +8,12 @@ define([
 
     const donorNode = document.createElement('div');
     function domSafeText(rawContent) {
+        // xss safe
+        donorNode.innerHTML = rawContent;
+        return donorNode.innerText;
+    }
+
+    function domEncodedText(rawContent) {
         donorNode.innerText = rawContent;
         // xss safe
         return donorNode.innerHTML;
@@ -109,6 +115,7 @@ define([
         objectInfoToObject,
         workspaceInfoToObject,
         domSafeText,
+        domEncodedText,
         domSafeErrorMessage,
         errorMessage
     };

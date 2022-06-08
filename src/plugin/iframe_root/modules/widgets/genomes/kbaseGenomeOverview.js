@@ -73,7 +73,7 @@ define([
                 // xss safe
                 .append($('<th>').text(a))
                 // xss safe
-                .append($('<th>').text(b));
+                .append($('<td>').text(b));
         },
         populateContigSelector(contigsToLengths) {
             this.$contigSelect.empty();

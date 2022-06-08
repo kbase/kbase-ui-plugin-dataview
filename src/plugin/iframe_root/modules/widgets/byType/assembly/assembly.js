@@ -34,20 +34,30 @@ define([
         // VIEW
 
         function layout() {
-            return div([
+            return div({
+                dataElement: 'panel'
+            }, [
                 BS.buildPanel({
                     type: 'default',
                     title: 'Summary',
                     body: div({
                         dataElement: 'summary'
-                    })
+                    }),
+                    name: 'summary-panel',
+                    attributes: [{
+                        dataKBTesthook: 'assembly-summary-panel'
+                    }]
                 }),
                 BS.buildPanel({
                     type: 'default',
                     title: 'Contigs',
                     body: div({
                         dataElement: 'contigs'
-                    })
+                    }),
+                    name: 'contigs-panel',
+                    attributes: [{
+                        dataKBTesthook: 'assembly-contigs-panel'
+                    }]
                 })
             ]);
         }
@@ -61,7 +71,7 @@ define([
             container.innerHTML = layout();
             return Promise.all(
                 widgets.map((widget) => {
-                    return widget.instance.attach(container.querySelector(`[data-element="${  widget.id  }"]`));
+                    return widget.instance.attach(container.querySelector(`[data-element="${widget.id}"]`));
                 })
             );
         }
