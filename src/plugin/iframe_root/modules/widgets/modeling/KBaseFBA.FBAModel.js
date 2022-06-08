@@ -7,19 +7,17 @@ define([
 
     // For effect
     'widgets/modeling/kbasePathways'
-], function (
+], (
     $,
     Workspace,
     FBA,
     DynamicServiceClient,
     KBModeling
-) {
-    'use strict';
-
+) => {
     const COMPOUND_IMAGE_URL_BASE = 'https://minedatabase.mcs.anl.gov/compound_images/ModelSEED/';
 
     function KBaseFBA_FBAModel(modeltabs) {
-        var self = this;
+        const self = this;
         this.modeltabs = modeltabs;
         this.runtime = modeltabs.runtime;
 
@@ -36,7 +34,7 @@ define([
             this.workspace = workspaceName;
             this.objName = objectName;
             this.overview = {
-                wsid: workspaceName + '/' + objectName, // TODO: terrible mixup of wsid, which usually means the workspace id!!!!
+                wsid: `${workspaceName  }/${  objectName}`, // TODO: terrible mixup of wsid, which usually means the workspace id!!!!
                 ref: [workspaceId, objectId, version].join('/'),
                 ws: workspaceName,
                 obj_name: objectName,
@@ -50,7 +48,7 @@ define([
             if ('Name' in metadata) {
                 this.usermeta = {
                     name: metadata['Name'],
-                    source: metadata['Source'] + '/' + metadata['Source ID'],
+                    source: `${metadata['Source']  }/${  metadata['Source ID']}`,
                     genome: metadata['Genome'],
                     modeltype: metadata['Type'],
                     numreactions: metadata['Number reactions'],
@@ -321,7 +319,7 @@ define([
             {
                 name: 'Pathways',
                 widget: 'kbasePathways',
-                getParams: function () {
+                getParams() {
                     return {
                         runtime: self.runtime,
                         models: [self.data]
@@ -331,8 +329,8 @@ define([
         ];
 
         this.ReactionTab = function (info) {
-            var rxn = self.rxnhash[info.id];
-            var output = [
+            const rxn = self.rxnhash[info.id];
+            const output = [
                 {
                     label: 'Reaction',
                     data: rxn.dispid
@@ -357,7 +355,7 @@ define([
             output.push(
                 {
                     label: 'Compartment',
-                    data: self.cmphash[rxn.cmpkbid].name + ' ' + self.cmphash[rxn.cmpkbid].compartmentIndex
+                    data: `${self.cmphash[rxn.cmpkbid].name  } ${  self.cmphash[rxn.cmpkbid].compartmentIndex}`
                 },
                 {
                     label: 'Equation',
@@ -371,7 +369,7 @@ define([
             );
 
             if (rxn.rxnkbid !== 'rxn00000') {
-                var client = new DynamicServiceClient({
+                const client = new DynamicServiceClient({
                     url: this.runtime.config('services.service_wizard.url'),
                     token: this.runtime.service('session').getAuthToken(),
                     module: 'BiochemistryAPI'
@@ -384,11 +382,11 @@ define([
                             biochemistry_workspace: 'kbase'
                         }
                     ])
-                    .spread(function (data) {
+                    .spread((data) => {
                         if ('deltaG' in data[0]) {
                             output.push({
                                 label: 'Delta G',
-                                data: data[0].deltaG + ' (' + data[0].deltaGErr + ') kcal/mol'
+                                data: `${data[0].deltaG  } (${  data[0].deltaGErr  }) kcal/mol`
                             });
                         }
                         if (data[0].enzymes) {
@@ -397,9 +395,9 @@ define([
                                 data: data[0].enzymes.join(', ')
                             });
                         }
-                        var aliashash = {};
-                        var finalaliases = [];
-                        for (var i = 0; i < data[0].aliases.length; i++) {
+                        const aliashash = {};
+                        const finalaliases = [];
+                        for (let i = 0; i < data[0].aliases.length; i++) {
                             if (!(data[0].aliases[i] in aliashash)) {
                                 finalaliases.push(data[0].aliases[i]);
                                 aliashash[data[0].aliases[i]] = 1;
@@ -418,8 +416,8 @@ define([
         this.GeneTab = function (info) {
             // var gene = this.genehash[id];
             // doing this instead of creating hash
-            var data;
-            self.modelgenes.forEach(function (gene) {
+            let data;
+            self.modelgenes.forEach((gene) => {
                 if (gene.id === info.id)
                     data = [
                         {
@@ -440,7 +438,7 @@ define([
         this.CompoundTab = function (info) {
             const cpd = self.cpdhash[info.id];
             const compoundId = cpd.id.split('_')[0];
-            var output = [
+            const output = [
                 {
                     label: 'Compound',
                     data: cpd.dispid
@@ -471,22 +469,22 @@ define([
                 },
                 {
                     label: 'Compartment',
-                    data: self.cmphash[cpd.cmpkbid].name + ' ' + self.cmphash[cpd.cmpkbid].compartmentIndex
+                    data: `${self.cmphash[cpd.cmpkbid].name  } ${  self.cmphash[cpd.cmpkbid].compartmentIndex}`
                 }
             ];
-            var client = new DynamicServiceClient({
+            const client = new DynamicServiceClient({
                 url: this.runtime.config('services.service_wizard.url'),
                 token: this.runtime.service('session').getAuthToken(),
                 module: 'BiochemistryAPI'
             });
             if (cpd.smiles && cpd.cpdkbid == 'cpd00000') {
-                var p = client
+                const p = client
                     .callFunc('depict_compounds', [
                         {
                             structures: [cpd.smiles]
                         }
                     ])
-                    .then(function (data) {
+                    .then((data) => {
                         output[1] = {
                             label: 'Image',
                             data: data[0]
@@ -504,16 +502,16 @@ define([
                             biochemistry_workspace: 'kbase'
                         }
                     ])
-                    .spread(function (data) {
+                    .spread((data) => {
                         if ('deltaG' in data[0]) {
                             output.push({
                                 label: 'Delta G',
-                                data: data[0].deltaG + ' (' + data[0].deltaGErr + ') kcal/mol'
+                                data: `${data[0].deltaG  } (${  data[0].deltaGErr  }) kcal/mol`
                             });
                         }
-                        var aliashash = {};
-                        var finalaliases = [];
-                        for (var i = 0; i < data[0].aliases.length; i++) {
+                        const aliashash = {};
+                        const finalaliases = [];
+                        for (let i = 0; i < data[0].aliases.length; i++) {
                             if (!(data[0].aliases[i] in aliashash)) {
                                 finalaliases.push(data[0].aliases[i]);
                                 aliashash[data[0].aliases[i]] = 1;
@@ -530,8 +528,8 @@ define([
         };
 
         this.CompartmentTab = function (info) {
-            var cmp = self.cmphash[info.id];
-            var output = [
+            const cmp = self.cmphash[info.id];
+            const output = [
                 {
                     label: 'Compartment',
                     data: cmp.id
@@ -553,8 +551,8 @@ define([
         };
 
         this.BiomassTab = function (info) {
-            var bio = self.biohash[info.id];
-            var output = [
+            const bio = self.biohash[info.id];
+            const output = [
                 {
                     label: 'Biomass',
                     data: bio.id
@@ -616,11 +614,11 @@ define([
             const gfobjects = [];
             this.gfhash = {};
             for (let i = 0; i < this.gapfillings.length; i++) {
-                this.gapfillings[i].simpid = 'gf.' + (i + 1);
+                this.gapfillings[i].simpid = `gf.${  i + 1}`;
                 if ('fba_ref' in this.gapfillings[i] && this.gapfillings[i].fba_ref.length > 0) {
-                    gfobjects.push({ ref: this.gapfillings[i].fba_ref });
+                    gfobjects.push({ref: this.gapfillings[i].fba_ref});
                 } else if ('gapfill_ref' in this.gapfillings[i] && this.gapfillings[i].gapfill_ref.length > 0) {
-                    gfobjects.push({ ref: this.gapfillings[i].gapfill_ref });
+                    gfobjects.push({ref: this.gapfillings[i].gapfill_ref});
                 }
                 this.gfhash[this.gapfillings[i].simpid] = this.gapfillings[i];
             }
@@ -640,7 +638,9 @@ define([
             for (let i = 0; i < this.modelcompounds.length; i++) {
                 const cpd = this.modelcompounds[i];
                 const idarray = cpd.id.split('_');
-                cpd.dispid = idarray[0] + '[' + idarray[1] + ']';
+                // TODO: this the id does not always have the _ separator,
+                //       so the part in brackets shows "undefined"
+                cpd.dispid = `${idarray[0]}[${idarray[1]}]`;
                 cpd.cmpkbid = cpd.modelcompartment_ref.split('/').pop();
                 cpd.cpdkbid = cpd.compound_ref.split('/').pop();
                 if (cpd.name === undefined) {
@@ -650,9 +650,9 @@ define([
                 this.cpdhash[cpd.id] = cpd;
                 if (cpd.cpdkbid !== 'cpd00000') {
                     // const array = cpd.compound_ref.split('/');
-                    this.cpdhash[cpd.cpdkbid + '_' + cpd.cmpkbid] = cpd;
+                    this.cpdhash[`${cpd.cpdkbid}_${cpd.cmpkbid}`] = cpd;
                     if (idarray[0] !== cpd.cpdkbid) {
-                        cpd.dispid += '<br>(' + cpd.cpdkbid + ')';
+                        cpd.dispid += `<br>(${cpd.cpdkbid})`;
                     }
                 }
             }
@@ -665,12 +665,14 @@ define([
                 biomass.dispid = biomass.id;
                 let reactants = '';
                 let products = '';
-                for (var j = 0; j < biomass.biomasscompounds.length; j++) {
+                for (let j = 0; j < biomass.biomasscompounds.length; j++) {
                     const biocpd = biomass.biomasscompounds[j];
                     biocpd.id = biocpd.modelcompound_ref.split('/').pop();
 
+                    // TODO: this the id does not always have the _ separator,
+                    //       so the part in brackets shows "undefined"
                     const idarray = biocpd.id.split('_');
-                    biocpd.dispid = idarray[0] + '[' + idarray[1] + ']';
+                    biocpd.dispid = `${idarray[0]}[${idarray[1]}]`;
 
                     const CPD = this.cpdhash[biocpd.id];
                     biocpd.name = CPD.name;
@@ -685,7 +687,7 @@ define([
                         }
                         if (biocpd.coefficient !== -1) {
                             const abscoef = Math.round(-1 * 100 * biocpd.coefficient) / 100;
-                            reactants += '(' + abscoef + ') ';
+                            reactants += `(${abscoef}) `;
                         }
 
                         reactants += `<a 
@@ -700,7 +702,7 @@ define([
                         }
                         if (biocpd.coefficient !== 1) {
                             const abscoef = Math.round(100 * biocpd.coefficient) / 100;
-                            products += '(' + abscoef + ') ';
+                            products += `(${abscoef}) `;
                         }
                         products +=`<a 
                             class="id-click" 
@@ -710,15 +712,15 @@ define([
                         </a>`;
                     }
                 }
-                biomass.equation = reactants + '<div style="font-weight: bold;">=></div>' + products;
+                biomass.equation = `${reactants  }<div style="font-weight: bold;">=></div>${  products}`;
             }
 
             this.modelgenes = [];
             this.rxnhash = {};
             for (let i = 0; i < this.modelreactions.length; i++) {
-                var rxn = this.modelreactions[i];
+                const rxn = this.modelreactions[i];
                 const idarray = rxn.id.split('_');
-                rxn.dispid = idarray[0] + '[' + idarray[1] + ']';
+                rxn.dispid = `${idarray[0]  }[${  idarray[1]  }]`;
                 rxn.rxnkbid = rxn.reaction_ref.split('/').pop();
                 rxn.rxnkbid = rxn.rxnkbid.replace(/_[a-zA-z]/, '');
                 rxn.cmpkbid = rxn.modelcompartment_ref.split('/').pop();
@@ -729,9 +731,9 @@ define([
                 }
                 self.rxnhash[rxn.id] = rxn;
                 if (rxn.rxnkbid !== 'rxn00000') {
-                    this.rxnhash[rxn.rxnkbid + '_' + rxn.cmpkbid] = rxn;
+                    this.rxnhash[`${rxn.rxnkbid  }_${  rxn.cmpkbid}`] = rxn;
                     if (rxn.rxnkbid !== idarray[0]) {
-                        rxn.dispid += '<br>(' + rxn.rxnkbid + ')';
+                        rxn.dispid += `<br>(${  rxn.rxnkbid  })`;
                     }
                 }
 
@@ -757,7 +759,7 @@ define([
                         }
                         if (rgt.coefficient !== -1) {
                             const abscoef = Math.round(-1 * 100 * rgt.coefficient) / 100;
-                            reactants += '(' + abscoef + ') ';
+                            reactants += `(${  abscoef  }) `;
                         }
                         // reactants += this.cpdhash[rgt.cpdkbid].name + '[' + this.cpdhash[rgt.cpdkbid].cmpkbid + ']';
                         reactants += `<a 
@@ -772,7 +774,7 @@ define([
                         }
                         if (rgt.coefficient !== 1) {
                             const abscoef = Math.round(100 * rgt.coefficient) / 100;
-                            products += '(' + abscoef + ') ';
+                            products += `(${  abscoef  }) `;
                         }
                         // products += this.cpdhash[rgt.cpdkbid].name + '[' + this.cpdhash[rgt.cpdkbid].cmpkbid + ']';
                         products += `<a 
@@ -814,62 +816,62 @@ define([
                 }
 
                 rxn.gapfilling = [];
-                for (var gf in rxn.gapfill_data) {
+                for (const gf in rxn.gapfill_data) {
                     if (rxn.gapfill_data[gf][0][0] === '<') {
-                        rxn.gapfilling.push(gf + ': reverse');
+                        rxn.gapfilling.push(`${gf  }: reverse`);
                     } else {
-                        rxn.gapfilling.push(gf + ': forward');
+                        rxn.gapfilling.push(`${gf  }: forward`);
                     }
                 }
                 rxn.gapfillingstring = rxn.gapfilling.join('<br>');
 
                 rxn.dispfeatures = '';
                 rxn.genes = [];
-                for (var gene in rxn.ftrhash) {
-                    rxn.genes.push({ id: gene });
+                for (const gene in rxn.ftrhash) {
+                    rxn.genes.push({id: gene});
 
-                    var genes = [];
-                    this.modelgenes.forEach(function (item) {
+                    const genes = [];
+                    this.modelgenes.forEach((item) => {
                         genes.push(item.id);
                     });
 
                     if (genes.indexOf(gene) === -1)
-                        this.modelgenes.push({ id: gene, reactions: [{ id: rxn.id, dispid: rxn.dispid }] });
-                    else this.modelgenes[genes.indexOf(gene)].reactions.push({ id: rxn.id, dispid: rxn.dispid });
+                        this.modelgenes.push({id: gene, reactions: [{id: rxn.id, dispid: rxn.dispid}]});
+                    else this.modelgenes[genes.indexOf(gene)].reactions.push({id: rxn.id, dispid: rxn.dispid});
                 }
 
-                rxn.equation = reactants + '<div style="font-weight: bold;">' + sign + '</div>' + products;
+                rxn.equation = `${reactants  }<div style="font-weight: bold;">${  sign  }</div>${  products}`;
             }
             if (gfobjects.length > 0) {
                 this.workspaceClient
                     .get_objects(gfobjects)
-                    .then(function (data) {
-                        for (var i = 0; i < data.length; i++) {
-                            var solrxns = data[i].data.gapfillingSolutions[0].gapfillingSolutionReactions;
-                            for (var j = 0; j < solrxns.length; j++) {
-                                var array = solrxns[j].reaction_ref.split('/');
-                                var id = array.pop();
-                                var rxnobj;
+                    .then((data) => {
+                        for (let i = 0; i < data.length; i++) {
+                            const solrxns = data[i].data.gapfillingSolutions[0].gapfillingSolutionReactions;
+                            for (let j = 0; j < solrxns.length; j++) {
+                                const array = solrxns[j].reaction_ref.split('/');
+                                let id = array.pop();
+                                let rxnobj;
                                 if (id in self.rxnhash) {
                                     rxnobj = self.rxnhash[id];
                                 } else {
-                                    var cmparray = solrxns[j].compartment_ref.split('/');
-                                    var cmp = cmparray.pop();
-                                    id = id + '_' + cmp + solrxns[j].compartmentIndex;
+                                    const cmparray = solrxns[j].compartment_ref.split('/');
+                                    const cmp = cmparray.pop();
+                                    id = `${id  }_${  cmp  }${solrxns[j].compartmentIndex}`;
                                     rxnobj = self.rxnhash[id];
                                 }
                                 if (typeof rxnobj !== 'undefined') {
                                     if (solrxns[j].direction === '<') {
-                                        rxnobj.gapfilling.push('gf.' + (i + 1) + ': reverse');
+                                        rxnobj.gapfilling.push(`gf.${  i + 1  }: reverse`);
                                     } else {
-                                        rxnobj.gapfilling.push('gf.' + (i + 1) + ': forward');
+                                        rxnobj.gapfilling.push(`gf.${  i + 1  }: forward`);
                                     }
                                     rxnobj.gapfillingstring = rxnobj.gapfilling.join('<br>');
                                 }
                             }
                         }
                     })
-                    .catch(function (err) {
+                    .catch((err) => {
                         console.error(err);
                     });
             }

@@ -75,9 +75,12 @@ define([
             if (this.runtime.featureEnabled('re-lineage')) {
                 $reTaxonomyInfo = $('<div>');
                 // xss safe
-                $taxonomyColumn.append($makeTitle('New Lineage'));
-                // xss safe
-                $taxonomyColumn.append($reTaxonomyInfo);
+                $taxonomyColumn.append($('<div>')
+                    .attr('data-element', 'new-lineage')
+                    // xss safe
+                    .append($makeTitle('New Lineage'))
+                    // xss safe
+                    .append($reTaxonomyInfo));
             }
 
             // This area for the taxonomy widget

@@ -127,10 +127,7 @@ define([
                 $.ajax({
                     async: true,
                     url:
-                        `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmax=${
-                            self.options.maxPubCount
-                        }&sort=pub+date&term=${
-                            lit.replace(/\s+/g, '+')}`,
+                        `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmax=${self.options.maxPubCount}&sort=pub+date&term=${lit.replace(/\s+/g, '+')}`,
                     type: 'GET',
                     success(data) {
                         let htmlJson = self.xmlToJson(data);
