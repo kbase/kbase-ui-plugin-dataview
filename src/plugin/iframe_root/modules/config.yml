@@ -141,8 +141,11 @@ install:
 
     # KBASE GENOMES
     - module: widgets/genomes/kbaseGenomePage
-      name: kb_dataview_genomes_genome
+      name: kb_dataview_genomes_genomex
       type: kbwidget
+    - module: widgets/GenomePanel
+      name: kb_dataview_genomes_genome
+      type: es6
     - module: widgets/genomes/kbaseGenomeWideOverview
       name: kb_dataview_genomes_wideOverview
       type: kbwidget

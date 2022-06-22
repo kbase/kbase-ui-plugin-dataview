@@ -242,7 +242,8 @@ define([
 
             self.populateContigSelector(contigsToLengths);
             // xss safe
-            self.$elem.append($maindiv);
+            const $mainDivWrapper = $('<div class="container-fluid" style="width: 100%;">');
+            self.$elem.append($mainDivWrapper.append($maindiv));
 
             self.hideMessage();
 
@@ -267,6 +268,7 @@ define([
                 // xss safe
                 $row.$row.append($('<td>').text('n/a'));
             }
+            return $row;
         },
         /**
          *

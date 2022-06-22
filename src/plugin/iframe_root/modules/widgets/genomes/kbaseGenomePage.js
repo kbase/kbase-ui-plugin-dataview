@@ -125,26 +125,24 @@ define([
                         if (metadata && metadata['GC content'] && metadata['Size'] && metadata['Number contigs']) {
                             add_stats(gnm, metadata['Size'], metadata['GC content'], metadata['Number contigs']);
                             _this.render(genomeObject);
-                        } else {
-                            return (
-                                _this.assemblyAPI
-                                    .callFunc('get_stats', [assembly_ref])
-                                    // .get_stats(assembly_ref)
-                                    .spread((stats) => {
-                                        add_stats(gnm, stats.dna_size, stats.gc_content, stats.num_contigs);
-                                        _this.render(genomeObject);
-                                        return null;
-                                    })
-                                    .catch((error) => {
-                                        assembly_error(gnm, error);
-                                    })
-                            );
+                            return null;
                         }
-                        return null;
+                        return (
+                            _this.assemblyAPI
+                                .callFunc('get_stats', [assembly_ref])
+                                .spread((stats) => {
+                                    add_stats(gnm, stats.dna_size, stats.gc_content, stats.num_contigs);
+                                    _this.render(genomeObject);
+                                    return null;
+                                })
+                                .catch((error) => {
+                                    assembly_error(gnm, error);
+                                })
+                        );
                     }
                     genome_fields.push('features');
                     // we do a second call here to get the features, see above.
-                    _this.genomeAnnotationAPI
+                    return _this.genomeAnnotationAPI
                         .callFunc('get_genome_v1', [
                             {
                                 genomes: [{ref: objId}],
@@ -190,11 +188,7 @@ define([
                             }
 
                             return null;
-                        })
-                        .catch((error) => {
-                            _this.showError(_this.view.panels[0].inner_div, error);
                         });
-                    return null;
                 })
                 .catch((error) => {
                     _this.showError(_this.view.panels[0].inner_div, error, 'Error loading genome subdata');

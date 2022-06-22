@@ -1,6 +1,8 @@
 define([
     'preact',
     'htm',
+
+    // For effect
     'css!./Loading.css'
 ], (
     preact,
@@ -31,7 +33,7 @@ define([
             `;
         }
 
-        renderLoading() {
+        render() {
             let message;
             if (this.props.message) {
                 message = html`<span>${this.props.message}</span>`;
@@ -42,19 +44,19 @@ define([
             return this.renderBlock(message);
         }
 
-        render() {
-            const style = {};
-            if (this.props.inline) {
-                style.justifyContent = 'left';
-            } else {
-                style.justifyContent = 'center';
-            }
-            return html`
-                <div className="Loading" style=${style}>
-                    ${this.renderLoading()}
-                </div>
-            `;
-        }
+        // render() {
+        //     const style = {};
+        //     if (this.props.inline) {
+        //         style.justifyContent = 'left';
+        //     } else {
+        //         style.justifyContent = 'center';
+        //     }
+        //     return html`
+        //         <div className="Loading" style=${style}>
+        //             ${this.renderLoading()}
+        //         </div>
+        //     `;
+        // }
     }
 
     return Loading;

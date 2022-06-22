@@ -97,8 +97,8 @@ define([
                             throw new Error('Object not found');
                         }
 
-                        const wsobject = APIUtils.objectInfoToObject(objectInfos[0]);
-                        const type = APIUtils.parseTypeId(wsobject.type),
+                        const objectInfo = APIUtils.objectInfoToObject(objectInfos[0]);
+                        const type = APIUtils.parseTypeId(objectInfo.type),
                             mapping = findMapping(type, params);
 
                         if (!mapping) {
@@ -106,13 +106,14 @@ define([
                         }
                         // These params are from the found object.
                         const widgetParams = {
-                            workspaceId: wsobject.wsid,
-                            objectId: wsobject.id,
-                            objectName: wsobject.name,
-                            workspaceName: wsobject.ws,
-                            objectVersion: wsobject.version,
-                            objectType: wsobject.type,
-                            type: wsobject.type
+                            workspaceId: objectInfo.wsid,
+                            objectId: objectInfo.id,
+                            objectName: objectInfo.name,
+                            workspaceName: objectInfo.ws,
+                            objectVersion: objectInfo.version,
+                            objectType: objectInfo.type,
+                            type: objectInfo.type,
+                            objectInfo
                         };
 
                         // handle sub

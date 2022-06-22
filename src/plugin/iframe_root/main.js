@@ -62,9 +62,18 @@ require(['loader'], () => {
                     });
                     integration.started();
                     // TODO: more channel listeners.
+                })
+                .catch((err) => {
+                    console.error('[main]', err);
+                    rootNode.innerHTML = `<div class="alert alert-danger">
+                        <div style="font-weight: bold">Error starting <i>dataview</i> plugin</div>
+                        <p>
+                            ${err.message}
+                        </p>
+                    </div>`;
                 });
         }).catch((err) => {
-            console.error('ERROR2', err);
+            console.error('[main]', err);
         });
     });
 });
