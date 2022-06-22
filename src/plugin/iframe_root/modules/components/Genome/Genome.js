@@ -3,6 +3,7 @@ define([
     'htm',
     'components/Tabs',
     'components/ErrorView',
+    'components/Alert',
     './Overview',
     './Publications',
     './Taxonomy',
@@ -12,6 +13,7 @@ define([
     htm,
     Tabs,
     ErrorView,
+    Alert,
     Overview,
     Publications,
     Taxonomy,
@@ -34,7 +36,7 @@ define([
                     id: 'publications',
                     title: 'Publications',
                     render: () => {
-                        return html`<${Publications}  searchTermx=${this.props.genomeObject.data.scientific_name} searchTerm="Prochlorococcus marinus" />`;
+                        return html`<${Publications}  searchTerm=${this.props.genomeObject.data.scientific_name} />`;
                     }
                 },
                 {
@@ -48,6 +50,7 @@ define([
                     id: 'assemblyAnnotation',
                     title: 'Assembly and Annotation',
                     render: () => {
+
                         return html`<${AssemblyAnnotation}  ...${this.props}/>`;
                     }
                 },

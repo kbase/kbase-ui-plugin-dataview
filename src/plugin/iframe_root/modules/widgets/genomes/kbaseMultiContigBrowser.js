@@ -184,7 +184,13 @@ define([
             // xss safe
             $maindiv.append(this.$featureInfoPanel);
 
-            self.showData(self.options.genomeInfo.data, $maindiv);
+            try {
+                self.showData(self.options.genomeInfo.data, $maindiv);
+            } catch (ex) {
+                console.error(ex);
+                self.renderError(`Error loading contig browser: ${ex.message}`);
+                return this;
+            }
 
             if (!this.options.onClickFunction) {
                 this.options.onClickFunction = function (svgobj, d) {
@@ -217,6 +223,9 @@ define([
             const self = this;
             self.genome = genome;
             const contigsToLengths = {};
+            if (!genome.contig_ids) {
+                throw new Error('No contigs found on this genome');
+            }
             if (genome.contig_ids && genome.contig_ids.length > 0) {
                 for (let i = 0; i < genome.contig_ids.length; i++) {
                     let len = 'Unknown';
@@ -225,20 +234,21 @@ define([
                     }
                     contigsToLengths[genome.contig_ids[i]] = len;
                 }
-            } else if (genome.features && genome.features.length > 0) {
-                /************
-                 * TEMP CODE!
-                 * INFER CONTIGS FROM FEATURE LIST!
-                 * OMG THIS SUCKS THAT I HAVE TO DO THIS UNTIL FBA MODEL SERVICES IS FIXED!
-                 * LOUD NOISES!
-                 ************/
-                for (let i = 0; i < genome.features.length; i++) {
-                    const f = genome.features[i];
-                    if (f.location && f.location[0][0]) {
-                        contigsToLengths[f.location[0][0]] = 'Unknown';
-                    }
-                }
             }
+            // else if (genome.features && genome.features.length > 0) {
+            //     /************
+            //      * TEMP CODE!
+            //      * INFER CONTIGS FROM FEATURE LIST!
+            //      * OMG THIS SUCKS THAT I HAVE TO DO THIS UNTIL FBA MODEL SERVICES IS FIXED!
+            //      * LOUD NOISES!
+            //      ************/
+            //     for (let i = 0; i < genome.features.length; i++) {
+            //         const f = genome.features[i];
+            //         if (f.location && f.location[0][0]) {
+            //             contigsToLengths[f.location[0][0]] = 'Unknown';
+            //         }
+            //     }
+            // }
 
             self.populateContigSelector(contigsToLengths);
             // xss safe

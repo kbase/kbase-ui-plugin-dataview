@@ -13,8 +13,7 @@ define([
 
     function intFormat(value) {
         return Intl.NumberFormat('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
+            useGrouping: true
         }).format(value);
     }
 
