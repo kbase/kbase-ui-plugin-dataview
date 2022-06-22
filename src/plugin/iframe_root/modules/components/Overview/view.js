@@ -409,20 +409,22 @@ define([
         render() {
             const id = `panel-${new Uuid(4).format()}`;
             return html`
-                <div className="row">
-                    <div className="col-sm-6">
-                        ${this.renderSummary()}
-                    </div>
-                    <div className="col-sm-6">
-                        <div className="panel-group"
-                             id=${id}
-                             role="tablist"
-                             aria-multiselectable="true">
-                            ${this.renderObjectInfo(id)}
-                            ${this.renderMetadataPanel(id)}
-                            ${this.renderVersionsPanel(id)}
-                            ${this.renderReferencedByPanel(id)}
-                            ${this.renderReferencesPanel(id)}
+                <div className="container-fluid" style=${{width: '100%'}}>
+                    <div className="row">
+                        <div className="col-sm-6">
+                            ${this.renderSummary()}
+                        </div>
+                        <div className="col-sm-6">
+                            <div className="panel-group"
+                                id=${id}
+                                role="tablist"
+                                aria-multiselectable="true">
+                                ${this.renderObjectInfo(id)}
+                                ${this.renderMetadataPanel(id)}
+                                ${this.renderVersionsPanel(id)}
+                                ${this.renderReferencedByPanel(id)}
+                                ${this.renderReferencesPanel(id)}
+                            </div>
                         </div>
                     </div>
                 </div>

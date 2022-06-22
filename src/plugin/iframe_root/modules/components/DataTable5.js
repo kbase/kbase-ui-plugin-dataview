@@ -780,7 +780,6 @@ define([
         }
 
         onRowDblClick(clickedIndex) {
-            console.log('clicked');
             if (this.props.onRowDblClick) {
                 this.props.onRowDblClick(this.tableMap[clickedIndex]);
                 return;

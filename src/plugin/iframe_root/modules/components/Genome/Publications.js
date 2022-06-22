@@ -515,7 +515,7 @@ define([
             return html`
                 <div className="-search-controls">
                     <form onSubmit=${this.doSearch.bind(this)} className="form form-inline">
-                        <input className="form-control" 
+                        <input className="form-control" style=${{width: '20em'}}
                             value=${this.state.currentSearchTerm} 
                             onChange=${this.searchInputChanged.bind(this)}
                             />

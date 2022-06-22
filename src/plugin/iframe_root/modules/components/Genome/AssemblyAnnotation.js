@@ -2,6 +2,10 @@ define([
     'preact',
     'htm',
     'jquery',
+    'components/Alert',
+    './MultiContigBrowser',
+    './SEEDFunctions',
+    './GeneTable',
 
     // For effect
     'widgets/genomes/kbaseMultiContigBrowser',
@@ -12,7 +16,11 @@ define([
 ], (
     preact,
     htm,
-    $
+    $,
+    Alert,
+    MultiContigBrowser,
+    SEEDFunctions,
+    GeneTable
 ) => {
     const {Component, createRef} = preact;
     const html = htm.bind(preact.h);
@@ -20,35 +28,40 @@ define([
     class AssemblyAnnotation extends Component {
         constructor(props) {
             super(props);
-            this.contigBrowserRef = createRef();
             this.geneTableRef = createRef();
             this.SEEDFunctionsRef = createRef();
         }
 
-        componentDidMount() {
-            $(this.contigBrowserRef.current).KBaseMultiContigBrowser({
-                genomeID: this.props.objectInfo.id,
-                workspaceID: this.props.objectInfo.wsid,
-                ver: this.props.objectInfo.version,
-                genomeInfo: this.props.genomeObject,
-                runtime: this.props.runtime
-            });
+        renderContigBrowser() {
+            if (!this.props.genomeObject.data.contig_ids || this.props.genomeObject.data.contig_ids.length === 0) {
+                return html`<${Alert}
+                    type="warning"
+                    message="No contigs available for this genome"
+                />`;
+            }
+            return html`
+                <${MultiContigBrowser} ...${this.props} />
+            `;
+        }
 
-            $(this.SEEDFunctionsRef.current).KBaseSEEDFunctions({
-                objNameOrId: this.props.objectInfo.id,
-                wsNameOrId: this.props.objectInfo.ws,
-                objVer: this.props.objectInfo.version,
-                genomeInfo: this.props.genomeObject,
-                runtime: this.props.runtime
-            });
+        renderSEEDFunctions() {
+            if (['Eukaryota', 'Plant'].includes(this.props.genomeObject.data.domain)) {
+                return html`<${Alert}
+                    type="warning"
+                    message=${`SEED Functions not currently implemented for ${this.props.genomeObject.data.domain}`}
+                />`;
+            }
+            return html`<${SEEDFunctions} ...${this.props} />`;
+        }
 
-            $(this.geneTableRef.current).KBaseGenomeGeneTable({
-                genome_id: this.props.objectInfo.id,
-                ws_name: this.props.objectInfo.ws,
-                ver: this.props.objectInfo.version,
-                genomeInfo: this.props.genomeObject,
-                runtime: this.props.runtime
-            });
+        renderGeneTable() {
+            if (['Eukaryota', 'Plant'].includes(this.props.genomeObject.data.domain)) {
+                return html`<${Alert}
+                    type="warning"
+                    message=${`The Gene Table not currently implemented for ${this.props.genomeObject.data.domain}`}
+                />`;
+            }
+            return html`<${GeneTable} ...${this.props} />`;
         }
 
         render() {
@@ -57,17 +70,17 @@ define([
                     <div className="row">
                         <div className="col-md-12">
                             <h4>Contig Browser</h4>
-                            <div ref=${this.contigBrowserRef} />
+                            ${this.renderContigBrowser()}
                         </div>
                     </div>
                      <div className="row">
                         <div className="col-md-6">
                             <h4>SEED Functions</h4>
-                            <div ref=${this.SEEDFunctionsRef} />
+                            ${this.renderSEEDFunctions()}
                         </div>
                         <div className="col-md-6">
                             <h4>Gene Table</h4>
-                            <div ref=${this.geneTableRef} />
+                            ${this.renderGeneTable()}
                         </div>
                     </div>
                 </div>
