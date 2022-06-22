@@ -1,5 +1,5 @@
 .Tabs {
-    flex: 1 1 0px;
+    flex: 1 1 0;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -13,7 +13,7 @@
 }
 
 .Tabs-tab-container {
-    flex: 1 1 0px;
+    flex: 1 1 0;
     display: flex;
     flex-direction: row;
     margin-bottom: -1px;
@@ -64,7 +64,7 @@
 }
 
 .Tabs-pane {
-    flex: 1 1 0px;
+    flex: 1 1 0;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -76,7 +76,7 @@
 }
 
 .Tabs-pane-default-content {
-    flex: 1 1 0px;
+    flex: 1 1 0;
     display: flex;
     flex-direction: column;
     min-height: 0;

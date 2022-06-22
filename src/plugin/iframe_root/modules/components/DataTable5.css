@@ -1,0 +1,176 @@
+.DataTable5-wrapper {
+    min-height: 0;
+    min-width: 0;
+}
+
+.DataTable5 {
+    min-height: 0;
+    min-width: 0;
+}
+
+.DataTable5-flex {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+.DataTable5-bordered {
+    border: 1px solid rgb(200, 200, 200); 
+    border-radius: 1em;
+    padding: 0.5em;
+}
+
+.DataTable5-header {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+    font-weight: bold;
+    color: gray;
+    /* Force scrollbar so it aligns w/body*/
+    border-bottom: 1px dashed rgb(200, 200, 200);
+    overflow-y: scroll;
+}
+
+.DataTable5-filter-header {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+    font-weight: bold;
+    color: gray;
+    /* Force scrollbar so it aligns w/body*/
+    border-bottom: 1px dashed rgb(200, 200, 200);
+    overflow-y: scroll;
+    animation: 1s linear;
+}
+
+.DataTable5-header::-webkit-scrollbar-track {
+    background-color: white;
+}
+
+.DataTable5-header::-webkit-scrollbar-thumb {
+    background-color: white;
+}
+
+.DataTable5-header-col {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: row;
+    min-width: 0;
+    user-select: none;
+    padding: 0.5em;
+    align-items: center;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+
+.DataTable5-header-col-sortable {
+    cursor: pointer;
+}
+
+.DataTable5-header-col-sortable:hover {
+    background-color: rgba(200,200, 200, 0.4);
+}
+
+.DataTable5-header-col-sorted {
+    /* background-color: rgba(200,200, 200, 0.2); */
+}
+
+.DataTable5-header-col-label {
+    flex: 1 1 0;
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.DataTable5-header-col-sortable {
+    flex: 0 0 auto;
+}   
+
+.DataTable5-body {
+    flex: 1 1 0px;
+    min-height: 0;
+    min-width: 0;
+    overflow-y: scroll;
+}
+
+.DataTable5-grid {
+    /* position: relative; */
+}
+
+.DataTable5-grid-row {
+    border-bottom: 1px solid rgba(200, 200, 200, 0.2);
+    cursor: pointer;
+}
+
+.DataTable5-grid-row:last-child {
+    border-bottom: none;
+}
+
+.DataTable5-grid-row:hover {
+    background-color: rgba(200, 200, 200, 0.2);
+}
+
+.DataTable5-grid-cell {
+    /* position: absolute; */
+}
+
+.DataTable5-row {
+    display: flex;
+    flex-direction: row;
+    /* font-weight: bold; */
+}
+
+.DataTable5-detail {
+
+}
+
+.DataTable5-row-detail {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+}
+
+.DataTable5-row-highlighted {
+    background-color: rgba(200, 200, 200, 0.5);
+}
+
+.DataTable5-col {
+    flex: 1 1 0px;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    justify-content: center;
+    padding: 0.5em;
+}
+
+.DataTable5-col-hovered {
+    background-color: rgba(200, 200, 200, 0.2);
+}
+
+.DataTable5-col-content {
+    overflow-x: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.DataTable5-toolbar {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.DataTable5-sort-icon {
+    color: rgb(150, 150, 150);
+}
+
+
+.DataTable5-header-col-sorted .DataTable5-sort-icon {
+    color: rgb(0,0,0);
+}
+
+.DataTable5-sort-icon-active {
+    color: rgb(0,0,0);
+}

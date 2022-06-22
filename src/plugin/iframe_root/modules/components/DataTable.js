@@ -1,12 +1,14 @@
 define([
     'preact',
     'htm',
+    'dompurify',
     '../ResizeObserver',
 
     'css!./DataTable.css'
 ], (
     preact,
     htm,
+    DOMPurify,
     ResizeObserver
 ) => {
     const {Component} = preact;
@@ -142,7 +144,21 @@ define([
                                 const content = (() => {
                                     if (col.render) {
                                         try {
-                                            return col.render(values[col.id], values);
+                                            return html`<div className="DataTable-col-content">
+                                                ${col.render(values[col.id], values)}
+                                            </div>`;
+                                        } catch (ex) {
+                                            return html`
+                                                <span className="text-danger">${ex.message}</span>
+                                            `;
+                                        }
+                                    } else if (col.renderHTML) {
+                                        try {
+                                            const content = DOMPurify.sanitize(col.renderHTML(values[col.id], values));
+                                            return html`
+                                                <div className="DataTable-col-content"
+                                                    dangerouslySetInnerHTML=${{__html: content}} />
+                                            `;
                                         } catch (ex) {
                                             return html`
                                                 <span className="text-danger">${ex.message}</span>
@@ -158,9 +174,7 @@ define([
                                          style=${style}
                                          data-k-b-testhook-cell=${col.id}
                                          role="cell">
-                                        <div className="DataTable-col-content">
-                                            ${content}
-                                        </div>
+                                        ${content}
                                     </div>
                                 `;
                             });
@@ -190,7 +204,7 @@ define([
                             <div className=${rowClasses.join(' ')}
                                  style=${style}
                                  role="row"
-                                 onClick=${() => {
+                                 onDblClick=${() => {
                             this.onRowClick(values);
                         }}>${row}
                             </div>

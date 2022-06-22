@@ -70,7 +70,7 @@ define([
                     }
                 }, {
                     id: 'overview',
-                    title: 'Overview',
+                    title: 'Object Overview',
                     autoScroll: true,
                     render: () => {
                         return html`

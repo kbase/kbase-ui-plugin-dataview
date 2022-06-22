@@ -255,6 +255,7 @@ define([
             if (doneLoading) {
                 this.hideMessage();
             } else {
+                console.log('loading!');
                 this.showMessage(html.loading());
             }
         },
