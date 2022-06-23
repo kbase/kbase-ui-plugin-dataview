@@ -91,7 +91,7 @@ define([
 
         renderNotFound() {
             return html`
-                <${Empty} message="A species tree could not be found for this genome." />
+                <${Empty} message="A species tree was not found for this genome." />
             `;
         }
 

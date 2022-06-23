@@ -112,14 +112,14 @@ define([
             case 'relationEngine':
                 return html`
                     <div>
-                        <p>Taxonomy derived from Relation Engine.</p>
+                        <p>Taxonomy provided by Relation Engine and linked to KBase.</p>
                         <${LineageRE} ...${this.state.value} />
                     </div>
                 `;
             case 'workspace':
                 return html`
                     <div>
-                        <p>Taxonomy derived from this Object.</p>
+                        <p>Taxonomy provided by this Object and linked to NCBI.</p>
                         <${LineageLegacy} ...${this.state.value} />
                     </div>
                 `;

@@ -1,9 +1,21 @@
+
+/*
+DataTable7
+#7 until there is a better name.
+This data table is dedicated to a simply infinitely scrolling table.
+Columns are defined via a configuration prop "columns".
+Data is currently just an array of objects.
+
+Future:
+- port over the infinite scrolling
+- at the same time defining a good DataSource interface object
+*/
 define([
     'preact',
     'htm',
     '../ResizeObserver',
 
-    'css!./DataTable3.css'
+    'css!./DataTable7.css'
 ], (
     preact,
     htm,
@@ -22,35 +34,6 @@ define([
         };
     }
 
-    /*
-    Dev Notes:
-
-    Over DataTable, adds a detail area below each row.
-    Therefore we support heights and renderer for detail area
-    The detail area is optional
-
-    First iteration, let's just support showing the entire enchilada, detail and all.
-
-    Next, let's support multiple details, and prop to select the detail to show.
-
-    Then we can support the ability to open/close details per row.
-
-    Props:
-    heights:
-        header
-        row
-        detail
-    showDetail
-    columns:
-        ..
-    render:
-        header
-        row
-        detail
-    dataSource:
-        ..
-    onClick
-    */
 
     class DataTable7 extends Component {
         constructor(props) {
