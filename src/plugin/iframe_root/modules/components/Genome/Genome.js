@@ -50,7 +50,12 @@ define([
                     id: 'assemblyAnnotation',
                     title: 'Assembly and Annotation',
                     render: () => {
-
+                        if (['Eukaryota', 'Plant'].includes(this.props.genomeObject.data.domain)) {
+                            return html`<${Alert}
+                                type="warning"
+                                message=${`Assembly and Annotation is not yet available for genomes of domain "${this.props.genomeObject.data.domain}"`}
+                            />`;
+                        }
                         return html`<${AssemblyAnnotation}  ...${this.props}/>`;
                     }
                 },

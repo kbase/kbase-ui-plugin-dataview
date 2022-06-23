@@ -281,7 +281,7 @@ define([
                                 </p>
                             </div>
                         </div>
-                        <div className="col-md-6">
+                        <div className="col-md-6" style=${{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                             ${this.renderImage(imageUri)}
                         </div>
                     </div>
@@ -291,7 +291,7 @@ define([
 
         renderImage(url) {
             if (url) {
-                return html`<img src=${url} style=${{width: this.props.width}} alt="Image from Wikipedia"/>`;
+                return html`<img src=${url} style=${{maxWidth: '100%'}} alt="Image from Wikipedia"/>`;
             }
             return html`<${Empty} message="Image not available" />`;
         }

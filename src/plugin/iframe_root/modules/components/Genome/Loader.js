@@ -82,7 +82,6 @@ define([
             return result.genomes[0];
         }
 
-        // No get_stats in this service any longer ??
         async getStats(assemblyRef) {
             const genomeAnnotationAPI = new DynamicServiceClient({
                 url: this.props.runtime.getConfig('services.service_wizard.url'),
@@ -92,6 +91,18 @@ define([
                 }
             });
             const [result] = await genomeAnnotationAPI.callFunc('get_stats', [assemblyRef]);
+            return result;
+        }
+
+        async getContigIds(assemblyRef) {
+            const genomeAnnotationAPI = new DynamicServiceClient({
+                url: this.props.runtime.getConfig('services.service_wizard.url'),
+                module: 'AssemblyAPI',
+                auth: {
+                    token: this.props.runtime.service('session').getAuthToken()
+                }
+            });
+            const [result] = await genomeAnnotationAPI.callFunc('get_contig_ids', [assemblyRef]);
             return result;
         }
 
@@ -105,92 +116,120 @@ define([
                 // We need the domain, so if it isn't in the metadata, get
                 // the genome info w/o features, in case it is a large genome.
                 const genomeMetadata = this.props.objectInfo.metadata;
-                let domain = genomeMetadata.Domain;
-                let genomeObject;
-                if (!domain) {
-                    // get prelim genome info
-                    genomeObject = await this.getGenomeInfoWithoutFeatures();
-                    domain = genomeObject.data.domain;
-                }
 
-                let stats = null;
-                // Skip getting features for Euks and Plants
-                if (domain === 'Eukaryota' || domain === 'Plant') {
-                    if (!genomeObject) {
+                const genomeObject = await (async () => {
+                    let domain = genomeMetadata.Domain;
+                    let genomeObject;
+                    if (!domain) {
+                        // get prelim genome info
                         genomeObject = await this.getGenomeInfoWithoutFeatures();
+                        domain = genomeObject.data.domain;
                     }
-                    const {
-                        dna_size, gc_content, num_contigs, contig_ids
-                    } = genomeObject.data;
-                    stats = {
-                        dna_size: dna_size || parseInt(genomeMetadata['Size'], 10),
-                        gc_content: gc_content || parseFloat(genomeMetadata['GC content']),
-                        num_contigs: num_contigs || (contig_ids && contig_ids.length) || parseInt(genomeMetadata['Number contigs'], 10)
-                    };
-                    //     if (genomeMetadata && genomeMetadata['GC content'] && genomeMetadata['Size'] && genomeMetadata['Number contigs']) {
-                    //         const stats = {
-                    //             dna_size: parseInt(genomeMetadata['Size'], 10),
-                    //             gc_content: parseFloat(genomeMetadata['GC content']),
-                    //             num_contigs:  parseInt(genomeMetadata['Number contigs'], 10)
-                    //         };
-                    //         //     add_stats(gnm, metadata['Size'], metadata['GC content'], metadata['Number contigs']);
-                    //         //     _this.render(genomeObject);
-                    //         //     return null;
-                    //         // }
-                    //     // console.log('BIG!');
-                    //     // TODO: implement later
-                    // } else {
+
+                    if (domain === 'Eukaryota' || domain === 'Plant') {
+                        if (genomeObject) {
+                            return genomeObject;
+                        }
+                        return this.getGenomeInfoWithoutFeatures();
+                    }
+
+                    return this.getGenomeInfoWithFeatures();
+                })();
+
+                // Get stats
+
+                const getIntValue  = (value, genomeMetadata, key) => {
+                    if (typeof value !== 'number' &&  (key in genomeMetadata)) {
+                        value = parseInt(genomeMetadata[key], 10);
+                    }
+
+                    if (isNaN(value)) {
+                        return null;
+                    }
+                    return value;
+                };
+
+                const getFloatValue  = (value, genomeMetadata, key) => {
+                    if (typeof value !== 'number' &&  (key in genomeMetadata)) {
+                        value = parseFloat(genomeMetadata[key]);
+                    }
+
+                    if (isNaN(value)) {
+                        return null;
+                    }
+                    return value;
+                };
+
+                const {
+                    dna_size, gc_content, num_contigs
+                } = genomeObject.data;
+
+                const stats = {
+                    dna_size: getIntValue(dna_size, genomeMetadata, 'Size'),
+                    gc_content: getFloatValue(gc_content, genomeMetadata, 'GC content'),
+                    num_contigs: getIntValue(num_contigs, genomeMetadata, 'Number contigs')
+                };
+
+                // Add in features if available (should be for non-Euk, non-Plant)
+                if (genomeObject.data.features) {
+                    stats.num_features = genomeObject.data.features.length;
                 } else {
-                    // We may need to fetch the genome again, if it is not Euk or Plant, and the metadata
-                    // did not have the domain already. (logic above)
-                    genomeObject = await this.getGenomeInfoWithFeatures();
-
-                    // console.log('genome object', genomeObject);
-
-                    // const genomeData = genomeObject.data;
-
-                    // Generate stats from the genome object.
-
-                    const {
-                        dna_size, gc_content, num_contigs
-                    } = genomeObject.data;
-
-                    const getIntValue  = (value, genomeMetadata, key) => {
-                        if (typeof value !== 'number' &&  (key in genomeMetadata)) {
-                            value = parseInt(genomeMetadata[key], 10);
-                        }
-
-                        if (isNaN(value)) {
-                            return null;
-                        }
-                        return value;
-                    };
-
-                    const getFloatValue  = (value, genomeMetadata, key) => {
-                        if (typeof value !== 'number' &&  (key in genomeMetadata)) {
-                            value = parseFloat(genomeMetadata[key]);
-                        }
-
-                        if (isNaN(value)) {
-                            return null;
-                        }
-                        return value;
-                    };
-
-                    stats = {
-                        dna_size: getIntValue(dna_size, genomeMetadata, 'Size'),
-                        gc_content: getFloatValue(gc_content, genomeMetadata, 'GC content'),
-                        num_contigs: getIntValue(num_contigs, genomeMetadata, 'Number contigs')
-                    };
-
-                    // Wait, is this possible?
-                    if (genomeObject.data.features) {
-                        stats.num_features = genomeObject.data.features.length;
-                    } else {
-                        const genomeMetadata = genomeObject.info[10];
-                        stats.num_features = parseInt(genomeMetadata['Number features'], 10);
-                    }
+                    const genomeMetadata = genomeObject.info[10];
+                    stats.num_features = parseInt(genomeMetadata['Number features'], 10);
                 }
+
+                // stats = {
+                //     dna_size: dna_size || parseInt(genomeMetadata['Size'], 10),
+                //     gc_content: gc_content || parseFloat(genomeMetadata['GC content']),
+                //     num_contigs: num_contigs || (contigIds && contigIds.length) || parseInt(genomeMetadata['Number contigs'], 10)
+                // };
+
+
+
+                // let stats = null;
+                // // Skip getting features for Euks and Plants
+                // if (domain === 'Eukaryota' || domain === 'Plant') {
+                //     if (!genomeObject) {
+                //         genomeObject = await this.getGenomeInfoWithoutFeatures();
+                //     }
+                //     const {
+                //         dna_size, gc_content, num_contigs, contig_ids
+                //     } = genomeObject.data;
+                //     stats = {
+                //         dna_size: dna_size || parseInt(genomeMetadata['Size'], 10),
+                //         gc_content: gc_content || parseFloat(genomeMetadata['GC content']),
+                //         num_contigs: num_contigs || (contig_ids && contig_ids.length) || parseInt(genomeMetadata['Number contigs'], 10)
+                //     };
+                //     //     if (genomeMetadata && genomeMetadata['GC content'] && genomeMetadata['Size'] && genomeMetadata['Number contigs']) {
+                //     //         const stats = {
+                //     //             dna_size: parseInt(genomeMetadata['Size'], 10),
+                //     //             gc_content: parseFloat(genomeMetadata['GC content']),
+                //     //             num_contigs:  parseInt(genomeMetadata['Number contigs'], 10)
+                //     //         };
+                //     //         //     add_stats(gnm, metadata['Size'], metadata['GC content'], metadata['Number contigs']);
+                //     //         //     _this.render(genomeObject);
+                //     //         //     return null;
+                //     //         // }
+                //     //     // console.log('BIG!');
+                //     //     // TODO: implement later
+                //     // } else {
+                // } else {
+                //     // We may need to fetch the genome again, if it is not Euk or Plant, and the metadata
+                //     // did not have the domain already. (logic above)
+                //     genomeObject = await this.getGenomeInfoWithFeatures();
+
+                //     // console.log('genome object', genomeObject);
+
+                //     // const genomeData = genomeObject.data;
+
+                //     // Generate stats from the genome object.
+
+                //     const {
+                //         dna_size, gc_content, num_contigs
+                //     } = genomeObject.data;
+
+
+                // }
 
                 // if (!stats.num_contigs) {
                 //     if ('Number contigs' in genomeMetadata) {
@@ -205,7 +244,6 @@ define([
                 };
 
                 // Weirdly defensive. Does nothing work right at KBase??
-                // console.log('here?', stats);
                 stats.dna_size = undefined;
                 if (isUndefined(stats.dna_size) || isUndefined(stats.gc_content) || isUndefined(stats.num_contigs)) {
                     console.warn('Some or all stats not available in genome, trying stats...');
