@@ -3,6 +3,7 @@ define([
     'htm',
     'dompurify',
     'lib/domUtils',
+    'lib/format',
     'components/Loading',
     'components/Alert',
     'components/Empty2',
@@ -16,6 +17,7 @@ define([
     htm,
     DOMPurify,
     {domSafeText},
+    {pluralize},
     Loading,
     Alert,
     Empty,
@@ -26,8 +28,8 @@ define([
 
     // const DEFAULT_WIDTH = 600;
     // const DEFAULT_HEIGHT = 700;
-    const MAX_PUBLICATION_COUNT = 500;
-    const PAGE_SIZE = 50;
+    const MAX_PUBLICATION_COUNT = 100;
+    const PAGE_SIZE = 100;
 
     const SORT_OPTIONS = [{
         value: 'most-recent',
@@ -444,6 +446,7 @@ define([
                 }
             }
             ];
+
             const props = {
                 columns,
                 dataSource: this.state.searchState.value.publications,
@@ -495,13 +498,13 @@ define([
                 if (this.state.searchState.value.count > MAX_PUBLICATION_COUNT) {
                     return html`
                     <span>
-                        Found ${Intl.NumberFormat('en-US', {useGrouping: true}).format(this.state.searchState.value.count)} publications, showing first ${MAX_PUBLICATION_COUNT}.
+                        Found ${Intl.NumberFormat('en-US', {useGrouping: true}).format(this.state.searchState.value.count)} ${pluralize(this.state.searchState.value.count, 'publication')}, showing first ${MAX_PUBLICATION_COUNT}.
                     </span>
                 `;
                 }
                 return html`
                     <span>
-                        Found ${this.state.searchState.value.count} publications.
+                        Found ${this.state.searchState.value.count} ${pluralize(this.state.searchState.value.count, 'publication')}.
                     </span>
                 `;
             }
@@ -545,7 +548,7 @@ define([
                         <button type="submit" className="form-control">
                             Search
                         </button>
-                        <span style=${{marginLeft: '1em'}}>Sort by:</span>
+                        <span style=${{margin: '0 0.5em 0 1em'}}>Sort by:</span>
                         <select className="form-control" onChange=${this.sortByChanged.bind(this)}>
                             ${sortOptions}
                         </select>

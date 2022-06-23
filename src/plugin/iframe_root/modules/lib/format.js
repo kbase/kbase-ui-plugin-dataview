@@ -42,5 +42,9 @@ define([], () => {
         return donorNode.innerHTML;
     }
 
-    return Object.freeze({formattedDate, formattedInteger, timestamp, date, domSafeText});
+    function pluralize(count, singular, plural) {
+        return count === 1 ? singular : plural || `${singular}s`;
+    }
+
+    return Object.freeze({formattedDate, formattedInteger, timestamp, date, domSafeText, pluralize});
 });

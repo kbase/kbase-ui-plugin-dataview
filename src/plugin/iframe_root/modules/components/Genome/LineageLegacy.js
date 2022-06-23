@@ -11,6 +11,18 @@ define([
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
+    function NCBIURL(name) {
+        return `http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?name=${name}`;
+    }
+
+    function NCBILink(name) {
+        return html`
+            <a href=${NCBIURL(encodeURIComponent(name))} target="_blank">
+                ${name}
+            </a>
+        `;
+    }
+
     class LineageLegacy extends Component {
         renderLineageList() {
             const {lineage} = this.props;
@@ -29,13 +41,10 @@ define([
             });
 
             const lineageMap = splittax.map((item) => {
-                const searchtax = item.replace('/ /g', '+');
-                const link = `http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?name=${searchtax}`;
+                // const searchtax = item.replace('/ /g', '+');
                 return html`
                     <div>
-                        <a href=${link} target="_blank">
-                            ${item}
-                        </a>
+                        ${NCBILink(item)}
                     </div>
                 `;
             });
@@ -54,7 +63,7 @@ define([
                                 Scientific Name
                             </th>
                             <td style= ${{fontStyle: 'italic'}}>
-                                ${this.props.scientificName}
+                                ${NCBILink(this.props.scientificName)}
                             </td>
                         </tr>
                         <tr>
