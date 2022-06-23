@@ -22,7 +22,7 @@ define([
             <div className="container-fluid Genome Overview" style=${{width: '100%'}}>
                 <div className="row">
                     <div className="col-md-4">
-                        <h4>Genome</h4>
+                        <h4>Summary and Stats</h4>
                         <${GenomeOverview}  ...${this.props}/>
                     </div>
                     <div className="col-md-8">

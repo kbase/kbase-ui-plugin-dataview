@@ -104,9 +104,7 @@ define([
             const subsysToGeneMap = self.subsysToGeneMap;
             const Level1 = [];
 
-            //d3.text("assets/data/subsys.txt", function(text) {
-            //d3.text("/static/subsys.txt", function(text) {
-            d3.text(`${this.runtime.pluginResourcePath  }/data/subsys.txt`, (text) => {
+            d3.text(`${this.runtime.pluginResourcePath}/data/subsys.txt`, (text) => {
                 const data = d3.tsv.parseRows(text);
                 let totalGenesWithFunctionalRoles = 0;
                 let i, j, geneCount, nodeHierarchy, parentHierarchy, node, gene;
@@ -116,7 +114,7 @@ define([
                     nodeHierarchy = '';
                     parentHierarchy = 'Functional Categories';
                     const functionName = data[i][3];
-                    if (subsysToGeneMap[functionName] === undefined) {
+                    if (typeof subsysToGeneMap[functionName] === 'undefined') {
                         // if barchart needs to only show the subsystems that have genes in this genome,
                         // uncomment the continue statement.
                         //continue;

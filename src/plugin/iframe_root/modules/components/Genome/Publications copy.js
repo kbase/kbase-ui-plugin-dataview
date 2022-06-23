@@ -6,7 +6,7 @@ define([
     'components/Loading',
     'components/Alert',
     'components/Empty2',
-    'components/DataTable7',
+    'components/DataTable5',
 
     // For effect
     'css!./common.css',
@@ -28,20 +28,6 @@ define([
     // const DEFAULT_HEIGHT = 700;
     const MAX_PUBLICATION_COUNT = 500;
     const PAGE_SIZE = 50;
-
-    const SORT_OPTIONS = [{
-        value: 'most-recent',
-        label: 'Most Recent'
-    },{
-        value: 'journal',
-        label: 'Journal'
-    },{
-        value: 'author',
-        label: 'First Author'
-    },{
-        value: 'title',
-        label: 'Title'
-    }];
 
     function childrenNamed(node, childName) {
         if (!node) {
@@ -253,8 +239,7 @@ define([
                 searchState: {
                     status: 'NONE'
                 },
-                currentSearchTerm: this.props.searchTerm,
-                sortBy: 'most-recent'
+                currentSearchTerm: this.props.searchTerm
             };
         }
 
@@ -269,10 +254,6 @@ define([
             // params.set('sort', 'pub date');
             params.set('retmax', max);
             params.set('term', term);
-            if (this.state.sortBy !== 'most-recent') {
-                // "most recent" the default sort order
-                params.set('sort', this.state.sortBy);
-            }
             return url.toString();
         }
 
@@ -371,8 +352,10 @@ define([
             const columns = [{
                 id: 'FullJournalName',
                 label: 'Journal',
-                style: {
-                    flex: '1.5 0 0'
+                styles: {
+                    column: {
+                        flex: '1.5 0 0'
+                    }
                 },
                 sortable: true,
                 searchable: true,
@@ -390,8 +373,10 @@ define([
             {
                 id: 'AuthorList',
                 label: 'Authors',
-                style: {
-                    flex: '1.5 0 0'
+                styles: {
+                    column: {
+                        flex: '1.5 0 0'
+                    }
                 },
                 sortable: true,
                 searchable: true,
@@ -402,17 +387,16 @@ define([
                     return value.join(', ');
                 }),
                 render: ({value}) => {
-                    if (value.length === 0) {
-                        return html`<i>No authors listed</i>`;
-                    }
                     return value.join(', ');
                 }
             },
             {
                 id: 'Title',
                 label: 'Title',
-                style: {
-                    flex: '3 0 0'
+                styles: {
+                    column: {
+                        flex: '3 0 0'
+                    }
                 },
                 sortable: true,
                 searchable: true,
@@ -431,8 +415,10 @@ define([
             {
                 id: 'PubDate',
                 label: 'Date',
-                style: {
-                    flex: '0 0 5em'
+                styles: {
+                    column: {
+                        flex: '0 0 5em'
+                    }
                 },
                 sortable: false,
                 searchable: true,
@@ -490,8 +476,7 @@ define([
             case 'PENDING':
             case 'ERROR':
                 return html`<${Loading} inline=${true} />`;
-            case 'SUCCESS': {
-                // const orderedByMessage = `ordered by "${SORT_OPTIONS.filter(({value}) => value === this.state.sortBy)[0].label}"`;
+            case 'SUCCESS':
                 if (this.state.searchState.value.count > MAX_PUBLICATION_COUNT) {
                     return html`
                     <span>
@@ -505,10 +490,9 @@ define([
                     </span>
                 `;
             }
-            }
         }
 
-        onSearchFormSubmit(e) {
+        doSearch(e) {
             e.preventDefault(e);
             this.loadData();
         }
@@ -520,24 +504,10 @@ define([
             });
         }
 
-        sortByChanged(e) {
-            this.setState({
-                ...this.state,
-                sortBy: e.target.value
-            }, this.loadData.bind(this));
-        }
-
         renderSearchControls() {
-            const sortOptions = SORT_OPTIONS.map(({value, label}) => {
-                return html`
-                    <option value=${value} selected=${this.state.sortBy === value}>
-                        ${label}
-                    </option>
-                `;
-            });
             return html`
                 <div className="-search-controls">
-                    <form onSubmit=${this.onSearchFormSubmit.bind(this)} className="form form-inline">
+                    <form onSubmit=${this.doSearch.bind(this)} className="form form-inline">
                         <input className="form-control" style=${{width: '20em'}}
                             value=${this.state.currentSearchTerm} 
                             onChange=${this.searchInputChanged.bind(this)}
@@ -545,10 +515,6 @@ define([
                         <button type="submit" className="form-control">
                             Search
                         </button>
-                        <span style=${{marginLeft: '1em'}}>Sort by:</span>
-                        <select className="form-control" onChange=${this.sortByChanged.bind(this)}>
-                            ${sortOptions}
-                        </select>
                         <div className="-summary">
                         ${this.renderSummary()}
                         </div>

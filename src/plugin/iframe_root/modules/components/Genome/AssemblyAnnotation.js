@@ -36,7 +36,7 @@ define([
             if (!this.props.genomeObject.data.contig_ids || this.props.genomeObject.data.contig_ids.length === 0) {
                 return html`<${Alert}
                     type="warning"
-                    message="No contigs available for this genome"
+                    message="No contigs found in this Genome object"
                 />`;
             }
             return html`
@@ -48,7 +48,7 @@ define([
             if (['Eukaryota', 'Plant'].includes(this.props.genomeObject.data.domain)) {
                 return html`<${Alert}
                     type="warning"
-                    message=${`SEED Functions not currently implemented for ${this.props.genomeObject.data.domain}`}
+                    message=${`The SEED Function viewer is not currently available for domain "${this.props.genomeObject.data.domain}"`}
                 />`;
             }
             return html`<${SEEDFunctions} ...${this.props} />`;
@@ -58,7 +58,7 @@ define([
             if (['Eukaryota', 'Plant'].includes(this.props.genomeObject.data.domain)) {
                 return html`<${Alert}
                     type="warning"
-                    message=${`The Gene Table not currently implemented for ${this.props.genomeObject.data.domain}`}
+                    message=${`The Gene Table is not currently available for domain "${this.props.genomeObject.data.domain}"`}
                 />`;
             }
             return html`<${GeneTable} ...${this.props} />`;

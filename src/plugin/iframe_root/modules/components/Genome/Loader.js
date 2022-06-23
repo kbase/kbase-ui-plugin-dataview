@@ -83,17 +83,17 @@ define([
         }
 
         // No get_stats in this service any longer ??
-        // async getStats(assemblyRef) {
-        //     const genomeAnnotationAPI = new DynamicServiceClient({
-        //         url: this.props.runtime.getConfig('services.service_wizard.url'),
-        //         module: 'GenomeAnnotationAPI',
-        //         auth: {
-        //             token: this.props.runtime.service('session').getAuthToken()
-        //         }
-        //     });
-        //     const [result] = await genomeAnnotationAPI.callFunc('get_stats', [assemblyRef]);
-        //     return result;
-        // }
+        async getStats(assemblyRef) {
+            const genomeAnnotationAPI = new DynamicServiceClient({
+                url: this.props.runtime.getConfig('services.service_wizard.url'),
+                module: 'AssemblyAPI',
+                auth: {
+                    token: this.props.runtime.service('session').getAuthToken()
+                }
+            });
+            const [result] = await genomeAnnotationAPI.callFunc('get_stats', [assemblyRef]);
+            return result;
+        }
 
         async loadGenome() {
             this.setState({
@@ -200,29 +200,32 @@ define([
                 //     }
                 // }
 
-                // const isUndefined = (value) => {
-                //     return typeof value === 'undefined';
-                // };
+                const isUndefined = (value) => {
+                    return typeof value === 'undefined';
+                };
 
                 // Weirdly defensive. Does nothing work right at KBase??
                 // console.log('here?', stats);
-                // stats.dna_size = undefined;
-                // if (isUndefined(stats.dna_size) || isUndefined(stats.gc_content) || isUndefined(stats.num_contigs)) {
-                //     console.log('and here?');
-                //     console.warn('Some or all stats not available in genome, trying stats...');
-                //     let assemblyRef;
-                //     if ('contigset_ref' in genomeObject.data) {
-                //         assemblyRef = genomeObject.data.contigset_ref;
-                //     } else if ('assembly_ref' in genomeObject.data) {
-                //         assemblyRef = genomeObject.data.assembly_ref;
-                //     } else {
-                //         throw new Error('No assembly reference present!');
-                //     }
-                //     const assemblyStats = await this.getStats(assemblyRef);
-                //     stats.dna_size = assemblyStats.dna_size;
-                //     stats.gc_content = assemblyStats.gc_content;
-                //     stats.num_contigs = assemblyStats.num_contigs;
-                // }
+                stats.dna_size = undefined;
+                if (isUndefined(stats.dna_size) || isUndefined(stats.gc_content) || isUndefined(stats.num_contigs)) {
+                    console.warn('Some or all stats not available in genome, trying stats...');
+                    let assemblyRef;
+                    if ('contigset_ref' in genomeObject.data) {
+                        assemblyRef = genomeObject.data.contigset_ref;
+                    } else if ('assembly_ref' in genomeObject.data) {
+                        assemblyRef = genomeObject.data.assembly_ref;
+                    } else {
+                        // console.error('assembly ref?', genomeObject.data);
+                        // throw new Error('No assembly reference present!');
+                        console.warn('And no contigset or assembly ref available; some stats will be missing');
+                    }
+                    if (assemblyRef) {
+                        const assemblyStats = await this.getStats(assemblyRef);
+                        stats.dna_size = assemblyStats.dna_size;
+                        stats.gc_content = assemblyStats.gc_content;
+                        stats.num_contigs = assemblyStats.num_contigs;
+                    }
+                }
 
                 this.setState({
                     genomeInfo: {
