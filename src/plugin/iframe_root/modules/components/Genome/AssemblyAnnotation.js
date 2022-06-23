@@ -33,34 +33,16 @@ define([
         }
 
         renderContigBrowser() {
-            if (!this.props.genomeObject.data.contig_ids || this.props.genomeObject.data.contig_ids.length === 0) {
-                return html`<${Alert}
-                    type="warning"
-                    message="No contigs found in this Genome object"
-                />`;
-            }
             return html`
                 <${MultiContigBrowser} ...${this.props} />
             `;
         }
 
         renderSEEDFunctions() {
-            if (['Eukaryota', 'Plant'].includes(this.props.genomeObject.data.domain)) {
-                return html`<${Alert}
-                    type="warning"
-                    message=${`The SEED Function viewer is not currently available for domain "${this.props.genomeObject.data.domain}"`}
-                />`;
-            }
             return html`<${SEEDFunctions} ...${this.props} />`;
         }
 
         renderGeneTable() {
-            if (['Eukaryota', 'Plant'].includes(this.props.genomeObject.data.domain)) {
-                return html`<${Alert}
-                    type="warning"
-                    message=${`The Gene Table is not currently available for domain "${this.props.genomeObject.data.domain}"`}
-                />`;
-            }
             return html`<${GeneTable} ...${this.props} />`;
         }
 
