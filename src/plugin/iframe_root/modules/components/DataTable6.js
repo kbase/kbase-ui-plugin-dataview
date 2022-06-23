@@ -51,109 +51,7 @@ define([
     onClick
     */
 
-    class FilterCell extends Component {
-        constructor(props) {
-            super(props);
-            this.state = {
-                filterPopup: {
-                    isActive: false,
-                    isStickyOpen: false
-                }
-            };
-        }
-
-
-        onPopupOpen() {
-            this.setState({
-                filterPopup: {
-                    ...this.state.filterPopup,
-                    isStickyOpen: true,
-                    isActive: false
-                }
-            });
-        }
-
-        onPopupClose() {
-            this.setState({
-                filterPopup: {
-                    ...this.state.filterPopup,
-                    isStickyOpen: false
-                }
-            });
-        }
-
-        onMouseEnter() {
-            this.setState({
-                filterPopup: {
-                    ...this.state.filterPopup,
-                    isActive: true
-                }
-            });
-        }
-
-        onMouseLeave() {
-            this.setState({
-                filterPopup: {
-                    ...this.state.filterPopup,
-                    isActive: false
-                }
-            });
-        }
-        render() {
-            const menu = {
-                items: this.props.filterValues.map((filterValue) => {
-                    return {
-                        title: filterValue,
-                        action: () => {
-                            this.props.onFilter(filterValue);
-                        }
-                    };
-                })
-            };
-
-            const menuStyle = {
-                flex: '0 0 auto',
-                visibility: 'hidden',
-                marginLeft: '4px'
-            };
-            if (this.state.filterPopup.isActive || this.state.filterPopup.isStickyOpen) {
-                menuStyle.visibility = 'visible';
-            }
-            const filterDropdown = html`
-                <div style=${menuStyle}>
-                    <${Popup} 
-                        overlaySelector=".DataTable5"
-                        scrollSelector=".DataTable5-filter-header"
-                        containerTop=${0}
-                        position="left"
-                        onOpen=${this.onPopupOpen.bind(this)}
-                        onClose=${this.onPopupClose.bind(this)}
-                    >
-                        <${DropdownMenu} 
-                            title="Filter on Unique Values" 
-                            menu=${menu} 
-                            onClose=${this.onPopupClose.bind(this)}/>
-                    </>
-                </div>
-            `;
-
-            return html`
-                <div style=${{flex: '1 1 0', display: 'flex', flexDirection: 'row', alignItems: 'center'}}
-                    onMouseEnter=${this.onMouseEnter.bind(this)}
-                    onMouseLeave=${this.onMouseLeave.bind(this)} >
-                    <input 
-                        className="form-control" 
-                        title=${`Filter "${this.props.column.label}" column; regular expression may be used`}
-                        onInput=${this.props.onInput} 
-                        value=${this.props.value}
-                        type="search" />
-                    ${filterDropdown}
-                </div>
-            `;
-        }
-    }
-
-    class DataTable5 extends Component {
+    class DataTable6 extends Component {
         constructor(props) {
             super(props);
             const ordered = [];
@@ -975,5 +873,5 @@ define([
 
     }
 
-    return DataTable5;
+    return DataTable6;
 });
