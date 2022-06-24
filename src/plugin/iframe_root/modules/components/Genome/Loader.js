@@ -3,7 +3,7 @@ define([
     'htm',
     'kb_lib/jsonRpc/dynamicServiceClient',
     'components/ErrorView',
-    'components/Loading',
+    'components/ProgressiveLoading',
     './Genome'
 ], (
     preact,
@@ -288,8 +288,25 @@ define([
         }
 
         renderLoading() {
+            const intervals = [{
+                elapsed: 5000,
+                message: 'Genomes can take some time to load, working on it...',
+                type: 'info'
+            }, {
+                elapsed: 15000,
+                message: 'This is taking longer than it should, working on it',
+                type: 'warning'
+            }, {
+                elapsed: 30000,
+                message: 'This is taking a while, but it is still loading',
+                type: 'warning'
+            }, {
+                elapsed: 45000,
+                message: 'This genome is taking a long time to load, the system wll cancel the request at 60s.',
+                type: 'danger'
+            }];
             return html`
-                <${Loading} message="Loading Genome..." />
+                <${Loading} message="Loading Genome..." intervals=${intervals}/>
             `;
         }
 
