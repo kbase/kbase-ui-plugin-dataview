@@ -1,0 +1,40 @@
+.ProgressiveLoading {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    border: 1px solid rgba(150, 150, 150, 0.5);
+    border-radius: 4px;
+    margin: 4px;
+    padding: 10px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(200, 200, 200, 0.3);
+}
+
+.ProgressiveLoading > .-messageArea {
+    display: flex;
+    flex-direction: row;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+}
+
+.ProgressiveLoading > .-intervalArea {
+    text-align: center;
+}
+
+.ProgressiveLoading .-spinner.fa.fa-spinner {
+    color: gray;
+}
+
+.ProgressiveLoading .-elapsed {
+    margin-left: 0.5em;
+    font-style: italic;
+}
+
+
+.ProgressiveLoading .-intervalMessage {
+    margin-left: 1em;
+    font-style: italic;
+    font-weight: bold;
+}

@@ -6,9 +6,6 @@ define([
     'components/ErrorView',
     'components/Loading',
     'components/Empty'
-
-    // For effect
-    // 'css!./Overview.css'
 ], (
     preact,
     htm,
@@ -277,7 +274,7 @@ define([
 
                             <div style=${{borderTop: '1px solid rgba(200, 200, 200)', margin: '1em 0', paddingTop: '1em'}}>
                                 <p>
-                                    Wikipedia summary for <i><a href="${wikiUri}" target="_blank">${searchTerm} <span className="fa fa-link" style=${{color: 'gray'}} /></a></i>
+                                    <a href="${wikiUri}" target="_blank">Wikipedia page for <i>${searchTerm}</i> <span className="fa fa-link" style=${{color: 'gray'}} /></a>
                                 </p>
                             </div>
                         </div>

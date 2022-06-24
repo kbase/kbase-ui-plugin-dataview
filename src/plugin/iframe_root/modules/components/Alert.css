@@ -1,5 +1,15 @@
+.Alert {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
 .Alert.alert.alert-neutral {
     color: rgb(50, 50, 50);
     background-color: #f9f9f9;
     border-color: #ddd;
+}
+
+.Alert .-icon {
+    margin-right: 0.5em;
 }
