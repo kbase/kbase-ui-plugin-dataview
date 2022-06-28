@@ -82,18 +82,18 @@ define([
                 return (() => {
                     const header = this.props.columns.map(({label, style}) => {
                         return html`
-                            <div className="DataTable3-header-col" style=${style || {}}>${label}</div>
+                            <div className="DataTable7-header-col" style=${style || {}}>${label}</div>
                         `;
                     });
                     return html`
-                        <div className="DataTable3-header">${header}</div>
+                        <div className="DataTable7-header">${header}</div>
                     `;
                 })();
             }
             return (() => {
                 const header = this.props.render.header();
                 return html`
-                    <div className="DataTable3-header" style=${style}>${header}</div>
+                    <div className="DataTable7-header" style=${style}>${header}</div>
                 `;
             })();
         }
@@ -133,7 +133,7 @@ define([
             // Render actual table row
             const rowColumns = this.renderRow(values);
             const row = html`
-                <div className="DataTable3-row">
+                <div className="DataTable7-row">
                     ${rowColumns}
                 </div>
             `;
@@ -143,9 +143,9 @@ define([
 
 
             // Render row wrapper.
-            const rowClasses = ['DataTable3-grid-row'];
+            const rowClasses = ['DataTable7-grid-row'];
             if (values.isHighlighted) {
-                rowClasses.push('DataTable3-row-highlighted');
+                rowClasses.push('DataTable7-row-highlighted');
             }
 
             return html`
@@ -178,11 +178,11 @@ define([
                 })();
                 const style = col.style || {};
                 return html`
-                    <div className="DataTable3-col"
+                    <div className="DataTable7-col"
                             style=${style}
                             data-k-b-testhook-cell=${col.id}
                             role="cell">
-                        <div className="DataTable3-col-content">
+                        <div className="DataTable7-col-content">
                             ${content}
                         </div>
                     </div>
@@ -239,10 +239,10 @@ define([
                 height: `${tableHeight}px`
             };
             return html`
-                <div className="DataTable3-body"
+                <div className="DataTable7-body"
                      ref=${this.bodyRef}
                      onScroll=${this.handleBodyScroll.bind(this)}>
-                    <div className="DataTable3-grid"
+                    <div className="DataTable7-grid"
                          style=${style}>
                         ${rows}
                     </div>
@@ -253,7 +253,7 @@ define([
         render() {
             this.doMeasurements();
             return html`
-                <div className="DataTable3">
+                <div className="DataTable7" role="table">
                     ${this.renderHeader()}
                     ${this.renderBody()}
                 </div>

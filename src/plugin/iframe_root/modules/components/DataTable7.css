@@ -1,4 +1,4 @@
-.DataTable3 {
+.DataTable7 {
     flex: 1 1 0px;
     display: flex;
     flex-direction: column;
@@ -11,7 +11,7 @@
 
 
 
-.DataTable3-header {
+.DataTable7-header {
     flex: 0 0 auto;
     display: flex;
     flex-direction: row;
@@ -24,15 +24,15 @@
     overflow-y: scroll;
 }
 
-.DataTable3-header::-webkit-scrollbar-track {
+.DataTable7-header::-webkit-scrollbar-track {
     background-color: white;
 }
 
-.DataTable3-header::-webkit-scrollbar-thumb {
+.DataTable7-header::-webkit-scrollbar-thumb {
     background-color: white;
 }
 
-.DataTable3-header-col {
+.DataTable7-header-col {
     flex: 1 1 0px;
     padding: 4px;
     overflow-x: hidden;
@@ -40,7 +40,7 @@
     text-overflow: ellipsis;
 }
 
-.DataTable3-body {
+.DataTable7-body {
     flex: 1 1 0px;
     /* display: flex; */
     /* flex-direction: column; */
@@ -49,11 +49,11 @@
     overflow-y: scroll;
 }
 
-.DataTable3-grid {
+.DataTable7-grid {
     position: relative;
 }
 
-.DataTable3-grid-row {
+.DataTable7-grid-row {
     position: absolute;
     display: flex;
     flex-direction: column;
@@ -61,39 +61,39 @@
     border-bottom: 1px solid rgba(200, 200, 200, 0.5);
 }
 
-.DataTable3-grid-row:hover {
+.DataTable7-grid-row:hover {
     background-color: rgba(200, 200, 200, 0.2);
     cursor: pointer;
 }
 
-.DataTable3-grid-cell {
+.DataTable7-grid-cell {
     position: absolute;
 }
 
-.DataTable3-row-wrapper {
+.DataTable7-row-wrapper {
     flex: 0 0 auto;
     display: flex;
     flex-direction: row;
     /* border-bottom: 1px solid rgba(200, 200, 200, 0.5); */
 }
 
-.DataTable3-row {
+.DataTable7-row {
     flex: 0 0 auto;
     display: flex;
     flex-direction: row;
 }
 
-.DataTable3-row-detail {
+.DataTable7-row-detail {
     flex: 0 0 auto;
     display: flex;
     flex-direction: row;
 }
 
-.DataTable3-row-highlighted {
+.DataTable7-row-highlighted {
     background-color: rgba(200, 200, 200, 0.5);
 }
 
-.DataTable3-col {
+.DataTable7-col {
     flex: 1 1 0px;
     display: flex;
     flex-direction: column;
@@ -101,7 +101,7 @@
     justify-content: center;
 }
 
-.DataTable3-col-content {
+.DataTable7-col-content {
     overflow-x: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;

@@ -21,14 +21,14 @@ define([
             return html` 
             <div className="container-fluid Genome Overview" style=${{width: '100%'}}>
                 <div className="row">
-                    <div className="col-md-4">
+                    <section className="col-md-4">
                         <h4>Summary and Stats</h4>
                         <${GenomeOverview}  ...${this.props}/>
-                    </div>
-                    <div className="col-md-8">
+                    </section>
+                    <section className="col-md-8">
                         <h4>From Wikipedia</h4>
                         <${GenomeWikipedia}  ...${this.props}/>
-                    </div>
+                    </section>
                 </div>
             </div>`;
         }

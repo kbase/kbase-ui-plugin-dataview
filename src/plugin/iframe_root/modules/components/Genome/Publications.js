@@ -566,15 +566,26 @@ define([
             `;
         }
 
-        render() {
+        renderPublications() {
             return html`
-                <div className="Publications">
+                <div className="PubMedPublications">
                     <div className="-toolbar">
                         ${this.renderToolbar()}
                     </div>
                     <div className="-table">
                         ${this.renderState()}
                     </div>
+                </div>
+            `;
+        }
+
+        render() {
+            return html`
+                <div className="Genome Publications">
+                    <section className="-flex-column">
+                        <h4>Publications in PubMed</h4>
+                        ${this.renderPublications()}
+                    </section>
                 </div>
             `;
         }

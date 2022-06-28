@@ -50,20 +50,20 @@ define([
             return html`
                 <div className="container-fluid Genome AssemblyAnnotation" style=${{width: '100%'}}>
                     <div className="row">
-                        <div className="col-md-12">
+                        <section className="col-md-12">
                             <h4>Contig Browser</h4>
                             ${this.renderContigBrowser()}
-                        </div>
+                        </section>
                     </div>
                      <div className="row">
-                        <div className="col-md-6">
+                        <section className="col-md-6">
                             <h4>SEED Functions</h4>
                             ${this.renderSEEDFunctions()}
-                        </div>
-                        <div className="col-md-6">
+                        </section>
+                        <section className="col-md-6">
                             <h4>Gene Table</h4>
                             ${this.renderGeneTable()}
-                        </div>
+                        </section>
                     </div>
                 </div>
             `;

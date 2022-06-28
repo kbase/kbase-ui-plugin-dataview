@@ -4,26 +4,32 @@
     flex-direction: column;
 }
 
-.Publications > .-toolbar {
-    flex: 0 0 auto;
-    margin-bottom: 1em
-}
-.Publications > .-table {
+.PubMedPublications {
     flex: 1 1 0;
     display: flex;
     flex-direction: column;
 }
 
-.Publications > .-toolbar >.search-controls {
+.PubMedPublications > .-toolbar {
+    flex: 0 0 auto;
+    margin-bottom: 1em
+}
+.PubMedPublications > .-table {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
 }
 
-.Publications > .-toolbar >.-search-controls > form.form.form-inline {
+.PubMedPublications > .-toolbar >.search-controls {
+}
+
+.PubMedPublications > .-toolbar >.-search-controls > form.form.form-inline {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-.Publications > .-toolbar >.-search-controls > form.form.form-inline > .-summary {
+.PubMedPublications > .-toolbar >.-search-controls > form.form.form-inline > .-summary {
     margin-left: 1em;
     display: float;
     float-direction: column;

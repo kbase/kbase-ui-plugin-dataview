@@ -161,10 +161,10 @@ define([
             return html`
                 <table className="table">
                     <tbody>
-                    ${this.renderTypeRow()}
-                    ${this.renderNarrativeRow()}
-                    ${this.renderLastUpdatedRow()}
-                    ${this.renderPermalinkRow()}
+                        ${this.renderTypeRow()}
+                        ${this.renderNarrativeRow()}
+                        ${this.renderLastUpdatedRow()}
+                        ${this.renderPermalinkRow()}
                     </tbody>
                 </table>
             `;
@@ -251,11 +251,11 @@ define([
                             <td>
                                 <a href=${`/#dataview/${version.wsid}/${version.id}/${version.version}`}
                                    target="_parent">
-                                        v${version.version}
+                                        ${`v${version.version}`}
                                 </a>
                             </td>
                             <td>
-                                Saved on ${dateFormat(version.save_date)} by ${' '}
+                                Saved on ${dateFormat(version.save_date)} by${' '}
                                 <a href="/#people/${version.saved_by}" target="_parent">${version.saved_by}</a>
                             </td>
                         </tr>
@@ -412,6 +412,7 @@ define([
                 <div className="container-fluid" style=${{width: '100%'}}>
                     <div className="row">
                         <div className="col-sm-6">
+                            <h4>Summary</h4>
                             ${this.renderSummary()}
                         </div>
                         <div className="col-sm-6">
