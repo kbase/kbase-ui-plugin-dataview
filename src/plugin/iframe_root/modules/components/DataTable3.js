@@ -271,7 +271,7 @@ define([
         render() {
             this.doMeasurements();
             return html`
-                <div className="DataTable3">
+                <div className="DataTable3" role="table">
                     ${this.renderHeader()}
                     ${this.renderBody()}
                 </div>

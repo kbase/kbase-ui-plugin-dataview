@@ -14,7 +14,7 @@ define([
 ], (
     {Component, h, Fragment, createRef, render},
     htm,
-    common,
+    {none},
     ResizeObserver,
     DropdownMenu,
     Popup,
@@ -789,7 +789,7 @@ define([
 
         renderCell(cellValue, columnDef) {
             if (typeof cellValue === 'undefined' || cellValue === null) {
-                return common.na();
+                return none();
             }
             if (columnDef.formatter) {
                 try {

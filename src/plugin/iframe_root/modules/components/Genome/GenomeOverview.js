@@ -1,19 +1,14 @@
 define([
     'preact',
     'htm',
-
-    // For effect
-    // 'css!./Overview.css'
+    'components/common'
 ], (
     preact,
-    htm
+    htm,
+    {na}
 ) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
-
-    function na(label = 'n/a') {
-        return html`<span style=${{fontStyle: 'italic'}}>${label}</span>`;
-    }
 
     function intFormat(value) {
         if (typeof value !== 'number') {
@@ -75,7 +70,7 @@ define([
                         <td>${wrapValue(this.props.genomeObject.data.scientific_name)}</td>
                     </tr>
                     <tr>
-                        <th>KBase Genome ID	</th>
+                        <th>KBase Genome ID</th>
                         <td>${wrapValue(this.props.genomeObject.data.id)}</td>
                     </tr>
                     <tr>
