@@ -1,4 +1,4 @@
-define(['preact', 'htm', 'components/Empty2'], (preact, htm, Empty) => {
+define(['preact', 'htm', 'components/Empty'], (preact, htm, Empty) => {
     const html = htm.bind(preact.h);
     function factory({}) {
         let parent,

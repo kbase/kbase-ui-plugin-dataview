@@ -108,7 +108,7 @@ define([
                 paneExtraClasses.push('Tabs-pane-auto-scroll');
             }
             return html`
-                <div className="Tabs">
+                <div className="Tabs" role="tablist">
                     <div className="Tabs-tabs">
                         <div className="Tabs-tab-container">
                             ${this.renderTabs()}
