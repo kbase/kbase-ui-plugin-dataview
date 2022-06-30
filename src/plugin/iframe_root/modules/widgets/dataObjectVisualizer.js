@@ -102,7 +102,7 @@ define([
                             mapping = findMapping(type, params);
 
                         if (!mapping) {
-                            throw new Error(`Sorry, cannot find widget for ${  type.module  }.${  type.name}`);
+                            throw new Error(`Cannot find widget for ${type.module}.${type.name}`);
                         }
                         // These params are from the found object.
                         const widgetParams = {
