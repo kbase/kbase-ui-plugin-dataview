@@ -2,9 +2,10 @@ define([
     'preact',
     'htm',
     './ProvenanceGraph.styles',
-    './Loading',
-    './ErrorView',
-    './SankeyGraph',
+    'components/Loading',
+    'components/ErrorView',
+    'components/SankeyGraph',
+    'components/Alert',
     'kb_lib/jsonRpc/genericClient',
 
     // For effect
@@ -16,12 +17,13 @@ define([
     Loading,
     ErrorView,
     SankeyGraph,
+    Alert,
     GenericClient
 ) => {
-    const {Component} = preact;
+    const {Component, Fragment} = preact;
     const html = htm.bind(preact.h);
 
-    const MAX_OBJECTS = 50;
+    const MAX_REFERENCING_OBJECTS = 50;
 
     // Utility functions.
 
@@ -63,8 +65,7 @@ define([
         }
 
         componentDidMount() {
-            // this.renderGraph(this.ref.current);
-            this.fetchData(this.props.objectRef);
+            this.fetchData(this.props.objectInfo);
         }
 
         processObjectHistory(data) {
@@ -85,8 +86,8 @@ define([
 
             data.forEach((objectInfo) => {
                 //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
-                const objId = `${objectInfo[6]  }/${  objectInfo[0]  }/${  objectInfo[4]}`,
-                    nodeId = graph.nodes.length;
+                const objId = `${objectInfo[6]}/${objectInfo[0]}/${objectInfo[4]}`;
+                const nodeId = graph.nodes.length;
                 graph.nodes.push({
                     node: nodeId,
                     name: getNodeLabel(objectInfo),
@@ -107,6 +108,68 @@ define([
             return {objIdentities, objRefToNodeIdx, graph};
         }
 
+        processObject(objectInfo) {
+            // let latestVersion = 0,
+            //     latestObjId = '';
+
+            // This is where we initialize these core data objects which are threaded through
+            // several methods to generate the data for the graph.
+            const objIdentities = [];
+            const objRefToNodeIdx = {};
+            const graph = {
+                nodes: [],
+                links: []
+            };
+
+            function getNodeLabel(info) {
+                return `${info[1]} (v${info[4]})`;
+            }
+
+            objIdentities.push({ref: objectInfo.ref});
+
+            // The primordial node.
+            const nodeId = 0;
+
+            graph.nodes.push({
+                node: nodeId,
+                name: getNodeLabel(objectInfo.raw),
+                info: objectInfo.raw,
+                nodeType: 'core',
+                objId: objectInfo.ref
+            });
+
+            objRefToNodeIdx[objectInfo.ref] = nodeId;
+
+            // TODO: don't now what this does; find out and document.
+            graph.nodes[objRefToNodeIdx[objectInfo.ref].nodeType] = 'selected';
+
+            // data.forEach((objectInfo) => {
+            //     //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
+            //     const objId = `${objectInfo[6]}/${objectInfo[0]}/${objectInfo[4]}`;
+            //     const nodeId = graph.nodes.length;
+            //     graph.nodes.push({
+            //         node: nodeId,
+            //         name: getNodeLabel(objectInfo),
+            //         info: objectInfo,
+            //         nodeType: 'core',
+            //         objId
+            //     });
+            //     if (objectInfo[4] > latestVersion) {
+            //         latestVersion = objectInfo[4];
+            //         latestObjId = objId;
+            //     }
+            //     objRefToNodeIdx[objId] = nodeId;
+            //     objIdentities.push({ref: objId});
+            // });
+            // if (latestObjId.length > 0) {
+            //     graph.nodes[objRefToNodeIdx[latestObjId].nodeType] = 'selected';
+            // }
+            return {objIdentities, objRefToNodeIdx, graph};
+        }
+
+        /* Adds nodes and links for all referencing objects, with the link terminating at a
+           node which is the target object (or one of it's versions, if the showAllVersions flag is on)
+        */
         async getReferencingObjects(objIdentities, graph, objRefToNodeIdx) {
             // Note that graph and objRefToNodeIdx are MODIFIED.
             const wsClient = new GenericClient({
@@ -114,49 +177,41 @@ define([
                 url: this.props.runtime.config('services.Workspace.url'),
                 token: this.props.runtime.service('session').getAuthToken()
             });
-            const [refData] =  await wsClient.callFunc('list_referencing_objects', [objIdentities]);
 
-            // (objIdentities).then((refData) => {
-            for (let i = 0; i < refData.length; i++) {
-                for (let k = 0; k < refData[i].length; k++) {
-                    if (k >= MAX_OBJECTS) {
-                        //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
-                        const nodeId = graph['nodes'].length;
-                        const nameStr = `${refData[i].length - MAX_OBJECTS  } more ...`;
-                        graph['nodes'].push({
-                            node: nodeId,
-                            name: nameStr,
-                            info: [-1, nameStr, 'Multiple Types', 0, 0, 'N/A', 0, 'N/A', 0, 0, {}],
-                            nodeType: 'ref',
-                            objId: '-1',
-                            isFake: true
-                        });
-                        objRefToNodeIdx[objId] = nodeId;
+            const [referencingObjects] =  await wsClient.callFunc('list_referencing_objects', [objIdentities]);
 
-                        // add the link now too
-                        if (objRefToNodeIdx[objIdentities[i]['ref']] !== null) {
-                            // only add the link if it is visible
-                            graph['links'].push({
-                                source: objRefToNodeIdx[objIdentities[i]['ref']],
-                                target: nodeId,
-                                value: 1
-                            });
-                        }
+            const warnings = [];
+
+            // We have a list of lists - one list for each object version as contained in objectIdentities.
+            for (let i = 0; i < referencingObjects.length; i++) {
+                for (let k = 0; k < referencingObjects[i].length; k++) {
+                    const refInfo = referencingObjects[i][k];
+                    //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
+                    const ref = `${refInfo[6]}/${refInfo[0]}/${refInfo[4]}`;
+
+                    // If we have exceeded the maximum number of objects we support in the graph,
+                    // create a fake entry.
+                    // TODO: explain how this is eventually displayed, because this is weird.
+                    if (k >= MAX_REFERENCING_OBJECTS) {
+                        // //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
+                        const warning = `The number of referencing objects (${referencingObjects[i].length}) exceeds the maximum displayable (${MAX_REFERENCING_OBJECTS}); display limited to first 50 referencing objects.`;
+                        console.warn(warning);
+                        warnings.push(warning);
                         break;
                     }
 
-                    const refInfo = refData[i][k];
-                    //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
-                    const objId = `${refInfo[6]  }/${  refInfo[0]  }/${  refInfo[4]}`;
-                    const graphNodeId = graph['nodes'].length;
-                    graph['nodes'].push({
+                    const graphNodeId = graph.nodes.length;
+                    graph.nodes.push({
                         node: graphNodeId,
                         name: getNodeLabel(refInfo),
                         info: refInfo,
                         nodeType: 'ref',
-                        objId
+                        objId: ref
                     });
-                    objRefToNodeIdx[objId] = graphNodeId;
+
+                    // Allows lookup of the node from the ref by getting the id, actually the node index, which can then be
+                    // used to index into graph.nodes.
+                    objRefToNodeIdx[ref] = graphNodeId;
 
                     // add the link now too
                     if (objRefToNodeIdx[objIdentities[i].ref] !== null) {
@@ -165,6 +220,7 @@ define([
                     }
                 }
             }
+            return warnings;
         }
 
         async getObjectProvenance(objIdentities) {
@@ -337,7 +393,7 @@ define([
             });
         }
 
-        async fetchData(objectRef) {
+        async fetchData(objectInfo) {
             // init the graph
             this.setState({
                 status: 'LOADING'
@@ -350,10 +406,17 @@ define([
             });
 
             try {
-                const  [objectHistory] = await wsClient.callFunc('get_object_history', [{ref: objectRef}]);
-                const {objIdentities, objRefToNodeIdx, graph} = this.processObjectHistory(objectHistory);
+                const showAllVersions = false;
 
-                const [, refData] = await Promise.all([
+                const {objIdentities, objRefToNodeIdx, graph} = await (async () => {
+                    if (showAllVersions) {
+                        const  [objectHistory] = await wsClient.callFunc('get_object_history', [{ref: objectInfo.ref}]);
+                        return this.processObjectHistory(objectHistory);
+                    }
+                    return this.processObject(objectInfo);
+                })();
+
+                const [warnings, refData] = await Promise.all([
                     this.getReferencingObjects(objIdentities, graph, objRefToNodeIdx),
                     this.getObjectProvenance(objIdentities, graph, objRefToNodeIdx)
                 ]);
@@ -370,10 +433,11 @@ define([
                 this.setState({
                     status: 'SUCCESS',
                     value: {
-                        graph, objRefToNodeIdx
+                        graph, objRefToNodeIdx, warnings
                     }
                 });
             } catch (ex) {
+                console.error(ex);
                 this.setState({
                     status: 'ERROR',
                     error: {
@@ -392,15 +456,29 @@ define([
             this.props.onInspectNodeLeave();
         }
 
-        renderGraph({graph, objRefToNodeIdx}) {
+        renderWarnings(warnings) {
+            if (warnings.length === 0) {
+                return;
+            }
             return html`
-                <${SankeyGraph} 
-                        graph=${graph} 
-                        objRefToNodeIdx=${objRefToNodeIdx} 
-                        runtime=${this.props.runtime} 
-                        onNodeOver=${this.onNodeOver.bind(this)}
-                        onNodeOut=${this.onNodeOut.bind(this)}
-                />
+                <${Alert} type="warning">
+                    ${warnings.join((warning) => {return html`<p>${warning}</p>`;})}
+                </>
+            `;
+        }
+
+        renderGraph({graph, objRefToNodeIdx, warnings}) {
+            return html`
+                <${Fragment}>
+                    <${SankeyGraph} 
+                            graph=${graph} 
+                            objRefToNodeIdx=${objRefToNodeIdx} 
+                            runtime=${this.props.runtime} 
+                            onNodeOver=${this.onNodeOver.bind(this)}
+                            onNodeOut=${this.onNodeOut.bind(this)}
+                    />
+                    ${this.renderWarnings(warnings)}
+                </>
             `;
         }
 
@@ -412,7 +490,7 @@ define([
 
         renderError(error) {
             return html`
-                <${ErrorView} error=${error} />
+                <${ErrorView} error=${error} runtime=${this.props.runtime}/>
             `;
         }
 
@@ -431,7 +509,11 @@ define([
         render() {
             return html`
                 <div style=${this.state.mainStyle}>
-                    <p>This is a visualization of the relationships between this piece of data and other data in KBase.  Mouse over objects to show additional information (shown below the graph). Double click on an object to select and recenter the graph on that object in a new window.</p>
+                    <p style="max-width: 60em">
+                        This is a visualization of the relationships between this data object and other data in KBase. \
+                        Mouse over objects (nodes in the graph) to show additional information (shown below the graph). \
+                        Double click on an object to select and recenter the graph on that object in a new window.
+                    </p>
                     ${this.renderState()}
                 </div>
             `;

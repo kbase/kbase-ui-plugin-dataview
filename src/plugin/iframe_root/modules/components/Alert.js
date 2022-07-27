@@ -33,8 +33,10 @@ define([
         renderContent() {
             if (this.props.render) {
                 return this.props.render();
+            } else if (this.props.message) {
+                return this.props.message;
             }
-            return this.props.message;
+            return this.props.children;
         }
         render() {
             return html`
