@@ -414,6 +414,7 @@ define([
                     runtime=${this.props.runtime}
                     onInspectNode=${this.onInspectNode.bind(this)}
                     onInspectNodeLeave=${this.onInspectNodeLeave.bind(this)}
+                    environment=${this.props.environment}
                 />
                 <${Row} style=${{marginBottom: '1em'}}>
                     <${Col} style=${{flex: '0 0 19em', marginRight: '0.5em'}}>
