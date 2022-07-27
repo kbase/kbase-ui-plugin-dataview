@@ -77,7 +77,7 @@ define([
         async function start(params) {
             const objectInfo = await getObjectInfo(params);
             runtime.send('ui', 'setTitle', `Data Provenance and Reference Network for ${objectInfo.name}`);
-            preact.render(preact.h(ProvenancePanel, {objectInfo, runtime}), container);
+            preact.render(preact.h(ProvenancePanel, {objectInfo, runtime, environment: 'standalone'}), container);
         }
 
         function run(params) {

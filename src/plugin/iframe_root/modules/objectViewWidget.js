@@ -85,7 +85,7 @@ define([
                     title: 'Provenance',
                     autoScroll: true,
                     render: () => {
-                        return html`<${Provenance} runtime=${runtime} ...${params} />`;
+                        return html`<${Provenance} runtime=${runtime} environment="embedded" ...${params} />`;
                     }
                 }
             ];

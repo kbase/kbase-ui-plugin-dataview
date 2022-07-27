@@ -59,8 +59,7 @@ define([
             super(props);
             this.graphNodeRef = preact.createRef();
             this.state = {
-                status: 'NONE',
-                mainStyle: styles.main
+                status: 'NONE'
             };
         }
 
@@ -506,14 +505,35 @@ define([
             }
         }
 
+        renderControls() {
+            if (this.props.environment === 'standalone') {
+                return;
+            }
+            return html`
+                <a href="/#provenance/${this.props.objectInfo.ref}" 
+                    target="_blank"
+                    className="btn btn-default"
+                >
+                    Open in separate window
+                </a>
+            `;
+        }
+
         render() {
             return html`
-                <div style=${this.state.mainStyle}>
-                    <p style="max-width: 60em">
-                        This is a visualization of the relationships between this data object and other data in KBase. \
-                        Mouse over objects (nodes in the graph) to show additional information (shown below the graph). \
-                        Double click on an object to select and recenter the graph on that object in a new window.
-                    </p>
+                <div style=${styles.main}>
+                    <div style=${styles.intro}>
+                        <div style=${styles.introText}>
+                        <p style="max-width: 50em">
+                            This is a visualization of the relationships between this data object and other data in KBase. \
+                            Mouse over objects (nodes in the graph) to show additional information (shown below the graph). \
+                            Double click on an object to select and recenter the graph on that object in a new window.
+                        </p>
+                        </div>
+                        <div style=${styles.introControls}>
+                            ${this.renderControls()}
+                        </div>
+                    </div>
                     ${this.renderState()}
                 </div>
             `;
