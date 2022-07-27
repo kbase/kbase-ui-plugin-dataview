@@ -179,7 +179,6 @@ define([
                 `;
             }
             const objectInfo = APIUtils.objectInfoToObject(this.state.selectedNode.nodeInfo.info);
-            // console.log('obj info', objectInfo);
             return html`
                 <table class="table table-striped table-bordered ObjectDetails">
                     <tbody>
@@ -411,7 +410,7 @@ define([
             return html`
             <div class="ProvenancePanel">
                 <${ProvenanceGraph} 
-                    objectRef=${this.props.objectInfo.ref} 
+                    objectInfo=${this.props.objectInfo}
                     runtime=${this.props.runtime}
                     onInspectNode=${this.onInspectNode.bind(this)}
                     onInspectNodeLeave=${this.onInspectNodeLeave.bind(this)}

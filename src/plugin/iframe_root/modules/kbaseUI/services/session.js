@@ -31,7 +31,7 @@ define(['kb_common_ts/Auth2'], (auth2) => {
             return this.auth2Session;
         }
         getRoles() {
-            return this.runtime.authorization.roles;
+            return this.runtime.authorization.roles || [];
         }
 
         serverTimeOffset() {

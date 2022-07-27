@@ -107,6 +107,11 @@ define([
             this.resizeObserver = new ResizeObserver(this.onContainerResize.bind(this));
         }
         componentDidMount() {
+
+            this.initialize();
+        }
+
+        initialize() {
             const node = this.ref.current;
             this.setState({
                 width: node.clientWidth
@@ -173,7 +178,7 @@ define([
             }, () => {
                 // Crude, but works. When this is rewritten with modern
                 // d3 and a supported d3 plugin, can redress this with
-                // propery d3 updating.
+                // proper d3 updating.
                 this.renderGraph(element);
             });
         }
@@ -203,7 +208,6 @@ define([
                 objRefToNodeIdx['-1'] = 1;
                 graph.links.push(makeLink(0, 1, 1));
             }
-
 
             // TODO: This was previously disabled, not sure why. We should consider
             // reviving it.
@@ -259,6 +263,7 @@ define([
                 .sort((a, b) => {
                     return b.dy - a.dy;
                 });
+
 
             // add the link titles
             link.append('title').text((d) => {
@@ -354,7 +359,7 @@ define([
                         `  saved on:  ${getTimeStampStr(objectInfo.save_date)}\n` +
                         `  saved by:  ${objectInfo.saved_by}\n`;
                     text += '  metadata:\n';
-                    if (Object.keys(objectInfo.metadata).length > 0) {
+                    if (objectInfo.metadata !== null && Object.keys(objectInfo.metadata).length > 0) {
                         for (const [key, value] of Object.entries(objectInfo.metadata)) {
                             text += `     ${key} : ${value}\n`;
                         }

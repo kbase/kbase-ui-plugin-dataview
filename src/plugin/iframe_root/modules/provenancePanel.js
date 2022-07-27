@@ -50,11 +50,13 @@ define([
                         objects: [{ref: objectRef}],
                         ignoreErrors: 1
                     })
-                    .then((objectList) => {
-                        if (objectList[0] === null) {
+                    .then((objectInfos) => {
+                        if (objectInfos[0] === null) {
                             throw new Error(`Object not found: ${  objectRef}`);
                         }
-                        return apiUtils.object_info_to_object(objectList[0]);
+                        const objectInfo = apiUtils.object_info_to_object(objectInfos[0]);
+                        objectInfo.raw = objectInfos[0];
+                        return objectInfo;
                     });
             });
         }
