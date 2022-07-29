@@ -11,7 +11,7 @@ define([
     'components/WidgetWrapper',
     'components/Overview/index',
     'components/MiniOverview/index',
-    'components/ProvenancePanel',
+    'components/Provenance/Controller',
     'uuid',
 
     'css!./objectViewWidget.css',
