@@ -5,9 +5,9 @@ define([
     // 'kbaseUI/widget/widgetSet',
     'kb_service/utils',
     'kb_service/client/workspace',
-    'components/ProvenancePanel',
+    'components/Provenance/Controller',
     'css!./provenancePanel.css'
-], (preact, Promise, apiUtils, Workspace, ProvenancePanel) => {
+], (preact, Promise, apiUtils, Workspace, Provenance) => {
 
     // const html = htm.bind(preact.h);
     // const t = htmlTags.tag,
@@ -77,7 +77,7 @@ define([
         async function start(params) {
             const objectInfo = await getObjectInfo(params);
             runtime.send('ui', 'setTitle', `Data Provenance and Reference Network for ${objectInfo.name}`);
-            preact.render(preact.h(ProvenancePanel, {objectInfo, runtime, environment: 'standalone'}), container);
+            preact.render(preact.h(Provenance, {objectInfo, runtime, environment: 'standalone'}), container);
         }
 
         function run(params) {

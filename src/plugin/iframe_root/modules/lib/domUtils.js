@@ -55,7 +55,8 @@ define([
             typeName: type[1],
             typeMajorVersion: type[2],
             typeMinorVersion: type[3],
-            saveDate: Utils.iso8601ToDate(data[3])
+            saveDate: Utils.iso8601ToDate(data[3]),
+            raw: rawObjectInfo
         };
     }
 

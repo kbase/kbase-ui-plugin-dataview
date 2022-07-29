@@ -1,5 +1,4 @@
-define(['jquery', 'widgets/modeling/KBModeling', 'widgets/modeling/kbaseTabTable'], function ($, KBModeling) {
-    'use strict';
+define(['jquery', 'widgets/modeling/KBModeling', 'widgets/modeling/kbaseTabTable'], ($, KBModeling) => {
     function KBaseSearch_GenomeSet(modeltabs) {
         this.modeltabs = modeltabs;
 
@@ -7,7 +6,7 @@ define(['jquery', 'widgets/modeling/KBModeling', 'widgets/modeling/kbaseTabTable
             this.workspace = data[7];
             this.objName = data[1];
             this.overview = {
-                wsid: data[7] + '/' + data[1],
+                wsid: `${data[7]  }/${  data[1]}`,
                 objecttype: data[2],
                 owner: data[5],
                 instance: data[4],
@@ -17,7 +16,7 @@ define(['jquery', 'widgets/modeling/KBModeling', 'widgets/modeling/kbaseTabTable
             if ('Name' in data[10]) {
                 this.usermeta = {
                     name: data[10]['Name'],
-                    source: data[10]['Source'] + '/' + data[10]['Source ID'],
+                    source: `${data[10]['Source']}/${  data[10]['Source ID']}`,
                     type: data[10]['Type']
                 };
 
@@ -28,8 +27,8 @@ define(['jquery', 'widgets/modeling/KBModeling', 'widgets/modeling/kbaseTabTable
         this.setData = function (indata) {
             this.data = indata;
             this.genome_refs = [];
-            for (var obj in indata.elements) {
-                this.genome_refs.push({ ref: indata.elements[obj]['ref'] });
+            for (const obj in indata.elements) {
+                this.genome_refs.push({ref: indata.elements[obj]['ref']});
             }
         };
 

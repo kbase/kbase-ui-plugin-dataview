@@ -107,8 +107,13 @@ define([
             this.resizeObserver = new ResizeObserver(this.onContainerResize.bind(this));
         }
         componentDidMount() {
-
             this.initialize();
+        }
+
+        componentDidUpdate(prevProps, prevState) {
+            if (prevProps.graph !== this.props.graph) {
+                this.renderGraph();
+            }
         }
 
         initialize() {
@@ -142,6 +147,11 @@ define([
             if (d.isFake) {
                 //
                 // TODO: What is this?
+                // Ah, this is code to handle a "fake" node, which is a node created when the # of nodes
+                // exceeds some maximum # of nodes.
+                // We don't use this technique any longer, rather creating a message for the user.
+                // We MAY, however, use a similar technique for displaying inaccessible nodes, so
+                // leave this in place for now.
                 //
                 // const info = d.info;
                 // let text = '<center><table cellpadding="2" cellspacing="0" class="table table-bordered"><tr><td>';
@@ -162,7 +172,7 @@ define([
 
                 this.props.onNodeOver({
                     ref: d.objId,
-                    info: d.info,
+                    info: d.info.raw,
                     objdata
                 });
             }
@@ -194,6 +204,10 @@ define([
             this.setState({
                 height: Math.min(height + 15, DEFAULT_MAX_HEIGHT)
             });
+
+            // this.setState({
+            //     height: DEFAULT_MAX_HEIGHT
+            // });
 
             if (graph.links.length === 0) {
                 // in order to render, we need at least two nodes
@@ -325,7 +339,7 @@ define([
                         // Oh, no!
                         alert('Cannot expand this node.');
                     } else {
-                        const path = `provenance/${encodeURI(`${d.info[6]}/${d.info[0]}/${d.info[4]}`)}`;
+                        const path = `provenance/${encodeURI(`${d.info.ref}`)}`;
                         const url = `${window.location.origin}/#${path}`;
                         window.open(url);
                     }
@@ -350,17 +364,17 @@ define([
                 })
                 .append('title')
                 // xss safe
-                .html((d) => {
-                    const objectInfo = objectInfoToObject(d.info);
+                .html(({info}) => {
+                    // const objectInfo = objectInfoToObject(d.info);
                     let text =
-                        `${objectInfo.name} (${objectInfo.ref})\n` +
+                        `${info.name} (${info.ref})\n` +
                         '--------------\n' +
-                        `  type:  ${objectInfo.type}\n` +
-                        `  saved on:  ${getTimeStampStr(objectInfo.save_date)}\n` +
-                        `  saved by:  ${objectInfo.saved_by}\n`;
+                        `  type:  ${info.type}\n` +
+                        `  saved on:  ${getTimeStampStr(info.save_date)}\n` +
+                        `  saved by:  ${info.saved_by}\n`;
                     text += '  metadata:\n';
-                    if (objectInfo.metadata !== null && Object.keys(objectInfo.metadata).length > 0) {
-                        for (const [key, value] of Object.entries(objectInfo.metadata)) {
+                    if (info.metadata !== null && Object.keys(info.metadata).length > 0) {
+                        for (const [key, value] of Object.entries(info.metadata)) {
                             text += `     ${key} : ${value}\n`;
                         }
                     } else {

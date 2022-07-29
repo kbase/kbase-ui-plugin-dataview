@@ -282,7 +282,7 @@ define([
             const body = (() => {
                 if (this.props.too_many_inc_refs) {
                     return html`
-                        <span>Sorry, there are too many references to this data to display.</span>
+                        <span>Sorry, there are too many references to this data object to display.</span>
                     `;
                 }
 
@@ -344,7 +344,7 @@ define([
             const body = (() => {
                 if (this.props.too_many_out_refs) {
                     return html`
-                        <span>Sorry, there are too many references to this data to display.</span>
+                        <span>Sorry, there are too many references from this data object to display.</span>
                     `;
                 }
 
