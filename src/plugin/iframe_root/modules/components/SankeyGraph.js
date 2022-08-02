@@ -82,7 +82,7 @@ define([
         // f-ing safari, need to add extra ':' delimiter to parse the timestamp
         if (isNaN(seconds)) {
             const tokens = objInfoTimeStamp.split('+'); // this is just the date without the GMT offset
-            const newTimestamp = `${tokens[0]  }+${  tokens[0].substr(0, 2)  }:${  tokens[1].substr(2, 2)}`;
+            const newTimestamp = `${tokens[0]}+${tokens[0].substr(0, 2)}:${tokens[1].substr(2, 2)}`;
             date = new Date(newTimestamp);
             seconds = Math.floor((new Date() - date) / 1000);
             if (isNaN(seconds)) {
@@ -94,7 +94,7 @@ define([
         }
 
         // keep it simple, just give a date
-        return `${monthLookup[date.getMonth()]  } ${  date.getDate()  }, ${  date.getFullYear()}`;
+        return `${monthLookup[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
     }
 
     class SankeyGraph extends Component {
@@ -112,7 +112,7 @@ define([
 
         componentDidUpdate(prevProps, prevState) {
             if (prevProps.graph !== this.props.graph) {
-                this.renderGraph();
+                this.renderGraph(this.ref.current);
             }
         }
 

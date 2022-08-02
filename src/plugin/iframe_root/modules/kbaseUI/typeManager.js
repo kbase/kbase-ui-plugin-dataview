@@ -1,8 +1,6 @@
-define(['kb_lib/props'], function (props) {
-    'use strict';
-
+define(['kb_lib/props'], (props) => {
     function factory(config) {
-        var types = new props.Props({
+        const types = new props.Props({
                 data: config.typeDefs
             }),
             defaultIcon = {
@@ -11,8 +9,8 @@ define(['kb_lib/props'], function (props) {
             };
 
         function getIcon(arg) {
-            var icon = types.getItem(['types', arg.type.module, arg.type.name, 'icon']) || defaultIcon,
-                classes = icon.classes.map(function (x) {
+            const icon = types.getItem(['types', arg.type.module, arg.type.name, 'icon']) || defaultIcon,
+                classes = icon.classes.map((x) => {
                     return x;
                 });
             switch (icon.type) {
@@ -38,46 +36,44 @@ define(['kb_lib/props'], function (props) {
             }
             if (classes) {
                 return {
-                    classes: classes,
+                    classes,
                     type: icon.type,
                     color: icon.color || getColor(arg.type),
-                    html: '<span class="' + classes.join(' ') + '"></span>'
+                    html: `<span class="${  classes.join(' ')  }"></span>`
                 };
             }
         }
 
         function getColor(type) {
-            var code = 0,
-                i,
-                colors = [
-                    '#F44336',
-                    '#E91E63',
-                    '#9C27B0',
-                    '#3F51B5',
-                    '#2196F3',
-                    '#673AB7',
-                    '#FFC107',
-                    '#0277BD',
-                    '#00BCD4',
-                    '#009688',
-                    '#4CAF50',
-                    '#33691E',
-                    '#2E7D32',
-                    '#AEEA00',
-                    '#03A9F4',
-                    '#FF9800',
-                    '#FF5722',
-                    '#795548',
-                    '#006064',
-                    '#607D8B'
-                ],
-                color;
+            let code = 0;
+            const colors = [
+                '#F44336',
+                '#E91E63',
+                '#9C27B0',
+                '#3F51B5',
+                '#2196F3',
+                '#673AB7',
+                '#FFC107',
+                '#0277BD',
+                '#00BCD4',
+                '#009688',
+                '#4CAF50',
+                '#33691E',
+                '#2E7D32',
+                '#AEEA00',
+                '#03A9F4',
+                '#FF9800',
+                '#FF5722',
+                '#795548',
+                '#006064',
+                '#607D8B'
+            ];
 
-            for (i = 0; i < type.name.length; i += 1) {
+            for (let i = 0; i < type.name.length; i += 1) {
                 code += type.name.charCodeAt(i);
             }
-            color = colors[code % colors.length];
-            return color;
+            console.log('code', code, code % colors.length);
+            return colors[code % colors.length];
         }
 
         function hasType(typeQuery) {
@@ -88,10 +84,10 @@ define(['kb_lib/props'], function (props) {
         }
 
         function getViewerById(arg) {
-            var viewer = types.getItem(['types', arg.type.module, arg.type.name, 'viewersById', arg.id]);
+            const viewer = types.getItem(['types', arg.type.module, arg.type.name, 'viewersById', arg.id]);
             if (!viewer) {
                 throw new Error(
-                    'Viewer not found with this id ' + arg.id + ' for ' + arg.type.module + '.' + arg.type.name
+                    `Viewer not found with this id ${  arg.id  } for ${  arg.type.module  }.${  arg.type.name}`
                 );
             }
             return viewer;
@@ -101,21 +97,21 @@ define(['kb_lib/props'], function (props) {
             if (arg.id) {
                 return getViewerById(arg);
             }
-            var viewers = types.getItem(['types', arg.type.module, arg.type.name, 'viewers']);
+            const viewers = types.getItem(['types', arg.type.module, arg.type.name, 'viewers']);
             if (!viewers || viewers.length === 0) {
                 return;
             }
             if (viewers.length === 1) {
                 return viewers[0];
             }
-            var defaults = viewers.filter(function (viewer) {
+            const defaults = viewers.filter((viewer) => {
                 if (viewer.default) {
                     return true;
                 }
                 return false;
             });
             if (defaults.length === 1) {
-                var copy = Object.assign({}, defaults[0]);
+                const copy = Object.assign({}, defaults[0]);
                 delete copy.default;
                 return copy;
             }
@@ -132,21 +128,21 @@ define(['kb_lib/props'], function (props) {
         }
 
         function checkViewers() {
-            var modules = types.getItem('types'),
+            const modules = types.getItem('types'),
                 problems = [];
             if (!modules) {
                 return problems;
             }
-            Object.keys(modules).forEach(function (moduleName) {
-                var module = modules[moduleName];
-                Object.keys(module).forEach(function (typeName) {
-                    var type = module[typeName],
+            Object.keys(modules).forEach((moduleName) => {
+                const module = modules[moduleName];
+                Object.keys(module).forEach((typeName) => {
+                    let type = module[typeName],
                         hasDefault = false;
                     if (!type.viewers) {
                         problems.push({
                             severity: 'warning',
                             type: 'no-viewers',
-                            message: 'A registered type has no viewers: ' + moduleName + '.' + typeName,
+                            message: `A registered type has no viewers: ${  moduleName  }.${  typeName}`,
                             info: {
                                 module: moduleName,
                                 type: typeName
@@ -154,14 +150,14 @@ define(['kb_lib/props'], function (props) {
                         });
                         return;
                     }
-                    type.viewers.forEach(function (viewer) {
+                    type.viewers.forEach((viewer) => {
                         if (viewer.default) {
                             if (hasDefault) {
                                 problems.push({
                                     severity: 'error',
                                     type: 'duplicate-default',
                                     message:
-                                        'There is already a default viewer established ' + moduleName + '.' + typeName,
+                                        `There is already a default viewer established ${  moduleName  }.${  typeName}`,
                                     info: {
                                         module: moduleName,
                                         type: typeName
@@ -175,7 +171,7 @@ define(['kb_lib/props'], function (props) {
                         problems.push({
                             severity: 'error',
                             type: 'no-default',
-                            message: 'There is no default viewer for this type: ' + moduleName + '.' + typeName,
+                            message: `There is no default viewer for this type: ${  moduleName  }.${  typeName}`,
                             info: {
                                 module: moduleName,
                                 type: typeName
@@ -219,13 +215,13 @@ define(['kb_lib/props'], function (props) {
              to: token
              */
         function addViewer(type, viewerDef) {
-            var typeDef = types.getItem(['types', type.module, type.name]);
+            const typeDef = types.getItem(['types', type.module, type.name]);
             if (typeDef === undefined) {
                 types.setItem(['types', type.module, type.name], {
                     viewers: []
                 });
             }
-            var viewers = types.getItem(['types', type.module, type.name, 'viewers']);
+            let viewers = types.getItem(['types', type.module, type.name, 'viewers']);
             if (!viewers) {
                 viewers = [];
                 types.setItem(['types', type.module, type.name, 'viewers'], viewers);
@@ -239,19 +235,19 @@ define(['kb_lib/props'], function (props) {
 
             // Also, may register by id
             if (viewerDef.id) {
-                var byId = types.getItem(['types', type.module, type.name, 'viewersById']);
+                let byId = types.getItem(['types', type.module, type.name, 'viewersById']);
                 if (!byId) {
                     byId = {};
                     types.setItem(['types', type.module, type.name, 'viewersById'], byId);
                 }
                 if (byId[viewerDef.id]) {
-                    throw new Error('Viewer with this id already registered ' + viewerDef.id);
+                    throw new Error(`Viewer with this id already registered ${  viewerDef.id}`);
                 }
                 byId[viewerDef.id] = viewerDef;
             }
         }
         function setIcon(type, iconDef) {
-            var typeDef = types.getItem(['types', type.module, type.name]);
+            const typeDef = types.getItem(['types', type.module, type.name]);
             if (typeDef === undefined || typeDef === null) {
                 types.setItem(['types', type.module, type.name], {
                     icon: iconDef
@@ -265,15 +261,15 @@ define(['kb_lib/props'], function (props) {
             return types.getItem(['defaults', prop]);
         }
         function makeTypeId(type) {
-            return type.module + '.' + type.name + '-' + type.version.major + '.' + type.version.minor;
+            return `${type.module  }.${  type.name  }-${  type.version.major  }.${  type.version.minor}`;
         }
         function parseTypeId(typeId) {
-            var matched = typeId.match(/^(.+?)\.(.+?)-(.+?)\.(.+)$/);
+            const matched = typeId.match(/^(.+?)\.(.+?)-(.+?)\.(.+)$/);
             if (!matched) {
-                throw new Error('Invalid data type ' + typeId);
+                throw new Error(`Invalid data type ${  typeId}`);
             }
             if (matched.length !== 5) {
-                throw new Error('Invalid data type ' + typeId);
+                throw new Error(`Invalid data type ${  typeId}`);
             }
 
             return {
@@ -288,9 +284,9 @@ define(['kb_lib/props'], function (props) {
         function makeType() {
             if (arguments.length === 1) {
                 // make from an object.
-                var spec = arguments[0];
+                const spec = arguments[0];
                 if (spec.version) {
-                    var version = spec.version.split('.');
+                    const version = spec.version.split('.');
                     return {
                         module: spec.module,
                         name: spec.name,
@@ -303,26 +299,26 @@ define(['kb_lib/props'], function (props) {
             }
         }
         function makeVersion(type) {
-            return type.version.major + '.' + type.version.minor;
+            return `${type.version.major  }.${  type.version.minor}`;
         }
 
         return Object.freeze({
-            getIcon: getIcon,
-            setIcon: setIcon,
-            getViewer: getViewer,
-            getDefault: getDefault,
-            makeTypeId: makeTypeId,
-            parseTypeId: parseTypeId,
-            makeType: makeType,
-            makeVersion: makeVersion,
-            addViewer: addViewer,
-            hasType: hasType,
-            checkViewers: checkViewers
+            getIcon,
+            setIcon,
+            getViewer,
+            getDefault,
+            makeTypeId,
+            parseTypeId,
+            makeType,
+            makeVersion,
+            addViewer,
+            hasType,
+            checkViewers
         });
     }
 
     return {
-        make: function (config) {
+        make(config) {
             return factory(config);
         }
     };

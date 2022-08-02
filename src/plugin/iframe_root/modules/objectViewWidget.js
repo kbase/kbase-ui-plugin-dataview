@@ -156,7 +156,7 @@ define([
                 dataKBTesthookPlugin: 'dataview'
             }, [
                 div({
-                    class: 'Col'
+                    class: 'PanelWidgetCol'
                 }, [
                     div({
                         id: widgetSet.addWidget('kb_dataview_copy'),

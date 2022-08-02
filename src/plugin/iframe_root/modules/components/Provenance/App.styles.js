@@ -18,7 +18,8 @@ define([], () => {
         },
         controlRow: {
             display: 'flex',
-            flexDirection: 'row'
+            flexDirection: 'row',
+            marginBottom: '0.25em'
         },
         statusRow: {
             display: 'flex',
@@ -41,7 +42,7 @@ define([], () => {
             justifyContent: 'flex-end'
         },
         filterControls: {
-            flex: '1 1 0',
+            flex: '2 1 0',
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',

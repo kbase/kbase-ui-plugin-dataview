@@ -4,7 +4,7 @@ define([
     'components/Row',
     'components/Col',
     'components/Alert',
-    'kb_service/utils',
+    './utils',
 
     'css!./NodeDetail.css'
 ], (
@@ -13,9 +13,9 @@ define([
     Row,
     Col,
     Alert,
-    APIUtils
+    {objectInfoToObject2}
 ) => {
-    const {Component} = preact;
+    const {Component, Fragment} = preact;
     const html = htm.bind(preact.h);
 
 
@@ -106,7 +106,7 @@ define([
                     <${Alert} type="info" message="Hover over graph node to display" />
                 `;
             }
-            const objectInfo = APIUtils.objectInfoToObject(this.props.node.nodeInfo.info);
+            const objectInfo = objectInfoToObject2(this.props.node.nodeInfo.info);
             return html`
                 <table class="table table-striped table-bordered ObjectDetails">
                     <tbody>
@@ -126,7 +126,7 @@ define([
                     <${Alert} type="info" message="Hover over graph node to display" />
                 `;
             }
-            const objectInfo = APIUtils.objectInfoToObject(this.props.node.nodeInfo.info);
+            const objectInfo = objectInfoToObject2(this.props.node.nodeInfo.info);
             if (objectInfo.metadata && Object.keys(objectInfo.metadata).length > 0) {
                 const rows = Object.entries(objectInfo.metadata).map(([key, value]) => {
                     return renderRow(key, value);
@@ -280,61 +280,32 @@ define([
             `;
         }
 
-        renderLegend() {
-            return html`
-                <div class="LegendTableContainer">
-                    <table class="LegendTable" cellpadding="0" cellspacing="0">
-                        <tbody>
-                            <tr>
-                                <td style=${{width: '3em', backgroundColor: '#FF9800'}}></td>
-                                <td>This Object</td>
-                            </tr>
-                            <tr>
-                                <td style=${{width: '3em', backgroundColor: '#C62828'}}></td>
-                                <td>Objects Referencing It</td>
-                            </tr>
-                            <tr>
-                                <td style=${{width: '3em', backgroundColor: '#2196F3'}}></td>
-                                <td>Objects Referenced by It</td>
-                            </tr>
-                            <tr>
-                                <td style=${{width: '3em', backgroundColor: '#4BB856'}}></td>
-                                <td>Copied From</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        }
+
         render() {
             const detailClass = this.props.node.over ? 'NodeHovered' : 'NodeNotHovered';
             return html`
-                <${Row} style=${{marginBottom: '1em'}}>
-                    <${Col} style=${{flex: '0 0 19em', marginRight: '0.5em'}}>
-                        <h4>Legend</h4>
-                        ${this.renderLegend()}
+                <${Fragment}>
+                    <${Row} style=${{marginBottom: '1em'}}>
+                        <${Col}style=${{flex: '1 1 0', marginRight: '0.5em'}}>
+                            <div class=${`ObjectDetails ${detailClass}`}>
+                                <h4>Data Object Details</h4>
+                                ${this.renderObjectDetails()}
+                            </div>
+                        <//>
+                        <${Col}style=${{flex: '1.75 1 0'}}>
+                            <div class=${`Provenance ${detailClass}`}>
+                                <h4>Provenance</h4>
+                                ${this.renderProvenanceTable()}
+                            </div>
+                        <//>
                     <//>
-                    <${Col}style=${{flex: '1 1 0', marginRight: '0.5em'}}>
-                        <div class=${`ObjectDetails ${detailClass}`}>
-                            <h4>Data Object Details</h4>
-                            ${this.renderObjectDetails()}
-                        </div>
-                    <//>
-                    <${Col}style=${{flex: '1.75 1 0'}}>
-                        <div class=${`Provenance ${detailClass}`}>
-                            <h4>Provenance</h4>
-                            ${this.renderProvenanceTable()}
-                        </div>
-                    <//>
-                <//>
-                <${Row}>
-                    <${Col} style=${{flex: '0 0 19em', marginRight: '0.5em'}}>
-                    <//>
-                    <${Col}style=${{flex: '1 1 0'}}>
-                        <div class=${`ObjectMetadata ${detailClass}`}>
-                            <h4>Metadata</h4>
-                            ${this.renderObjectMetadata()}
-                        </div>
+                    <${Row}>
+                        <${Col}style=${{flex: '1 1 0'}}>
+                            <div class=${`ObjectMetadata ${detailClass}`}>
+                                <h4>Metadata</h4>
+                                ${this.renderObjectMetadata()}
+                            </div>
+                        <//>
                     <//>
                 <//>
             `;
