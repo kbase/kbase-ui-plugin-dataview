@@ -5,14 +5,14 @@
     min-height: 0;
 }
 
-.Row {
-    flex: 1 1 0px;
+.PanelWidgetRow {
+    /* flex: 1 1 0px; */
     display: flex;
     flex-direction: row;
     min-height: 0;
 }
 
-.Col {
+.PanelWidgetCol {
     flex: 1 1 0px;
     display: flex;
     flex-direction: column;

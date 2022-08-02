@@ -4,7 +4,7 @@ define([
     'components/Loading',
     'components/ErrorView',
     'kb_lib/jsonRpc/genericClient',
-    'lib/domUtils',
+    './utils',
     './App'
 
 ], (
@@ -13,7 +13,7 @@ define([
     Loading,
     ErrorView,
     GenericClient,
-    {objectInfoToObject},
+    {objectInfoToObject2},
     App
 ) => {
     const {Component} = preact;
@@ -38,10 +38,6 @@ define([
         return false;
     }
 
-    function getNodeLabel(info) {
-        return `${info.name} (v${info.version})`;
-    }
-
     function makeLink(source, target, value) {
         return {
             source,
@@ -58,6 +54,8 @@ define([
                 status: 'NONE',
                 omitOtherNarratives: false,
                 omitReports: false,
+                showAllVersions: false,
+                nodeLabelType: 'object-name',
                 omitTypes: [],
                 selectedNode: {
                     nodeInfo: null,
@@ -68,6 +66,19 @@ define([
 
         componentDidMount() {
             this.fetchData();
+        }
+
+        getNodeLabel(info, nodeId) {
+            switch (this.state.nodeLabelType) {
+            case 'object-name':
+                return `${info.name} (v${info.version})`;
+            case 'type':
+                return `${info.typeName} (${info.ref})`;
+            case 'ref':
+                return `${info.ref} (${info.typeName})`;
+            case 'exp':
+                return `#${nodeId} ${info.typeName} (${info.ref})`;
+            }
         }
 
         processObjectHistory(data) {
@@ -84,12 +95,12 @@ define([
 
             data.forEach((info) => {
                 //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
-                const objectInfo = objectInfoToObject(info);
+                const objectInfo = objectInfoToObject2(info);
                 const objRef = objectInfo.ref;
                 const nodeId = graph.nodes.length;
                 graph.nodes.push({
                     node: nodeId,
-                    name: getNodeLabel(objectInfo),
+                    name: this.getNodeLabel(objectInfo, nodeId),
                     info: objectInfo,
                     nodeType: 'core',
                     objId: objRef
@@ -99,7 +110,7 @@ define([
                     latestObjId = objRef;
                 }
                 objRefToNodeIdx[objRef] = nodeId;
-                objIdentities.push(objectInfoToObject(objectInfo));
+                objIdentities.push(objectInfo);
             });
             if (latestObjId.length > 0) {
                 graph.nodes[objRefToNodeIdx[latestObjId].nodeType] = 'selected';
@@ -124,7 +135,7 @@ define([
 
             graph.nodes.push({
                 node: nodeId,
-                name: getNodeLabel(objectInfo),
+                name: this.getNodeLabel(objectInfo, nodeId),
                 info: objectInfo,
                 nodeType: 'core',
                 objId: objectInfo.ref
@@ -136,6 +147,22 @@ define([
             graph.nodes[objRefToNodeIdx[objectInfo.ref].nodeType] = 'selected';
 
             return {objIdentities, objRefToNodeIdx, graph};
+        }
+
+        filterCondition(refInfo, objInfo) {
+            if (this.state.omitOtherNarratives) {
+                if (refInfo.wsid !== objInfo.wsid) {
+                    return false;
+                }
+            }
+            if (this.state.omitTypes.length > 0) {
+                for (const [moduleName, typeName] of this.state.omitTypes) {
+                    if (refInfo.typeModule === moduleName && refInfo.typeName === typeName) {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
         /* Adds nodes and links for all referencing objects, with the link terminating at a
@@ -154,27 +181,27 @@ define([
             // convert all object info to object-ified object info.
             const referencingObjectsSets = results.map((referencingObjects) => {
                 return referencingObjects.map((info) => {
-                    return objectInfoToObject(info);
+                    return objectInfoToObject2(info);
                 });
             });
 
             // const warnings = [];
 
-            const filterCondition = (refInfo, objInfo) => {
-                if (this.state.omitOtherNarratives) {
-                    if (refInfo.wsid !== objInfo.wsid) {
-                        return false;
-                    }
-                }
-                if (this.state.omitTypes.length > 0) {
-                    for (const [moduleName, typeName] of this.state.omitTypes) {
-                        if (refInfo.typeModule === moduleName && refInfo.typeName === typeName) {
-                            return false;
-                        }
-                    }
-                }
-                return true;
-            };
+            // const filterCondition = (refInfo, objInfo) => {
+            //     if (this.state.omitOtherNarratives) {
+            //         if (refInfo.wsid !== objInfo.wsid) {
+            //             return false;
+            //         }
+            //     }
+            //     if (this.state.omitTypes.length > 0) {
+            //         for (const [moduleName, typeName] of this.state.omitTypes) {
+            //             if (refInfo.typeModule === moduleName && refInfo.typeName === typeName) {
+            //                 return false;
+            //             }
+            //         }
+            //     }
+            //     return true;
+            // };
 
             const [totalCount, filteredCount] = (() => {
                 let filteredCount = 0;
@@ -182,7 +209,7 @@ define([
 
                 referencingObjectsSets.forEach((referencingObjects, setIndex) => {
                     referencingObjects.forEach((referencingObject) => {
-                        if (filterCondition(referencingObject, objIdentities[setIndex])) {
+                        if (this.filterCondition(referencingObject, objIdentities[setIndex])) {
                             filteredCount += 1;
                         }
                         totalCount += 1;
@@ -197,7 +224,7 @@ define([
             for (let i = 0; i < referencingObjectsSets.length; i++) {
                 for (let k = 0; k < referencingObjectsSets[i].length; k++) {
                     const referencingObjectInfo = referencingObjectsSets[i][k];
-                    if (!filterCondition(referencingObjectInfo, objIdentities[i])) {
+                    if (!this.filterCondition(referencingObjectInfo, objIdentities[i])) {
                         continue;
                     }
 
@@ -209,7 +236,7 @@ define([
                     const graphNodeId = graph.nodes.length;
                     graph.nodes.push({
                         node: graphNodeId,
-                        name: getNodeLabel(referencingObjectInfo),
+                        name: this.getNodeLabel(referencingObjectInfo, graphNodeId),
                         info: referencingObjectInfo,
                         nodeType: 'ref',
                         objId: ref
@@ -257,8 +284,13 @@ define([
                 uniqueRefObjectIdentities = [],
                 links = [];
 
+            let totalReferencedObjects = 0;
+
+            let isCopied = false;
             objdata.forEach((objectProvenance) => {
                 const objRef = getObjectRef(objectProvenance.info);
+
+                totalReferencedObjects += objectProvenance.refs.length;
 
                 // extract the references contained within the object
                 objectProvenance.refs.forEach((ref) => {
@@ -272,6 +304,7 @@ define([
                 // extract the references from the provenance
                 objectProvenance.provenance.forEach((provenance) => {
                     if (provenance.resolved_ws_objects) {
+                        totalReferencedObjects += provenance.resolved_ws_objects.length;
                         provenance.resolved_ws_objects.forEach((resolvedObjectRef) => {
                             if (!(resolvedObjectRef in uniqueRefs)) {
                                 uniqueRefs[resolvedObjectRef] = 'included'; // TODO switch to prov??
@@ -284,6 +317,7 @@ define([
 
                 // copied from
                 if (objectProvenance.copied) {
+                    isCopied = true;
                     const copyShort =
                         `${objectProvenance.copied.split('/')[0]  }/${  objectProvenance.copied.split('/')[1]}`;
                     const thisShort = getObjectRefShort(objectProvenance.info);
@@ -298,9 +332,11 @@ define([
                 }
             });
             return {
+                totalReferencedObjects: Object.keys(uniqueRefs).length,
                 uniqueRefs,
                 uniqueRefObjectIdentities,
-                links
+                links,
+                isCopied
             };
         }
 
@@ -321,7 +357,7 @@ define([
                 for (let i = 0; i < objInfoList.length; i++) {
                     if (objInfoList[i]) {
                         objInfoStash[`${objInfoList[i][6]}/${objInfoList[i][0]}/${objInfoList[i][4]}`] =
-                            objectInfoToObject(objInfoList[i]);
+                            objectInfoToObject2(objInfoList[i]);
                     }
                 }
                 // add the nodes
@@ -334,7 +370,7 @@ define([
                         const nodeId = graph.nodes.length;
                         graph.nodes.push({
                             node: nodeId,
-                            name: getNodeLabel(refInfo),
+                            name: this.getNodeLabel(refInfo, nodeId),
                             info: refInfo,
                             nodeType: uniqueRefs[ref],
                             objId: objRef
@@ -368,7 +404,7 @@ define([
                     graph['nodes'].push({
                         node: nodeId,
                         name: ref,
-                        info: objectInfoToObject([
+                        info: objectInfoToObject2([
                             refTokens[1],
                             'Data not found, object may be deleted',
                             'Unknown',
@@ -409,7 +445,7 @@ define([
                 }
                 //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
                 expectedNextVersion = node.info[4] + 1;
-                expectedNextId = `${node.info[6]  }/${  node.info[0]  }/${  expectedNextVersion}`;
+                expectedNextId = `${node.info[6]}/${node.info[0]}/${expectedNextVersion}`;
                 if (objRefToNodeIdx[expectedNextId]) {
                     // add the link now too
                     graph.links.push(makeLink(objRefToNodeIdx[node.objId], objRefToNodeIdx[expectedNextId], 1));
@@ -431,14 +467,12 @@ define([
             });
 
             try {
-                const showAllVersions = false;
-
-                const {objIdentities, objRefToNodeIdx, graph} = await (async () => {
-                    if (showAllVersions) {
+                const {objIdentities, objRefToNodeIdx, graph, totalVersions} = await (async () => {
+                    if (this.state.showAllVersions) {
                         const  [objectHistory] = await wsClient.callFunc('get_object_history', [{ref: objectInfo.ref}]);
-                        return this.processObjectHistory(objectHistory);
+                        return {...this.processObjectHistory(objectHistory), totalVersions: objectHistory.length};
                     }
-                    return this.processObject(objectInfo);
+                    return {...this.processObject(objectInfo), totalVersions: 1};
                 })();
 
                 const [{totalReferencingObjects, filteredReferencingObjects, truncated}, refData] = await Promise.all([
@@ -470,7 +504,14 @@ define([
                 this.setState({
                     status: 'SUCCESS',
                     value: {
-                        graph, objRefToNodeIdx, totalReferencingObjects, filteredReferencingObjects, truncated
+                        graph, objRefToNodeIdx,
+                        includesAllVersions: this.state.showAllVersions,
+                        totalReferencingObjects,
+                        filteredReferencingObjects,
+                        totalReferencedObjects: refData.totalReferencedObjects,
+                        totalVersions,
+                        nodeCount: graph.nodes.length, edgeCount: graph.links.length , truncated,
+                        isCopied: refData.isCopied
                     },
                     selectedNode
                 });
@@ -539,8 +580,9 @@ define([
         toggleOmitOtherNarratives() {
             this.setState({
                 omitOtherNarratives: !this.state.omitOtherNarratives
+            }, () => {
+                this.fetchData(true);
             });
-            this.fetchData(true);
         }
 
         toggleOmitReports() {
@@ -560,8 +602,26 @@ define([
             this.setState({
                 omitReports,
                 omitTypes
+            }, () => {
+                this.fetchData(true);
             });
-            this.fetchData(true);
+        }
+
+        toggleShowAllVersions() {
+            const showAllVersions = !this.state.showAllVersions;
+            this.setState({
+                showAllVersions
+            }, () => {
+                this.fetchData(true);
+            });
+        }
+
+        selectNodeLabelType(nodeLabelType) {
+            this.setState({
+                nodeLabelType
+            }, () => {
+                this.fetchData(true);
+            });
         }
 
         renderSuccess(value) {
@@ -569,9 +629,13 @@ define([
                 <${App} 
                     omitOtherNarratives=${this.state.omitOtherNarratives}
                     omitReports=${this.state.omitReports}
+                    showAllVersions=${this.state.showAllVersions}
+                    nodeLabelType=${this.state.nodeLabelType}
                     environment=${this.props.environment}
                     toggleOmitOtherNarratives=${this.toggleOmitOtherNarratives.bind(this)}
                     toggleOmitReports=${this.toggleOmitReports.bind(this)}
+                    toggleShowAllVersions=${this.toggleShowAllVersions.bind(this)}
+                    selectNodeLabelType=${this.selectNodeLabelType.bind(this)}
                     value=${value}
                     runtime=${this.props.runtime}
                     onNodeOver=${this.onNodeOver.bind(this)}
@@ -579,6 +643,12 @@ define([
                     selectedNode=${this.state.selectedNode}
                     objectInfo=${this.props.objectInfo}
                     loading=${false}
+                    totalReferencingObjects=${this.state.value.totalReferencingObjects}
+                    filteredReferencingObjects=${this.state.value.filteredReferencingObjects}
+                    totalReferencedObjects=${this.state.value.totalReferencedObjects}
+                    totalVersions=${this.state.value.totalVersions}
+                    includesAllVersions=${this.state.value.includesAllVersions}
+                    isCopied=${this.state.value.isCopied}
                 />
             `;
         }
@@ -586,11 +656,15 @@ define([
         renderReloading(value) {
             return html`
                 <${App} 
-                    omitOtherNarratives=${this.state.omitOtherNarratives}
+                     omitOtherNarratives=${this.state.omitOtherNarratives}
                     omitReports=${this.state.omitReports}
+                    showAllVersions=${this.state.showAllVersions}
+                    nodeLabelType=${this.state.nodeLabelType}
                     environment=${this.props.environment}
                     toggleOmitOtherNarratives=${this.toggleOmitOtherNarratives.bind(this)}
                     toggleOmitReports=${this.toggleOmitReports.bind(this)}
+                    toggleShowAllVersions=${this.toggleShowAllVersions.bind(this)}
+                    selectNodeLabelType=${this.selectNodeLabelType.bind(this)}
                     value=${value}
                     runtime=${this.props.runtime}
                     onNodeOver=${this.onNodeOver.bind(this)}
@@ -598,6 +672,12 @@ define([
                     selectedNode=${this.state.selectedNode}
                     objectInfo=${this.props.objectInfo}
                     loading=${true}
+                    totalReferencingObjects=${this.state.value.totalReferencingObjects}
+                    filteredReferencingObjects=${this.state.value.filteredReferencingObjects}
+                    totalReferencedObjects=${this.state.value.totalReferencedObjects}
+                    totalVersions=${this.state.value.totalVersions}
+                    includesAllVersions=${this.state.value.includesAllVersions}
+                    isCopied=${this.state.value.isCopied}
                 />
             `;
         }
