@@ -260,7 +260,7 @@ define([
                     // add the link now too
                     if (objRefToNodeIdx[objIdentities[i].ref] !== null) {
                         // only add the link if it is visible
-                        graph.links.push(fromNodeId, graphNodeId, 1);
+                        graph.links.push(makeLink(fromNodeId, graphNodeId, 1));
                     }
 
                     // If we have exceeded the maximum number of objects we support in the graph,
@@ -552,9 +552,14 @@ define([
                     return {from: 0, to: 0};
                 });
 
+                console.log('graph.links', graph.links);
+
                 graph.links.forEach((link) => {
                     // This is referencing
                     const nodeSource = graph2[link.source];
+                    if (nodeSource === undefined) {
+                        console.log('REALLY?', link);
+                    }
                     nodeSource.from += 1;
 
                     // This is referenced.
