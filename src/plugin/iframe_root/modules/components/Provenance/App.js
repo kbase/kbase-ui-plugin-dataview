@@ -2,11 +2,9 @@ define([
     'preact',
     'htm',
     'components/SankeyGraph',
-    'lib/utils',
     './NodeDetail',
     'components/Row',
     'components/Col',
-    'reactContent',
     './App.styles',
 
     'css!./App.css'
@@ -14,10 +12,8 @@ define([
     preact,
     htm,
     SankeyGraph,
-    {isEqual},
     NodeDetail,
     Row, Col,
-    {na},
     styles
 ) => {
     const {Component} = preact;
@@ -67,7 +63,7 @@ define([
                     <option value="object-name" selected=${labelType === 'object-name'}>Object Name</option>
                     <option value="ref" selected=${labelType === 'ref'}>Object Ref</option>
                     <option value="type" selected=${labelType === 'type'}>Object Type</option>
-                    <option value="exp" selected=${labelType === 'exp'}>Experiment</option>
+                    <option value="node-number" selected=${labelType === 'node-number'}>Node #</option>
                 </select>
             `;
         }
@@ -156,10 +152,11 @@ define([
                             <td style=${{width: '3em', backgroundColor: '#4BB856'}}></td>
                             <td>Copied From</td>
                             <td>1</td>
+                            <td>1</td>
                         </tr>
                     `;
                 }
-            });
+            })();
             return html`
                 <div className="LegendTableContainer">
                     <table className="LegendTable" cellpadding="0" cellspacing="0">
@@ -210,13 +207,13 @@ define([
                         <div style=${styles.controlRow}>
                             <div style=${styles.filterControls} className="form-inline">
                                 <span style=${styles.label}>Filters:</span>
-                                <span style=${{width: '1em'}} />
                                 ${this.renderThisNarrativeToggle()}
                                 <span style=${{width: '1em'}} />
                                 ${this.renderOmitReportToggle()}
                                 <span style=${{width: '1em'}} />
                                 ${this.renderShowAllVersionsToggle()}
                                 <span style=${{width: '1em'}} />
+                                <span style=${styles.label}>Node Label:</span>
                                 ${this.renderLabelTypeSelect()}
                             </div>
                             <div style=${styles.controls}>

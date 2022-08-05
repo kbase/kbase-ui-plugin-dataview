@@ -76,7 +76,7 @@ define([
                 return `${info.typeName} (${info.ref})`;
             case 'ref':
                 return `${info.ref} (${info.typeName})`;
-            case 'exp':
+            case 'node-number':
                 return `#${nodeId} ${info.typeName} (${info.ref})`;
             }
         }
@@ -222,6 +222,17 @@ define([
             // We have a list of lists - one list for each object version as contained in objectIdentities.
             let referencingObjectCount = 0;
             for (let i = 0; i < referencingObjectsSets.length; i++) {
+                // This is the nodeId of the subject object, the one to which references are made;
+                // we want links from this node to the referencing node.
+                const fromNodeId = objRefToNodeIdx[objIdentities[i].ref];
+                // Handle case of no referencing objects for a given object; in this case we add a
+                // 'none' node to indicate no references to it.
+                // if (referencingObjectsSets[i].length === 0) {
+                //     this.addNullReferencingObject(graph, fromNodeId);
+                //     continue;
+                // }
+
+
                 for (let k = 0; k < referencingObjectsSets[i].length; k++) {
                     const referencingObjectInfo = referencingObjectsSets[i][k];
                     if (!this.filterCondition(referencingObjectInfo, objIdentities[i])) {
@@ -249,27 +260,48 @@ define([
                     // add the link now too
                     if (objRefToNodeIdx[objIdentities[i].ref] !== null) {
                         // only add the link if it is visible
-                        graph.links.push(makeLink(objRefToNodeIdx[objIdentities[i].ref], graphNodeId, 1));
+                        graph.links.push(fromNodeId, graphNodeId, 1);
                     }
 
                     // If we have exceeded the maximum number of objects we support in the graph,
                     // create a fake entry.
                     // TODO: explain how this is eventually displayed, because this is weird.
                     if (referencingObjectCount >= MAX_REFERENCING_OBJECTS) {
-                        // annoying way to get the total filtered referencing objects.
-
-                        // console.log('total count', totalCount);
-
-                        // // //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
-                        // const warning = `The number of referencing objects (${totalCount}) exceeds the maximum displayable (${MAX_REFERENCING_OBJECTS}); display limited to first 50 referencing objects.`;
-                        // console.warn(warning);
-                        // warnings.push(warning);
-                        // return warnings;
                         return {totalReferencingObjects: totalCount, filteredReferencingObjects: filteredCount, truncated: true};
                     }
                 }
             }
             return {totalReferencingObjects: totalCount, filteredReferencingObjects: filteredCount, truncated: false};
+        }
+
+        async addNullReferencingObject(graph, from) {
+            const to = graph.nodes.length;
+            graph.nodes.push({
+                node: to,
+                name: 'No References',
+                info: null,
+                nodeType: 'none',
+                objId: null,
+                isFake: true
+            });
+            // 0th node is always the subject.
+            graph.links.push(makeLink(from, to, 1));
+            return to;
+        }
+
+        async addNullReferencedObject(graph, to) {
+            const from = graph.nodes.length;
+            graph.nodes.push({
+                node: from,
+                name: 'No References',
+                info: null,
+                nodeType: 'none',
+                objId: null,
+                isFake: true
+            });
+            // 0th node is always the subject.
+            graph.links.push(makeLink(from, to, 1));
+            return from;
         }
 
         async getObjectProvenance(objIdentities) {
@@ -319,7 +351,7 @@ define([
                 if (objectProvenance.copied) {
                     isCopied = true;
                     const copyShort =
-                        `${objectProvenance.copied.split('/')[0]  }/${  objectProvenance.copied.split('/')[1]}`;
+                        `${objectProvenance.copied.split('/')[0]}/${objectProvenance.copied.split('/')[1]}`;
                     const thisShort = getObjectRefShort(objectProvenance.info);
                     if (copyShort !== thisShort) {
                         // only add if it wasn't copied from an older version
@@ -440,7 +472,7 @@ define([
             //loop over graph nodes, get next version, if it is in our node list, then add it
             let expectedNextVersion, expectedNextId;
             graph.nodes.forEach((node) => {
-                if (node.nodeType === 'copied') {
+                if (node.nodeType === 'copied' || node.nodeType === 'none') {
                     return;
                 }
                 //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
@@ -480,12 +512,20 @@ define([
                     this.getObjectProvenance(objIdentities, graph, objRefToNodeIdx)
                 ]);
 
-                if (refData && 'uniqueRefObjectIdentities' in refData) {
-                    if (refData.uniqueRefObjectIdentities.length > 0) {
-                        // Modifies graph and objRefToNodeIdx
-                        await this.getObjectInfo(refData, graph, objRefToNodeIdx);
-                    }
+                // If no referencing objects, we add a null node to indicate we are at the
+                // end of the line.
+
+                // if (totalReferencingObjects === 0) {
+                //     this.addNullReferencingObject(graph, graph.nodes.length);
+                // }
+
+                if (refData && 'uniqueRefObjectIdentities' in refData && refData.uniqueRefObjectIdentities.length > 0) {
+                    // Modifies graph and objRefToNodeIdx
+                    await this.getObjectInfo(refData, graph, objRefToNodeIdx);
                 }
+                // else {
+                //     this.addNullReferencedObject(graph, 0);
+                // }
 
                 this.addVersionEdges(graph, objRefToNodeIdx);
 
@@ -498,6 +538,49 @@ define([
                             nodeInfo: null,
                             over: false
                         };
+                    }
+                }
+
+                // Handle all cases of missing next or previous nodes.
+                // So the SanKey plugin will scan the nodes and links and
+                // create the links directly on the nodes.
+                // We could use that, but at this point in the code flow they have not
+                // yet been created (and is an internal impl of SanKey, however rude it
+                // is that it modifies the data we pass in...)
+                // We just need to know if there are any, so we just count.
+                const graph2 = graph.nodes.map(() => {
+                    return {from: 0, to: 0};
+                });
+
+                graph.links.forEach((link) => {
+                    // This is referencing
+                    const nodeSource = graph2[link.source];
+                    nodeSource.from += 1;
+
+                    // This is referenced.
+                    const nodeTarget = graph2[link.target];
+                    nodeTarget.to += 1;
+                });
+
+                graph2.forEach(({from, to}, index) => {
+                    if (from === 0 && graph.nodes[index].nodeType === 'core') {
+                        this.addNullReferencingObject(graph, index);
+                    }
+                    if (to === 0 && graph.nodes[index].nodeType === 'core') {
+                        this.addNullReferencedObject(graph, index);
+                    }
+                });
+
+
+                for (const node of graph.nodes) {
+                    // find links from this node.
+                    if (node.targetLinks && node.targetLinks.length === 0) {
+                        this.addNullReferencingObject(graph, node.node);
+                    }
+
+                    // find links to this node.
+                    if (node.sourceLinks && node.sourceLinks.length === 0) {
+                        this.addNullReferencedObject(graph, node.node);
                     }
                 }
 
