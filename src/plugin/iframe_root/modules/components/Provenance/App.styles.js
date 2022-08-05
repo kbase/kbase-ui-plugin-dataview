@@ -50,7 +50,8 @@ define([], () => {
         },
         label: {
             fontWeight: 'bold',
-            color: 'rgb(100, 100, 100)'
+            color: 'rgb(100, 100, 100)',
+            marginRight:'0.5em'
         }
     };
 });

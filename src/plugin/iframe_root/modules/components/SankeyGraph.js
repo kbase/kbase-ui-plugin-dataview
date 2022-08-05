@@ -52,7 +52,7 @@ define([
             name: 'Data Referenced by this Data'
         },
         none: {
-            color: '#FFFFFF',
+            color: '#CCC',
             name: ''
         },
         copied: {
@@ -214,7 +214,8 @@ define([
                 graph.nodes.push({
                     node: 1,
                     name: 'No references found',
-                    info: [-1, 'No references found', 'No Type', 0, 0, 'N/A', 0, 'N/A', 0, 0, {}],
+                    // info: [-1, 'No references found', 'No Type', 0, 0, 'N/A', 0, 'N/A', 0, 0, {}],
+                    info: null,
                     nodeType: 'none',
                     objId: '-1',
                     isFake: true
@@ -282,13 +283,19 @@ define([
             // add the link titles
             link.append('title').text((d) => {
                 if (d.source.nodeType === 'copied') {
-                    d.text = `${d.target.name  } copied from ${d.source.name}`;
+                    d.text = `${d.target.info.ref} copied from ${d.source.info.ref}`;
                 } else if (d.source.nodeType === 'core') {
-                    d.text = `${d.target.name  } is a newer version of ${d.source.name}`;
+                    switch (d.target.nodeType) {
+                    case 'none':
+                        d.text = `no references to ${d.source.name}`;
+                        break;
+                    default:
+                        d.text = `${d.target.name} is a newer version of ${d.source.name}`;
+                    }
                 } else if (d.source.nodeType === 'ref') {
-                    d.text = `${d.source.name  } references ${d.target.name}`;
+                    d.text = `${d.source.name} references ${d.target.name}`;
                 } else if (d.source.nodeType === 'included') {
-                    d.text = `${d.target.name  } references ${d.source.name}`;
+                    d.text = `${d.target.name} references ${d.source.name}`;
                 }
                 return d.text;
             });
@@ -366,19 +373,25 @@ define([
                 // xss safe
                 .html(({info}) => {
                     // const objectInfo = objectInfoToObject(d.info);
-                    let text =
-                        `${info.name} (${info.ref})\n` +
-                        '--------------\n' +
-                        `  type:  ${info.type}\n` +
-                        `  saved on:  ${getTimeStampStr(info.save_date)}\n` +
-                        `  saved by:  ${info.saved_by}\n`;
-                    text += '  metadata:\n';
-                    if (info.metadata !== null && Object.keys(info.metadata).length > 0) {
-                        for (const [key, value] of Object.entries(info.metadata)) {
-                            text += `     ${key} : ${value}\n`;
-                        }
+                    let text;
+                    if (info === null) {
+                        text = 'Null node';
                     } else {
-                        text += '     none';
+                        text =
+                            `${info.name} (${info.ref})\n` +
+                            '--------------\n' +
+                            `  type:  ${info.type}\n` +
+                            `  saved on:  ${getTimeStampStr(info.save_date)}\n` +
+                            `  saved by:  ${info.saved_by}\n`;
+                        text += '  metadata:\n';
+                        if (info.metadata !== null && Object.keys(info.metadata).length > 0) {
+                            for (const [key, value] of Object.entries(info.metadata)) {
+                                text += `     ${key} : ${value}\n`;
+                            }
+                        } else {
+                            text += '     none';
+                        }
+
                     }
 
                     return text;
