@@ -4,7 +4,6 @@ define([
     'components/Row',
     'components/Col',
     'components/Alert',
-    './utils',
 
     'css!./NodeDetail.css'
 ], (
@@ -12,8 +11,7 @@ define([
     htm,
     Row,
     Col,
-    Alert,
-    {objectInfoToObject2}
+    Alert
 ) => {
     const {Component, Fragment} = preact;
     const html = htm.bind(preact.h);
@@ -106,7 +104,7 @@ define([
                     <${Alert} type="info" message="Hover over graph node to display" />
                 `;
             }
-            const objectInfo = objectInfoToObject2(this.props.node.nodeInfo.info);
+            const objectInfo = this.props.node.nodeInfo.info;
             return html`
                 <table class="table table-striped table-bordered ObjectDetails">
                     <tbody>
@@ -126,7 +124,7 @@ define([
                     <${Alert} type="info" message="Hover over graph node to display" />
                 `;
             }
-            const objectInfo = objectInfoToObject2(this.props.node.nodeInfo.info);
+            const objectInfo = this.props.node.nodeInfo.info;
             if (objectInfo.metadata && Object.keys(objectInfo.metadata).length > 0) {
                 const rows = Object.entries(objectInfo.metadata).map(([key, value]) => {
                     return renderRow(key, value);

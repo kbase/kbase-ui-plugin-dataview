@@ -37,7 +37,7 @@ define([
                 <div className="checkbox" title="If checked, will omit reports from the graph.">
                     <label><input type="checkbox" 
                         checked=${this.props.omitReports} 
-                        onChange=${this.props.toggleOmitReports}/> Omit Reports</label>
+                        onChange=${this.props.toggleOmitReports}/> Omit Reports (${this.props.totalReports})</label>
                 </div>  
             `;
         }
@@ -47,7 +47,7 @@ define([
                 <div className="checkbox" title="If checked, will include all versions in the graph.">
                     <label><input type="checkbox" 
                         checked=${this.props.showAllVersions} 
-                        onChange=${this.props.toggleShowAllVersions}/> All Versions</label>
+                        onChange=${this.props.toggleShowAllVersions}/> Include all Versions</label>
                 </div>  
             `;
         }
@@ -114,16 +114,6 @@ define([
             }
         }
 
-        // componentDidUpdate(prevProps, prevState) {
-        //     // console.log('did update!', this.props.value.graph, prevProps.value.graph, isEqual);
-        //     try {
-        //         // console.log('did update', isEqual(this.props.value.graph, prevProps.value.graph));
-        //         console.log('did update', this.props.value.graph === prevProps.value.graph);
-        //     } catch (ex) {
-        //         console.error('Error??', ex);
-        //     }
-        // }
-
         renderSankeyGraph() {
             const {graph, objRefToNodeIdx} = this.props.value;
             return html`
@@ -177,13 +167,13 @@ define([
                             </tr>
                             <tr>
                                 <td style=${{width: '3em', backgroundColor: '#C62828'}}></td>
-                                <td>Referenced by</td>
+                                <td>Referencing</td>
                                 <td>${this.props.totalReferencingObjects}</td>
                                 <td>${this.props.filteredReferencingObjects}</td>
                             </tr>
                             <tr>
                                 <td style=${{width: '3em', backgroundColor: '#2196F3'}}></td>
-                                <td>References</td>
+                                <td>Referenced</td>
                                 <td>${this.props.totalReferencedObjects}</td>
                                 <td>${this.props.totalReferencedObjects}</td>
                             </tr>
@@ -200,19 +190,46 @@ define([
             `;
         }
 
+        renderGraphToolbar() {
+            return html`
+                <div style=${styles.graphToolbar}>
+                    <div style=${styles.graphToolbarHeaderRow}>
+                         <div style=${{...styles.graphToolbarCol, ...styles.title}}>
+                            Objects referenced
+                        </div>
+                        <div style=${{...styles.graphToolbarCol, ...styles.title}}>
+                            This object
+                        </div>
+                        <div style=${{...styles.graphToolbarCol, ...styles.title}}>
+                            Objects referencing
+                        </div>
+                    </div>
+                    <div style=${styles.graphToolbarRow}>
+                        <div style=${styles.graphToolbarCol}>
+                        </div>
+                        <div style=${styles.graphToolbarCol}>
+                            ${this.renderShowAllVersionsToggle()}
+                        </div>
+                        <div style=${styles.graphToolbarCol}>
+                            ${this.renderThisNarrativeToggle()}
+                                <span style=${{width: '1em'}} />
+                                ${this.renderOmitReportToggle()}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
         render() {
             return html`
                 <div style=${styles.main}>
                     <div style=${styles.headerRow}>
                         <div style=${styles.controlRow}>
+                            <div style=${styles.status}>
+                            ${this.renderStats()}
+                            ${this.renderLoading()}
+                            </div>
                             <div style=${styles.filterControls} className="form-inline">
-                                <span style=${styles.label}>Filters:</span>
-                                ${this.renderThisNarrativeToggle()}
-                                <span style=${{width: '1em'}} />
-                                ${this.renderOmitReportToggle()}
-                                <span style=${{width: '1em'}} />
-                                ${this.renderShowAllVersionsToggle()}
-                                <span style=${{width: '1em'}} />
                                 <span style=${styles.label}>Node Label:</span>
                                 ${this.renderLabelTypeSelect()}
                             </div>
@@ -220,16 +237,10 @@ define([
                                 ${this.renderControls()}
                             </div>
                         </div>
-                        <div style=${styles.statusRow}> 
-                            <div style="flex: 1 1 0">
-                            ${this.renderStats()}
-                            </div>
-                            <div style="flex: 0 0 auto">
-                            ${this.renderLoading()}
-                            </div>
-                        </div>
+                       
                     </div>
                     <div style=${styles.body}>
+                        ${this.renderGraphToolbar()}
                         ${this.renderSankeyGraph()}
                         <${Row} style=${{marginBottom: '1em'}}>
                             <${Col} style=${{flex: '0 0 22em', marginRight: '0.5em'}}>

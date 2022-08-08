@@ -72,7 +72,6 @@ define(['kb_lib/props'], (props) => {
             for (let i = 0; i < type.name.length; i += 1) {
                 code += type.name.charCodeAt(i);
             }
-            console.log('code', code, code % colors.length);
             return colors[code % colors.length];
         }
 

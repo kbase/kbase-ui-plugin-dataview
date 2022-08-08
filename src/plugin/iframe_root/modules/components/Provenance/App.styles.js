@@ -29,7 +29,7 @@ define([], () => {
         },
         body: {
             flex: '1 1 0',
-            overflowY: 'auto'
+            overflowY: 'scroll'
         },
         introText: {
             flex: '2 1 0'
@@ -42,6 +42,13 @@ define([], () => {
             justifyContent: 'flex-end'
         },
         filterControls: {
+            flex: '1 1 0',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start'
+        },
+        status: {
             flex: '2 1 0',
             display: 'flex',
             flexDirection: 'row',
@@ -52,6 +59,41 @@ define([], () => {
             fontWeight: 'bold',
             color: 'rgb(100, 100, 100)',
             marginRight:'0.5em'
+        },
+        graphToolbar: {
+            borderTop: '1px solid rgba(200, 200, 200, 1)',
+            borderLeft: '1px solid rgba(200, 200, 200, 1)',
+            borderRight: '1px solid rgba(200, 200, 200, 1)',
+            // borderRadius: '0.5em',
+            padding: '0.5em'
+        },
+        graphToolbarHeaderRow: {
+            flex: '0 0 auto',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start'
+        },
+        graphToolbarRow: {
+            flex: '0 0 auto',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start'
+        },
+        graphToolbarCol: {
+            flex: '1 1 0',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0.25em',
+            margin: '0 0.25em'
+        },
+        title: {
+            fontWeight: 'bold',
+            backgroundColor: 'rgba(150, 150, 150, 1)',
+            color: 'white',
         }
     };
 });
