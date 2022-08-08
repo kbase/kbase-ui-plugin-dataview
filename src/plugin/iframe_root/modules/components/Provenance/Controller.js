@@ -38,11 +38,12 @@ define([
         return false;
     }
 
-    function makeLink(source, target, value) {
+    function makeLink(source, target, value, relationship = 'unknown') {
         return {
             source,
             target,
-            value
+            value,
+            relationship
         };
     }
 
@@ -221,6 +222,7 @@ define([
 
             // We have a list of lists - one list for each object version as contained in objectIdentities.
             let referencingObjectCount = 0;
+            let totalReports = 0;
             for (let i = 0; i < referencingObjectsSets.length; i++) {
                 // This is the nodeId of the subject object, the one to which references are made;
                 // we want links from this node to the referencing node.
@@ -235,6 +237,10 @@ define([
 
                 for (let k = 0; k < referencingObjectsSets[i].length; k++) {
                     const referencingObjectInfo = referencingObjectsSets[i][k];
+                    if (referencingObjectInfo.typeModule === 'KBaseReport' &&
+                        referencingObjectInfo.typeName === 'Report') {
+                        totalReports += 1;
+                    }
                     if (!this.filterCondition(referencingObjectInfo, objIdentities[i])) {
                         continue;
                     }
@@ -260,7 +266,7 @@ define([
                     // add the link now too
                     if (objRefToNodeIdx[objIdentities[i].ref] !== null) {
                         // only add the link if it is visible
-                        graph.links.push(makeLink(fromNodeId, graphNodeId, 1));
+                        graph.links.push(makeLink(fromNodeId, graphNodeId, 1, 'referencing'));
                     }
 
                     // If we have exceeded the maximum number of objects we support in the graph,
@@ -271,21 +277,21 @@ define([
                     }
                 }
             }
-            return {totalReferencingObjects: totalCount, filteredReferencingObjects: filteredCount, truncated: false};
+            return {totalReferencingObjects: totalCount, filteredReferencingObjects: filteredCount, totalReports, truncated: false};
         }
 
         async addNullReferencingObject(graph, from) {
             const to = graph.nodes.length;
             graph.nodes.push({
                 node: to,
-                name: 'No References',
+                name: '∅ (no referencing objects)',
                 info: null,
                 nodeType: 'none',
                 objId: null,
                 isFake: true
             });
             // 0th node is always the subject.
-            graph.links.push(makeLink(from, to, 1));
+            graph.links.push(makeLink(from, to, 1, 'none'));
             return to;
         }
 
@@ -293,14 +299,14 @@ define([
             const from = graph.nodes.length;
             graph.nodes.push({
                 node: from,
-                name: 'No References',
+                name: '∅ (no referenced objects)',
                 info: null,
                 nodeType: 'none',
                 objId: null,
                 isFake: true
             });
             // 0th node is always the subject.
-            graph.links.push(makeLink(from, to, 1));
+            graph.links.push(makeLink(from, to, 1, 'none'));
             return from;
         }
 
@@ -330,10 +336,11 @@ define([
                         uniqueRefs[ref] = 'included';
                         uniqueRefObjectIdentities.push({ref});
                     }
-                    links.push(makeLink(ref, objRef, 1));
+                    links.push(makeLink(ref, objRef, 1, 'included'));
                 });
 
                 // extract the references from the provenance
+                // TODO: is this not duplicative of the above?
                 objectProvenance.provenance.forEach((provenance) => {
                     if (provenance.resolved_ws_objects) {
                         totalReferencedObjects += provenance.resolved_ws_objects.length;
@@ -342,7 +349,7 @@ define([
                                 uniqueRefs[resolvedObjectRef] = 'included'; // TODO switch to prov??
                                 uniqueRefObjectIdentities.push({ref: resolvedObjectRef});
                             }
-                            links.push(makeLink(resolvedObjectRef, objRef, 1));
+                            links.push(makeLink(resolvedObjectRef, objRef, 1, 'included'));
                         });
                     }
                 });
@@ -359,17 +366,18 @@ define([
                             uniqueRefs[objectProvenance.copied] = 'copied'; // TODO switch to prov??
                             uniqueRefObjectIdentities.push({ref: objectProvenance.copied});
                         }
-                        links.push(makeLink(objectProvenance.copied, objRef, 1));
+                        links.push(makeLink(objectProvenance.copied, objRef, 1, 'copied'));
                     }
                 }
             });
-            return {
+            const result = {
                 totalReferencedObjects: Object.keys(uniqueRefs).length,
                 uniqueRefs,
                 uniqueRefObjectIdentities,
                 links,
                 isCopied
             };
+            return result;
         }
 
         async getObjectInfo(refData, graph, objRefToNodeIdx) {
@@ -413,15 +421,26 @@ define([
                         // here, but instead we just skip
                         // At least warn... there be bugs if this happens...
                         console.warn(`In provenance widget reference ${ref} is not accessible`);
+                        const nodeId = graph.nodes.length;
+                        graph.nodes.push({
+                            node: nodeId,
+                            name: `Inaccessible (${ref})`,
+                            info: null,
+                            nodeType: 'inaccessible',
+                            objId: ref
+                        });
+                        objRefToNodeIdx[ref] = nodeId;
+
                     }
                 }
                 // add the link info
                 refData.links.forEach((link) => {
+                    // TODO: is this condition possible?
                     if (isUndefNull(objRefToNodeIdx[link.source]) || isUndefNull(objRefToNodeIdx[link.target])) {
-                        console.warn('skipping link', link);
+                        console.warn('skipping link', link, objRefToNodeIdx[link.source], objRefToNodeIdx[link.target]);
                     } else {
                         graph.links.push(
-                            makeLink(objRefToNodeIdx[link.source], objRefToNodeIdx[link.target], link.value)
+                            makeLink(objRefToNodeIdx[link.source], objRefToNodeIdx[link.target], link.value, link.relationship)
                         );
                     }
                 });
@@ -461,7 +480,8 @@ define([
                         makeLink(
                             objRefToNodeIdx[links[i]['source']],
                             objRefToNodeIdx[links[i]['target']],
-                            links[i]['value']
+                            links[i]['value'],
+                            'unknown'
                         )
                     );
                 }
@@ -472,7 +492,8 @@ define([
             //loop over graph nodes, get next version, if it is in our node list, then add it
             let expectedNextVersion, expectedNextId;
             graph.nodes.forEach((node) => {
-                if (node.nodeType === 'copied' || node.nodeType === 'none') {
+                // TODO: add flag for isObject
+                if (node.nodeType === 'copied' || node.nodeType === 'none' || node.nodeType === 'inaccessible') {
                     return;
                 }
                 //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
@@ -480,7 +501,7 @@ define([
                 expectedNextId = `${node.info[6]}/${node.info[0]}/${expectedNextVersion}`;
                 if (objRefToNodeIdx[expectedNextId]) {
                     // add the link now too
-                    graph.links.push(makeLink(objRefToNodeIdx[node.objId], objRefToNodeIdx[expectedNextId], 1));
+                    graph.links.push(makeLink(objRefToNodeIdx[node.objId], objRefToNodeIdx[expectedNextId], 1, 'version'));
                 }
             });
         }
@@ -507,7 +528,7 @@ define([
                     return {...this.processObject(objectInfo), totalVersions: 1};
                 })();
 
-                const [{totalReferencingObjects, filteredReferencingObjects, truncated}, refData] = await Promise.all([
+                const [{totalReferencingObjects, filteredReferencingObjects, totalReports, truncated}, refData] = await Promise.all([
                     this.getReferencingObjects(objIdentities, graph, objRefToNodeIdx),
                     this.getObjectProvenance(objIdentities, graph, objRefToNodeIdx)
                 ]);
@@ -552,14 +573,9 @@ define([
                     return {from: 0, to: 0};
                 });
 
-                console.log('graph.links', graph.links);
-
                 graph.links.forEach((link) => {
                     // This is referencing
                     const nodeSource = graph2[link.source];
-                    if (nodeSource === undefined) {
-                        console.log('REALLY?', link);
-                    }
                     nodeSource.from += 1;
 
                     // This is referenced.
@@ -597,6 +613,7 @@ define([
                         totalReferencingObjects,
                         filteredReferencingObjects,
                         totalReferencedObjects: refData.totalReferencedObjects,
+                        totalReports,
                         totalVersions,
                         nodeCount: graph.nodes.length, edgeCount: graph.links.length , truncated,
                         isCopied: refData.isCopied
@@ -615,11 +632,23 @@ define([
             }
         }
 
-        onNodeOver({ref, info, objdata}) {
+        async onNodeOver(node) {
+            const {isFake, ref, info} = node;
+            if (isFake) {
+                return;
+            }
+            const wsClient = new GenericClient({
+                module: 'Workspace',
+                url: this.props.runtime.config('services.Workspace.url'),
+                token: this.props.runtime.service('session').getAuthToken()
+            });
+            const [objdata] = await wsClient.callFunc('get_object_provenance', [[{
+                ref: node.objId
+            }]]);
             this.onInspectNode({ref, info, objdata}, true);
         }
 
-        onNodeOut() {
+        onNodeOut(node) {
             this.onInspectNodeLeave();
         }
 
@@ -676,16 +705,8 @@ define([
         toggleOmitReports() {
             const omitReports = !this.state.omitReports;
             const omitTypes = [];
-            // let selectedNode = this.state.selectedNode;
             if (omitReports) {
                 omitTypes.push(['KBaseReport', 'Report']);
-                // console.log('sel', selectedNode);
-                // if (selectedNode.nodeInfo && selectedNode.nodeInfo.info[2].split(/[.-]/)[1] === 'Report') {
-                //     selectedNode = {
-                //         nodeInfo: null,
-                //         over: false
-                //     };
-                // }
             }
             this.setState({
                 omitReports,
@@ -737,6 +758,7 @@ define([
                     totalVersions=${this.state.value.totalVersions}
                     includesAllVersions=${this.state.value.includesAllVersions}
                     isCopied=${this.state.value.isCopied}
+                    totalReports=${this.state.value.totalReports}
                 />
             `;
         }
@@ -766,6 +788,7 @@ define([
                     totalVersions=${this.state.value.totalVersions}
                     includesAllVersions=${this.state.value.includesAllVersions}
                     isCopied=${this.state.value.isCopied}
+                    totalReports=${this.state.value.totalReports}
                 />
             `;
         }
