@@ -49,7 +49,14 @@ define([], () => {
             justifyContent: 'flex-start'
         },
         status: {
-            flex: '2 1 0',
+            flex: '0 0 10em',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start'
+        },
+        message: {
+            flex: '1.5 1 0',
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',

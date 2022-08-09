@@ -169,7 +169,7 @@ define([
         /* Adds nodes and links for all referencing objects, with the link terminating at a
            node which is the target object (or one of it's versions, if the showAllVersions flag is on)
         */
-        async getReferencingObjects(objIdentities, graph, objRefToNodeIdx) {
+        async getReferencingObjects(objIdentities, graph, objRefToNodeIdx, objectInfo) {
             // Note that graph and objRefToNodeIdx are MODIFIED.
             const wsClient = new GenericClient({
                 module: 'Workspace',
@@ -186,27 +186,11 @@ define([
                 });
             });
 
-            // const warnings = [];
-
-            // const filterCondition = (refInfo, objInfo) => {
-            //     if (this.state.omitOtherNarratives) {
-            //         if (refInfo.wsid !== objInfo.wsid) {
-            //             return false;
-            //         }
-            //     }
-            //     if (this.state.omitTypes.length > 0) {
-            //         for (const [moduleName, typeName] of this.state.omitTypes) {
-            //             if (refInfo.typeModule === moduleName && refInfo.typeName === typeName) {
-            //                 return false;
-            //             }
-            //         }
-            //     }
-            //     return true;
-            // };
-
-            const [totalCount, filteredCount] = (() => {
+            const {totalCount, filteredCount, totalReports, totalObjectsInOtherNarratives} = (() => {
                 let filteredCount = 0;
                 let totalCount = 0;
+                let totalReports = 0;
+                let totalObjectsInOtherNarratives = 0;
 
                 referencingObjectsSets.forEach((referencingObjects, setIndex) => {
                     referencingObjects.forEach((referencingObject) => {
@@ -214,33 +198,35 @@ define([
                             filteredCount += 1;
                         }
                         totalCount += 1;
+
+                        if (referencingObject.typeModule === 'KBaseReport' &&
+                        referencingObject.typeName === 'Report') {
+                            totalReports += 1;
+                        }
+                        // We also track the total # of objects not in the same workspace as the subject object.
+                        if (referencingObject.wsid !== objectInfo.wsid) {
+                            totalObjectsInOtherNarratives += 1;
+                        }
                     });
                 });
 
-                return [totalCount, filteredCount];
+                // We track the total # of report objects (useful for the filtering ui)
+
+                return {totalCount, filteredCount, totalReports, totalObjectsInOtherNarratives};
             })();
 
             // We have a list of lists - one list for each object version as contained in objectIdentities.
             let referencingObjectCount = 0;
-            let totalReports = 0;
+
             for (let i = 0; i < referencingObjectsSets.length; i++) {
                 // This is the nodeId of the subject object, the one to which references are made;
                 // we want links from this node to the referencing node.
                 const fromNodeId = objRefToNodeIdx[objIdentities[i].ref];
-                // Handle case of no referencing objects for a given object; in this case we add a
-                // 'none' node to indicate no references to it.
-                // if (referencingObjectsSets[i].length === 0) {
-                //     this.addNullReferencingObject(graph, fromNodeId);
-                //     continue;
-                // }
-
 
                 for (let k = 0; k < referencingObjectsSets[i].length; k++) {
                     const referencingObjectInfo = referencingObjectsSets[i][k];
-                    if (referencingObjectInfo.typeModule === 'KBaseReport' &&
-                        referencingObjectInfo.typeName === 'Report') {
-                        totalReports += 1;
-                    }
+
+
                     if (!this.filterCondition(referencingObjectInfo, objIdentities[i])) {
                         continue;
                     }
@@ -273,11 +259,23 @@ define([
                     // create a fake entry.
                     // TODO: explain how this is eventually displayed, because this is weird.
                     if (referencingObjectCount >= MAX_REFERENCING_OBJECTS) {
-                        return {totalReferencingObjects: totalCount, filteredReferencingObjects: filteredCount, truncated: true};
+                        return {
+                            totalReferencingObjects: totalCount,
+                            filteredReferencingObjects: filteredCount,
+                            truncated: true,
+                            totalReports,
+                            totalObjectsInOtherNarratives
+                        };
                     }
                 }
             }
-            return {totalReferencingObjects: totalCount, filteredReferencingObjects: filteredCount, totalReports, truncated: false};
+            return {
+                totalReferencingObjects: totalCount,
+                filteredReferencingObjects: filteredCount,
+                truncated: false,
+                totalReports,
+                totalObjectsInOtherNarratives
+            };
         }
 
         async addNullReferencingObject(graph, from) {
@@ -521,15 +519,16 @@ define([
 
             try {
                 const {objIdentities, objRefToNodeIdx, graph, totalVersions} = await (async () => {
+                    // Sorry, we get the object history even though we may not need it.
+                    const  [objectHistory] = await wsClient.callFunc('get_object_history', [{ref: objectInfo.ref}]);
                     if (this.state.showAllVersions) {
-                        const  [objectHistory] = await wsClient.callFunc('get_object_history', [{ref: objectInfo.ref}]);
                         return {...this.processObjectHistory(objectHistory), totalVersions: objectHistory.length};
                     }
-                    return {...this.processObject(objectInfo), totalVersions: 1};
+                    return {...this.processObject(objectInfo), totalVersions: objectHistory.length};
                 })();
 
-                const [{totalReferencingObjects, filteredReferencingObjects, totalReports, truncated}, refData] = await Promise.all([
-                    this.getReferencingObjects(objIdentities, graph, objRefToNodeIdx),
+                const [{totalReferencingObjects, filteredReferencingObjects, totalReports, totalObjectsInOtherNarratives, truncated}, refData] = await Promise.all([
+                    this.getReferencingObjects(objIdentities, graph, objRefToNodeIdx, objectInfo),
                     this.getObjectProvenance(objIdentities, graph, objRefToNodeIdx)
                 ]);
 
@@ -614,6 +613,7 @@ define([
                         filteredReferencingObjects,
                         totalReferencedObjects: refData.totalReferencedObjects,
                         totalReports,
+                        totalObjectsInOtherNarratives,
                         totalVersions,
                         nodeCount: graph.nodes.length, edgeCount: graph.links.length , truncated,
                         isCopied: refData.isCopied
@@ -759,6 +759,8 @@ define([
                     includesAllVersions=${this.state.value.includesAllVersions}
                     isCopied=${this.state.value.isCopied}
                     totalReports=${this.state.value.totalReports}
+                    totalObjectsInOtherNarratives=${this.state.value.totalObjectsInOtherNarratives}
+                    totalVersions=${this.state.value.totalVersions}
                 />
             `;
         }
@@ -789,6 +791,8 @@ define([
                     includesAllVersions=${this.state.value.includesAllVersions}
                     isCopied=${this.state.value.isCopied}
                     totalReports=${this.state.value.totalReports}
+                    totalObjectsInOtherNarratives=${this.state.value.totalObjectsInOtherNarratives}
+                    totalVersions=${this.state.value.totalVersions}
                 />
             `;
         }
