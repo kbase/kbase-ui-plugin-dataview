@@ -23,16 +23,30 @@ define([
 
     class App extends Component {
         renderThisNarrativeToggle() {
+            if (this.props.totalObjectsInOtherNarratives === 0) {
+                return html`
+                    <div className="checkbox" title="If checked, will omit referencing objects from other Narratives, otherwise shows all referencing objects regardless of Narrative..">
+                        <label><input type="checkbox" disabled/> Omit other Narratives (none)</label>
+                    </div>
+                `;
+            }
             return html`
                 <div className="checkbox" title="If checked, will omit referencing objects from other Narratives, otherwise shows all referencing objects regardless of Narrative..">
                     <label><input type="checkbox" 
                         checked=${this.props.omitOtherNarratives} 
-                        onChange=${this.props.toggleOmitOtherNarratives}/> Omit other Narratives</label>
+                        onChange=${this.props.toggleOmitOtherNarratives}/> Omit other Narratives (${this.props.totalObjectsInOtherNarratives})</label>
                 </div>
             `;
         }
 
         renderOmitReportToggle() {
+            if (!this.props.totalReports) {
+                return html`
+                    <div className="checkbox" title="There are no referencing Reports in the graph.">
+                        <label><input type="checkbox" disabled /> Omit Reports (none)</label>
+                    </div>  
+                `;
+            }
             return html`
                 <div className="checkbox" title="If checked, will omit reports from the graph.">
                     <label><input type="checkbox" 
@@ -43,11 +57,19 @@ define([
         }
 
         renderShowAllVersionsToggle() {
+            if (this.props.totalVersions === 1) {
+                return html`
+                    <div className="checkbox" title="If checked, will include all versions in the graph.">
+                        <label><input type="checkbox" 
+                            disabled /> Include all Versions (no other versions)</label>
+                    </div>  
+                `;
+            }
             return html`
                 <div className="checkbox" title="If checked, will include all versions in the graph.">
                     <label><input type="checkbox" 
                         checked=${this.props.showAllVersions} 
-                        onChange=${this.props.toggleShowAllVersions}/> Include all Versions</label>
+                        onChange=${this.props.toggleShowAllVersions}/> Include all Versions (${this.props.totalVersions})</label>
                 </div>  
             `;
         }
@@ -69,6 +91,16 @@ define([
         }
 
         renderOpenButton() {
+            const disabled = this.props.environment !== 'embedded';
+            if (disabled) {
+                return html`
+                <a disabled
+                    className="btn btn-default"
+                >
+                    Open in separate window
+                </a>
+            `;
+            }
             return html`
                 <a href="/#provenance/${this.props.objectInfo.ref}" 
                     target="_blank"
@@ -81,16 +113,12 @@ define([
 
         renderControls() {
             return html`
-                ${this.props.environment === 'embedded' ? this.renderOpenButton() : null}
+                ${this.renderOpenButton()}
             `;
         }
 
-        renderStats() {
-            const message = (() => {
-                if (this.props.value.truncated) {
-                    return html`<span class="text-warning" style=${{marginLeft: '1em'}}>The number of referencing objects exceeds the maximum displayable (${MAX_REFERENCING_OBJECTS}); display limited to first ${MAX_REFERENCING_OBJECTS} referencing objects.</span>`;
-                }
-            })();
+        renderStatus() {
+
             // const referencingObjectSummary = (() => {
             //     const {totalReferencingObjects, filteredReferencingObjects} = this.props.value;
             //     if (totalReferencingObjects === filteredReferencingObjects) {
@@ -98,19 +126,23 @@ define([
             //     }
             //     return html`${filteredReferencingObjects} of ${totalReferencingObjects}`;
             // })();
+            const nodeCount = (() => {
+                if (this.props.loading) {
+                    return html`
+                        <span className="fa fa-refresh fa-spin fa-fw" />
+                    `;
+                }
+                return this.props.value.nodeCount;
+            })();
             return html`
-                <span>
-                    <span>Node count: ${this.props.value.nodeCount} </span>
-                    ${message}
-                </span>
+                <span>Node count: ${nodeCount} </span>
             `;
         }
 
-        renderLoading() {
-            if (this.props.loading) {
-                return html`
-                    <span className="fa fa-refresh fa-spin fa-fw" />
-                `;
+        renderMessage() {
+            if (this.props.value.truncated) {
+                return html`<span class="text-warning" style=${{marginLeft: '1em'}}>
+                    The number of referencing objects (${this.props.filteredReferencingObjects}) exceeds the maximum displayable (${MAX_REFERENCING_OBJECTS}); display limited to first ${MAX_REFERENCING_OBJECTS} referencing objects.</span>`;
             }
         }
 
@@ -226,14 +258,17 @@ define([
                     <div style=${styles.headerRow}>
                         <div style=${styles.controlRow}>
                             <div style=${styles.status}>
-                            ${this.renderStats()}
-                            ${this.renderLoading()}
+                                ${this.renderStatus()}
                             </div>
-                            <div style=${styles.filterControls} className="form-inline">
-                                <span style=${styles.label}>Node Label:</span>
-                                ${this.renderLabelTypeSelect()}
+                            <div style=${styles.message}>
+                                ${this.renderMessage()}
                             </div>
+                           
                             <div style=${styles.controls}>
+                                <div className="form-inline" style=${{marginRight: '0.25em'}}>
+                                    <span style=${styles.label}>Node Label:</span>
+                                    ${this.renderLabelTypeSelect()}
+                                </div>
                                 ${this.renderControls()}
                             </div>
                         </div>
