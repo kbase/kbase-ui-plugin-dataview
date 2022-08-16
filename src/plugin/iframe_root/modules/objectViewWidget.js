@@ -11,7 +11,7 @@ define([
     'components/WidgetWrapper',
     'components/Overview/index',
     'components/MiniOverview/index',
-    'components/ProvenancePanel',
+    'components/Provenance/Controller',
     'uuid',
 
     'css!./objectViewWidget.css',
@@ -85,7 +85,7 @@ define([
                     title: 'Provenance',
                     autoScroll: true,
                     render: () => {
-                        return html`<${Provenance} runtime=${runtime} ...${params} />`;
+                        return html`<${Provenance} runtime=${runtime} environment="embedded" ...${params} />`;
                     }
                 }
             ];
@@ -156,7 +156,7 @@ define([
                 dataKBTesthookPlugin: 'dataview'
             }, [
                 div({
-                    class: 'Col'
+                    class: 'PanelWidgetCol'
                 }, [
                     div({
                         id: widgetSet.addWidget('kb_dataview_copy'),

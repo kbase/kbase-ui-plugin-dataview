@@ -21,7 +21,6 @@ define([
         }
 
         start(params) {
-            // console.log('params', params);
             preact.render(html`<${Loader} objectInfo=${params.objectInfo} runtime=${this.runtime} />`, this.node);
             return null;
         }

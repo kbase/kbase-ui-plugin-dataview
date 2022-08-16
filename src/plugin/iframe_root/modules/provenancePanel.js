@@ -5,9 +5,9 @@ define([
     // 'kbaseUI/widget/widgetSet',
     'kb_service/utils',
     'kb_service/client/workspace',
-    'components/ProvenancePanel',
+    'components/Provenance/Controller',
     'css!./provenancePanel.css'
-], (preact, Promise, apiUtils, Workspace, ProvenancePanel) => {
+], (preact, Promise, apiUtils, Workspace, Provenance) => {
 
     // const html = htm.bind(preact.h);
     // const t = htmlTags.tag,
@@ -50,11 +50,13 @@ define([
                         objects: [{ref: objectRef}],
                         ignoreErrors: 1
                     })
-                    .then((objectList) => {
-                        if (objectList[0] === null) {
+                    .then((objectInfos) => {
+                        if (objectInfos[0] === null) {
                             throw new Error(`Object not found: ${  objectRef}`);
                         }
-                        return apiUtils.object_info_to_object(objectList[0]);
+                        const objectInfo = apiUtils.object_info_to_object(objectInfos[0]);
+                        objectInfo.raw = objectInfos[0];
+                        return objectInfo;
                     });
             });
         }
@@ -75,7 +77,7 @@ define([
         async function start(params) {
             const objectInfo = await getObjectInfo(params);
             runtime.send('ui', 'setTitle', `Data Provenance and Reference Network for ${objectInfo.name}`);
-            preact.render(preact.h(ProvenancePanel, {objectInfo, runtime}), container);
+            preact.render(preact.h(Provenance, {objectInfo, runtime, environment: 'standalone'}), container);
         }
 
         function run(params) {

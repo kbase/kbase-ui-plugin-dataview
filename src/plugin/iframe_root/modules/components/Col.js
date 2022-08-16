@@ -2,7 +2,7 @@ define([
     'preact',
     'htm',
 
-    'css!./Col'
+    'css!./Col.css'
 ], (
     preact,
     htm

@@ -98,6 +98,7 @@ define([
                         }
 
                         const objectInfo = APIUtils.objectInfoToObject(objectInfos[0]);
+                        objectInfo.raw = objectInfos[0];
                         const type = APIUtils.parseTypeId(objectInfo.type),
                             mapping = findMapping(type, params);
 

@@ -267,10 +267,7 @@ define([
                 tabPane.append('<br>');
                 // xss safe
                 tabPane.append(
-                    html.makePanel({
-                        title: 'Error',
-                        content: $errorAlert(error)
-                    })
+                    $errorAlert(error)
                 );
             }
 

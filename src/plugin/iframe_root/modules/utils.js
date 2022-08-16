@@ -44,7 +44,9 @@ define([
                 ignoreErrors: 0
             }])
                 .then(([result]) => {
-                    return apiUtils.object_info_to_object(result.infos[0]);
+                    const objectInfo = apiUtils.object_info_to_object(result.infos[0]);
+                    objectInfo.raw = result.infos[0];
+                    return objectInfo;
                 })
                 .catch((err) => {
                     if (/Anonymous users may not read workspace/.test(err.message)) {

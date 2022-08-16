@@ -1,10 +1,8 @@
 define([
     'kb_common/html',
-], function (
+], (
     html
-) {
-    'use strict';
-
+) => {
     const t = html.tag,
         span = t('span');
 

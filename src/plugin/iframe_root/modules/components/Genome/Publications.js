@@ -432,7 +432,6 @@ define([
                     return value;
                 }),
                 render: ({value}, row) => {
-                    // console.log('ROW', row);
                     const url =  this.articleLinkURL(row.Id.value);
                     return html`<a href="${url}" target="_blank" dangerouslySetInnerHTML=${{__html: DOMPurify.sanitize(value)}} /a>`;
                 }

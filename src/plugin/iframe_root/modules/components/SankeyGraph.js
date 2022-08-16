@@ -22,6 +22,16 @@ define([
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
+    d3.rgb.prototype.toHex = function () {
+        let r = Math.round(this.r).toString(16);
+        let g = Math.round(this.g).toString(16);
+        let b = Math.round(this.b).toString(16);
+        if (this.r < 16) r = `0${r}`;
+        if (this.g < 16) g = `0${g}`;
+        if (this.b < 16) b = `0${b}`;
+        return `#${r}${g}${b}`;
+    };
+
     // The height of the graph is calculated as the product of the total # of nodes and
     // the following factor. This roughly sizes the graph height to scale with the size of
     // the graph. A larger factor results in a taller graph, and taller nodes.
@@ -52,7 +62,43 @@ define([
             name: 'Data Referenced by this Data'
         },
         none: {
-            color: '#FFFFFF',
+            color: '#CCC',
+            name: ''
+        },
+        copied: {
+            color: '#4BB856',
+            name: 'Copied From'
+        },
+
+        inaccessible: {
+            color: '#fc03f8',
+            name: 'Inaccessible'
+        },
+    };
+
+    const LINK_TYPES = {
+        referencing: {
+            color: '#C62828',
+            name: 'Data Referencing this Data'
+        },
+        included: {
+            color: '#2196F3',
+            name: 'Data Referenced by this Data'
+        },
+        referenced: {
+            color: '#2196F3',
+            name: 'Data Referenced by this Data'
+        },
+        none: {
+            color: '#CCC',
+            name: ''
+        },
+        unknown: {
+            color: '#fc03f8',
+            name: '#fc03f8'
+        },
+        inaccessible: {
+            color: '#fc03f8',
             name: ''
         },
         copied: {
@@ -63,13 +109,13 @@ define([
 
     // Utility functions.
 
-    function makeLink(source, target, value) {
-        return {
-            source,
-            target,
-            value
-        };
-    }
+    // function makeLink(source, target, value) {
+    //     return {
+    //         source,
+    //         target,
+    //         value
+    //     };
+    // }
 
     function getTimeStampStr(objInfoTimeStamp) {
         const monthLookup = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -82,7 +128,7 @@ define([
         // f-ing safari, need to add extra ':' delimiter to parse the timestamp
         if (isNaN(seconds)) {
             const tokens = objInfoTimeStamp.split('+'); // this is just the date without the GMT offset
-            const newTimestamp = `${tokens[0]  }+${  tokens[0].substr(0, 2)  }:${  tokens[1].substr(2, 2)}`;
+            const newTimestamp = `${tokens[0]}+${tokens[0].substr(0, 2)}:${tokens[1].substr(2, 2)}`;
             date = new Date(newTimestamp);
             seconds = Math.floor((new Date() - date) / 1000);
             if (isNaN(seconds)) {
@@ -94,7 +140,7 @@ define([
         }
 
         // keep it simple, just give a date
-        return `${monthLookup[date.getMonth()]  } ${  date.getDate()  }, ${  date.getFullYear()}`;
+        return `${monthLookup[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
     }
 
     class SankeyGraph extends Component {
@@ -107,6 +153,16 @@ define([
             this.resizeObserver = new ResizeObserver(this.onContainerResize.bind(this));
         }
         componentDidMount() {
+            this.initialize();
+        }
+
+        componentDidUpdate(prevProps, prevState) {
+            if (prevProps.graph !== this.props.graph) {
+                this.renderGraph(this.ref.current);
+            }
+        }
+
+        initialize() {
             const node = this.ref.current;
             this.setState({
                 width: node.clientWidth
@@ -129,42 +185,11 @@ define([
         }
 
         async nodeMouseover(d) {
-            const wsClient = new GenericClient({
-                module: 'Workspace',
-                url: this.props.runtime.config('services.Workspace.url'),
-                token: this.props.runtime.service('session').getAuthToken()
-            });
-            if (d.isFake) {
-                //
-                // TODO: What is this?
-                //
-                // const info = d.info;
-                // let text = '<center><table cellpadding="2" cellspacing="0" class="table table-bordered"><tr><td>';
-                // text +=
-                //     '<h4>Object Details</h4><table cellpadding="2" cellspacing="0" border="0" class="table table-bordered table-striped">';
-                // text += `<tr><td><b>Name</b></td><td>${  info[1]  }</td></tr>`;
-                // text += '</td></tr></table></td><td>';
-                // text +=
-                //     '<h4>Provenance</h4><table cellpadding="2" cellspacing="0" class="table table-bordered table-striped">';
-                // text += '<tr><td><b>N/A</b></td></tr>';
-                // text += '</table>';
-                // text += '</td></tr></table>';
-                // $container.find('#objdetailsdiv').html(text);
-            } else {
-                const [objdata] = await wsClient.callFunc('get_object_provenance', [[{
-                    ref: d.objId
-                }]]);
-
-                this.props.onNodeOver({
-                    ref: d.objId,
-                    info: d.info,
-                    objdata
-                });
-            }
+            this.props.onNodeOver(d);
         }
 
-        nodeMouseout() {
-            this.props.onNodeOut();
+        nodeMouseout(d) {
+            this.props.onNodeOut(d);
         }
 
         setWidth(element) {
@@ -173,7 +198,7 @@ define([
             }, () => {
                 // Crude, but works. When this is rewritten with modern
                 // d3 and a supported d3 plugin, can redress this with
-                // propery d3 updating.
+                // proper d3 updating.
                 this.renderGraph(element);
             });
         }
@@ -183,27 +208,11 @@ define([
 
             // TODO: eliminate the "- 27" which is to ensure there is no horizontal scrolling.
             const width = this.state.width - 27;
-            const {graph, objRefToNodeIdx} = this.props;
             const height = this.props.graph.nodes.length * HEIGHT_CALC_NODE_FACTOR;
             // TODO: eliminate the "+ 15", required to ensure bounding container does not overflow
             this.setState({
                 height: Math.min(height + 15, DEFAULT_MAX_HEIGHT)
             });
-
-            if (graph.links.length === 0) {
-                // in order to render, we need at least two nodes
-                graph.nodes.push({
-                    node: 1,
-                    name: 'No references found',
-                    info: [-1, 'No references found', 'No Type', 0, 0, 'N/A', 0, 'N/A', 0, 0, {}],
-                    nodeType: 'none',
-                    objId: '-1',
-                    isFake: true
-                });
-                objRefToNodeIdx['-1'] = 1;
-                graph.links.push(makeLink(0, 1, 1));
-            }
-
 
             // TODO: This was previously disabled, not sure why. We should consider
             // reviving it.
@@ -226,6 +235,7 @@ define([
             svg.attr('width', width)
                 .attr('height', height)
                 .append('g');
+
             // removed for simplicity, not sure it really adds very much.
             // we use the container to add padding for layout. It is fine
             // and preferred to have the graph start at 0,0.
@@ -256,26 +266,54 @@ define([
                 .style('stroke-width', () => {
                     return 10; /*Math.max(1, d.dy);*/
                 })
+                .style('stroke', (d) => {
+                    return (d.color = LINK_TYPES[d.relationship].color);
+                })
+                .style('stroke-opacity', '0.3')
+                .on('mouseover', function () {
+                    d3.select(this).style('stroke-opacity', '0.6');
+                })
+                .on('mouseout', function () {
+                    d3.select(this).style('stroke-opacity', '0.3');
+                })
                 .sort((a, b) => {
                     return b.dy - a.dy;
                 });
 
+
             // add the link titles
             link.append('title').text((d) => {
-                if (d.source.nodeType === 'copied') {
-                    d.text = `${d.target.name  } copied from ${d.source.name}`;
-                } else if (d.source.nodeType === 'core') {
-                    d.text = `${d.target.name  } is a newer version of ${d.source.name}`;
-                } else if (d.source.nodeType === 'ref') {
-                    d.text = `${d.source.name  } references ${d.target.name}`;
-                } else if (d.source.nodeType === 'included') {
-                    d.text = `${d.target.name  } references ${d.source.name}`;
-                }
+                d.text = (() => {
+                    switch (d.source.nodeType) {
+                    case 'core':
+                        switch (d.target.nodeType) {
+                        case 'none':
+                            return `no references to ${d.source.name}`;
+                        case 'ref':
+                            return `${d.source.name} referenced by ${d.target.name}`;
+                        default:
+                            return `${d.target.name} is a newer version of ${d.source.name}`;
+                        }
+                    case 'copied':
+                        return `${d.target.info.ref} copied from ${d.source.info.ref}`;
+                    case 'ref':
+                        return `${d.source.name} references ${d.target.name}`;
+                    case 'none':
+                        return `no references from ${d.target.name}`;
+                    case 'included':
+                        return `${d.target.name} references ${d.source.name}`;
+                    case 'inaccessible':
+                        return `${d.target.name} references ${d.source.name}`;
+                    }
+                })();
+
                 return d.text;
             });
             $(link).tooltip({delay: {show: 0, hide: 100}});
 
             // add in the nodes
+            // we do this to accommodate event listeners via the old d3 library.
+            const _this = this;
             const node = svg
                 .append('g')
                 .selectAll('.node')
@@ -311,22 +349,22 @@ define([
                     }
                     // TODO: toggle switch between redirect vs redraw
 
-                    // alternate redraw
-                    //self.$elem.find('#objgraphview').hide();
-                    //self.buildDataAndRender({ref:d['objId']});
-
                     //alternate reload page so we can go forward and back
                     if (d.isFake) {
                         // Oh, no!
                         alert('Cannot expand this node.');
                     } else {
-                        const path = `provenance/${encodeURI(`${d.info[6]}/${d.info[0]}/${d.info[4]}`)}`;
+                        const path = `provenance/${encodeURI(`${d.info.ref}`)}`;
                         const url = `${window.location.origin}/#${path}`;
                         window.open(url);
                     }
                 })
-                .on('mouseover', this.nodeMouseover.bind(this))
-                .on('mouseout', this.nodeMouseout.bind(this));
+                .on('mouseover', (d) => {
+                    _this.props.onNodeOver(d);
+                })
+                .on('mouseout', (d) => {
+                    _this.props.onNodeOut(d);
+                });
 
             // add the rectangles for the nodes
             node.append('rect')
@@ -340,26 +378,35 @@ define([
                 .style('fill', (d) => {
                     return (d.color = TYPES[d['nodeType']].color);
                 })
-                .style('stroke', (d) => {
-                    return 0 * d3.rgb(d.color).darker(2);
+                .on('mouseover', function (d) {
+                    d3.select(this).style('fill', d3.rgb(d.color).darker(1).toHex());
+                })
+                .on('mouseout', function (d) {
+                    d3.select(this).style('fill', d.color);
                 })
                 .append('title')
                 // xss safe
-                .html((d) => {
-                    const objectInfo = objectInfoToObject(d.info);
-                    let text =
-                        `${objectInfo.name} (${objectInfo.ref})\n` +
-                        '--------------\n' +
-                        `  type:  ${objectInfo.type}\n` +
-                        `  saved on:  ${getTimeStampStr(objectInfo.save_date)}\n` +
-                        `  saved by:  ${objectInfo.saved_by}\n`;
-                    text += '  metadata:\n';
-                    if (Object.keys(objectInfo.metadata).length > 0) {
-                        for (const [key, value] of Object.entries(objectInfo.metadata)) {
-                            text += `     ${key} : ${value}\n`;
-                        }
+                .html(({info}) => {
+                    // const objectInfo = objectInfoToObject(d.info);
+                    let text;
+                    if (info === null) {
+                        text = 'Null node';
                     } else {
-                        text += '     none';
+                        text =
+                            `${info.name} (${info.ref})\n` +
+                            '--------------\n' +
+                            `  type:  ${info.type}\n` +
+                            `  saved on:  ${getTimeStampStr(info.save_date)}\n` +
+                            `  saved by:  ${info.saved_by}\n`;
+                        text += '  metadata:\n';
+                        if (info.metadata !== null && Object.keys(info.metadata).length > 0) {
+                            for (const [key, value] of Object.entries(info.metadata)) {
+                                text += `     ${key} : ${value}\n`;
+                            }
+                        } else {
+                            text += '     none';
+                        }
+
                     }
 
                     return text;
