@@ -5,8 +5,7 @@ define([
     'lib/domUtils',
     'lib/format',
     'components/Loading',
-    'components/Alert',
-    'components/Empty2',
+    'components/Empty3',
     'components/DataTable7',
 
     // For effect
@@ -19,7 +18,6 @@ define([
     {domSafeText},
     {pluralize},
     Loading,
-    Alert,
     Empty,
     DataTable
 ) => {
@@ -366,7 +364,16 @@ define([
 
         renderSuccess({count, searchTerm}) {
             if (count === 0) {
-                return html`<${Empty} message=${`Sorry, nothing found for "${searchTerm}".`}/>`;
+                return html`<div style="flex: 0 0 auto">
+                <${Empty} title="Not Found">
+                    <p>
+                        Sorry, nothing found for "${searchTerm}".
+                    </p>
+                    <p>
+                        You may find results by removing terms from the end of the search string and then searching again.
+                    </p>
+                <//>
+                </div>`;
             }
 
             // return html`<${Alert} type="info" message=${`Wow, ${count} publications found for "${searchTerm}".`}/>`;

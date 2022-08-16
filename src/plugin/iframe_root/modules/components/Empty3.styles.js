@@ -1,8 +1,9 @@
 define([], () => {
+    const mutedHeaderColor = 'rgba(150, 150, 150, 1)';
     return {
         main: {
             display: 'flex',
-            flexDirection: 'row',
+            flexDirection: 'column',
             flex: '0 0 auto',
             border: '1px solid rgba(150, 150, 150, 0.5)',
             borderRadius: '4px',
@@ -20,8 +21,17 @@ define([], () => {
             justifyContent: 'center'
         },
         icon: {
-            color: 'gray',
+            color: mutedHeaderColor,
             marginRight: '6px'
+        },
+        header: {
+            flex: '0 0 auto',
+            fontWeight: 'bold',
+            color: mutedHeaderColor,
+            marginBottom: '1em'
+        },
+        body: {
+            flex: '1 1 0'
         }
     };
 });

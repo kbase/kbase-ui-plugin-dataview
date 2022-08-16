@@ -13,7 +13,7 @@ define([], () => {
             flexDirection: 'column',
             marginBottom: '0.5em',
             padding: '0.5em',
-            border: '1px solid rgba(150, 150, 150, 1)',
+            border: '1px solid rgba(200, 200, 200, 0.5)',
             borderRadius: '1em'
         },
         controlRow: {
@@ -68,9 +68,9 @@ define([], () => {
             marginRight:'0.5em'
         },
         graphToolbar: {
-            borderTop: '1px solid rgba(200, 200, 200, 1)',
-            borderLeft: '1px solid rgba(200, 200, 200, 1)',
-            borderRight: '1px solid rgba(200, 200, 200, 1)',
+            borderTop: '1px solid rgba(200, 200, 200, 0.5)',
+            borderLeft: '1px solid rgba(200, 200, 200, 0.5)',
+            borderRight: '1px solid rgba(200, 200, 200, 0.5)',
             // borderRadius: '0.5em',
             padding: '0.5em'
         },
@@ -99,7 +99,7 @@ define([], () => {
         },
         title: {
             fontWeight: 'bold',
-            backgroundColor: 'rgba(150, 150, 150, 1)',
+            backgroundColor: 'rgba(100, 100, 100, 1)',
             color: 'white',
         }
     };
