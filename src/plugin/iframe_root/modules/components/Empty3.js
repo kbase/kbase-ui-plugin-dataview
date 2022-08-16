@@ -1,7 +1,7 @@
 define([
     'preact',
     'htm',
-    './Empty.styles'
+    './Empty3.styles'
 ], (
     preact,
     htm,
@@ -11,18 +11,17 @@ define([
     const html = htm.bind(preact.h);
 
     class Empty extends Component {
-        renderMessage() {
-            if (this.props.message) {
-                return html`<span>${this.props.message}</span>`;
-            }
-            return this.props.children;
-        }
         render() {
             return html`
                 <div style=${styles.wrapper}>
                     <div style=${styles.main}>
-                        <div className="fa fa-lg fa-ban" style=${styles.icon} />
-                        ${this.renderMessage()}
+                        <div style=${styles.header}>
+                            <div className="fa fa-lg fa-ban" style=${styles.icon} />
+                            ${this.props.title || 'Empty'}
+                        </div>
+                        <div style=${styles.body}>
+                            ${this.props.children}
+                        </div>
                     </div>
                 </div>
             `;
