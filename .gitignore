@@ -9,6 +9,7 @@ _trash/
 # The dist directory is created during a build and left in place; it can be used in side-by-side development with
 # kbase-ui.
 /dist/
+dist.tgz
 
 # We don't check the vendor directory in; the vendor deps are only installed during
 # development, are captured in the dist.tgz.

@@ -84,7 +84,6 @@ async function taritup(rootDir) {
 
 async function main() {
     const cwd = process.cwd().split('/');
-    cwd.push('..');
     const projectPath = path.normalize(cwd.join('/'));
     console.log(`Project path: ${projectPath}`);
     console.log('Copying files to dist...');
