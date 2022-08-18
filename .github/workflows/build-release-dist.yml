@@ -23,6 +23,7 @@ jobs:
       - name: Upload dist to release
         uses: alexellis/upload-assets@0.2.2
         env:
-          GITHUB_TOKEN: ${{ secrets.KBASE_BOT_TOKEN }}
+          # GITHUB_TOKEN: ${{ secrets.KBASE_BOT_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         with:
           asset_paths: '["dist.zip"]'
