@@ -34,6 +34,10 @@ define([
         }
 
         async componentDidMount() {
+            this.loadData();
+        }
+
+        async loadData() {
             this.setState({
                 status: 'loading'
             });
@@ -143,10 +147,17 @@ define([
             }
 
             const objectInfos = (await this.fetchObjectInfos(wsClient, objectRefs))
-                .sort((a, b) => {
+                .sort(({info: a}, {info: b}) => {
+                    if (a === null) {
+                        if (b === null) {
+                            return 0;
+                        }
+                        return -1;
+                    } else if (b === null) {
+                        return 1;
+                    }
                     return a.name.localeCompare(b.name);
                 });
-
 
             return [false, objectInfos];
         }
@@ -163,11 +174,19 @@ define([
                 includeMetadata: 1
             }]);
 
-            return result.infos.filter((info) => {
-                return info;
-            })
-                .map((info) => {
-                    return APIUtils.objectInfoToObject(info);
+            return result.infos
+                .map((info, index) => {
+                    const ref = refs[index];
+                    if (info) {
+                        return {
+                            ref,
+                            info: APIUtils.objectInfoToObject(info)
+                        };
+                    }
+                    return {
+                        ref,
+                        info: null
+                    };
                 });
 
         }
@@ -227,25 +246,6 @@ define([
                 this.fetchWritableNarratives(wsClient)
             ]);
 
-            // const [result] = await wsClient.callFunc('get_object_info3', [{
-            //     objects: [{ ref}],
-            //     includeMetadata: 1
-            // }]);
-
-            // const objectInfo = APIUtils.objectInfoToObject(result.infos[0]);
-
-            // const [wsinfoResult] = await wsClient.callFunc('get_workspace_info', [{
-            //     id: this.props.workspaceId
-            // }]);
-            // const workspaceInfo = APIUtils.workspaceInfoToObject(wsinfoResult);
-
-            // const versions = await this.fetchObjectHistory(wsClient, ref);
-
-            // const [too_many_inc_refs, inc_references] = await this.fetchIncomingReferences(wsClient, ref);
-
-            // const [too_many_out_refs, out_references] = await this.fetchOutgoingReferences(wsClient, ref);
-
-            // const writableNarratives = await this.fetchWritableNarratives(wsClient);
 
             return {
                 objectInfo, workspaceInfo, versions,

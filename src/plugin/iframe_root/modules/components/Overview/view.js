@@ -356,21 +356,34 @@ define([
                     `;
                 }
 
-                const tableBody = this.props.out_references.map((ref) => {
+                const tableBody = this.props.out_references.map(({ref, info}) => {
+                    if (info) {
+                        return html`
+                            <tr>
+                                <td>
+                                    <a href=${`/#dataview/${ref}`}
+                                    target="_blank">${info.name}</a>
+                                </td>
+                                <td>
+                                    <a href=${`/#spec/type/${info.type}`} target="_blank">${info.typeName}</a>
+                                </td>
+                                <td>
+                                    ${dateFormat(info.save_date)}
+                                </td>
+                                <td>
+                                    <a href=${`/#people/${info.saved_by}`} target="_blank">${info.saved_by}</a>
+                                </td>
+                            </tr>
+                        `;
+                    }
                     return html`
                         <tr>
                             <td>
-                                <a href=${`/#dataview/${ref.wsid}/${ref.id}/${ref.version}`}
-                                   target="_parent">${ref.name}</a>
+                                <a href=${`/#dataview/${ref}`}
+                                target="_blank">${ref}</a>
                             </td>
-                            <td>
-                                <a href=${`/#spec/type/${ref.type}`} target="_parent">${ref.typeName}</a>
-                            </td>
-                            <td>
-                                ${dateFormat(ref.save_date)}
-                            </td>
-                            <td>
-                                <a href=${`/#people/${ref.saved_by}`} target="_parent">${ref.saved_by}</a>
+                            <td colspan="3">
+                                Object inaccessible
                             </td>
                         </tr>
                     `;
@@ -383,8 +396,7 @@ define([
                             <th>Name</th>
                             <th>Type</th>
                             <th>Saved</th>
-                            <th>By
-                            </td>
+                            <th>By</td>
                         </tr>
                         </thead>
                         <tbody>

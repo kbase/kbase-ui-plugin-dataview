@@ -31,17 +31,17 @@ define([
                     }
                 },
                 {
-                    id: 'publications',
-                    title: 'Publications',
-                    render: () => {
-                        return html`<${Publications}  searchTerm=${this.props.genomeObject.data.scientific_name} />`;
-                    }
-                },
-                {
                     id: 'taxonomy',
                     title: 'Taxonomy',
                     render: () => {
                         return html`<${Taxonomy} ...${this.props} />`;
+                    }
+                },
+                {
+                    id: 'publications',
+                    title: 'Publications',
+                    render: () => {
+                        return html`<${Publications}  searchTerm=${this.props.genomeObject.data.scientific_name} />`;
                     }
                 },
                 {
