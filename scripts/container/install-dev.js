@@ -15,7 +15,6 @@ async function updateFiles(rootDir) {
 
 async function main() {
     const cwd = process.cwd().split('/');
-    cwd.push('..');
     const projectPath = path.normalize(cwd.join('/'));
     // eslint-disable-next-line no-console
     console.log(`Project path: ${projectPath}`);
