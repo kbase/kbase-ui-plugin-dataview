@@ -35,7 +35,7 @@ define([
                 return h('div', null,
                     h('p', null, [
                         'This object is located in a private Narrative. ',
-                        'This means that you may only access it if you are logged in and have access to the Narrative.'
+                        'This means that you may only access it if you are logged in and have access to that Narrative.'
                     ]),
                     h('p', null, [
                         'In order to access this object you must first log in.'
@@ -44,7 +44,7 @@ define([
                 return h('div', null,
                     h('p', null, [
                         'This object is located in a private Narrative. ',
-                        'This means that you may only access it if you are logged in and have access to the Narrative.'
+                        'This means that you may only access it if you are logged in and have access to that Narrative.'
                     ]),
                     h('p', null, [
                         'You are logged in but do not have access to the Narrative this object is located in.'
