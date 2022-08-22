@@ -5,13 +5,14 @@
     "main": "index.js",
     "scripts": {
         "clean": "grunt clean",
-        "install-bower": "bower-installer",
+        "install-bower": "echo \"XDG_CONFIG_HOME=${XDG_CONFIG_HOME}\" && echo \"XDG_CACHE_HOME=${XDG_CACHE_HOME}\"  && echo \"XDG_DATA_HOME=${XDG_DATA_HOME}\"  && bower-installer",
         "install-npm": "grunt copy",
         "remove-source-maps": "node scripts/container/remove-source-maps.js",
         "install-dist": "node scripts/container/install-dist.js",
         "install-dev": "node scripts/container/install-dev.js",
         "build": "bash scripts/build.sh",
-        "update": "node scripts/container/install-dev.js"
+        "update": "node scripts/container/install-dev.js",
+        "watch": "nodemon --watch ./src --ext js,css,yml,yaml,json --exec 'npm run install-dev'"
     },
     "repository": {
         "type": "git",
@@ -46,6 +47,13 @@
         "numeral": "2.0.6",
         "requirejs-json": "0.0.3",
         "tar": "6.1.11",
-        "terser": "5.14.1"
-    }
+        "terser": "5.14.1",
+        "nodemon": "2.0.15",
+        "eslint": "8.12.0",
+        "eslint-config-preact": "1.3.0"
+    },
+    "directories": {
+        "doc": "docs"
+    },
+    "keywords": []
 }

@@ -1,8 +1,6 @@
 set -e
-rm -rf __xdg__
-mkdir -p __xdg__/confg 
-mkdir -p __xdg__/cache
-mkdir -p __xdg__/data
+mkdir __config__
+export XDG_CONFIG_HOME=${PWD}/__config__
 export DIR=${PWD}
 echo "--------------------------"
 echo "Starting Build"
@@ -26,12 +24,7 @@ docker compose run --rm node npm install
 echo "--------------------------"
 echo "Installing bower packages..."
 echo "CONFIG $XDG_CONFIG_HOME"
-# docker compose run --rm  -e XDG_CONFIG_HOME=${XDG_CONFIG_HOME} node npm run install-bower
-docker compose run --rm  \
-  -e XDG_CONFIG_HOME=/app/__xdg__/config \
-  -e XDG_CACHE_HOME=/app/__xdg__/cache \
-  -e XDG_DATA_HOME=/app/__xdg__/data \
-  node npm run install-bower
+docker compose run --rm  -e XDG_CONFIG_HOME=${XDG_CONFIG_HOME} node npm run install-bower
 echo "--------------------------"
 echo "Copying npm packages..."
 docker compose run --rm node npm run install-npm

@@ -2,26 +2,21 @@ define([
     'preact',
     'htm',
     './view',
-    'kb_lib/jsonRpc/genericClient',
     'kb_service/utils',
     'components/Loading2',
+    'lib/Model',
 
     'bootstrap'
 ], (
     preact,
     htm,
     View,
-    GenericClient,
     APIUtils,
-    Loading
+    Loading,
+    Model
 ) => {
-
-
     const {Component} = preact;
     const html = htm.bind(preact.h);
-
-    const MAX_OUTGOING_REFS = 100;
-    const MAX_INCOMING_REFS = 100;
 
     class Overview extends Component {
         constructor(props) {
@@ -31,9 +26,18 @@ define([
                 data: null,
                 error: null
             };
+
+            this.model = new Model({
+                workspaceURL: this.props.runtime.config('services.Workspace.url'),
+                authToken: this.props.runtime.service('session').getAuthToken()
+            });
         }
 
         async componentDidMount() {
+            this.loadData();
+        }
+
+        async loadData() {
             this.setState({
                 status: 'loading'
             });
@@ -98,104 +102,7 @@ define([
             }
         }
 
-        async fetchObjectHistory(wsClient, ref) {
-            const [result] = await wsClient.callFunc('get_object_history', [{
-                ref
-            }]);
-
-            return result.map((version) => {
-                return APIUtils.objectInfoToObject(version);
-            })
-                .sort((a, b) => {
-                    return a.version - b.version;
-                });
-        }
-
-        async fetchIncomingReferences(wsClient, ref) {
-            const counts = await wsClient.callFunc('list_referencing_object_counts', [[{
-                ref
-            }]]);
-            if (counts[0] > MAX_INCOMING_REFS) {
-                return [true, null];
-            }
-            const [result] = await wsClient.callFunc('list_referencing_objects', [[{ref}]]);
-            const references = result[0].map((reference) => {
-                return APIUtils.objectInfoToObject(reference);
-            })
-                .sort((a, b) => {
-                    return a.name.localeCompare(b.name);
-                });
-
-            return [false, references];
-        }
-
-        async fetchOutgoingReferences(wsClient, ref) {
-            const [[result]] = await wsClient.callFunc('get_object_provenance', [[{ref}]]);
-            const objectRefs = result.provenance.reduce((objectRefs, reference) => {
-                reference.resolved_ws_objects.forEach((ref) => {
-                    objectRefs.push(ref);
-                });
-                return objectRefs;
-            }, result.refs);
-
-            if (objectRefs.length > MAX_OUTGOING_REFS) {
-                return [true, null];
-            }
-
-            const objectInfos = (await this.fetchObjectInfos(wsClient, objectRefs))
-                .sort((a, b) => {
-                    return a.name.localeCompare(b.name);
-                });
-
-
-            return [false, objectInfos];
-        }
-
-        async fetchObjectInfos(wsClient, refs) {
-            if (refs.length === 0) {
-                return [];
-            }
-            const [result] = await wsClient.callFunc('get_object_info3', [{
-                objects: refs.map((ref) => {
-                    return {ref};
-                }),
-                ignoreErrors: 1,
-                includeMetadata: 1
-            }]);
-
-            return result.infos.filter((info) => {
-                return info;
-            })
-                .map((info) => {
-                    return APIUtils.objectInfoToObject(info);
-                });
-
-        }
-
-        async fetchWritableNarratives(wsClient) {
-            const [workspaceInfos] = await wsClient.callFunc('list_workspace_info', [{
-                perm: 'w'
-            }]);
-            return workspaceInfos.map((workspaceInfo) => {
-                return APIUtils.workspaceInfoToObject(workspaceInfo);
-            })
-                .filter((workspaceInfo) => {
-                    return (workspaceInfo.metadata.narrative &&
-                        !isNaN(parseInt(workspaceInfo.metadata.narrative, 10)) &&
-                        workspaceInfo.id !== this.props.workspaceId &&
-                        workspaceInfo.metadata.narrative_nice_nice &&
-                        workspaceInfo.metadata.is_temporary &&
-                        workspaceInfo.metadata.is_temporary !== 'true');
-                });
-        }
-
         async fetchData() {
-            const wsClient = new GenericClient({
-                module: 'Workspace',
-                url: this.props.runtime.config('services.Workspace.url'),
-                token: this.props.runtime.service('session').getAuthToken()
-            });
-
             const ref = APIUtils.makeWorkspaceObjectRef(
                 this.props.workspaceId,
                 this.props.objectId,
@@ -207,45 +114,16 @@ define([
                 workspaceInfo,
                 versions,
                 [too_many_inc_refs, inc_references],
-                [too_many_out_refs, out_references],
+                [too_many_out_refs,out_references],
                 writableNarratives
             ] = await Promise.all([
-                wsClient.callFunc('get_object_info3', [{
-                    objects: [{ref}],
-                    includeMetadata: 1
-                }]).then(([result]) => {
-                    return APIUtils.objectInfoToObject(result.infos[0]);
-                }),
-                wsClient.callFunc('get_workspace_info', [{
-                    id: this.props.workspaceId
-                }]).then(([result]) => {
-                    return APIUtils.workspaceInfoToObject(result);
-                }),
-                this.fetchObjectHistory(wsClient, ref),
-                this.fetchIncomingReferences(wsClient, ref),
-                this.fetchOutgoingReferences(wsClient, ref),
-                this.fetchWritableNarratives(wsClient)
+                this.model.getObjectInfo(ref),
+                this.model.getWorkspaceInfo(this.props.workspaceId),
+                this.model.getObjectHistory(ref),
+                this.model.getIncomingReferences(ref),
+                this.model.getOutgoingReferences(ref),
+                this.model.getWritableNarratives(this.props.workspaceId)
             ]);
-
-            // const [result] = await wsClient.callFunc('get_object_info3', [{
-            //     objects: [{ ref}],
-            //     includeMetadata: 1
-            // }]);
-
-            // const objectInfo = APIUtils.objectInfoToObject(result.infos[0]);
-
-            // const [wsinfoResult] = await wsClient.callFunc('get_workspace_info', [{
-            //     id: this.props.workspaceId
-            // }]);
-            // const workspaceInfo = APIUtils.workspaceInfoToObject(wsinfoResult);
-
-            // const versions = await this.fetchObjectHistory(wsClient, ref);
-
-            // const [too_many_inc_refs, inc_references] = await this.fetchIncomingReferences(wsClient, ref);
-
-            // const [too_many_out_refs, out_references] = await this.fetchOutgoingReferences(wsClient, ref);
-
-            // const writableNarratives = await this.fetchWritableNarratives(wsClient);
 
             return {
                 objectInfo, workspaceInfo, versions,

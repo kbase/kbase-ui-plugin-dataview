@@ -3,8 +3,6 @@ define([
     'htm',
     'jquery',
     'd3',
-    'kb_lib/jsonRpc/genericClient',
-    'lib/domUtils',
     'ResizeObserver',
 
     // For effect
@@ -15,8 +13,6 @@ define([
     htm,
     $,
     d3,
-    GenericClient,
-    {objectInfoToObject},
     ResizeObserver
 ) => {
     const {Component} = preact;
@@ -44,35 +40,43 @@ define([
     // able to even see the detail tables below it.
     const DEFAULT_MAX_HEIGHT = 400;
 
-    const TYPES = {
-        selected: {
-            color: '#FF9800',
-            name: 'Current version'
-        },
+    const NODE_TYPES = {
         core: {
             color: '#FF9800',
             name: 'All Versions of this Data'
         },
-        ref: {
+        referencing: {
             color: '#C62828',
             name: 'Data Referencing this Data'
         },
-        included: {
+        references: {
             color: '#2196F3',
             name: 'Data Referenced by this Data'
         },
-        none: {
-            color: '#CCC',
-            name: ''
+        used: {
+            color: '#2196F3',
+            name: 'Data Objects used to create this Data Object'
         },
-        copied: {
+        copiedFrom: {
             color: '#4BB856',
             name: 'Copied From'
         },
 
+        none: {
+            color: '#CCC',
+            name: ''
+        },
+        selected: {
+            color: '#FF9800',
+            name: 'Current version'
+        },
         inaccessible: {
             color: '#fc03f8',
             name: 'Inaccessible'
+        },
+        unknown: {
+            color: '#fc03f8',
+            name: 'UNKNOWN'
         },
     };
 
@@ -81,13 +85,22 @@ define([
             color: '#C62828',
             name: 'Data Referencing this Data'
         },
-        included: {
+        used: {
+            color: '#2196F3',
+            name: 'Data Used by this Data Object when it was created'
+        },
+        references: {
             color: '#2196F3',
             name: 'Data Referenced by this Data'
         },
-        referenced: {
-            color: '#2196F3',
-            name: 'Data Referenced by this Data'
+        copiedFrom: {
+            color: '#4BB856',
+            name: 'Copied From'
+        },
+
+        inaccessible: {
+            color: '#fc03f8',
+            name: ''
         },
         none: {
             color: '#CCC',
@@ -96,26 +109,10 @@ define([
         unknown: {
             color: '#fc03f8',
             name: '#fc03f8'
-        },
-        inaccessible: {
-            color: '#fc03f8',
-            name: ''
-        },
-        copied: {
-            color: '#4BB856',
-            name: 'Copied From'
         }
     };
 
     // Utility functions.
-
-    // function makeLink(source, target, value) {
-    //     return {
-    //         source,
-    //         target,
-    //         value
-    //     };
-    // }
 
     function getTimeStampStr(objInfoTimeStamp) {
         const monthLookup = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -203,6 +200,23 @@ define([
             });
         }
 
+        getStrokeColor(relationship) {
+            if (relationship in LINK_TYPES) {
+                return LINK_TYPES[relationship].color;
+            }
+            console.warn('unconfigured relationship', relationship)
+            return LINK_TYPES.unknown.color;
+        }
+
+        getNodeColor(nodeType) {
+            if (nodeType in NODE_TYPES) {
+                return NODE_TYPES[nodeType].color;
+            }
+            console.warn('unconfigured node type', nodeType)
+            return NODE_TYPES.unknown.color;
+            // return (d.color = TYPES[d['nodeType']].color);
+        }
+
         renderGraph(graphNode) {
             const $graphNode = $(graphNode);
 
@@ -267,7 +281,7 @@ define([
                     return 10; /*Math.max(1, d.dy);*/
                 })
                 .style('stroke', (d) => {
-                    return (d.color = LINK_TYPES[d.relationship].color);
+                    return d.color = this.getStrokeColor(d.relationship);
                 })
                 .style('stroke-opacity', '0.3')
                 .on('mouseover', function () {
@@ -294,9 +308,9 @@ define([
                         default:
                             return `${d.target.name} is a newer version of ${d.source.name}`;
                         }
-                    case 'copied':
+                    case 'copiedFrom':
                         return `${d.target.info.ref} copied from ${d.source.info.ref}`;
-                    case 'ref':
+                    case 'referencing':
                         return `${d.source.name} references ${d.target.name}`;
                     case 'none':
                         return `no references from ${d.target.name}`;
@@ -376,7 +390,8 @@ define([
                 })
                 .attr('width', sankey.nodeWidth())
                 .style('fill', (d) => {
-                    return (d.color = TYPES[d['nodeType']].color);
+                    return (d.color = this.getNodeColor(d.nodeType));
+                    // return (d.color = TYPES[d['nodeType']].color);
                 })
                 .on('mouseover', function (d) {
                     d3.select(this).style('fill', d3.rgb(d.color).darker(1).toHex());
@@ -406,13 +421,20 @@ define([
                         } else {
                             text += '     none';
                         }
-
                     }
 
                     return text;
                 });
 
             // add in the title for the nodes
+            // node
+            //     .append('foreignObject')
+            //     .append("xhtml:div")
+            //     .html(({label}) => {
+            //         console.log('label??', label);
+            //         return label
+            //     });
+
             node.append('text')
                 .attr('y', (d) => {
                     return d.dy / 2;
@@ -420,14 +442,15 @@ define([
                 .attr('dy', '.35em')
                 .attr('text-anchor', 'end')
                 .attr('transform', null)
-                .text((d) => {
-                    return d.name;
+                .text(({label}) => {
+                    return label;
                 })
                 .filter((d) => {
                     return d.x < width / 2;
                 })
                 .attr('x', 6 + sankey.nodeWidth())
                 .attr('text-anchor', 'start');
+
             return this;
         }
 
