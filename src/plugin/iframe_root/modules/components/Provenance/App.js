@@ -223,6 +223,8 @@ define([
         }
 
         renderGraphToolbar() {
+            // 
+                            // ${this.renderShowAllVersionsToggle()}
             return html`
                 <div style=${styles.graphToolbar}>
                     <div style=${styles.graphToolbarHeaderRow}>
@@ -240,7 +242,6 @@ define([
                         <div style=${styles.graphToolbarCol}>
                         </div>
                         <div style=${styles.graphToolbarCol}>
-                            ${this.renderShowAllVersionsToggle()}
                         </div>
                         <div style=${styles.graphToolbarCol}>
                             ${this.renderThisNarrativeToggle()}

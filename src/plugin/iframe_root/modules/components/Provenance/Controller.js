@@ -4,8 +4,8 @@ define([
     'components/Loading',
     'components/ErrorView',
     'kb_lib/jsonRpc/genericClient',
-    './utils',
-    './App'
+    './App',
+    'lib/Model'
 
 ], (
     preact,
@@ -13,8 +13,8 @@ define([
     Loading,
     ErrorView,
     GenericClient,
-    {objectInfoToObject2},
-    App
+    App,
+    Model
 ) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
@@ -63,13 +63,18 @@ define([
                     over: false
                 }
             };
+            
+            this.model = new Model({
+                workspaceURL: this.props.runtime.config('services.Workspace.url'),
+                authToken: this.props.runtime.service('session').getAuthToken()
+            });
         }
 
         componentDidMount() {
             this.fetchData();
         }
 
-        getNodeLabel(info, nodeId) {
+        getNodeName(info, nodeId) {
             switch (this.state.nodeLabelType) {
             case 'object-name':
                 return `${info.name} (v${info.version})`;
@@ -82,72 +87,38 @@ define([
             }
         }
 
-        processObjectHistory(data) {
-            const objIdentities = [];
-            let latestVersion = 0,
-                latestObjId = '';
-
-            // These are global - but not really!
-            const objRefToNodeIdx = {};
-            const graph = {
-                nodes: [],
-                links: []
-            };
-
-            data.forEach((info) => {
-                //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
-                const objectInfo = objectInfoToObject2(info);
-                const objRef = objectInfo.ref;
-                const nodeId = graph.nodes.length;
-                graph.nodes.push({
-                    node: nodeId,
-                    name: this.getNodeLabel(objectInfo, nodeId),
-                    info: objectInfo,
-                    nodeType: 'core',
-                    objId: objRef
-                });
-                if (objectInfo[4] > latestVersion) {
-                    latestVersion = objectInfo[4];
-                    latestObjId = objRef;
-                }
-                objRefToNodeIdx[objRef] = nodeId;
-                objIdentities.push(objectInfo);
-            });
-            if (latestObjId.length > 0) {
-                graph.nodes[objRefToNodeIdx[latestObjId].nodeType] = 'selected';
+        formatTitlePart(titlePart) {
+            if (titlePart.length < 25) {
+                return titlePart;
             }
-            return {objIdentities, objRefToNodeIdx, graph};
+            return `${titlePart.substr(0, 25)}…`
         }
 
-        processObject(objectInfo) {
-            // This is where we initialize these core data objects which are threaded through
-            // several methods to generate the data for the graph.
-            const objIdentities = [];
-            const objRefToNodeIdx = {};
-            const graph = {
-                nodes: [],
-                links: []
-            };
+        getNodeLabel(info, nodeId) {
+            switch (this.state.nodeLabelType) {
+            case 'object-name':
+                 return `${this.formatTitlePart(info.name)} (${info.typeName})`;
+            case 'type':
+                return `${info.typeName} (${info.ref})`;
+            case 'ref':
+                return `${info.ref} (${info.typeName})`;
+            case 'node-number':
+                return `#${nodeId} ${info.typeName} (${info.ref})`;
+            }
+        }
 
-            objIdentities.push(objectInfo);
-
+        processObject(objectInfo, {graph, objRefToNodeIdx}) {
             // The primordial node.
             const nodeId = 0;
 
             graph.nodes.push({
                 node: nodeId,
-                name: this.getNodeLabel(objectInfo, nodeId),
+                name: this.getNodeName(objectInfo, nodeId),
+                label: this.getNodeLabel(objectInfo, nodeId),
                 info: objectInfo,
                 nodeType: 'core',
                 objId: objectInfo.ref
             });
-
-            objRefToNodeIdx[objectInfo.ref] = nodeId;
-
-            // TODO: don't now what this does; find out and document.
-            graph.nodes[objRefToNodeIdx[objectInfo.ref].nodeType] = 'selected';
-
-            return {objIdentities, objRefToNodeIdx, graph};
         }
 
         filterCondition(refInfo, objInfo) {
@@ -169,106 +140,52 @@ define([
         /* Adds nodes and links for all referencing objects, with the link terminating at a
            node which is the target object (or one of it's versions, if the showAllVersions flag is on)
         */
-        async getReferencingObjects(objIdentities, graph, objRefToNodeIdx, objectInfo) {
-            // Note that graph and objRefToNodeIdx are MODIFIED.
-            const wsClient = new GenericClient({
-                module: 'Workspace',
-                url: this.props.runtime.config('services.Workspace.url'),
-                token: this.props.runtime.service('session').getAuthToken()
-            });
+        async getReferencingObjects(objectInfo, {graph}) {
+            const referencingObjects = await this.model.getReferencingObjects(objectInfo.ref);
 
-            const [results] =  await wsClient.callFunc('list_referencing_objects', [objIdentities.map(({ref}) => {return {ref};})]);
-
-            // convert all object info to object-ified object info.
-            const referencingObjectsSets = results.map((referencingObjects) => {
-                return referencingObjects.map((info) => {
-                    return objectInfoToObject2(info);
-                });
-            });
-
-            const {totalCount, filteredCount, totalReports, totalObjectsInOtherNarratives} = (() => {
-                let filteredCount = 0;
-                let totalCount = 0;
-                let totalReports = 0;
-                let totalObjectsInOtherNarratives = 0;
-
-                referencingObjectsSets.forEach((referencingObjects, setIndex) => {
-                    referencingObjects.forEach((referencingObject) => {
-                        if (this.filterCondition(referencingObject, objIdentities[setIndex])) {
-                            filteredCount += 1;
-                        }
-                        totalCount += 1;
-
-                        if (referencingObject.typeModule === 'KBaseReport' &&
-                        referencingObject.typeName === 'Report') {
-                            totalReports += 1;
-                        }
-                        // We also track the total # of objects not in the same workspace as the subject object.
-                        if (referencingObject.wsid !== objectInfo.wsid) {
-                            totalObjectsInOtherNarratives += 1;
-                        }
-                    });
-                });
-
-                // We track the total # of report objects (useful for the filtering ui)
-
-                return {totalCount, filteredCount, totalReports, totalObjectsInOtherNarratives};
-            })();
-
-            // We have a list of lists - one list for each object version as contained in objectIdentities.
+            let filteredCount = 0;
+            let totalCount = 0;
+            let totalReports = 0;
+            let totalObjectsInOtherNarratives = 0;
             let referencingObjectCount = 0;
-
-            for (let i = 0; i < referencingObjectsSets.length; i++) {
-                // This is the nodeId of the subject object, the one to which references are made;
-                // we want links from this node to the referencing node.
-                const fromNodeId = objRefToNodeIdx[objIdentities[i].ref];
-
-                for (let k = 0; k < referencingObjectsSets[i].length; k++) {
-                    const referencingObjectInfo = referencingObjectsSets[i][k];
-
-
-                    if (!this.filterCondition(referencingObjectInfo, objIdentities[i])) {
-                        continue;
-                    }
-
-                    referencingObjectCount += 1;
-
-                    //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
-                    const ref = referencingObjectInfo.ref;
-
+            for (const referencingObject of referencingObjects) {
+                console.log('referencing object', referencingObject);
+                referencingObjectCount += 1;
+                if (this.filterCondition(referencingObject, objectInfo)) {
+                    filteredCount += 1;
                     const graphNodeId = graph.nodes.length;
                     graph.nodes.push({
                         node: graphNodeId,
-                        name: this.getNodeLabel(referencingObjectInfo, graphNodeId),
-                        info: referencingObjectInfo,
-                        nodeType: 'ref',
-                        objId: ref
+                        name: this.getNodeName(referencingObject, graphNodeId),
+                        label: this.getNodeLabel(referencingObject, graphNodeId),
+                        info: referencingObject,
+                        nodeType: 'referencing',
+                        objId: referencingObject.ref
                     });
+                    graph.links.push(makeLink(0, graphNodeId, 1, 'referencing'));
+                }
+                totalCount += 1;
 
-                    // Allows lookup of the node from the ref by getting the id, actually the node index, which can then be
-                    // used to index into graph.nodes.
-                    objRefToNodeIdx[ref] = graphNodeId;
+                if (referencingObject.typeModule === 'KBaseReport' &&
+                    referencingObject.typeName === 'Report') {
+                    totalReports += 1;
+                }
+                // We also track the total # of objects not in the same workspace as the subject object.
+                if (referencingObject.wsid !== objectInfo.wsid) {
+                    totalObjectsInOtherNarratives += 1;
+                }
 
-                    // add the link now too
-                    if (objRefToNodeIdx[objIdentities[i].ref] !== null) {
-                        // only add the link if it is visible
-                        graph.links.push(makeLink(fromNodeId, graphNodeId, 1, 'referencing'));
-                    }
-
-                    // If we have exceeded the maximum number of objects we support in the graph,
-                    // create a fake entry.
-                    // TODO: explain how this is eventually displayed, because this is weird.
-                    if (referencingObjectCount >= MAX_REFERENCING_OBJECTS) {
-                        return {
-                            totalReferencingObjects: totalCount,
-                            filteredReferencingObjects: filteredCount,
-                            truncated: true,
-                            totalReports,
-                            totalObjectsInOtherNarratives
-                        };
-                    }
+                if (referencingObjectCount >= MAX_REFERENCING_OBJECTS) {
+                    return {
+                        totalReferencingObjects: totalCount,
+                        filteredReferencingObjects: filteredCount,
+                        truncated: true,
+                        totalReports,
+                        totalObjectsInOtherNarratives
+                    };
                 }
             }
+
             return {
                 totalReferencingObjects: totalCount,
                 filteredReferencingObjects: filteredCount,
@@ -278,10 +195,10 @@ define([
             };
         }
 
-        async addNullReferencingObject(graph, from) {
-            const to = graph.nodes.length;
+        addNullReferencingObject({graph}) {
+            const nodeId = graph.nodes.length;
             graph.nodes.push({
-                node: to,
+                node: nodeId,
                 name: '∅ (no referencing objects)',
                 info: null,
                 nodeType: 'none',
@@ -289,219 +206,70 @@ define([
                 isFake: true
             });
             // 0th node is always the subject.
-            graph.links.push(makeLink(from, to, 1, 'none'));
-            return to;
+            graph.links.push(makeLink(0, nodeId, 1, 'none'));
         }
 
-        async addNullReferencedObject(graph, to) {
-            const from = graph.nodes.length;
+        async addNullReferencedObject({graph}) {
+            const nodeId = graph.nodes.length;
             graph.nodes.push({
-                node: from,
+                node: nodeId,
                 name: '∅ (no referenced objects)',
                 info: null,
                 nodeType: 'none',
                 objId: null,
                 isFake: true
             });
-            // 0th node is always the subject.
-            graph.links.push(makeLink(from, to, 1, 'none'));
-            return from;
+            // 0th node is always the target.
+            graph.links.push(makeLink(nodeId, 0, 1, 'none'));
         }
 
-        async getObjectProvenance(objIdentities) {
-            const wsClient = new GenericClient({
-                module: 'Workspace',
-                url: this.props.runtime.config('services.Workspace.url'),
-                token: this.props.runtime.service('session').getAuthToken()
-            });
-            const [objdata] = await  wsClient.callFunc('get_object_provenance', [objIdentities.map(({ref}) => {return {ref};})]);
+        async getObjectProvenance(ref, {graph}) {
+            const [truncated, objectReferences] = await this.model.getOutgoingReferences(ref);
+            const uniqueRefs = new Set();
 
-            const uniqueRefs = {},
-                uniqueRefObjectIdentities = [],
-                links = [];
-
-            let totalReferencedObjects = 0;
-
+            // Each object reference is a unique ref already.
+            // Our job here is to create a node for each one,
+            // and a link from the subject ref to this node.
             let isCopied = false;
-            objdata.forEach((objectProvenance) => {
-                const objRef = getObjectRef(objectProvenance.info);
-
-                totalReferencedObjects += objectProvenance.refs.length;
-
-                // extract the references contained within the object
-                objectProvenance.refs.forEach((ref) => {
-                    if (!(ref in uniqueRefs)) {
-                        uniqueRefs[ref] = 'included';
-                        uniqueRefObjectIdentities.push({ref});
-                    }
-                    links.push(makeLink(ref, objRef, 1, 'included'));
-                });
-
-                // extract the references from the provenance
-                // TODO: is this not duplicative of the above?
-                objectProvenance.provenance.forEach((provenance) => {
-                    if (provenance.resolved_ws_objects) {
-                        totalReferencedObjects += provenance.resolved_ws_objects.length;
-                        provenance.resolved_ws_objects.forEach((resolvedObjectRef) => {
-                            if (!(resolvedObjectRef in uniqueRefs)) {
-                                uniqueRefs[resolvedObjectRef] = 'included'; // TODO switch to prov??
-                                uniqueRefObjectIdentities.push({ref: resolvedObjectRef});
-                            }
-                            links.push(makeLink(resolvedObjectRef, objRef, 1, 'included'));
-                        });
-                    }
-                });
-
-                // copied from
-                if (objectProvenance.copied) {
+            for (const {ref, relation, info} of objectReferences) {
+                const nodeId = graph.nodes.length;
+                if (relation.includes('copiedFrom')) {
                     isCopied = true;
-                    const copyShort =
-                        `${objectProvenance.copied.split('/')[0]}/${objectProvenance.copied.split('/')[1]}`;
-                    const thisShort = getObjectRefShort(objectProvenance.info);
-                    if (copyShort !== thisShort) {
-                        // only add if it wasn't copied from an older version
-                        if (!(objectProvenance.copied in uniqueRefs)) {
-                            uniqueRefs[objectProvenance.copied] = 'copied'; // TODO switch to prov??
-                            uniqueRefObjectIdentities.push({ref: objectProvenance.copied});
-                        }
-                        links.push(makeLink(objectProvenance.copied, objRef, 1, 'copied'));
-                    }
                 }
-            });
-            const result = {
-                totalReferencedObjects: Object.keys(uniqueRefs).length,
+                if (info) {
+                    graph.nodes.push({
+                        node: nodeId,
+                        name: info.name,
+                        info: info,
+                        name: this.getNodeName(info, nodeId),
+                        label: this.getNodeLabel(info, nodeId),
+                        // TODO: align with multiple possible relations
+                        nodeType: relation[0],
+                        objId: info.ref,
+                        isFake: false
+                    });
+                } else {
+                    // Case in which the object is inaccessible 
+                     graph.nodes.push({
+                        node: nodeId,
+                        name: 'unknown',
+                        info: info,
+                        name: this.getNodeName(info, nodeId),
+                        label: this.getNodeLabel(info, nodeId),
+                        // TODO: align with multiple possible relations
+                        nodeType: 'none',
+                        objId: null,
+                        isFake: false
+                    });
+                }
+                graph.links.push(makeLink(nodeId, 0, 1, relation[0]))
+            }
+
+            return {
+                totalReferencedObjects: objectReferences.length,
                 uniqueRefs,
-                uniqueRefObjectIdentities,
-                links,
                 isCopied
             };
-            return result;
-        }
-
-        async getObjectInfo(refData, graph, objRefToNodeIdx) {
-            const wsClient = new GenericClient({
-                module: 'Workspace',
-                url: this.props.runtime.config('services.Workspace.url'),
-                token: this.props.runtime.service('session').getAuthToken()
-            });
-            try {
-                const [objInfoList] = await wsClient.callFunc('get_object_info_new', [{
-                    objects: refData['uniqueRefObjectIdentities'],
-                    includeMetadata: 1,
-                    ignoreErrors: 1
-                }]);
-
-                const objInfoStash = {};
-                for (let i = 0; i < objInfoList.length; i++) {
-                    if (objInfoList[i]) {
-                        objInfoStash[`${objInfoList[i][6]}/${objInfoList[i][0]}/${objInfoList[i][4]}`] =
-                            objectInfoToObject2(objInfoList[i]);
-                    }
-                }
-                // add the nodes
-                const uniqueRefs = refData.uniqueRefs;
-                for (const ref in uniqueRefs) {
-                    const refInfo = objInfoStash[ref];
-                    if (refInfo) {
-                        //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
-                        const objRef = refInfo.ref;
-                        const nodeId = graph.nodes.length;
-                        graph.nodes.push({
-                            node: nodeId,
-                            name: this.getNodeLabel(refInfo, nodeId),
-                            info: refInfo,
-                            nodeType: uniqueRefs[ref],
-                            objId: objRef
-                        });
-                        objRefToNodeIdx[objRef] = nodeId;
-                    } else {
-                        // there is a reference, but we no longer have access; could do something better
-                        // here, but instead we just skip
-                        // At least warn... there be bugs if this happens...
-                        console.warn(`In provenance widget reference ${ref} is not accessible`);
-                        const nodeId = graph.nodes.length;
-                        graph.nodes.push({
-                            node: nodeId,
-                            name: `Inaccessible (${ref})`,
-                            info: null,
-                            nodeType: 'inaccessible',
-                            objId: ref
-                        });
-                        objRefToNodeIdx[ref] = nodeId;
-
-                    }
-                }
-                // add the link info
-                refData.links.forEach((link) => {
-                    // TODO: is this condition possible?
-                    if (isUndefNull(objRefToNodeIdx[link.source]) || isUndefNull(objRefToNodeIdx[link.target])) {
-                        console.warn('skipping link', link, objRefToNodeIdx[link.source], objRefToNodeIdx[link.target]);
-                    } else {
-                        graph.links.push(
-                            makeLink(objRefToNodeIdx[link.source], objRefToNodeIdx[link.target], link.value, link.relationship)
-                        );
-                    }
-                });
-            } catch (ex) {
-                // we couldn't get info for some reason, could be if objects are deleted or not visible
-                const uniqueRefs = refData['uniqueRefs'];
-                for (const ref in uniqueRefs) {
-                    const nodeId = graph['nodes'].length;
-                    const refTokens = ref.split('/');
-                    // TODO: probably better to have a special node type rather than create a fake
-                    // object info!
-                    graph['nodes'].push({
-                        node: nodeId,
-                        name: ref,
-                        info: objectInfoToObject2([
-                            refTokens[1],
-                            'Data not found, object may be deleted',
-                            'Unknown',
-                            '',
-                            refTokens[2],
-                            'Unknown',
-                            refTokens[0],
-                            refTokens[0],
-                            'Unknown',
-                            'Unknown',
-                            {}
-                        ]),
-                        nodeType: uniqueRefs[ref],
-                        objId: ref
-                    });
-                    objRefToNodeIdx[ref] = nodeId;
-                }
-                // add the link info
-                const links = refData['links'];
-                for (let i = 0; i < links.length; i++) {
-                    graph['links'].push(
-                        makeLink(
-                            objRefToNodeIdx[links[i]['source']],
-                            objRefToNodeIdx[links[i]['target']],
-                            links[i]['value'],
-                            'unknown'
-                        )
-                    );
-                }
-            }
-        }
-
-        addVersionEdges(graph, objRefToNodeIdx) {
-            //loop over graph nodes, get next version, if it is in our node list, then add it
-            let expectedNextVersion, expectedNextId;
-            graph.nodes.forEach((node) => {
-                // TODO: add flag for isObject
-                if (node.nodeType === 'copied' || node.nodeType === 'none' || node.nodeType === 'inaccessible') {
-                    return;
-                }
-                //0:obj_id, 1:obj_name, 2:type ,3:timestamp, 4:version, 5:username saved_by, 6:ws_id, 7:ws_name, 8 chsum, 9 size, 10:usermeta
-                expectedNextVersion = node.info[4] + 1;
-                expectedNextId = `${node.info[6]}/${node.info[0]}/${expectedNextVersion}`;
-                if (objRefToNodeIdx[expectedNextId]) {
-                    // add the link now too
-                    graph.links.push(makeLink(objRefToNodeIdx[node.objId], objRefToNodeIdx[expectedNextId], 1, 'version'));
-                }
-            });
         }
 
         async fetchData(reloading = false) {
@@ -511,112 +279,71 @@ define([
                 status: reloading ? 'RELOADING' : 'LOADING'
             });
 
-            const wsClient = new GenericClient({
-                module: 'Workspace',
-                url: this.props.runtime.config('services.Workspace.url'),
-                token: this.props.runtime.service('session').getAuthToken()
-            });
-
             try {
-                const {objIdentities, objRefToNodeIdx, graph, totalVersions} = await (async () => {
-                    // Sorry, we get the object history even though we may not need it.
-                    const  [objectHistory] = await wsClient.callFunc('get_object_history', [{ref: objectInfo.ref}]);
-                    if (this.state.showAllVersions) {
-                        return {...this.processObjectHistory(objectHistory), totalVersions: objectHistory.length};
+                const graphState = {
+                    objIdentities: [],
+                    objRefToNodeIdx: {},
+                    graph: {
+                        nodes: [],
+                        links: []
                     }
-                    return {...this.processObject(objectInfo), totalVersions: objectHistory.length};
-                })();
+                };
 
-                const [{totalReferencingObjects, filteredReferencingObjects, totalReports, totalObjectsInOtherNarratives, truncated}, refData] = await Promise.all([
-                    this.getReferencingObjects(objIdentities, graph, objRefToNodeIdx, objectInfo),
-                    this.getObjectProvenance(objIdentities, graph, objRefToNodeIdx)
-                ]);
+                const totalVersions = 1;
 
-                // If no referencing objects, we add a null node to indicate we are at the
-                // end of the line.
+                this.processObject(this.props.objectInfo, graphState);
 
-                // if (totalReferencingObjects === 0) {
-                //     this.addNullReferencingObject(graph, graph.nodes.length);
-                // }
+                const {
+                    totalReferencingObjects, 
+                    filteredReferencingObjects, 
+                    totalReports, 
+                    totalObjectsInOtherNarratives, 
+                    truncated
+                } = await this.getReferencingObjects(objectInfo, graphState);
+                const {totalReferencedObjects, isCopied} =  await this.getObjectProvenance(objectInfo.ref, graphState);
 
-                if (refData && 'uniqueRefObjectIdentities' in refData && refData.uniqueRefObjectIdentities.length > 0) {
-                    // Modifies graph and objRefToNodeIdx
-                    await this.getObjectInfo(refData, graph, objRefToNodeIdx);
-                }
-                // else {
-                //     this.addNullReferencedObject(graph, 0);
-                // }
-
-                this.addVersionEdges(graph, objRefToNodeIdx);
-
+                // TODO: restore selected NODE
                 // In case this is a reload, the selected node may have disappeared, in which case
                 // we reset the selected node to null.
-                let selectedNode = this.state.selectedNode;
-                if (selectedNode.nodeInfo) {
-                    if (!(selectedNode.nodeInfo.ref in objRefToNodeIdx)) {
-                        selectedNode = {
-                            nodeInfo: null,
-                            over: false
-                        };
-                    }
+                // let selectedNode = this.state.selectedNode;
+                // if (selectedNode.nodeInfo) {
+                //     if (!(selectedNode.nodeInfo.ref in objRefToNodeIdx)) {
+                //         selectedNode = {
+                //             nodeInfo: null,
+                //             over: false
+                //         };
+                //     }
+                // }
+
+                const selectedNode = {
+                    nodeInfo: null,
+                    over: false
+                };
+
+                if (totalReferencingObjects === 0) {
+                    this.addNullReferencingObject(graphState);
                 }
 
-                // Handle all cases of missing next or previous nodes.
-                // So the SanKey plugin will scan the nodes and links and
-                // create the links directly on the nodes.
-                // We could use that, but at this point in the code flow they have not
-                // yet been created (and is an internal impl of SanKey, however rude it
-                // is that it modifies the data we pass in...)
-                // We just need to know if there are any, so we just count.
-                const graph2 = graph.nodes.map(() => {
-                    return {from: 0, to: 0};
-                });
-
-                graph.links.forEach((link) => {
-                    // This is referencing
-                    const nodeSource = graph2[link.source];
-                    nodeSource.from += 1;
-
-                    // This is referenced.
-                    const nodeTarget = graph2[link.target];
-                    nodeTarget.to += 1;
-                });
-
-                graph2.forEach(({from, to}, index) => {
-                    if (from === 0 && graph.nodes[index].nodeType === 'core') {
-                        this.addNullReferencingObject(graph, index);
-                    }
-                    if (to === 0 && graph.nodes[index].nodeType === 'core') {
-                        this.addNullReferencedObject(graph, index);
-                    }
-                });
-
-
-                for (const node of graph.nodes) {
-                    // find links from this node.
-                    if (node.targetLinks && node.targetLinks.length === 0) {
-                        this.addNullReferencingObject(graph, node.node);
-                    }
-
-                    // find links to this node.
-                    if (node.sourceLinks && node.sourceLinks.length === 0) {
-                        this.addNullReferencedObject(graph, node.node);
-                    }
+                if (totalReferencedObjects === 0) {
+                    this.addNullReferencedObject(graphState);
                 }
 
                 this.setState({
                     status: 'SUCCESS',
                     value: {
-                        graph, objRefToNodeIdx,
+                        graph: graphState.graph,
+                        objRefToNodeIdx: graphState.objRefToNodeIdex,
                         includesAllVersions: this.state.showAllVersions,
                         totalReferencingObjects,
                         filteredReferencingObjects,
-                        totalReferencedObjects: refData.totalReferencedObjects,
+                        totalReferencedObjects,
                         totalReports,
                         totalObjectsInOtherNarratives,
                         totalVersions,
-                        nodeCount: graph.nodes.length, edgeCount: graph.links.length , truncated,
-                        isCopied: refData.isCopied
+                        nodeCount: graphState.graph.nodes.length, 
+                        edgeCount: graphState.graph.links.length , 
+                        truncated,
+                        isCopied
                     },
                     selectedNode
                 });
@@ -637,6 +364,9 @@ define([
             if (isFake) {
                 return;
             }
+
+            // TODO: there should be enough info in the node to 
+            // display.
             const wsClient = new GenericClient({
                 module: 'Workspace',
                 url: this.props.runtime.config('services.Workspace.url'),
@@ -651,7 +381,6 @@ define([
         onNodeOut(node) {
             this.onInspectNodeLeave();
         }
-
 
         onInspectNode(nodeInfo) {
             if (nodeInfo === null) {
@@ -680,7 +409,6 @@ define([
             });
         }
 
-
         renderLoading() {
             return html`
                 <${Loading} message="Loading..." />
@@ -692,7 +420,6 @@ define([
                 <${ErrorView} error=${error} runtime=${this.props.runtime}/>
             `;
         }
-
 
         toggleOmitOtherNarratives() {
             this.setState({

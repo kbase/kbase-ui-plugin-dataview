@@ -32,8 +32,24 @@ table.kb-overview-table {
 }
 
 table.kb-overview-table td {
-    overflow-x: auto;
+    overflow-x: hidden;
     text-overflow: ellipsis;
+}
+
+
+table.kb-references-table {
+    table-layout: auto;
+    width: 100%;
+    /* white-space: nowrap; */
+    margin-bottom: 0;
+}
+
+table.kb-references-table td {
+    white-space: nowrap;
+}
+
+table.kb-references-table td:nth-child(2) {
+    white-space: normal;
 }
 
 .id-click {

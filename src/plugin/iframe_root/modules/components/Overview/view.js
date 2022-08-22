@@ -3,11 +3,9 @@ define([
     'htm',
     'jquery',
     'uuid',
-    '../Row',
-    '../Col',
-    '../CollapsiblePanel',
     'kb_common/utils',
     '../Panel',
+    './view.styles',
 
     'bootstrap',
     'css!./style.css'
@@ -16,11 +14,9 @@ define([
     htm,
     $,
     Uuid,
-    Row,
-    Col,
-    CollapsiblePanel,
     Utils,
-    Panel
+    Panel,
+    styles
 ) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
@@ -340,6 +336,40 @@ define([
             `;
         }
 
+        renderRelation(relation) {
+            switch (relation) {
+                case 'references':
+                    return html`
+                        <span title="This object references the viewed object" style=${styles.relation}>
+                        ref
+                        </span>
+                    `;
+                case 'used':
+                    return html`
+                        <span title="This object is used as input to create the viewed object" style=${styles.relation}>
+                        ref
+                        </span>
+                    `;
+                case 'copiedFrom':
+                    return html`
+                        <span title="This object was copied to the viewed object" style=${styles.relation}>
+                            copy
+                        </span>
+                    `;
+                default: 
+                    console.warn('unknown relation', relation);
+            }
+
+            // switch (relation) {
+            //     case 'references':
+            //         return html`<span className="fa fa-link" title="This object references the viewed object"/>`;
+            //     case 'used':
+            //         return html`<span className="fa fa-arrow-left" title="This object is used as input to create the viewed object"/>`;
+            //     case 'copiedFrom':
+            //         return html`<span className="fa fa-clone" title="This object was copied to the viewed object"/>`;
+            // }
+        }
+
         renderReferencesPanel(parentId) {
             const body = (() => {
                 if (this.props.too_many_out_refs) {
@@ -356,10 +386,28 @@ define([
                     `;
                 }
 
-                const tableBody = this.props.out_references.map(({ref, info}) => {
+                const tableBody = this.props.out_references.map(({ref, relation, info}) => {
+                    const relation2 = (() => {
+                        if (typeof relation === 'string') {
+                            return this.renderRelation(relation);
+                        }
+                        return relation.map((rel, index) => {
+                            const style = (() => {
+                                if (index >= 1) {
+                                    return {marginLeft: '0.25em'}
+                                }
+                                return {};
+                            })();
+                            return html`<span style=${style}>${this.renderRelation(rel)}</span>`;
+                        })
+                    })();
+
                     if (info) {
                         return html`
                             <tr>
+                                <td>
+                                    ${relation2}
+                                </td>
                                 <td>
                                     <a href=${`/#dataview/${ref}`}
                                     target="_blank">${info.name}</a>
@@ -376,23 +424,51 @@ define([
                             </tr>
                         `;
                     }
+
+                    // This case probably never occurs?
+                    if (ref) {
+                        return html`
+                            <tr>
+                                <td>
+                                    ${relation2}
+                                </td>
+                                <td>
+                                    <a href=${`/#dataview/${ref}`}
+                                    target="_blank">${ref}</a>
+                                </td>
+                                <td>Unknown</td>
+                                <td colspan="2">
+                                    Object inaccessible
+                                </td>
+                            </tr>
+                        `;
+                    }
                     return html`
                         <tr>
                             <td>
-                                <a href=${`/#dataview/${ref}`}
-                                target="_blank">${ref}</a>
+                                ${relation2}
                             </td>
-                            <td colspan="3">
-                                Object inaccessible
+                            <td>
+                               <i>Unknown</i>
+                            </td>
+                            <td>
+                                <a href=${`/#spec/type/${this.props.objectInfo.typeName}`} target="_blank">${this.props.objectInfo.typeName}</a>
+                            </td>
+                            <td>
+                                <i>Unknown</i>
+                            </td>
+                            <td>
+                               <i>Unknown</i>
                             </td>
                         </tr>
                     `;
                 });
 
                 return html`
-                    <table className="table kb-overview-table">
+                    <table className="table kb-references-table" >
                         <thead>
                         <tr>
+                            <th>Relation</th>
                             <th>Name</th>
                             <th>Type</th>
                             <th>Saved</th>
