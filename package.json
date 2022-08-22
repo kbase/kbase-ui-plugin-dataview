@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "clean": "grunt clean",
-        "install-bower": "echo \"XDG_CONFIG_HOME=${XDG_CONFIG_HOME}\" && bower-installer",
+        "install-bower": "echo \"XDG_CONFIG_HOME=${XDG_CONFIG_HOME}\" && echo \"XDG_CACHE_HOME=${XDG_CACHE_HOME}\" && bower-installer",
         "install-npm": "grunt copy",
         "remove-source-maps": "node scripts/container/remove-source-maps.js",
         "install-dist": "node scripts/container/install-dist.js",
