@@ -24,7 +24,17 @@ The object version is optional; if omitted, the most recent version of the objec
 
 This url may be used either with or without an `Authorization` header. 
 
+## Development
 
+```
+cd tools/node
+DIR=`pwd`/../.. docker compose run --rm node sh
+npm install
+npm run build
+npm npm run build-dev
+npm run watch
+
+```
 
 ## Contributing
 
