@@ -26,4 +26,4 @@ jobs:
           # GITHUB_TOKEN: ${{ secrets.KBASE_BOT_TOKEN }}
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '["dist.zip"]'
+          asset_paths: '["dist.tgz"]'
