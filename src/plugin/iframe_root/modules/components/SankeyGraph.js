@@ -303,22 +303,29 @@ define([
                         switch (d.target.nodeType) {
                         case 'none':
                             return `no references to ${d.source.name}`;
-                        case 'ref':
-                            return `${d.source.name} referenced by ${d.target.name}`;
+                        case 'referencing':
+                            return `${d.source.name}\n☚ referenced by ☚\n${d.target.name}`;
                         default:
-                            return `${d.target.name} is a newer version of ${d.source.name}`;
+                            console.warning('Unrecognized target node type: ', d.target.nodeType);
+                            return `${d.target.name}\nUNKNOWN RELATION\n${d.source.name}`;
                         }
                     case 'copiedFrom':
-                        return `${d.target.info.ref} copied from ${d.source.info.ref}`;
-                    case 'referencing':
-                        return `${d.source.name} references ${d.target.name}`;
+                        return `${d.target.name}\n☚ copied from ☚\n${d.source.name}`;
+                    case 'references':
+                        return `${d.target.name}\n☚ references ☚\n${d.source.name}`;
+                     case 'used':
+                        return `${d.target.name}\n☚ was used to create ☚\n${d.source.name}`;
                     case 'none':
                         return `no references from ${d.target.name}`;
                     case 'included':
                         return `${d.target.name} references ${d.source.name}`;
                     case 'inaccessible':
                         return `${d.target.name} references ${d.source.name}`;
+                    default:
+                        console.warn('Unrecognized source node type: ', d.source.nodeType);
+                        return `${d.source.name}\nUNKNOWN RELATION\n${d.source.name}`;
                     }
+                    
                 })();
 
                 return d.text;
@@ -431,7 +438,6 @@ define([
             //     .append('foreignObject')
             //     .append("xhtml:div")
             //     .html(({label}) => {
-            //         console.log('label??', label);
             //         return label
             //     });
 

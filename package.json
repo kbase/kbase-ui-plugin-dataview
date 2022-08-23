@@ -10,7 +10,9 @@
         "remove-source-maps": "node scripts/container/remove-source-maps.js",
         "install-dist": "node scripts/container/install-dist.js",
         "install-dev": "node scripts/container/install-dev.js",
-        "build": "bash scripts/build.sh",
+        "build": "bash scripts/host/build.sh",
+        "copy-dev": "bash scripts/host/copy-dev.sh",
+        "watch-dev": "bash scripts/host/watch-dev.sh",
         "update": "node scripts/container/install-dev.js",
         "watch": "nodemon --watch ./src --ext js,css,yml,yaml,json --exec 'npm run install-dev'"
     },

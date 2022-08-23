@@ -75,6 +75,9 @@ define([
         }
 
         getNodeName(info, nodeId) {
+            if (info === null) {
+                return 'inaccessible object';
+            }
             switch (this.state.nodeLabelType) {
             case 'object-name':
                 return `${info.name} (v${info.version})`;
@@ -95,6 +98,9 @@ define([
         }
 
         getNodeLabel(info, nodeId) {
+            if (info === null) {
+                return 'inaccessible object';
+            }
             switch (this.state.nodeLabelType) {
             case 'object-name':
                  return `${this.formatTitlePart(info.name)} (${info.typeName})`;
@@ -149,7 +155,6 @@ define([
             let totalObjectsInOtherNarratives = 0;
             let referencingObjectCount = 0;
             for (const referencingObject of referencingObjects) {
-                console.log('referencing object', referencingObject);
                 referencingObjectCount += 1;
                 if (this.filterCondition(referencingObject, objectInfo)) {
                     filteredCount += 1;
@@ -200,6 +205,7 @@ define([
             graph.nodes.push({
                 node: nodeId,
                 name: '∅ (no referencing objects)',
+                label: '∅ (no referencing objects)',
                 info: null,
                 nodeType: 'none',
                 objId: null,
@@ -209,11 +215,12 @@ define([
             graph.links.push(makeLink(0, nodeId, 1, 'none'));
         }
 
-        async addNullReferencedObject({graph}) {
+        addNullReferencedObject({graph}) {
             const nodeId = graph.nodes.length;
             graph.nodes.push({
                 node: nodeId,
                 name: '∅ (no referenced objects)',
+                label: '∅ (no referenced objects)',
                 info: null,
                 nodeType: 'none',
                 objId: null,
@@ -320,7 +327,7 @@ define([
                     over: false
                 };
 
-                if (totalReferencingObjects === 0) {
+                if (filteredReferencingObjects === 0) {
                     this.addNullReferencingObject(graphState);
                 }
 
@@ -361,7 +368,7 @@ define([
 
         async onNodeOver(node) {
             const {isFake, ref, info} = node;
-            if (isFake) {
+            if (isFake || info === null) {
                 return;
             }
 
@@ -372,10 +379,17 @@ define([
                 url: this.props.runtime.config('services.Workspace.url'),
                 token: this.props.runtime.service('session').getAuthToken()
             });
-            const [objdata] = await wsClient.callFunc('get_object_provenance', [[{
+            const objects = [{
                 ref: node.objId
-            }]]);
-            this.onInspectNode({ref, info, objdata}, true);
+            }];
+            if (['used', 'references'].includes(node.nodeType)) {
+                objects[0].to_obj_ref_path = [this.props.objectInfo.ref];
+            }
+            const [objdata] = await wsClient.callFunc('get_objects2', [{
+                objects,
+                no_data: 1
+            }]);
+            this.onInspectNode({ref, info, objdata: objdata.data[0]}, true);
         }
 
         onNodeOut(node) {

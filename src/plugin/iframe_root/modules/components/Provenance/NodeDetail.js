@@ -233,14 +233,13 @@ define([
                     <${Alert} type="info" message="Hover over graph node to display" />
                 `;
             }
-            const {objdata} = this.props.node.nodeInfo;
-            if (objdata.length === 0) {
+            const {objdata: objectData} = this.props.node.nodeInfo;
+            if (objectData.provenance.length === 0) {
                 return html`
                     <${Alert} type="neutral" message="No provenance data set." />
                 `;
             }
             const rows = [];
-            const objectData = objdata[0];
             if ('copied' in objectData) {
                 rows.push(html`
                     <tr>
@@ -264,6 +263,7 @@ define([
                     rows.push(...this.getProvRows(provenance, prefix));
                 });
             }
+
             if (rows.length > 0) {
                 return html`
                     <table class="table table-striped table-bordered Provenance">
