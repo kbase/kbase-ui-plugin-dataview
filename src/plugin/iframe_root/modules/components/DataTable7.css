@@ -4,11 +4,13 @@
     flex-direction: column;
     min-height: 0;
     min-width: 0;
+}
+
+.DataTable7.-bordered {
     border: 1px solid rgb(200, 200, 200);
     border-radius: 1em;
     padding: 0.5em;
 }
-
 
 
 .DataTable7-header {

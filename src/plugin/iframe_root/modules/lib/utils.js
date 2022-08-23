@@ -43,7 +43,6 @@ define([
                 } else if (v2 === null) {
                     return false;
                 } else {
-                    console.log('err', v1, v2);
                     const k1 = Object.keys(v1).sort();
                     const k2 = Object.keys(v2).sort();
                     if (k1.length !== k2.length) {

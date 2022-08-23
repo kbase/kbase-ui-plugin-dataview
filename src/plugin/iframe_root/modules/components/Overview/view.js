@@ -4,6 +4,7 @@ define([
     'jquery',
     'uuid',
     'kb_common/utils',
+    'components/DataTable7',
     '../Panel',
     './view.styles',
 
@@ -15,6 +16,7 @@ define([
     $,
     Uuid,
     Utils,
+    DataTable,
     Panel,
     styles
 ) => {
@@ -28,6 +30,16 @@ define([
         }
         const date = Utils.iso8601ToDate(dateString);
         return `${monthLookup[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+    }
+
+    function dateFormatShort(dateString) {
+        if (Utils.isBlank(dateString)) {
+            return '';
+        }
+        const date = Utils.iso8601ToDate(dateString);
+        const monthPart = Intl.NumberFormat('en-US', {minimumIntegerDigits: 2}).format(date.getMonth() + 1);
+        const dayPart = Intl.NumberFormat('en-US', {minimumIntegerDigits: 2}).format(date.getDate())
+        return `${date.getFullYear()}/${monthPart}/${dayPart}`;
     }
 
     class Overview extends Component {
@@ -144,7 +156,7 @@ define([
             return html`
                 <tr>
                     <th>Last Updated</th>
-                    <td>${dateFormat(this.props.objectInfo.save_date)} by ${' '}
+                    <td>${dateFormatShort(this.props.objectInfo.save_date)} by ${' '}
                         <a href="${`/#people/${this.props.objectInfo.saved_by}`}" target="_blank">
                             ${this.props.objectInfo.saved_by}
                         </a>
@@ -251,7 +263,7 @@ define([
                                 </a>
                             </td>
                             <td>
-                                Saved on ${dateFormat(version.save_date)} by${' '}
+                                Saved on ${dateFormatShort(version.save_date)} by${' '}
                                 <a href="/#people/${version.saved_by}" target="_parent">${version.saved_by}</a>
                             </td>
                         </tr>
@@ -274,13 +286,73 @@ define([
             `;
         }
 
-        renderReferencedByPanel(parentId) {
-            const body = (() => {
-                if (this.props.too_many_inc_refs) {
+        renderReferencedByTable(references) {
+            const columns = [{
+                id: 'name',
+                label: 'Name',
+                style: {
+                    flex: '3 1 0'
+                },
+                render: (name, ref) => {
                     return html`
-                        <span>Sorry, there are too many references to this data object to display.</span>
+                        <a href=${`/#dataview/${ref.wsid}/${ref.id}/${ref.version}`}
+                            title=${name}
+                            target="_parent">${ref.name}</a>
+                    `;
+                    return name;
+                }
+            }, {
+                id: 'type',
+                label: 'Type',
+                style: {
+                    flex: '1 0 0'
+                },
+                render: (type, ref) => {
+                    return html`
+                    <a href=${`/#spec/type/${ref.type}`} 
+                        title=${type}
+                        target="_parent">${ref.typeName}</a>
                     `;
                 }
+            },{
+                id: 'save_date',
+                label: 'Saved',
+                style: {
+                    flex: '0 0 8em'
+                },
+                render: (savedDate) => {
+                    return dateFormatShort(savedDate);
+                }
+            },{
+                id: 'saved_by',
+                label: 'By',
+                style: {
+                    flex: '1 0 0'
+                },
+                render: (savedBy, ref) => {
+                    return html`
+                        <a href=${`/#people/${ref.saved_by}`} target="_parent">${ref.saved_by}</a>
+                    `;
+                }
+            }];
+
+             const props = {
+                columns,
+                dataSource: references,
+            };
+
+            return html`
+                <${DataTable} heights=${{row: 40, col: 40}} flex=${true} bordered=${false} ...${props} />
+            `;
+        }
+
+        renderReferencedByPanel(parentId) {
+            const body = (() => {
+                // if (this.props.too_many_inc_refs) {
+                //     return html`
+                //         <span>Sorry, there are too many references (${this.props.inc_references_count}) to this data object to display.</span>
+                //     `;
+                // }
 
                 if (!this.props.inc_references || this.props.inc_references.length === 0) {
                     return html`
@@ -290,42 +362,48 @@ define([
                     `;
                 }
 
-                const tableBody = this.props.inc_references.map((ref) => {
-                    return html`
-                        <tr>
-                            <td>
-                                <a href=${`/#dataview/${ref.wsid}/${ref.id}/${ref.version}`}
-                                   target="_parent">${ref.name}</a>
-                            </td>
-                            <td>
-                                <a href=${`/#spec/type/${ref.type}`} target="_parent">${ref.typeName}</a>
-                            </td>
-                            <td>
-                                ${dateFormat(ref.save_date)}
-                            </td>
-                            <td>
-                                <a href=${`/#people/${ref.saved_by}`} target="_parent">${ref.saved_by}</a>
-                            </td>
-                        </tr>
-                    `;
-                });
-
                 return html`
-                    <table className="table kb-overview-table">
-                        <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Type</th>
-                            <th>Saved</th>
-                            <th>By
-                            </td>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        ${tableBody}
-                        </tbody>
-                    </table>
+                    <div style=${{height: '20em', display: 'flex', flexDirection: 'column'}}>
+                    ${this.renderReferencedByTable(this.props.inc_references)}
+                    </div>
                 `;
+
+                // const tableBody = this.props.inc_references.map((ref) => {
+                //     return html`
+                //         <tr>
+                //             <td>
+                //                 <a href=${`/#dataview/${ref.wsid}/${ref.id}/${ref.version}`}
+                //                    target="_parent">${ref.name}</a>
+                //             </td>
+                //             <td>
+                //                 <a href=${`/#spec/type/${ref.type}`} target="_parent">${ref.typeName}</a>
+                //             </td>
+                //             <td>
+                //                 ${dateFormat(ref.save_date)}
+                //             </td>
+                //             <td>
+                //                 <a href=${`/#people/${ref.saved_by}`} target="_parent">${ref.saved_by}</a>
+                //             </td>
+                //         </tr>
+                //     `;
+                // });
+
+                // return html`
+                //     <table className="table kb-overview-table">
+                //         <thead>
+                //         <tr>
+                //             <th>Name</th>
+                //             <th>Type</th>
+                //             <th>Saved</th>
+                //             <th>By
+                //             </td>
+                //         </tr>
+                //         </thead>
+                //         <tbody>
+                //         ${tableBody}
+                //         </tbody>
+                //     </table>
+                // `;
             })();
 
             return html`
@@ -367,7 +445,81 @@ define([
             //         return html`<span className="fa fa-arrow-left" title="This object is used as input to create the viewed object"/>`;
             //     case 'copiedFrom':
             //         return html`<span className="fa fa-clone" title="This object was copied to the viewed object"/>`;
-            // }
+        }
+
+         renderReferencesTable(references) {
+            const columns = [{
+                id: 'name',
+                label: 'Name',
+                style: {
+                    flex: '3 1 0'
+                },
+                render: (_, {ref, info}) => {
+                    if (info === null) {
+                        return html`
+                            <a href=${`/#dataview/${ref}`}
+                                title=${ref}
+                                target="_parent">${ref}</a>
+                        `;
+                    }
+                    return html`
+                        <a href=${`/#dataview/${info.wsid}/${info.id}/${info.version}`}
+                            title=${info.name}
+                            target="_parent">${info.name}</a>
+                    `;
+                }
+            }, {
+                id: 'type',
+                label: 'Type',
+                style: {
+                    flex: '1 0 0'
+                },
+                render: (_, {info}) => {
+                    if (info === null) {
+                        return html`<i>inaccessible</i>`;
+                    }
+                    return html`
+                    <a href=${`/#spec/type/${info.type}`} 
+                        title=${info.type}
+                        target="_parent">${info.typeName}</a>
+                    `;
+                }
+            },{
+                id: 'save_date',
+                label: 'Saved',
+                style: {
+                    flex: '0 0 8em'
+                },
+                render: (_, {info}) => {
+                    if (info === null) {
+                       return html`<i>inaccessible</i>`;
+                    }
+                    return dateFormatShort(info.save_date);
+                }
+            },{
+                id: 'saved_by',
+                label: 'By',
+                style: {
+                    flex: '1 0 0'
+                },
+                render: (_, {info}) => {
+                    if (info === null) {
+                       return html`<i>inaccessible</i>`;
+                    }
+                    return html`
+                        <a href=${`/#people/${info.saved_by}`} target="_parent">${info.saved_by}</a>
+                    `;
+                }
+            }];
+
+             const props = {
+                columns,
+                dataSource: references,
+            };
+
+            return html`
+                <${DataTable} heights=${{row: 40, col: 40}} flex=${true} bordered=${false} ...${props} />
+            `;
         }
 
         renderReferencesPanel(parentId) {
@@ -386,75 +538,81 @@ define([
                     `;
                 }
 
-                const tableBody = this.props.out_references.map(({ref, relation, info}) => {
-                    if (info) {
-                        return html`
-                            <tr>
-                                <td>
-                                    <a href=${`/#dataview/${ref}`}
-                                    target="_blank">${info.name}</a>
-                                </td>
-                                <td>
-                                    <a href=${`/#spec/type/${info.type}`} target="_blank">${info.typeName}</a>
-                                </td>
-                                <td>
-                                    ${dateFormat(info.save_date)}
-                                </td>
-                                <td>
-                                    <a href=${`/#people/${info.saved_by}`} target="_blank">${info.saved_by}</a>
-                                </td>
-                            </tr>
-                        `;
-                    }
+                 return html`
+                    <div style=${{height: '20em', display: 'flex', flexDirection: 'column'}}>
+                    ${this.renderReferencesTable(this.props.out_references)}
+                    </div>
+                `; 
 
-                    // This case probably never occurs?
-                    if (ref) {
-                        return html`
-                            <tr>
-                                <td>
-                                    <a href=${`/#dataview/${ref}`}
-                                    target="_blank">${ref}</a>
-                                </td>
-                                <td>Unknown</td>
-                                <td colspan="2">
-                                    Object inaccessible
-                                </td>
-                            </tr>
-                        `;
-                    }
-                    return html`
-                        <tr>
-                            <td>
-                               <i>Unknown</i>
-                            </td>
-                            <td>
-                                <a href=${`/#spec/type/${this.props.objectInfo.typeName}`} target="_blank">${this.props.objectInfo.typeName}</a>
-                            </td>
-                            <td>
-                                <i>Unknown</i>
-                            </td>
-                            <td>
-                               <i>Unknown</i>
-                            </td>
-                        </tr>
-                    `;
-                });
+                // const tableBody = this.props.out_references.map(({ref, relation, info}) => {
+                //     if (info) {
+                //         return html`
+                //             <tr>
+                //                 <td>
+                //                     <a href=${`/#dataview/${ref}`}
+                //                     target="_blank">${info.name}</a>
+                //                 </td>
+                //                 <td>
+                //                     <a href=${`/#spec/type/${info.type}`} target="_blank">${info.typeName}</a>
+                //                 </td>
+                //                 <td>
+                //                     ${dateFormatShort(info.save_date)}
+                //                 </td>
+                //                 <td>
+                //                     <a href=${`/#people/${info.saved_by}`} target="_blank">${info.saved_by}</a>
+                //                 </td>
+                //             </tr>
+                //         `;
+                //     }
 
-                return html`
-                    <table className="table kb-references-table" >
-                        <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Type</th>
-                            <th>Saved</th>
-                            <th>By</td>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        ${tableBody}
-                        </tbody>
-                    </table>
-                `;
+                //     // This case probably never occurs?
+                //     if (ref) {
+                //         return html`
+                //             <tr>
+                //                 <td>
+                //                     <a href=${`/#dataview/${ref}`}
+                //                     target="_blank">${ref}</a>
+                //                 </td>
+                //                 <td>Unknown</td>
+                //                 <td colspan="2">
+                //                     Object inaccessible
+                //                 </td>
+                //             </tr>
+                //         `;
+                //     }
+                //     return html`
+                //         <tr>
+                //             <td>
+                //                <i>Unknown</i>
+                //             </td>
+                //             <td>
+                //                 <a href=${`/#spec/type/${this.props.objectInfo.typeName}`} target="_blank">${this.props.objectInfo.typeName}</a>
+                //             </td>
+                //             <td>
+                //                 <i>Unknown</i>
+                //             </td>
+                //             <td>
+                //                <i>Unknown</i>
+                //             </td>
+                //         </tr>
+                //     `;
+                // });
+
+                // return html`
+                //     <table className="table kb-references-table" >
+                //         <thead>
+                //         <tr>
+                //             <th>Name</th>
+                //             <th>Type</th>
+                //             <th>Saved</th>
+                //             <th>By</td>
+                //         </tr>
+                //         </thead>
+                //         <tbody>
+                //         ${tableBody}
+                //         </tbody>
+                //     </table>
+                // `;
             })();
 
             return html`
@@ -511,7 +669,7 @@ define([
                                     <a href=${`/#spec/type/${info.type}`} target="_blank">${info.typeName}</a>
                                 </td>
                                 <td>
-                                    ${dateFormat(info.save_date)}
+                                    ${dateFormatShort(info.save_date)}
                                 </td>
                                 <td>
                                     <a href=${`/#people/${info.saved_by}`} target="_blank">${info.saved_by}</a>

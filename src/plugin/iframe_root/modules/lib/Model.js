@@ -81,13 +81,14 @@ define([
         }
 
          async getIncomingReferences(ref) {
-            const counts = await this.wsClient.callFunc('list_referencing_object_counts', [[{
-                ref
-            }]]);
-            if (counts[0] > MAX_INCOMING_REFS) {
-                return [true, null];
-            }
+            // const counts = await this.wsClient.callFunc('list_referencing_object_counts', [[{
+            //     ref
+            // }]]);
+            // if (counts[0] > MAX_INCOMING_REFS) {
+            //     return [true, counts[0], null];
+            // }
             const [result] = await this.wsClient.callFunc('list_referencing_objects', [[{ref}]]);
+
             const references = result[0].map((reference) => {
                 return APIUtils.objectInfoToObject(reference);
             })
@@ -161,7 +162,7 @@ define([
 
             // We turn the outgoing refs map into an array, since we might not have a ref
             // for each entry.
-            // Note info to be filled in later.
+            // Note, info to be filled in later.
             const outgoingReferences =  Object.entries(combinedOutgoingRefs).map(([ref, {relation}]) => {
                 return {
                     ref,
@@ -259,7 +260,6 @@ define([
                     return {
                         ref,
                         to_obj_ref_path: [subjectRef]
-
                     };
                 }),
                 ignoreErrors: 1,

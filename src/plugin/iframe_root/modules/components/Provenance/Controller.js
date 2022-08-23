@@ -75,6 +75,9 @@ define([
         }
 
         getNodeName(info, nodeId) {
+            if (info === null) {
+                return 'inaccessible object';
+            }
             switch (this.state.nodeLabelType) {
             case 'object-name':
                 return `${info.name} (v${info.version})`;
@@ -95,6 +98,9 @@ define([
         }
 
         getNodeLabel(info, nodeId) {
+            if (info === null) {
+                return 'inaccessible object';
+            }
             switch (this.state.nodeLabelType) {
             case 'object-name':
                  return `${this.formatTitlePart(info.name)} (${info.typeName})`;
@@ -362,7 +368,7 @@ define([
 
         async onNodeOver(node) {
             const {isFake, ref, info} = node;
-            if (isFake) {
+            if (isFake || info === null) {
                 return;
             }
 
@@ -373,10 +379,17 @@ define([
                 url: this.props.runtime.config('services.Workspace.url'),
                 token: this.props.runtime.service('session').getAuthToken()
             });
-            const [objdata] = await wsClient.callFunc('get_object_provenance', [[{
+            const objects = [{
                 ref: node.objId
-            }]]);
-            this.onInspectNode({ref, info, objdata}, true);
+            }];
+            if (['used', 'references'].includes(node.nodeType)) {
+                objects[0].to_obj_ref_path = [this.props.objectInfo.ref];
+            }
+            const [objdata] = await wsClient.callFunc('get_objects2', [{
+                objects,
+                no_data: 1
+            }]);
+            this.onInspectNode({ref, info, objdata: objdata.data[0]}, true);
         }
 
         onNodeOut(node) {

@@ -115,7 +115,6 @@ define([
 
         rowHeight() {
             return this.props.heights.row; // + this.currentView().height;
-
         }
 
         renderRowWrapper(values, index) {
@@ -169,8 +168,8 @@ define([
                             return col.render(values[col.id], values);
                         } catch (ex) {
                             return html`
-                                        <span className="text-danger">${ex.message}</span>
-                                    `;
+                                <span className="text-danger">${ex.message}</span>
+                            `;
                         }
                     } else {
                         return values[col.id];
@@ -252,8 +251,14 @@ define([
 
         render() {
             this.doMeasurements();
+            const classes = [
+                "DataTable7"
+            ];
+            if (this.props.bordered !== false) {
+                classes.push('-bordered');
+            }
             return html`
-                <div className="DataTable7" role="table">
+                <div className=${classes.join(' ')} role="table">
                     ${this.renderHeader()}
                     ${this.renderBody()}
                 </div>
