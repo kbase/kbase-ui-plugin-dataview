@@ -149,7 +149,6 @@ define([
             let totalObjectsInOtherNarratives = 0;
             let referencingObjectCount = 0;
             for (const referencingObject of referencingObjects) {
-                console.log('referencing object', referencingObject);
                 referencingObjectCount += 1;
                 if (this.filterCondition(referencingObject, objectInfo)) {
                     filteredCount += 1;
@@ -200,6 +199,7 @@ define([
             graph.nodes.push({
                 node: nodeId,
                 name: '∅ (no referencing objects)',
+                label: '∅ (no referencing objects)',
                 info: null,
                 nodeType: 'none',
                 objId: null,
@@ -209,11 +209,12 @@ define([
             graph.links.push(makeLink(0, nodeId, 1, 'none'));
         }
 
-        async addNullReferencedObject({graph}) {
+        addNullReferencedObject({graph}) {
             const nodeId = graph.nodes.length;
             graph.nodes.push({
                 node: nodeId,
                 name: '∅ (no referenced objects)',
+                label: '∅ (no referenced objects)',
                 info: null,
                 nodeType: 'none',
                 objId: null,
@@ -320,7 +321,7 @@ define([
                     over: false
                 };
 
-                if (totalReferencingObjects === 0) {
+                if (filteredReferencingObjects === 0) {
                     this.addNullReferencingObject(graphState);
                 }
 

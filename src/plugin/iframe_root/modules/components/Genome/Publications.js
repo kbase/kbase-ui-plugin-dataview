@@ -457,7 +457,6 @@ define([
                 columns,
                 dataSource: this.state.searchState.value.publications,
                 // onRowDblClick: (row) => {
-                //     console.log('here', row);
                 //     // window.open(this.articleLinkURL(row.Id.value), '_blank');
                 // }
             };

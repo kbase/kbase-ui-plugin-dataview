@@ -340,19 +340,19 @@ define([
             switch (relation) {
                 case 'references':
                     return html`
-                        <span title="This object references the viewed object" style=${styles.relation}>
+                        <span title="The viewed object references (is linked to) this object" style=${styles.relation}>
                         ref
                         </span>
                     `;
                 case 'used':
                     return html`
-                        <span title="This object is used as input to create the viewed object" style=${styles.relation}>
-                        ref
+                        <span title="This viewed object was created by an app which used this object as a parameter" style=${styles.relation}>
+                        used
                         </span>
                     `;
                 case 'copiedFrom':
                     return html`
-                        <span title="This object was copied to the viewed object" style=${styles.relation}>
+                        <span title="The viewed object was created by coping this object" style=${styles.relation}>
                             copy
                         </span>
                     `;
@@ -371,6 +371,101 @@ define([
         }
 
         renderReferencesPanel(parentId) {
+            const body = (() => {
+                if (this.props.too_many_out_refs) {
+                    return html`
+                        <span>Sorry, there are too many references from this data object to display.</span>
+                    `;
+                }
+
+                if (!this.props.inc_references || this.props.out_references.length === 0) {
+                    return html`
+                        <p>
+                           This object does not reference any other data object.
+                        </p>
+                    `;
+                }
+
+                const tableBody = this.props.out_references.map(({ref, relation, info}) => {
+                    if (info) {
+                        return html`
+                            <tr>
+                                <td>
+                                    <a href=${`/#dataview/${ref}`}
+                                    target="_blank">${info.name}</a>
+                                </td>
+                                <td>
+                                    <a href=${`/#spec/type/${info.type}`} target="_blank">${info.typeName}</a>
+                                </td>
+                                <td>
+                                    ${dateFormat(info.save_date)}
+                                </td>
+                                <td>
+                                    <a href=${`/#people/${info.saved_by}`} target="_blank">${info.saved_by}</a>
+                                </td>
+                            </tr>
+                        `;
+                    }
+
+                    // This case probably never occurs?
+                    if (ref) {
+                        return html`
+                            <tr>
+                                <td>
+                                    <a href=${`/#dataview/${ref}`}
+                                    target="_blank">${ref}</a>
+                                </td>
+                                <td>Unknown</td>
+                                <td colspan="2">
+                                    Object inaccessible
+                                </td>
+                            </tr>
+                        `;
+                    }
+                    return html`
+                        <tr>
+                            <td>
+                               <i>Unknown</i>
+                            </td>
+                            <td>
+                                <a href=${`/#spec/type/${this.props.objectInfo.typeName}`} target="_blank">${this.props.objectInfo.typeName}</a>
+                            </td>
+                            <td>
+                                <i>Unknown</i>
+                            </td>
+                            <td>
+                               <i>Unknown</i>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                return html`
+                    <table className="table kb-references-table" >
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Saved</th>
+                            <th>By</td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        ${tableBody}
+                        </tbody>
+                    </table>
+                `;
+            })();
+
+            return html`
+                <${Panel} title="References"
+                          parentId=${parentId}>
+                    ${body}
+                <//>
+            `;
+        }
+
+         renderReferencesPanelWithRelation(parentId) {
             const body = (() => {
                 if (this.props.too_many_out_refs) {
                     return html`
