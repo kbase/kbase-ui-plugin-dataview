@@ -31,11 +31,11 @@ define([
                             mapping = mapping.sub[sub]; // ha, crazy line, i know.
                         } else {
                             throw new Error(
-                                `Sub was specified, but config has no correct sub handler, sub:${  sub  }config:`
+                                `Sub was specified, but config has no correct sub handler, sub:${sub}config:`
                             );
                         }
                     } else {
-                        throw new Error(`Sub was specified, but config has no sub handler, sub:${  sub}`);
+                        throw new Error(`Sub was specified, but config has no sub handler, sub:${sub}`);
                     }
                 }
             } else {
@@ -91,7 +91,7 @@ define([
                     .spread((result) => {
                         const objectInfos = result.infos;
                         if (objectInfos.length > 1) {
-                            throw new Error(`Too many (${  objectInfos.length  }) objects found.`);
+                            throw new Error(`Too many (${objectInfos.length}) objects found.`);
                         }
                         if (objectInfos[0] === null) {
                             throw new Error('Object not found');
@@ -119,7 +119,7 @@ define([
 
                         // handle sub
                         if (params.sub) {
-                            widgetParams[`${params.sub.toLowerCase()  }ID`] = params.subid;
+                            widgetParams[`${params.sub.toLowerCase()}ID`] = params.subid;
                         }
 
                         // Create params.

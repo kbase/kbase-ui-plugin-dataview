@@ -26,14 +26,11 @@ This url may be used either with or without an `Authorization` header.
 
 ## Development
 
-```
-cd tools/node
-DIR=`pwd`/../.. docker compose run --rm node sh
-npm install
-npm run build
-npm npm run build-dev
-npm run watch
 
+```
+npm run build
+npm run copy-dev
+npm run watch-dev
 ```
 
 ## Contributing
