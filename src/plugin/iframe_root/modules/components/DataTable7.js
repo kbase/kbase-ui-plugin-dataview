@@ -24,6 +24,8 @@ define([
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
+    const SCROLL_DELAY = 100;
+
     function outerDimensions(el) {
         el.offsetHeight;
         const rect = el.getBoundingClientRect();
@@ -72,7 +74,7 @@ define([
                     triggerRefresh: new Date().getTime()
                 });
                 this.resizeTimer = null;
-            }, 100);
+            }, SCROLL_DELAY);
         }
         renderHeader() {
             const style = {
@@ -110,11 +112,14 @@ define([
 
             const {height} = outerDimensions(body);
             this.firstRow = Math.floor(body.scrollTop / rowHeight);
+            if (this.firstRow < 0) {
+                this.firstRow = 0;
+            }
             this.lastRow = this.firstRow + Math.ceil(height / rowHeight);
         }
 
         rowHeight() {
-            return this.props.heights.row; // + this.currentView().height;
+            return this.props.heights.row; 
         }
 
         renderRowWrapper(values, index) {
@@ -136,10 +141,6 @@ define([
                     ${rowColumns}
                 </div>
             `;
-
-            // Render row detail, if any.
-            // const detail = this.renderDetail(values);
-
 
             // Render row wrapper.
             const rowClasses = ['DataTable7-grid-row'];
@@ -189,17 +190,6 @@ define([
             });
         }
 
-        // currentView() {
-        //     return this.props.views[this.props.view];
-        // }
-
-        // renderDetail(row) {
-        //     const view = this.currentView();
-        //     if (view && view.render) {
-        //         return view.render(row);
-        //     }
-        // }
-
         renderRows() {
             if (typeof this.firstRow === 'undefined') {
                 return;
@@ -228,7 +218,7 @@ define([
                     triggerRefresh: new Date().getTime()
                 });
                 this.scrollTimer = null;
-            }, 100);
+            }, SCROLL_DELAY);
         }
 
         renderBody() {
