@@ -5,8 +5,6 @@ define([
     preact,
     htm
 ) => {
-
-
     const {Component} = preact;
     const html = htm.bind(preact.h);
     class SimpleError extends Component {

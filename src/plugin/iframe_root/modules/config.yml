@@ -162,6 +162,9 @@ install:
     - module: widgets/genomes/kbaseGenePage
       name: kb_dataview_genomes_genePage
       type: kbwidget
+    - module: widgets/genomes/CDSPage
+      name: kb_dataview_genomes_cdsPage
+      type: es6
     - module: widgets/genomes/kbaseGenomeGeneTable
       name: kb_dataview_genomes_geneTable
       type: kbwidget
@@ -852,6 +855,14 @@ install:
                   to: workspaceID
                 - from: featureID
                   to: featureID
+            cds:
+              widget:
+                name: kb_dataview_genomes_cdsPage
+              panel: false 
+              scrolling: true 
+              default: true 
+
+
     - type:
         module: KBaseGenomes
         name: Pangenome

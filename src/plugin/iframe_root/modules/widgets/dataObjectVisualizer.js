@@ -127,11 +127,12 @@ define([
                             mapping.options.forEach((item) => {
                                 const from = widgetParams[item.from];
                                 if (!from && item.optional !== true) {
-                                    throw `Missing param, from ${  item.from  }, to ${  item.to}`;
+                                    throw `Missing param, from ${item.from}, to ${item.to}`;
                                 }
                                 widgetParams[item.to] = from;
                             });
                         }
+                        
                         // Handle different types of widgets here.
                         return runtime
                             .service('widget')

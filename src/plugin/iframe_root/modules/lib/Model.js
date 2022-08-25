@@ -300,6 +300,63 @@ define([
                 });
         }
 
+        async getCDS({ref, cdsId}) {
+            let included = [
+                // '/complete',
+                // '/contig_ids',
+                // '/contig_lengths',
+                // 'contigset_ref',
+                // '/dna_size',
+                // '/domain',
+                // '/gc_content',
+                // '/genetic_code',
+                // '/id',
+                // '/md5',
+                // 'num_contigs',
+                // '/scientific_name',
+                // '/source',
+                // '/source_id',
+                // '/tax_id',
+                // '/taxonomy',
+                '/cdss/[*]/id'
+            ];
+            const [[result]] = await this.wsClient.callFunc('get_object_subset', [[{
+                ref,
+                included
+            }]])
+
+            const cdsIndex = result.data.cdss.findIndex(({id}) => {
+                return id === cdsId;
+            });
+
+            if (cdsIndex === -1) {
+                throw new Error(`CDS "${cdsId}" not found`);
+            }
+
+            included = [
+                '/dna_size',
+                '/scientific_name', 
+                '/id',
+                '/source',
+                '/source_id',
+                `/cdss/${cdsIndex}`
+            ]
+
+            const [[{data}]] = await this.wsClient.callFunc('get_object_subset', [[{
+                ref,
+                included
+            }]])
+
+            return {
+                dnaSize: data.dna_size,
+                scientificName: data.scientific_name,
+                genomeId: data.id,
+                source: data.source,
+                sourceId: data.source_id,
+                cds: data.cdss[0]
+            }
+        }
+
     }
 
     return Model;
