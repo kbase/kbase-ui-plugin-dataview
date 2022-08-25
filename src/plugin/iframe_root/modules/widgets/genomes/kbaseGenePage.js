@@ -154,7 +154,7 @@ define([
                     }
                     if (featureIdx) {
                         self.workspace.get_object_subset(
-                            [{ref: objId, included: [`/features/${  featureIdx}`]}],
+                            [{ref: objId, included: [`/features/${featureIdx}`]}],
                             (data) => {
                                 const fInfo = data[0].data;
                                 genomeInfo.data.features[featureIdx] = fInfo.features[0];
