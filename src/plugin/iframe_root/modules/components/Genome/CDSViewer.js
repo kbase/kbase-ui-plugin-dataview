@@ -17,6 +17,9 @@ define([
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
+    // @optional parent_gene parent_mrna functions ontology_terms note flags warnings
+    // @optional inference_data dna_sequence aliases db_xrefs functional_descriptions  
+
     class CDS extends Component {
 
         renderLocation(loc) {
@@ -40,6 +43,26 @@ define([
             return locStr;
         }
 
+        renderProteinTranslation(proteinTranslation) {
+            if (proteinTranslation.length === 0) {
+                return 'n/a';
+            }
+
+            const SEQUENCE_SLICE_SIZE = 50;
+            
+            const slices = Math.ceil(proteinTranslation.length /  SEQUENCE_SLICE_SIZE);
+            const sequence = [];
+            for (let i = 0; i < slices; i += 1) {
+                const piece = proteinTranslation.slice(i * SEQUENCE_SLICE_SIZE, (i + 1) * SEQUENCE_SLICE_SIZE);
+                sequence.push(piece);
+            }
+            return html`
+                <div style=${{fontFamily: 'monospace'}}>${sequence.map((line) => {
+                    return html`<div>${line}</div>`
+                })}</div>
+            `;
+        }
+
         renderParentGene(featureId) {
             if (!featureId) { 
                 return;
@@ -48,6 +71,15 @@ define([
             return html`
                 <a href=${url} target="_blank">${featureId}</a>
             `;
+        }
+
+        renderWarnings(warnings) {
+            if (!warnings) {
+                return 'n/a';
+            }
+            return warnings.map((warning) => {
+                return html`<p>${warning}</p>`
+            })
         }
 
         renderOverview() {
@@ -70,7 +102,7 @@ define([
                         </tr>
                         <tr>
                             <th>Length</th>
-                            <td>${dna_sequence.length} bp</td>
+                            <td>${dna_sequence ? dna_sequence.length : 'n/a'} bp</td>
                         </tr>
                         <tr>
                             <th>Location</th>
@@ -79,9 +111,9 @@ define([
                         <tr>
                             <th>Aliases</th>
                             <td>
-                                ${aliases.map((alias) => {
+                                ${aliases ? aliases.map((alias) => {
                                     return html`<p>${alias}</p>`;
-                                })}
+                                }) : 'n/a'}
                             </td>
                         </tr>
                         <tr>
@@ -91,15 +123,13 @@ define([
                         <tr>
                             <th>Note</th>
                             <td>
-                            ${note}
+                            ${note || 'n/a'}
                             </td>
                         </tr>
                         <tr>
                             <th>Warnings</th>
                             <td>
-                                ${warnings.map((warning) => {
-                                    return html`<p>${warning}</p>`
-                                })}
+                                ${this.renderWarnings(warnings)}
                             </td>
                         </tr>
                     </tbody>
@@ -118,28 +148,41 @@ define([
                     <tbody>
                         <tr>
                             <th>Function</th>
-                            <td>${functions.map((func) => {
+                            <td>${functions ? functions.map((func) => {
                                 return func;
-                            })}</td>
+                            }) : 'n/a'}</td>
                         </tr>
                         <tr>
                             <th>Protein translation</th>
-                            <td>${protein_translation || 'n/a'}</td>
+                            <td>${this.renderProteinTranslation(protein_translation)}</td>
                         </tr>
                     </tbody>
                 </table>
             `;
         }
 
-        renderSequence() {
+        renderDNASequence(dna_sequence) {
+            if (!dna_sequence) {
+                return 'n/a';
+            }
+
             const SEQUENCE_SLICE_SIZE = 50;
-            const {dna_sequence} = this.props.cdsData.cds;
+            
             const slices = Math.ceil(dna_sequence.length /  SEQUENCE_SLICE_SIZE);
             const sequence = [];
             for (let i = 0; i < slices; i += 1) {
                 const piece = dna_sequence.slice(i * SEQUENCE_SLICE_SIZE, (i + 1) * SEQUENCE_SLICE_SIZE);
                 sequence.push(piece);
             }
+            return html`
+                <div style=${{fontFamily: 'monospace'}}>${sequence.map((line) => {
+                    return html`<div>${line}</div>`
+                })}</div>
+            `;
+        }
+
+        renderSequence() {
+           const {dna_sequence} = this.props.cdsData.cds;
             return html`
                 <table className="table table-striped">
                     <colgroup>
@@ -149,13 +192,11 @@ define([
                     <tbody>
                          <tr>
                             <th>Length</th>
-                            <td>${dna_sequence.length} bp</td>
+                            <td>${dna_sequence ? dna_sequence.length : 'n/a'} bp</td>
                         </tr>
                         <tr>
                             <th>CDS</th>
-                            <td><div style=${{fontFamily: 'monospace'}}>${sequence.map((line) => {
-                                return html`<div>${line}</div>`
-                            })}</div></td>
+                            <td>${this.renderDNASequence(dna_sequence)}</td>
                         </tr>
                     </tbody>
                 </table>
