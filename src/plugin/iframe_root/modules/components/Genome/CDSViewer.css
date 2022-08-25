@@ -1,0 +1,12 @@
+
+.CDSViewer h4 {
+    text-align: center;
+    color: white;
+    padding: 0.5em;
+    margin-top: 0;
+    background-color: rgba(150, 150, 150, 1);
+}
+
+.CDSViewer p {
+    max-width: 60em;
+} 

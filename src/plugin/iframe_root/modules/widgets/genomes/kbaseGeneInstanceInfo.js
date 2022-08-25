@@ -168,9 +168,9 @@ define([
                     // Figure out the feature length
                     let len = 'Unknown';
                     if (feature.dna_sequence_length) {
-                        len = `${feature.dna_sequence_length  } bp`;
+                        len = `${feature.dna_sequence_length} bp`;
                     } else if (feature.dna_sequence) {
-                        len = `${feature.dna_sequence.length  } bp`;
+                        len = `${feature.dna_sequence.length} bp`;
                     } else if (feature.location && feature.location.length > 0) {
                         len = 0;
                         for (let i = 0; i < feature.location.length; i++) {

@@ -69,7 +69,7 @@ define([
             self.makeDecoration(cell3, 'Sequence', panel3);
             ///////////////////////////////////////////////////////////////////////////////
 
-            const objId = `${scope.ws  }/${  scope.gid}`;
+            const objId = `${scope.ws}/${scope.gid}`;
             const included = [
                 '/complete',
                 '/contig_ids',
