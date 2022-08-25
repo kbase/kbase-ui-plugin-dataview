@@ -1,5 +1,4 @@
 set -e
-mkdir __config__
 export DIR=${PWD}
 echo "--------------------------"
 echo "Starting Build"
