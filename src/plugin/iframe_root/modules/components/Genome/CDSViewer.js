@@ -82,6 +82,26 @@ define([
             })
         }
 
+        renderAliases(aliases) {
+            if (!aliases || aliases.length == 0) {
+                return 'n/a';
+            }
+            const rows = aliases.map(([label, alias]) => {
+                return html`<tr>
+                    <td>${label}</td>
+                    <td>${alias}</td>
+                </tr>`;
+            });
+
+            return html`
+                <table className="table table-compact kb-mini-table">
+                    <tbody>
+                   ${rows}
+                   </tbody>
+                </table>
+            `;
+        }
+
         renderOverview() {
             const {cds: {location, aliases, parent_gene, dna_sequence, note, warnings}, scientificName, genomeId} = this.props.cdsData;
             const genomeLink = `/#dataview/${this.props.objectInfo.ref}`;
@@ -111,9 +131,7 @@ define([
                         <tr>
                             <th>Aliases</th>
                             <td>
-                                ${aliases ? aliases.map((alias) => {
-                                    return html`<p>${alias}</p>`;
-                                }) : 'n/a'}
+                                ${this.renderAliases(aliases)}
                             </td>
                         </tr>
                         <tr>
