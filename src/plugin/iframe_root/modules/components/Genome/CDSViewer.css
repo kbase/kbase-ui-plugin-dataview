@@ -10,3 +10,13 @@
 .CDSViewer p {
     max-width: 60em;
 } 
+
+.CDSViewer table.table.kb-mini-table {
+    width: auto;
+    background-color: transparent;
+    margin: 0;
+}
+
+.CDSViewer table.table.kb-mini-table td {
+    border: none;
+}
