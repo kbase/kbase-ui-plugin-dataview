@@ -20,3 +20,7 @@
 .CDSViewer table.table.kb-mini-table td {
     border: none;
 }
+
+.CDSViewer table.table.kb-mini-table td:nth-child(1) {
+    padding-left: 0;
+}

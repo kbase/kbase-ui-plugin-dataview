@@ -20,15 +20,13 @@ define([
             }
             return html`
                 <div style=${styles.wrapper}>
-                    <div className="fa fa-lg fa-2x fa-ban" style=${styles.icon}>
-                    </div>
                     <div style=${styles.message}>${message}</div>
                 </div>
             `;
         }
         render() {
             return html`
-                <${Alert} type="info" render=${this.renderMessage.bind(this)} />
+                <${Alert} icon="ban" type="info" render=${this.renderMessage.bind(this)} />
             `;
         }
     }
