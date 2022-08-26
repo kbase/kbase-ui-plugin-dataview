@@ -352,6 +352,58 @@ define([
             }
         }
 
+        async getFeature({ref, featureId}) {
+            let included = [
+                '/features/[*]/id'
+            ];
+            const [[result]] = await this.wsClient.callFunc('get_object_subset', [[{
+                ref,
+                included
+            }]])
+
+
+            if (!('features' in result.data)) {
+                throw new Error(`This Genome is an older version which does not support Features`)
+            }
+
+            const featureIndex = result.data.features.findIndex(({id}) => {
+                return id === featureId;
+            });
+
+            if (featureIndex === -1) {
+                throw new Error(`Feature "${featureId}" not found`);
+            }
+
+            included = [
+                '/dna_size',
+                '/scientific_name', 
+                '/id',
+                '/source',
+                '/source_id',
+                '/protein_translation',
+                '/function',
+                '/annotations',
+                '/subsystem_data',
+                `/features/${featureIndex}`
+            ]
+
+            const [[{data}]] = await this.wsClient.callFunc('get_object_subset', [[{
+                ref,
+                included
+            }]])
+
+            const feature = data.features[0];
+
+            return {
+                dnaSize: data.dna_size,
+                scientificName: data.scientific_name,
+                genomeId: data.id,
+                source: data.source,
+                sourceId: data.source_id,
+                feature
+            }
+        }
+
     }
 
     return Model;

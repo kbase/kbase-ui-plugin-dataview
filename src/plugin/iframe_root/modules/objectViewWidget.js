@@ -230,8 +230,6 @@ define([
 
                     preact.render(preact.h(MiniOverviewComponent, props), document.getElementById(miniOverviewId));
 
-                    // preact.render(preact.h(OverviewComponent, props), document.getElementById(overviewId));
-
                     return Promise.all([objectInfo, widgetSet.start(params)]);
                 })
                 .catch((error) => {
@@ -243,7 +241,6 @@ define([
         }
 
         function run(params) {
-            // return widgetSet.run(params);
             renderTabs(params);
             widgetSet.run(params)
                 .then(() => {

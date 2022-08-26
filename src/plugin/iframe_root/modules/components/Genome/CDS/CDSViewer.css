@@ -19,8 +19,14 @@
 
 .CDSViewer table.table.kb-mini-table td {
     border: none;
+    padding: 4px;
 }
+
 
 .CDSViewer table.table.kb-mini-table td:nth-child(1) {
     padding-left: 0;
+}
+
+.CDSViewer table.table.kb-mini-table tr:nth-child(1) td {
+    padding-top: 0;
 }
