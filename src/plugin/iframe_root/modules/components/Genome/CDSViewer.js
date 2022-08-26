@@ -3,7 +3,6 @@ define([
     'htm',
     'components/Row',
     'components/Col',
-    './CDSViewer.styles',
 
     'bootstrap',
     'css!./CDSViewer.css'
@@ -11,8 +10,7 @@ define([
     preact,
     htm,
     Row, 
-    Col,
-    styles
+    Col
 ) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
@@ -141,7 +139,7 @@ define([
                         <tr>
                             <th>Note</th>
                             <td>
-                            ${note || 'n/a'}
+                                <p>${note || 'n/a'}</p>
                             </td>
                         </tr>
                         <tr>
@@ -223,7 +221,7 @@ define([
        
         render() {
             return html`
-                <div style=${styles.main} className="CDSViewer">
+                <div className="CDSViewer">
                    <h4>Overview</h4>
                    ${this.renderOverview()}
 

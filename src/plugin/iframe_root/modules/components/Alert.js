@@ -12,6 +12,9 @@ define([
     class Alert extends Component {
         renderIcon() {
             const icon = (() => {
+                if (this.props.icon) {
+                    return this.props.icon;
+                }
                 switch (this.props.type) {
                 case 'info':
                     return 'info-circle';

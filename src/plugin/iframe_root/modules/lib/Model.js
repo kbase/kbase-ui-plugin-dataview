@@ -302,28 +302,17 @@ define([
 
         async getCDS({ref, cdsId}) {
             let included = [
-                // '/complete',
-                // '/contig_ids',
-                // '/contig_lengths',
-                // 'contigset_ref',
-                // '/dna_size',
-                // '/domain',
-                // '/gc_content',
-                // '/genetic_code',
-                // '/id',
-                // '/md5',
-                // 'num_contigs',
-                // '/scientific_name',
-                // '/source',
-                // '/source_id',
-                // '/tax_id',
-                // '/taxonomy',
                 '/cdss/[*]/id'
             ];
             const [[result]] = await this.wsClient.callFunc('get_object_subset', [[{
                 ref,
                 included
             }]])
+
+
+            if (!('cdss' in result.data)) {
+                throw new Error(`This Genome is an older version which does not support CDSs`)
+            }
 
             const cdsIndex = result.data.cdss.findIndex(({id}) => {
                 return id === cdsId;
@@ -346,6 +335,12 @@ define([
                 ref,
                 included
             }]])
+
+            const cds = data.cdss[0]
+
+            if (!('protein_md5' in cds)) {
+                throw new Error('This object is an older version which has an unsupported CDS structure');
+            }
 
             return {
                 dnaSize: data.dna_size,
