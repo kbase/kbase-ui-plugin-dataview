@@ -1,14 +1,14 @@
 define([
     'preact',
     'htm',    
-    'components/Genome/CDS/CDS'
+    'components/Genome/Feature/Feature'
 ], (
     preact,
     htm,
-    CDS
+    Feature
 ) => {
     const html = htm.bind(preact.h);
-    class CDSPage {
+    class FeaturePage {
         constructor(config) {
             this.runtime = config.runtime;
         }
@@ -21,8 +21,8 @@ define([
         }
 
         start(params) {
-            this.runtime.send('ui', 'setTitle', `Data View for CDS "${params.cdsID}" of genome "${params.objectInfo.name}"`);
-            preact.render(html`<${CDS} cdsId=${params.cdsID} objectInfo=${params.objectInfo} runtime=${this.runtime}/>`, this.node);
+            this.runtime.send('ui', 'setTitle', `Data View for feature "${params.featureID}" of genome "${params.objectInfo.name}"`);
+            preact.render(html`<${Feature} featureId=${params.featureID} objectInfo=${params.objectInfo} runtime=${this.runtime}/>`, this.node);
             return null;
         }
 
@@ -37,5 +37,5 @@ define([
         }
     }
 
-    return CDSPage;
+    return FeaturePage;
 });

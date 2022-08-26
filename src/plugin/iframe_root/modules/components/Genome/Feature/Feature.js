@@ -4,19 +4,19 @@ define([
     'components/Loading',
     'components/SimpleError',
     'lib/Model',
-    './CDSViewer'
+    './FeatureViewer'
 ], (
     preact,
     htm,
     Loading,
     SimpleError,
     Model, 
-    CDSViewer
+    FeatureViewer
 ) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
-    class CDS extends Component {
+    class Feature extends Component {
         constructor(props) {
             super(props);
             this.state = {
@@ -33,10 +33,6 @@ define([
             this.fetchData();
         }
 
-        async getCDS() {
-            this.model.getCDS(this.props.objectInfo.ref, this.props.cdsId);
-        }
-
         async fetchData() {
             try {
                 this.setState({
@@ -44,9 +40,9 @@ define([
                 });
 
                 // fetch data...
-                const value = await this.model.getCDS({
+                const value = await this.model.getFeature({
                     ref: this.props.objectInfo.ref, 
-                    cdsId: this.props.cdsId
+                    featureId: this.props.featureId
                 });
 
                 this.setState({
@@ -66,7 +62,7 @@ define([
 
         renderLoading() {
             return html`
-                <${Loading} message="Loading CDS..." />
+                <${Loading} message="Loading Feature..." />
             `;
         }
 
@@ -78,7 +74,7 @@ define([
 
         renderSuccess(value) {
             return html`
-                <${CDSViewer} cdsData=${value} objectInfo=${this.props.objectInfo}/>
+                <${FeatureViewer} featureData=${value} objectInfo=${this.props.objectInfo}/>
             `;
         }
        
@@ -94,5 +90,5 @@ define([
             }
         }
     }
-    return CDS;
+    return Feature;
 });

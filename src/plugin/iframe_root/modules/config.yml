@@ -165,6 +165,9 @@ install:
     - module: widgets/genomes/CDSPage
       name: kb_dataview_genomes_cdsPage
       type: es6
+    - module: widgets/genomes/FeaturePage
+      name: kb_dataview_genomes_featurePage
+      type: es6
     - module: widgets/genomes/kbaseGenomeGeneTable
       name: kb_dataview_genomes_geneTable
       type: kbwidget
@@ -840,7 +843,7 @@ install:
             - from: workspaceId
               to: workspaceID
           sub:
-            feature:
+            featurex:
               widget:
                 name: kb_dataview_genomes_genePage
                 config:
@@ -855,6 +858,12 @@ install:
                   to: workspaceID
                 - from: featureID
                   to: featureID
+            feature:
+              widget:
+                name: kb_dataview_genomes_featurePage
+              panel: false 
+              scrolling: true 
+              default: true 
             cds:
               widget:
                 name: kb_dataview_genomes_cdsPage

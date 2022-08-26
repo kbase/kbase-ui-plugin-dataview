@@ -1,0 +1,32 @@
+
+.FeatureViewer h4 {
+    text-align: center;
+    color: white;
+    padding: 0.5em;
+    margin-top: 0;
+    background-color: rgba(150, 150, 150, 1);
+}
+
+.FeatureViewer p {
+    max-width: 60em;
+} 
+
+.FeatureViewer table.table.kb-mini-table {
+    width: auto;
+    background-color: transparent;
+    margin: 0;
+}
+
+.FeatureViewer table.table.kb-mini-table td {
+    border: none;
+    padding: 4px;
+}
+
+
+.FeatureViewer table.table.kb-mini-table td:nth-child(1) {
+    padding-left: 0;
+}
+
+.FeatureViewer table.table.kb-mini-table tr:nth-child(1) td {
+    padding-top: 0;
+}
