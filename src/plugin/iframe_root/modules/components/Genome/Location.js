@@ -16,7 +16,6 @@ define([
 
             return locations.map((location, index) => {
                 const [contigId, start, direction, length] = location;
-                console.log('loc', contigId, start, direction, length)
 
                 const end = (() => {
                     if (direction === '+') {
