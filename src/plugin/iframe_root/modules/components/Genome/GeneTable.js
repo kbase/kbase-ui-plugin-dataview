@@ -24,6 +24,7 @@ define([
                 genome_id: this.props.objectInfo.id,
                 ws_name: this.props.objectInfo.ws,
                 ver: this.props.objectInfo.version,
+                objectInfo: this.props.objectInfo,
                 genomeInfo: this.props.genomeObject,
                 runtime: this.props.runtime
             });

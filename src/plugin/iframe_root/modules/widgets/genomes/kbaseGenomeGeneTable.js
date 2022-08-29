@@ -25,7 +25,8 @@ define([
             genome_id: null,
             ws_name: null,
             ver: null,
-            genomeInfo: null
+            genomeInfo: null,
+            objectInfo: null
         },
         init(options) {
             this._super(options);
@@ -44,7 +45,7 @@ define([
             // xss safe
             container.append(html.loading('loading genes data...'));
 
-            const genomeRef = `${String(this.options.ws_name)  }/${  String(this.options.genome_id)}`;
+            const genomeRef = this.options.objectInfo.ref;
 
             const showData = function (gnm) {
                 function showGenes() {
@@ -97,16 +98,12 @@ define([
                         }
                         const geneType = gene.type;
                         let geneFunc = gene['function'];
-                        if (!geneFunc) geneFunc = '-';
+                        if (!geneFunc) {
+                            geneFunc = '-';
+                        }
                         genesData.push({
                             id:
-                                `<a href="/#dataview/${
-                                    genomeRef
-                                }?sub=Feature&subid=${
-                                    geneId
-                                }" target="_blank">${
-                                    geneId
-                                }</a>`,
+                                `<a href="/#dataview/${genomeRef}?sub=Feature&subid=${geneId}" target="_blank">${geneId}</a>`,
                             contig: contigName,
                             start: geneStart,
                             dir: geneDir,
