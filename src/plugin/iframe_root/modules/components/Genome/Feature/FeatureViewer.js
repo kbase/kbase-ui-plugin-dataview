@@ -50,7 +50,7 @@ define([
                         </tr>
                         <tr>
                             <th>Length</th>
-                            <td>${Intl.NumberFormat('en-US', {useGrouping: true}).format(dna_sequence_length)} bp${protein_translation ? `, ${protein_translation.length} aa` : ''}</td>
+                            <td>${this.renderFeatureLength()}, ${this.renderProteinLength()}</td>
                         </tr>
                         <tr>
                             <th>Location</th>
@@ -122,8 +122,8 @@ define([
         }
 
         renderAnnotationComments(annotations) {
-            if (!annotations) {
-                return  html`<i>No annotation comments found.</i>`;
+            if (!annotations || annotations.length === 0) {
+                return  html`<i>No annotation comments</i>`;
             } 
 
             return annotations.map(([comment, annotator, annotation_time]) => {
@@ -136,8 +136,8 @@ define([
         }
 
         renderSubsystems(subsystem_data) {
-            if (!subsystem_data) {
-                return html`<i>No subsystem data found.</i>`;
+            if (!subsystem_data || subsystem_data.length === 0) {
+                return html`<i>No subsystem data</i>`;
             }
 
             return subsystem_data.map(([subsystem, variant, role]) => {
@@ -151,14 +151,32 @@ define([
             });
         }
 
+        renderFeatureLength() {
+            const {dna_sequence_length} = this.props.featureData.feature;
+            if (!dna_sequence_length) {
+                return 'n/a';
+            }
+
+            return `${Intl.NumberFormat('en-US', {useGrouping: true}).format(dna_sequence_length)} bp`
+        }
+
+        renderProteinLength() {
+            const {protein_translation_length} = this.props.featureData.feature;
+            if (!protein_translation_length) {
+                return 'n/a';
+            }
+
+            return `${Intl.NumberFormat('en-US', {useGrouping: true}).format(protein_translation_length)} aa`
+        }
+
         renderSequence() {
-           const {dna_sequence, dna_sequence_length, protein_translation, protein_translation_length} = this.props.featureData.feature;
+           const {dna_sequence, protein_translation } = this.props.featureData.feature;
             return html`
                 <table className="table table-striped -dnaSequence">
                     <tbody>
                          <tr>
                             <th>Protein length</th>
-                            <td>${Intl.NumberFormat('en-US', {useGrouping: true}).format(protein_translation_length)} aa</td>
+                            <td>${this.renderProteinLength()}</td>
                         </tr>
                         <tr>
                             <th>Protein translation</th>
@@ -166,7 +184,7 @@ define([
                         </tr>
                         <tr>
                             <th>Feature Length</th>
-                            <td>${Intl.NumberFormat('en-US', {useGrouping: true}).format(dna_sequence_length)} bp</td>
+                            <td>${this.renderFeatureLength()}</td>
                         </tr>
                         <tr>
                             <th>Feature</th>
