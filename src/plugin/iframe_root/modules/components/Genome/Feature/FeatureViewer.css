@@ -14,7 +14,7 @@
 /* Per table first column width optimizations */
 
 .FeatureViewer table.table.-dnaSequence th {
-    width: 7em;
+    width: 13em;
 }
 
 .FeatureViewer table.table.-biochemistry th {

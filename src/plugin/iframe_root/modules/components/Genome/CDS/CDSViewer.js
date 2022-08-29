@@ -62,6 +62,10 @@ define([
                             <td>${scientificName}</td>
                         </tr>
                         <tr>
+                            <th>Functions</th>
+                            <td>${this.renderFunctions()}</td>
+                        </tr>
+                        <tr>
                             <th>Length</th>
                             <td>${Intl.NumberFormat('en-US', {useGrouping: true}).format(dna_sequence_length)} bp, ${Intl.NumberFormat('en-US', {useGrouping: true}).format(protein_translation_length)} aa</td>
                         </tr>
@@ -96,21 +100,44 @@ define([
             `;
         }
 
-        renderBiochemistry() {
-            const {functions, protein_translation_length, protein_translation} = this.props.cdsData.cds;
+         renderFunctions() {
+            const feature = this.props.cdsData.cds
+            if (feature.functions) {
+                return feature.functions.map((func) => {
+                    return html`<div>${func}</div>`;
+                });
+            }
+            if (feature.function) {
+                return feature.function;
+            }
+            return 'n/a';
+        }
+
+        // renderBiochemistry() {
+        //     const {functions, protein_translation_length, protein_translation} = this.props.cdsData.cds;
+        //     return html`
+        //         <table className="table table-striped -biochemistry">
+        //             <colgroup>
+        //                 <col style="width: 11em" />
+        //                 <col />
+        //             </colgroup>
+        //             <tbody>
+                        
+                        
+        //             </tbody>
+        //         </table>
+        //     `;
+        // }
+
+        renderSequence() {
+           const {dna_sequence, dna_sequence_length, protein_translation_length, protein_translation} = this.props.cdsData.cds;
             return html`
-                <table className="table table-striped -biochemistry">
+                <table className="table table-striped -sequence">
                     <colgroup>
                         <col style="width: 11em" />
                         <col />
                     </colgroup>
                     <tbody>
-                        <tr>
-                            <th>Function</th>
-                            <td>${functions ? functions.map((func) => {
-                                return func;
-                            }) : 'n/a'}</td>
-                        </tr>
                         <tr>
                             <th>Protein length</th>
                             <td>${Intl.NumberFormat('en-US', {useGrouping: true}).format(protein_translation_length)} aa</td>
@@ -119,22 +146,8 @@ define([
                             <th>Protein translation</th>
                             <td><${ProteinSequence} sequence=${protein_translation} /></td>
                         </tr>
-                    </tbody>
-                </table>
-            `;
-        }
-
-        renderSequence() {
-           const {dna_sequence, dna_sequence_length} = this.props.cdsData.cds;
-            return html`
-                <table className="table table-striped -sequence">
-                    <colgroup>
-                        <col style="width: 11em" />
-                        <col />
-                    </colgroup>
-                    <tbody>
                          <tr>
-                            <th>Length</th>
+                            <th>CDS Length</th>
                             <td>${Intl.NumberFormat('en-US', {useGrouping: true}).format(dna_sequence_length)} bp</td>
                         </tr>
                         <tr>
@@ -149,20 +162,16 @@ define([
         render() {
             return html`
                 <div className="CDSViewer">
-                   <h4>CDS Overview</h4>
-                   ${this.renderOverview()}
-
                    <${Row}>
                     <${Col} style=${{marginRight: '0.5em'}}>
-                        <h4>Biochemistry</h4>
-                        ${this.renderBiochemistry()} 
+                        <h4>CDS Overview</h4>
+                        ${this.renderOverview()}
                     <//>
                     <${Col} style=${{marginLeft: '0.5em'}}>
-                        <h4>Sequence</h4>
+                         <h4>Sequence</h4>
                         ${this.renderSequence()} 
                     <//>
                    <//>
-
                 </div>
             `;
         }
