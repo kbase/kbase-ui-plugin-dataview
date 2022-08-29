@@ -42,7 +42,7 @@ define([
                     <tbody>
                         <tr>
                             <th>Function</th>
-                            <td>${func || 'Unknown'}</td>
+                            <td>${this.renderFunction()}</td>
                         </tr>
                         <tr>
                             <th>Genome</th>
@@ -71,24 +71,39 @@ define([
             `;
         }
 
+        renderFunction() {
+            const feature = this.props.featureData.feature;
+            if (feature.functions) {
+                return feature.functions.map((func) => {
+                    return html`<div>${func}</div>`;
+                });
+            }
+            if (feature.function) {
+                return feature.function;
+            }
+            return 'n/a';
+        }
+
         renderBiochemistry() {
-            const {functions, protein_translation, annotations, subsystem_data} = this.props.featureData.feature;
+            const {functions, protein_translation, protein_translation_length, annotations, subsystem_data} = this.props.featureData.feature;
             return html`
                 <table className="table table-striped -biochemistry">
                     <tbody>
                         <tr>
                             <th>Function</th>
-                            <td>${functions ? functions.map((func) => {
-                                return func;
-                            }) : 'n/a'}</td>
+                            <td>${this.renderFunction()}</td>
                         </tr>
                          <tr>
                             <th>Subsystems</th>
                             <td>${this.renderSubsystems(subsystem_data)}</td>
                         </tr>
-                         <tr>
+                        <tr>
                             <th>Annotation Comments</th>
                             <td>${this.renderAnnotationComments(annotations)}</td>
+                        </tr>
+                         <tr>
+                            <th>Protein length</th>
+                            <td>${Intl.NumberFormat('en-US', {useGrouping: true}).format(protein_translation_length)} aa</td>
                         </tr>
                         <tr>
                             <th>Protein translation</th>
@@ -145,13 +160,13 @@ define([
         }
 
         renderSequence() {
-           const {dna_sequence} = this.props.featureData.feature;
+           const {dna_sequence, dna_sequence_length} = this.props.featureData.feature;
             return html`
                 <table className="table table-striped -dnaSequence">
                     <tbody>
                          <tr>
                             <th>Length</th>
-                            <td>${dna_sequence ? dna_sequence.length : 'n/a'} bp</td>
+                            <td>${Intl.NumberFormat('en-US', {useGrouping: true}).format(dna_sequence_length)} bp</td>
                         </tr>
                         <tr>
                             <th>Feature</th>
