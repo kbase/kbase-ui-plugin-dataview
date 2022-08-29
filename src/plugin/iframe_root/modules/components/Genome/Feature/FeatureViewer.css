@@ -11,22 +11,16 @@
     max-width: 60em;
 } 
 
-.FeatureViewer table.table.kb-mini-table {
-    width: auto;
-    background-color: transparent;
-    margin: 0;
+/* Per table first column width optimizations */
+
+.FeatureViewer table.table.-dnaSequence th {
+    width: 7em;
 }
 
-.FeatureViewer table.table.kb-mini-table td {
-    border: none;
-    padding: 4px;
+.FeatureViewer table.table.-biochemistry th {
+    width: 13em;
 }
 
-
-.FeatureViewer table.table.kb-mini-table td:nth-child(1) {
-    padding-left: 0;
-}
-
-.FeatureViewer table.table.kb-mini-table tr:nth-child(1) td {
-    padding-top: 0;
+.FeatureViewer table.table.-overview th {
+    width: 7em;
 }

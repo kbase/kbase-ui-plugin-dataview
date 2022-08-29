@@ -1,0 +1,18 @@
+table.Aliases.table.kb-mini-table {
+    width: auto;
+    background-color: transparent;
+    margin: 0;
+}
+
+table.Aliases.table.kb-mini-table td {
+    border: none;
+    padding: 4px;
+}
+
+table.Aliases.table.kb-mini-table td:nth-child(1) {
+    padding-left: 0;
+}
+
+table.Aliases.table.kb-mini-table tr:nth-child(1) td {
+    padding-top: 0;
+}

@@ -46,5 +46,19 @@ define([], () => {
         return count === 1 ? singular : plural || `${singular}s`;
     }
 
-    return Object.freeze({formattedDate, formattedInteger, timestamp, date, domSafeText, pluralize});
+
+
+    function unixEpochToTimestamp(time) {
+        if (!time) {
+            return 'n/a';
+        }
+        const options = {
+            year: 'numeric', month: 'numeric', day: 'numeric',
+            hour: 'numeric', minute: 'numeric', second: 'numeric',
+            hour12: false
+        };
+        return Intl.DateTimeFormat('en-US', options).format(time * 1000);
+    }
+
+    return Object.freeze({formattedDate, formattedInteger, timestamp, date, domSafeText, pluralize, unixEpochToTimestamp});
 });

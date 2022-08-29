@@ -3,6 +3,10 @@ define([
     'htm',
     'components/Row',
     'components/Col',
+    '../Aliases',
+    '../Location',
+    '../DNASequence',
+    '../ProteinSequence',
 
     'bootstrap',
     'css!./CDSViewer.css'
@@ -10,57 +14,16 @@ define([
     preact,
     htm,
     Row, 
-    Col
+    Col,
+    Aliases,
+    Location,
+    DNASequence,
+    ProteinSequence
 ) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
-    // @optional parent_gene parent_mrna functions ontology_terms note flags warnings
-    // @optional inference_data dna_sequence aliases db_xrefs functional_descriptions  
-
     class CDS extends Component {
-
-        renderLocation(loc) {
-            if (loc.length === 0) {
-                return 'Unknown';
-            }
-
-            let locStr = '';
-            for (let i = 0; i < loc.length; i++) {
-                const start = Number(loc[i][1]);
-                const length = Number(loc[i][3]);
-
-                let end = 0;
-                if (loc[i][2] === '+')
-                    end = start + length - 1;
-                else
-                    end = start - length + 1;
-
-                locStr += `${start} to ${end} (${loc[i][2]})`;
-            }
-            return locStr;
-        }
-
-        renderProteinTranslation(proteinTranslation) {
-            if (proteinTranslation.length === 0) {
-                return 'n/a';
-            }
-
-            const SEQUENCE_SLICE_SIZE = 50;
-            
-            const slices = Math.ceil(proteinTranslation.length /  SEQUENCE_SLICE_SIZE);
-            const sequence = [];
-            for (let i = 0; i < slices; i += 1) {
-                const piece = proteinTranslation.slice(i * SEQUENCE_SLICE_SIZE, (i + 1) * SEQUENCE_SLICE_SIZE);
-                sequence.push(piece);
-            }
-            return html`
-                <div style=${{fontFamily: 'monospace'}}>${sequence.map((line) => {
-                    return html`<div>${line}</div>`
-                })}</div>
-            `;
-        }
-
         renderParentGene(featureId) {
             if (!featureId) { 
                 return;
@@ -80,31 +43,11 @@ define([
             })
         }
 
-        renderAliases(aliases) {
-            if (!aliases || aliases.length == 0) {
-                return 'n/a';
-            }
-            const rows = aliases.map(([label, alias]) => {
-                return html`<tr>
-                    <td>${label}</td>
-                    <td>${alias}</td>
-                </tr>`;
-            });
-
-            return html`
-                <table className="table table-compact kb-mini-table">
-                    <tbody>
-                   ${rows}
-                   </tbody>
-                </table>
-            `;
-        }
-
         renderOverview() {
-            const {cds: {location, aliases, parent_gene, dna_sequence, note, warnings}, scientificName, genomeId} = this.props.cdsData;
+            const {cds: {location, aliases, parent_gene, dna_sequence_length, note, warnings}, scientificName, genomeId} = this.props.cdsData;
             const genomeLink = `/#dataview/${this.props.objectInfo.ref}`;
             return html`
-                <table className="table table-striped">
+                <table className="table table-striped -overview">
                     <colgroup>
                         <col style="width: 11em" />
                         <col />
@@ -120,16 +63,16 @@ define([
                         </tr>
                         <tr>
                             <th>Length</th>
-                            <td>${dna_sequence ? dna_sequence.length : 'n/a'} bp</td>
+                            <td>${Intl.NumberFormat('en-US', {useGrouping: true}).format(dna_sequence_length)} bp</td>
                         </tr>
                         <tr>
                             <th>Location</th>
-                            <td>${this.renderLocation(location)}</td>
+                            <td><${Location} location=${location} /></td>
                         </tr>
                         <tr>
                             <th>Aliases</th>
                             <td>
-                                ${this.renderAliases(aliases)}
+                                <${Aliases} aliases=${aliases} />
                             </td>
                         </tr>
                         <tr>
@@ -154,9 +97,9 @@ define([
         }
 
         renderBiochemistry() {
-            const {functions, protein_translation} = this.props.cdsData.cds;
+            const {functions, protein_translation_length, protein_translation} = this.props.cdsData.cds;
             return html`
-                <table className="table table-striped">
+                <table className="table table-striped -biochemistry">
                     <colgroup>
                         <col style="width: 11em" />
                         <col />
@@ -169,38 +112,22 @@ define([
                             }) : 'n/a'}</td>
                         </tr>
                         <tr>
+                            <th>Protein length</th>
+                            <td>${Intl.NumberFormat('en-US', {useGrouping: true}).format(protein_translation_length)} aa</td>
+                        </tr>
+                        <tr>
                             <th>Protein translation</th>
-                            <td>${this.renderProteinTranslation(protein_translation)}</td>
+                            <td><${ProteinSequence} sequence=${protein_translation} /></td>
                         </tr>
                     </tbody>
                 </table>
             `;
         }
 
-        renderDNASequence(dna_sequence) {
-            if (!dna_sequence) {
-                return 'n/a';
-            }
-
-            const SEQUENCE_SLICE_SIZE = 50;
-            
-            const slices = Math.ceil(dna_sequence.length /  SEQUENCE_SLICE_SIZE);
-            const sequence = [];
-            for (let i = 0; i < slices; i += 1) {
-                const piece = dna_sequence.slice(i * SEQUENCE_SLICE_SIZE, (i + 1) * SEQUENCE_SLICE_SIZE);
-                sequence.push(piece);
-            }
-            return html`
-                <div style=${{fontFamily: 'monospace'}}>${sequence.map((line) => {
-                    return html`<div>${line}</div>`
-                })}</div>
-            `;
-        }
-
         renderSequence() {
-           const {dna_sequence} = this.props.cdsData.cds;
+           const {dna_sequence, dna_sequence_length} = this.props.cdsData.cds;
             return html`
-                <table className="table table-striped">
+                <table className="table table-striped -sequence">
                     <colgroup>
                         <col style="width: 11em" />
                         <col />
@@ -208,11 +135,11 @@ define([
                     <tbody>
                          <tr>
                             <th>Length</th>
-                            <td>${dna_sequence ? dna_sequence.length : 'n/a'} bp</td>
+                            <td>${Intl.NumberFormat('en-US', {useGrouping: true}).format(dna_sequence_length)} bp</td>
                         </tr>
                         <tr>
                             <th>CDS</th>
-                            <td>${this.renderDNASequence(dna_sequence)}</td>
+                            <td><${DNASequence} dna_sequence=${dna_sequence} /></td>
                         </tr>
                     </tbody>
                 </table>

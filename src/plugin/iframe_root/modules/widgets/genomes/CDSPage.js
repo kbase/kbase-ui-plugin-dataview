@@ -21,7 +21,7 @@ define([
         }
 
         start(params) {
-            this.runtime.send('ui', 'setTitle', `Data View for CDS "${params.cdsID}" of genome "${params.objectInfo.name}"`);
+            this.runtime.send('ui', 'setTitle', `Data View for CDS "${params.cdsID}" of Genome "${params.objectInfo.name}"`);
             preact.render(html`<${CDS} cdsId=${params.cdsID} objectInfo=${params.objectInfo} runtime=${this.runtime}/>`, this.node);
             return null;
         }

@@ -21,7 +21,7 @@ define([
         }
 
         start(params) {
-            this.runtime.send('ui', 'setTitle', `Data View for feature "${params.featureID}" of genome "${params.objectInfo.name}"`);
+            this.runtime.send('ui', 'setTitle', `Data View for Feature "${params.featureID}" of Genome "${params.objectInfo.name}"`);
             preact.render(html`<${Feature} featureId=${params.featureID} objectInfo=${params.objectInfo} runtime=${this.runtime}/>`, this.node);
             return null;
         }

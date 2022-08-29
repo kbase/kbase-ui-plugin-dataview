@@ -4,7 +4,7 @@ define([
     'components/Loading',
     'components/SimpleError',
     'lib/Model',
-    './CDSViewer'
+    './CDSViewer',
 ], (
     preact,
     htm,

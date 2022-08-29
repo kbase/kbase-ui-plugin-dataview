@@ -11,9 +11,13 @@ define([
         render() {
             return html`
                 <div className="alert alert-danger">
-                <strong>${this.props.title || 'Error!'}</strong>${' '}
-                ${this.props.message}
-                </table>
+                    <div>
+                        <strong>${this.props.title || 'Error!'}</strong>${' '}
+                    </div>
+                    <div>
+                        ${this.props.message}
+                    </div>
+                </div>
             `;
         }
     }
