@@ -44,7 +44,7 @@ define([
         }
 
         renderOverview() {
-            const {cds: {location, aliases, parent_gene, dna_sequence_length, note, warnings}, scientificName, genomeId} = this.props.cdsData;
+            const {cds: {location, aliases, parent_gene, dna_sequence_length, protein_translation_length, note, warnings}, scientificName, genomeId} = this.props.cdsData;
             const genomeLink = `/#dataview/${this.props.objectInfo.ref}`;
             return html`
                 <table className="table table-striped -overview">
@@ -63,7 +63,7 @@ define([
                         </tr>
                         <tr>
                             <th>Length</th>
-                            <td>${Intl.NumberFormat('en-US', {useGrouping: true}).format(dna_sequence_length)} bp</td>
+                            <td>${Intl.NumberFormat('en-US', {useGrouping: true}).format(dna_sequence_length)} bp, ${Intl.NumberFormat('en-US', {useGrouping: true}).format(protein_translation_length)} aa</td>
                         </tr>
                         <tr>
                             <th>Location</th>
