@@ -43,8 +43,26 @@ define([
             })
         }
 
+         renderCDSLength() {
+            const {dna_sequence_length} = this.props.cdsData.cds;
+            if (!dna_sequence_length) {
+                return 'n/a';
+            }
+
+            return `${Intl.NumberFormat('en-US', {useGrouping: true}).format(dna_sequence_length)} bp`
+        }
+
+        renderProteinLength() {
+            const {protein_translation_length} = this.props.cdsData.cds;
+            if (!protein_translation_length) {
+                return 'n/a';
+            }
+
+            return `${Intl.NumberFormat('en-US', {useGrouping: true}).format(protein_translation_length)} aa`
+        }
+
         renderOverview() {
-            const {cds: {location, aliases, parent_gene, dna_sequence_length, protein_translation_length, note, warnings}, scientificName, genomeId} = this.props.cdsData;
+            const {cds: {location, aliases, parent_gene, note, warnings}, scientificName, genomeId} = this.props.cdsData;
             const genomeLink = `/#dataview/${this.props.objectInfo.ref}`;
             return html`
                 <table className="table table-striped -overview">
@@ -67,7 +85,7 @@ define([
                         </tr>
                         <tr>
                             <th>Length</th>
-                            <td>${Intl.NumberFormat('en-US', {useGrouping: true}).format(dna_sequence_length)} bp, ${Intl.NumberFormat('en-US', {useGrouping: true}).format(protein_translation_length)} aa</td>
+                            <td>${this.renderCDSLength()}, ${this.renderProteinLength()}</td>
                         </tr>
                         <tr>
                             <th>Location</th>
@@ -140,7 +158,7 @@ define([
                     <tbody>
                         <tr>
                             <th>Protein length</th>
-                            <td>${Intl.NumberFormat('en-US', {useGrouping: true}).format(protein_translation_length)} aa</td>
+                            <td>${this.renderProteinLength()}</td>
                         </tr>
                         <tr>
                             <th>Protein translation</th>
@@ -148,7 +166,7 @@ define([
                         </tr>
                          <tr>
                             <th>CDS Length</th>
-                            <td>${Intl.NumberFormat('en-US', {useGrouping: true}).format(dna_sequence_length)} bp</td>
+                            <td>${this.renderCDSLength()}</td>
                         </tr>
                         <tr>
                             <th>CDS</th>
