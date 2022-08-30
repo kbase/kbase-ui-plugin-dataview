@@ -36,13 +36,21 @@ define([
         }
 
         renderOverview() {
-            const {feature: {location, aliases, cdss, 'function': func, dna_sequence_length, note, warnings, protein_translation}, scientificName, genomeId} = this.props.featureData;
+            const {feature: {location, aliases, cdss, subsystem_data, annotations}, scientificName} = this.props.featureData;
             return html`
                 <table className="table table-striped -overview">
                     <tbody>
                         <tr>
-                            <th>Function</th>
+                            <th>Functions</th>
                             <td>${this.renderFunctions()}</td>
+                        </tr>
+                        <tr>
+                            <th>Subsystems</th>
+                            <td>${this.renderSubsystems(subsystem_data)}</td>
+                        </tr>
+                        <tr>
+                            <th>Annotation Comments</th>
+                            <td>${this.renderAnnotationComments(annotations)}</td>
                         </tr>
                         <tr>
                             <th>Genome</th>
@@ -84,27 +92,20 @@ define([
             return 'n/a';
         }
 
-        renderBiochemistry() {
-            const {annotations, subsystem_data} = this.props.featureData.feature;
-            return html`
-                <table className="table table-striped -biochemistry">
-                    <tbody>
-                        <tr>
-                            <th>Functions</th>
-                            <td>${this.renderFunctions()}</td>
-                        </tr>
-                         <tr>
-                            <th>Subsystems</th>
-                            <td>${this.renderSubsystems(subsystem_data)}</td>
-                        </tr>
-                        <tr>
-                            <th>Annotation Comments</th>
-                            <td>${this.renderAnnotationComments(annotations)}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            `;
-        }
+        // renderBiochemistry() {
+        //     const {annotations, subsystem_data} = this.props.featureData.feature;
+        //     return html`
+        //         <table className="table table-striped -biochemistry">
+        //             <tbody>
+        //                 <tr>
+        //                     <th>Functions</th>
+        //                     <td>${this.renderFunctions()}</td>
+        //                 </tr>
+                        
+        //             </tbody>
+        //         </table>
+        //     `;
+        // }
 
         renderCDSs(cdss) {
             if (!cdss) {
@@ -197,6 +198,8 @@ define([
         }
        
         render() {
+            // <h4>Biochemistry</h4>
+            // ${this.renderBiochemistry()} 
             return html`
                 <div className="FeatureViewer">
                    <${Row}>
@@ -204,8 +207,6 @@ define([
                         <h4>Feature Overview</h4>
                         ${this.renderOverview()}
 
-                        <h4>Biochemistry</h4>
-                        ${this.renderBiochemistry()} 
                     <//>
                     <${Col} style=${{marginLeft: '0.5em'}}>
                         <h4>Sequence</h4>
