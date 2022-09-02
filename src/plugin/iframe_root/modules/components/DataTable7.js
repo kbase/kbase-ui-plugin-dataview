@@ -84,11 +84,19 @@ define([
                 return (() => {
                     const header = this.props.columns.map(({label, style}) => {
                         return html`
-                            <div className="DataTable7-header-col" style=${style || {}}>${label}</div>
+                            <div className="DataTable7-header-col" style=${style || {}}>
+                                <div className="DataTable7-header-col-content" >
+                                    ${label}
+                                </div>
+                            </div>
                         `;
                     });
                     return html`
-                        <div className="DataTable7-header">${header}</div>
+                        <div className="DataTable7-header">
+                            <div className="DataTable7-header-inner">
+                                ${header}
+                            </div>
+                        </div>
                     `;
                 })();
             }
