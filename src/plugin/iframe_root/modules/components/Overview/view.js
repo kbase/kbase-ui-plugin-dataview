@@ -39,7 +39,7 @@ define([
         const date = Utils.iso8601ToDate(dateString);
         const monthPart = Intl.NumberFormat('en-US', {minimumIntegerDigits: 2}).format(date.getMonth() + 1);
         const dayPart = Intl.NumberFormat('en-US', {minimumIntegerDigits: 2}).format(date.getDate())
-        return `${date.getFullYear()}/${monthPart}/${dayPart}`;
+        return Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'short', day: 'numeric'}).format(date);
     }
 
     class Overview extends Component {
@@ -414,25 +414,44 @@ define([
             `;
         }
 
-        renderRelation(relation) {
+        renderRelationLabel(relation) {
             switch (relation) {
                 case 'references':
                     return html`
                         <span title="The viewed object references (is linked to) this object" style=${styles.relation}>
-                        ref
+                        references
                         </span>
                     `;
                 case 'used':
                     return html`
                         <span title="This viewed object was created by an app which used this object as a parameter" style=${styles.relation}>
-                        used
+                        created with
                         </span>
                     `;
                 case 'copiedFrom':
                     return html`
                         <span title="The viewed object was created by coping this object" style=${styles.relation}>
-                            copy
+                            copied from
                         </span>
+                    `;
+                default: 
+                    console.warn('unknown relation', relation);
+            }
+        }
+
+        renderRelation(relation) {
+            switch (relation) {
+                case 'references':
+                    return html`
+                        <span title="The viewed object references (is linked to) this object" style=${styles.relation} className="fa fa-link" />
+                    `;
+                case 'used':
+                    return html`
+                        <span title="This viewed object was created by an app which used this object as a parameter" style=${styles.relation} className="fa fa-arrow-left" />
+                    `;
+                case 'copiedFrom':
+                    return html`
+                        <span title="The viewed object was created by coping this object" style=${styles.relation} className="fa fa-clone" />
                     `;
                 default: 
                     console.warn('unknown relation', relation);
@@ -448,7 +467,58 @@ define([
         }
 
          renderReferencesTable(references) {
-            const columns = [{
+            const dataSource = references.slice();
+
+            dataSource.sort((a, b) => {
+                console.log('sort', a, b);
+                
+                const aDate = new Date(a.info.saveDate);
+                aDate.setHours(0);
+                aDate.setMinutes(0);
+                aDate.setSeconds(0);
+                aDate.setMilliseconds(0);
+                const bDate = new Date(b.info.saveDate);
+                bDate.setHours(0);
+                bDate.setMinutes(0);
+                bDate.setSeconds(0);
+                bDate.setMilliseconds(0);
+
+                const dateDiff = aDate.getTime() - bDate.getTime();
+                if (dateDiff !== 0) {
+                    return dateDiff;
+                }
+
+                const typeDiff = a.info.typeName.localeCompare(b.info.typeName);
+                if (typeDiff !== 0) {
+                    return typeDiff;
+                }
+
+                return a.info.name.localeCompare(b.info.name);
+            });
+
+            const columns = [
+                {
+                id: 'relation',
+                label: 'Relation',
+                style: {
+                    flex: '1 1 0'
+                },
+                render: (relation) => {
+                     if (typeof relation === 'string') {
+                        return this.renderRelation(relation);
+                    }
+                    return relation.map((rel, index) => {
+                        const style = (() => {
+                            if (index >= 1) {
+                                return {marginLeft: '0.25em'}
+                            }
+                            return {};
+                        })();
+                        return html`<span style=${style}>${this.renderRelation(rel)}</span>`;
+                    });
+                }
+            },
+            {
                 id: 'name',
                 label: 'Name',
                 style: {
@@ -514,7 +584,7 @@ define([
 
              const props = {
                 columns,
-                dataSource: references,
+                dataSource
             };
 
             return html`
