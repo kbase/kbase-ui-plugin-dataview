@@ -25,8 +25,8 @@ define([
                 sequence.push(piece);
             }
             return html`
-                <div style=${{fontFamily: 'monospace'}}>${sequence.map((line) => {
-                    return html`<div>${line}</div>`
+                <div style=${{fontFamily: 'monospace'}} role="list">${sequence.map((line) => {
+                    return html`<div role="listitem">${line}</div>`
                 })}</div>
             `;
         }

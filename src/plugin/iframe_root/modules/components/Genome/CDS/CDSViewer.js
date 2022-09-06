@@ -182,12 +182,16 @@ define([
                 <div className="CDSViewer">
                    <${Row}>
                     <${Col} style=${{marginRight: '0.5em'}}>
-                        <h4>CDS Overview</h4>
-                        ${this.renderOverview()}
+                        <section>
+                            <h4>CDS Overview</h4>
+                            ${this.renderOverview()}
+                        </section>
                     <//>
                     <${Col} style=${{marginLeft: '0.5em'}}>
-                         <h4>Sequence</h4>
-                        ${this.renderSequence()} 
+                        <section>
+                            <h4>Sequence</h4>
+                            ${this.renderSequence()} 
+                        </section>
                     <//>
                    <//>
                 </div>

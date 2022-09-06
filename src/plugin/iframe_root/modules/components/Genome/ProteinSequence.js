@@ -25,8 +25,8 @@ define([
                 lines.push(line);
             }
             return html`
-                <div style=${{fontFamily: 'monospace'}}>${lines.map((line) => {
-                    return html`<div>${line}</div>`
+                <div style=${{fontFamily: 'monospace'}} role="list">${lines.map((line) => {
+                    return html`<div role="listitem">${line}</div>`
                 })}</div>
             `;
         }
