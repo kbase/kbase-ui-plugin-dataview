@@ -26,7 +26,6 @@ This url may be used either with or without an `Authorization` header.
 
 ## Development
 
-
 ```
 npm run build
 npm run copy-dev

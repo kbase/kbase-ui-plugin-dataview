@@ -99,11 +99,17 @@ define([
 
             return cdss.map((cds) => {
                 const url = `/#dataview/${this.props.objectInfo.ref}?sub=cds&subid=${cds}`;
-                return html`
-                    <a href=${url} target="_blank">
-                        ${cds}
-                    </a>
-                `;
+                if (this.props.isCDSCompatible) {
+                    return html`
+                        <div>
+                            <a href=${url} target="_blank">
+                                ${cds}
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    return html`<div>${cds}</div>`
+                }
             })
         }
 
@@ -183,8 +189,6 @@ define([
         }
        
         render() {
-            // <h4>Biochemistry</h4>
-            // ${this.renderBiochemistry()} 
             return html`
                 <div className="FeatureViewer">
                    <${Row}>
