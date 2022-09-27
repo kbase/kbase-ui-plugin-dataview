@@ -300,6 +300,40 @@ define([
                 });
         }
 
+        /**
+         * Determines if the genome object has incomplete CDS support (as in v8.2 in prod).
+         * Uses a "sentinel property", "protein_md5", which does not exist in the incomplete
+         * CDS support, but does in the complete.
+         * @param {} param0 
+         * @returns 
+         */
+        async isCDSCompatible({ref}) {
+            let included = [
+                '/cdss/0'
+            ];
+            const [[result]] = await this.wsClient.callFunc('get_object_subset', [[{
+                ref,
+                included
+            }]])
+
+
+            if (!('cdss' in result.data)) {
+                return false;
+            }
+
+            if (result.data.cdss.length === 0) {
+                return false;
+            }
+
+            const cds = result.data.cdss[0];
+
+            if (!('protein_md5' in cds)) {
+                return false;
+            }
+
+            return true;
+        }
+
         async getCDS({ref, cdsId}) {
             let included = [
                 '/cdss/[*]/id'
@@ -311,7 +345,7 @@ define([
 
 
             if (!('cdss' in result.data)) {
-                throw new Error(`This Genome is an older version which does not support CDSs`)
+                throw new Error(`This Genome object is an older version which does not support CDSs`)
             }
 
             const cdsIndex = result.data.cdss.findIndex(({id}) => {

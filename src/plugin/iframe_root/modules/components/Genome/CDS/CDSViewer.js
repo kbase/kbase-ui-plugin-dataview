@@ -131,22 +131,6 @@ define([
             return 'n/a';
         }
 
-        // renderBiochemistry() {
-        //     const {functions, protein_translation_length, protein_translation} = this.props.cdsData.cds;
-        //     return html`
-        //         <table className="table table-striped -biochemistry">
-        //             <colgroup>
-        //                 <col style="width: 11em" />
-        //                 <col />
-        //             </colgroup>
-        //             <tbody>
-                        
-                        
-        //             </tbody>
-        //         </table>
-        //     `;
-        // }
-
         renderSequence() {
            const {dna_sequence, dna_sequence_length, protein_translation_length, protein_translation} = this.props.cdsData.cds;
             return html`

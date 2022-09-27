@@ -40,14 +40,22 @@ define([
                 });
 
                 // fetch data...
-                const value = await this.model.getFeature({
+                const featureInfo = await this.model.getFeature({
                     ref: this.props.objectInfo.ref, 
                     featureId: this.props.featureId
                 });
 
+                const isCDSCompatible = await (async () => {
+                    if ('cdss' in featureInfo.feature) {
+                        return this.model.isCDSCompatible({ref: this.props.objectInfo.ref});
+                    }
+                })();
+
                 this.setState({
                     status: 'SUCCESS',
-                    value
+                    value: {
+                        featureInfo, isCDSCompatible
+                    }
                 });
             } catch (ex) {
                 console.error(ex);
@@ -72,9 +80,9 @@ define([
             `;
         }
 
-        renderSuccess(value) {
+        renderSuccess({featureInfo, isCDSCompatible}) {
             return html`
-                <${FeatureViewer} featureData=${value} objectInfo=${this.props.objectInfo}/>
+                <${FeatureViewer} featureData=${featureInfo} isCDSCompatible=${isCDSCompatible} objectInfo=${this.props.objectInfo}/>
             `;
         }
        
