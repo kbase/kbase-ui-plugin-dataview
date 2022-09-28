@@ -345,7 +345,7 @@ define([
 
 
             if (!('cdss' in result.data)) {
-                throw new Error(`This Genome object is an older version which does not support CDSs`)
+                throw new Error(`This Genome object is an older version that does not support CDSs`)
             }
 
             const cdsIndex = result.data.cdss.findIndex(({id}) => {
@@ -373,7 +373,7 @@ define([
             const cds = data.cdss[0]
 
             if (!('protein_md5' in cds)) {
-                throw new Error('This object is an older version which has an unsupported CDS structure');
+                throw new Error('This object is an older version that has an unsupported CDS structure');
             }
 
             return {
@@ -397,7 +397,7 @@ define([
 
 
             if (!('features' in result.data)) {
-                throw new Error(`This Genome is an older version which does not support Features`)
+                throw new Error(`This Genome is an older version that does not support Features`)
             }
 
             const featureIndex = result.data.features.findIndex(({id}) => {
