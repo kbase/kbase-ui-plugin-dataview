@@ -1,6 +1,6 @@
 define([
     'kb_lib/props',
-    'json!../data/icons.json'
+    'json!./data/icons.json'
 ], (
 props, 
 iconConfig
