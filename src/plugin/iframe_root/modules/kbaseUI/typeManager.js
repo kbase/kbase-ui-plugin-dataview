@@ -1,76 +1,100 @@
-define(['kb_lib/props'], (props) => {
+define([
+    'kb_lib/props',
+    'json!../data/icons.json'
+], (
+props, 
+iconConfig
+) => {
     function factory(config) {
         const types = new props.Props({
-                data: config.typeDefs
-            }),
-            defaultIcon = {
+            data: config.typeDefs
+        });
+
+        /**
+         * We create an object type config that is a bit more reasonable.
+         * {
+         *   classNames - Array<string> - icon classes
+         *   type - string - kbase or fontAwesome - the type of icon class architecture
+         *   color - string - the background color for the icon.
+         * }
+         */
+        const objectTypes = new Set(Object.keys(iconConfig.data).concat(Object.keys(iconConfig.color_mapping)));
+        objectTypes.delete('DEFAULT');
+
+        const objectTypeConfig = Array.from(objectTypes.keys()).reduce((objectTypeConfig, typeName) => {
+            const typeConfig = {};
+            if (typeName in iconConfig.data) {
+                typeConfig.classNames = iconConfig.data[typeName][0].split(/\s+/);
+            } else {
+                typeConfig.classNames = iconConfig.data.DEFAULT[0].split(/\s+/);
+            }
+            if (typeName in iconConfig.color_mapping) {
+                typeConfig.color = iconConfig.color_mapping[typeName];
+            } else {
+                console.warn('Type without color assigned, defaulting', typeName);
+                typeConfig.color = getColor(typeName)
+            }
+            if (typeConfig.classNames.some((className) => { return className.includes("fa-"); })) {
+                typeConfig.type = 'fontAwesome';
+            } else {
+                typeConfig.type = 'kbase';
+            }
+            objectTypeConfig[typeName] = typeConfig;
+            return objectTypeConfig;
+        }, {});
+
+        function getDefaultIcon(typeName) {
+            return {
                 type: 'fontAwesome',
-                classes: ['fa-file-o']
+                classNames: ['fa-file-o'],
+                color: getColor(typeName)
             };
+        }
 
         function getIcon(arg) {
-            const icon = types.getItem(['types', arg.type.module, arg.type.name, 'icon']) || defaultIcon,
-                classes = icon.classes.map((x) => {
-                    return x;
-                });
-            switch (icon.type) {
+            const iconConfig = objectTypeConfig[arg.type.name];
+            if (!iconConfig) {
+                console.warn(`No icon defined for type ${arg.type.name}, defaulting`);
+                return getDefaultIcon(arg.type.name);
+            }
+            const classNames = iconConfig.classNames.slice();
+            switch (iconConfig.type) {
             case 'kbase':
-                classes.push('icon');
+                classNames.push('icon');
                 if (arg.size) {
                     switch (arg.size) {
                     case 'small':
-                        classes.push('icon-sm');
+                        classNames.push('icon-sm');
                         break;
                     case 'medium':
-                        classes.push('icon-md');
+                        classNames.push('icon-md');
                         break;
                     case 'large':
-                        classes.push('icon-lg');
+                        classNames.push('icon-lg');
                         break;
                     }
                 }
                 break;
             case 'fontAwesome':
-                classes.push('fa');
+                classNames.push('fa');
                 break;
             }
-            if (classes) {
-                return {
-                    classes,
-                    type: icon.type,
-                    color: icon.color || getColor(arg.type),
-                    html: `<span class="${  classes.join(' ')  }"></span>`
-                };
-            }
+
+            return {
+                classNames,
+                type: iconConfig.type,
+                color: iconConfig.color,
+                html: `<span class="${classNames.join(' ')}"></span>`
+            };
         }
 
-        function getColor(type) {
+        function getColor(typeName) {
             let code = 0;
-            const colors = [
-                '#F44336',
-                '#E91E63',
-                '#9C27B0',
-                '#3F51B5',
-                '#2196F3',
-                '#673AB7',
-                '#FFC107',
-                '#0277BD',
-                '#00BCD4',
-                '#009688',
-                '#4CAF50',
-                '#33691E',
-                '#2E7D32',
-                '#AEEA00',
-                '#03A9F4',
-                '#FF9800',
-                '#FF5722',
-                '#795548',
-                '#006064',
-                '#607D8B'
-            ];
+            const colors = iconConfig.colors;
 
-            for (let i = 0; i < type.name.length; i += 1) {
-                code += type.name.charCodeAt(i);
+            // TODO: see if this still matches what the Narrative does.
+            for (let i = 0; i < typeName.length; i += 1) {
+                code += typeName.charCodeAt(i);
             }
             return colors[code % colors.length];
         }
@@ -245,22 +269,12 @@ define(['kb_lib/props'], (props) => {
                 byId[viewerDef.id] = viewerDef;
             }
         }
-        function setIcon(type, iconDef) {
-            const typeDef = types.getItem(['types', type.module, type.name]);
-            if (typeDef === undefined || typeDef === null) {
-                types.setItem(['types', type.module, type.name], {
-                    icon: iconDef
-                });
-            } else {
-                types.setItem(['types', type.module, type.name, 'icon'], iconDef);
-            }
-        }
 
         function getDefault(prop) {
             return types.getItem(['defaults', prop]);
         }
         function makeTypeId(type) {
-            return `${type.module  }.${  type.name  }-${  type.version.major  }.${  type.version.minor}`;
+            return `${type.module}.${type.name}-${type.version.major}.${type.version.minor}`;
         }
         function parseTypeId(typeId) {
             const matched = typeId.match(/^(.+?)\.(.+?)-(.+?)\.(.+)$/);
@@ -303,7 +317,6 @@ define(['kb_lib/props'], (props) => {
 
         return Object.freeze({
             getIcon,
-            setIcon,
             getViewer,
             getDefault,
             makeTypeId,

@@ -53,7 +53,7 @@ define([
                 <span className="fa-stack fa-2x">
                     <i className="fa fa-circle fa-stack-2x"
                        style=${{color: icon.color}}></i>
-                    <i className=${`fa fa-inverse fa-stack-1x ${icon.classes.join(' ')}`}></i>
+                    <i className=${`fa fa-inverse fa-stack-1x ${icon.classNames.join(' ')}`}></i>
                 </span>
             `;
         }

@@ -47,7 +47,7 @@ define(['kb_knockout/registry', 'kb_knockout/lib/generators', 'kb_knockout/lib/v
                 i({
                     class: 'fa-inverse fa-stack-1x',
                     dataBind: {
-                        class: 'icon.classes.join(" ")'
+                        class: 'icon.classNames.join(" ")'
                     }
                 })
             ]

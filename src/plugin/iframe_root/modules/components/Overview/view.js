@@ -64,7 +64,7 @@ define([
                 <span className="fa-stack fa-2x">
                     <i className="fa fa-circle fa-stack-2x"
                        style=${{color: icon.color}}></i>
-                    <i className=${`fa fa-inverse fa-stack-1x ${icon.classes.join(' ')}`}></i>
+                    <i className=${`fa fa-inverse fa-stack-1x ${icon.classNames.join(' ')}`}></i>
                 </span>
                 </div>
             `;
@@ -470,8 +470,6 @@ define([
             const dataSource = references.slice();
 
             dataSource.sort((a, b) => {
-                console.log('sort', a, b);
-                
                 const aDate = new Date(a.info.saveDate);
                 aDate.setHours(0);
                 aDate.setMinutes(0);

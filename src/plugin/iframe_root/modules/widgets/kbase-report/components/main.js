@@ -166,7 +166,7 @@ define([
                                 dataElement: 'title',
                                 // class: toggleClasses.join(' '),
                                 dataToggle: 'collapse',
-                                dataTarget: `#${  collapseId}`,
+                                dataTarget: `#${collapseId}`,
                                 style: {cursor: 'pointer'},
                                 dataBind: {
                                     css: {
@@ -184,7 +184,7 @@ define([
                         class: 'panel-collapse collapse',
                         dataBind: {
                             css: {
-                                in: `!${  args.collapsed}` || true
+                                in: `!${args.collapsed}` || true
                             }
                         }
                     },
