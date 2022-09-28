@@ -470,6 +470,20 @@ define([
             const dataSource = references.slice();
 
             dataSource.sort((a, b) => {
+                // Accommodate info being missing (null) due to 
+                // the object being inaccessible.
+                if (!a.info) {
+                    if (!b.info) {
+                        return 0;
+                    } else {
+                        return -1
+                    }
+                } else {
+                     if (!b.info) {
+                        return 1;
+                    } 
+                }
+                
                 const aDate = new Date(a.info.saveDate);
                 aDate.setHours(0);
                 aDate.setMinutes(0);
