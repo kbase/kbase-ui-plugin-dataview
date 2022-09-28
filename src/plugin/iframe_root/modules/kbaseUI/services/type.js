@@ -55,10 +55,6 @@ define(['bluebird', '../typeManager'], (Promise, TypeManager) => {
                     viewers = typeDef.viewers,
                     icon = typeDef.icon;
 
-                if (icon) {
-                    this.typeManager.setIcon(type, icon);
-                }
-
                 if (viewers) {
                     viewers.map((viewerDef) => {
                         return Promise.try(() => {

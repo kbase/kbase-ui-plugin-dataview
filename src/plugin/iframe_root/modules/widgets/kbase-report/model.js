@@ -66,7 +66,7 @@ define(['bluebird', 'kb_lib/jsonRpc/genericClient', 'kb_service/utils'], functio
                                 type: objectInfo.typeName,
                                 fullType: objectInfo.type,
                                 description: objectsCreated[index].description || '',
-                                icon: icon
+                                icon
                             };
                         });
                     });
