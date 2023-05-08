@@ -71,7 +71,7 @@ define([
                     tr([td('Total Length'), tdSafe(`${Intl.NumberFormat('en-us', {useGrouping: true}).format(data.assembly.stats.dna_size)} bp`)]),
                     tr([td('External Source'), td(data.workspace.external_source ? domSafeText(data.workspace.external_source) : na())]),
                     tr([td('External Source ID'), td(data.workspace.external_source_id ? domSafeText(data.workspace.external_source_id) : na())]),
-                    tr([td('Source Origination Date'), td(data.workspace.external_source_origination_date ? domSafeText(data.wforkspace.external_source_origination_date) : na())])
+                    tr([td('Source Origination Date'), td(data.workspace.external_source_origination_date ? domSafeText(data.workspace.external_source_origination_date) : na())])
                 ]
             );
         }
