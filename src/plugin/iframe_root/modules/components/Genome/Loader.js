@@ -83,26 +83,14 @@ define([
         }
 
         async getStats(assemblyRef) {
-            const genomeAnnotationAPI = new DynamicServiceClient({
+            const assemblyAPI = new DynamicServiceClient({
                 url: this.props.runtime.getConfig('services.service_wizard.url'),
                 module: 'AssemblyAPI',
                 auth: {
                     token: this.props.runtime.service('session').getAuthToken()
                 }
             });
-            const [result] = await genomeAnnotationAPI.callFunc('get_stats', [assemblyRef]);
-            return result;
-        }
-
-        async getContigIds(assemblyRef) {
-            const genomeAnnotationAPI = new DynamicServiceClient({
-                url: this.props.runtime.getConfig('services.service_wizard.url'),
-                module: 'AssemblyAPI',
-                auth: {
-                    token: this.props.runtime.service('session').getAuthToken()
-                }
-            });
-            const [result] = await genomeAnnotationAPI.callFunc('get_contig_ids', [assemblyRef]);
+            const [result] = await assemblyAPI.callFunc('get_stats', [assemblyRef]);
             return result;
         }
 
@@ -178,67 +166,6 @@ define([
                     stats.num_features = parseInt(genomeMetadata['Number features'], 10);
                 }
 
-                // stats = {
-                //     dna_size: dna_size || parseInt(genomeMetadata['Size'], 10),
-                //     gc_content: gc_content || parseFloat(genomeMetadata['GC content']),
-                //     num_contigs: num_contigs || (contigIds && contigIds.length) || parseInt(genomeMetadata['Number contigs'], 10)
-                // };
-
-
-
-                // let stats = null;
-                // // Skip getting features for Euks and Plants
-                // if (domain === 'Eukaryota' || domain === 'Plant') {
-                //     if (!genomeObject) {
-                //         genomeObject = await this.getGenomeInfoWithoutFeatures();
-                //     }
-                //     const {
-                //         dna_size, gc_content, num_contigs, contig_ids
-                //     } = genomeObject.data;
-                //     stats = {
-                //         dna_size: dna_size || parseInt(genomeMetadata['Size'], 10),
-                //         gc_content: gc_content || parseFloat(genomeMetadata['GC content']),
-                //         num_contigs: num_contigs || (contig_ids && contig_ids.length) || parseInt(genomeMetadata['Number contigs'], 10)
-                //     };
-                //     //     if (genomeMetadata && genomeMetadata['GC content'] && genomeMetadata['Size'] && genomeMetadata['Number contigs']) {
-                //     //         const stats = {
-                //     //             dna_size: parseInt(genomeMetadata['Size'], 10),
-                //     //             gc_content: parseFloat(genomeMetadata['GC content']),
-                //     //             num_contigs:  parseInt(genomeMetadata['Number contigs'], 10)
-                //     //         };
-                //     //         //     add_stats(gnm, metadata['Size'], metadata['GC content'], metadata['Number contigs']);
-                //     //         //     _this.render(genomeObject);
-                //     //         //     return null;
-                //     //         // }
-                //     //     // console.log('BIG!');
-                //     //     // TODO: implement later
-                //     // } else {
-                // } else {
-                //     // We may need to fetch the genome again, if it is not Euk or Plant, and the metadata
-                //     // did not have the domain already. (logic above)
-                //     genomeObject = await this.getGenomeInfoWithFeatures();
-
-                //     // console.log('genome object', genomeObject);
-
-                //     // const genomeData = genomeObject.data;
-
-                //     // Generate stats from the genome object.
-
-                //     const {
-                //         dna_size, gc_content, num_contigs
-                //     } = genomeObject.data;
-
-
-                // }
-
-                // if (!stats.num_contigs) {
-                //     if ('Number contigs' in genomeMetadata) {
-                //         stats.num_contigs = parseInt(genomeMetadata['Number contigs'], 10);
-                //     } else {
-                //         stats.num_contigs = genomeObject.data.contig_ids.length;
-                //     }
-                // }
-
                 const isUndefined = (value) => {
                     return typeof value === 'undefined';
                 };
@@ -253,12 +180,11 @@ define([
                     } else if ('assembly_ref' in genomeObject.data) {
                         assemblyRef = genomeObject.data.assembly_ref;
                     } else {
-                        // console.error('assembly ref?', genomeObject.data);
-                        // throw new Error('No assembly reference present!');
                         console.warn('And no contigset or assembly ref available; some stats will be missing');
                     }
                     if (assemblyRef) {
-                        const assemblyStats = await this.getStats(assemblyRef);
+                        const assemblyRefChain = [this.props.objectInfo.ref, assemblyRef].join(';')
+                        const assemblyStats = await this.getStats(assemblyRefChain);
                         stats.dna_size = assemblyStats.dna_size;
                         stats.gc_content = assemblyStats.gc_content;
                         stats.num_contigs = assemblyStats.num_contigs;
@@ -280,7 +206,7 @@ define([
                     genomeInfo: {
                         status: 'ERROR',
                         error: {
-                            message: ex.message
+                            message: `There was an error loading this Genome: ${ex.message}` 
                         }
                     }
                 });
