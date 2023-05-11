@@ -94,6 +94,22 @@ define([
             return result;
         }
 
+        async getContigInfo(assemblyRef) {
+            const assemblyAPI = new DynamicServiceClient({
+                url: this.props.runtime.getConfig('services.service_wizard.url'),
+                module: 'AssemblyAPI',
+                auth: {
+                    token: this.props.runtime.service('session').getAuthToken()
+                }
+            });
+            const [ids] = await assemblyAPI.callFunc('get_contig_ids', [assemblyRef]);
+            const [lengthMap] = await assemblyAPI.callFunc('get_contig_lengths', [assemblyRef, ids])
+            const lengths = ids.map((id) => {
+                return lengthMap[id];
+            })
+            return {ids, lengths};
+        }
+
         async loadGenome() {
             this.setState({
                 genomeInfo: {
@@ -170,24 +186,44 @@ define([
                     return typeof value === 'undefined';
                 };
 
-                // Weirdly defensive. Does nothing work right at KBase??
-                stats.dna_size = undefined;
-                if (isUndefined(stats.dna_size) || isUndefined(stats.gc_content) || isUndefined(stats.num_contigs)) {
-                    console.warn('Some or all stats not available in genome, trying stats...');
+                const assemblyRef = (() => {
                     let assemblyRef;
                     if ('contigset_ref' in genomeObject.data) {
                         assemblyRef = genomeObject.data.contigset_ref;
                     } else if ('assembly_ref' in genomeObject.data) {
                         assemblyRef = genomeObject.data.assembly_ref;
+                    }
+                    if (assemblyRef) {
+                        return [this.props.objectInfo.ref, assemblyRef].join(';')
                     } else {
                         console.warn('And no contigset or assembly ref available; some stats will be missing');
                     }
+                })();
+
+                // If stats are missing, get them from the Assembly.
+                if (isUndefined(stats.dna_size) || isUndefined(stats.gc_content) || isUndefined(stats.num_contigs)) {
+                    console.warn('No stats found on Genome Object...'); 
                     if (assemblyRef) {
-                        const assemblyRefChain = [this.props.objectInfo.ref, assemblyRef].join(';')
-                        const assemblyStats = await this.getStats(assemblyRefChain);
+                        console.warn('...fetching from Assembly');
+                        const assemblyStats = await this.getStats(assemblyRef);
                         stats.dna_size = assemblyStats.dna_size;
                         stats.gc_content = assemblyStats.gc_content;
                         stats.num_contigs = assemblyStats.num_contigs;
+                    } else {
+                        console.warn('... and no Assembly ref - stats will be missing');
+                    }
+                }
+
+                // If contig_ids are missing, get them from the Assembly.
+                if (isUndefined(genomeObject.data.contig_ids)) {
+                    console.warn('No contig ids in Genome...');
+                    if (assemblyRef) {
+                        console.warn('... fetching from Assembly');
+                        const {ids, lengths} = await this.getContigInfo(assemblyRef);
+                        genomeObject.data.contig_ids = ids;
+                        genomeObject.data.contig_lengths = lengths;
+                    } else {
+                        console.warn('... and no Assembly ref - contig ids will be missing');
                     }
                 }
 
