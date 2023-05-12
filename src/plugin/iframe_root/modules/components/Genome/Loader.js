@@ -33,6 +33,15 @@ define([
     ];
     const feature_fields = ['type', 'id', 'contig_id', 'location', 'function', 'functions'];
 
+    const isUndefined = (value) => {
+        return typeof value === 'undefined';
+    };
+
+    const isUndefinedOrNull = (value) => {
+        return typeof value === 'undefined' || value == null;
+    };
+
+
     class Loader extends Component {
         constructor(props) {
             super(props);
@@ -142,6 +151,8 @@ define([
 
                 // Get stats
 
+                // Gets an integer value form the metadata, if the given value
+                // isn't a number.
                 const getIntValue  = (value, genomeMetadata, key) => {
                     if (typeof value !== 'number' &&  (key in genomeMetadata)) {
                         value = parseInt(genomeMetadata[key], 10);
@@ -150,6 +161,7 @@ define([
                     if (isNaN(value)) {
                         return null;
                     }
+
                     return value;
                 };
 
@@ -174,6 +186,14 @@ define([
                     num_contigs: getIntValue(num_contigs, genomeMetadata, 'Number contigs')
                 };
 
+                // Sometimes num_contigs is missing, but we can grok it from the contig_ids rather
+                // than the more expensive call to get assembly stats.
+                if (isUndefinedOrNull(stats.num_contigs)) {
+                    if ('contig_ids' in genomeObject.data) {
+                        stats.num_contigs = genomeObject.data.contig_ids.length;
+                    }
+                }
+
                 // Add in features if available (should be for non-Euk, non-Plant)
                 if (genomeObject.data.features) {
                     stats.num_features = genomeObject.data.features.length;
@@ -182,9 +202,6 @@ define([
                     stats.num_features = parseInt(genomeMetadata['Number features'], 10);
                 }
 
-                const isUndefined = (value) => {
-                    return typeof value === 'undefined';
-                };
 
                 const assemblyRef = (() => {
                     let assemblyRef;
@@ -201,8 +218,8 @@ define([
                 })();
 
                 // If stats are missing, get them from the Assembly.
-                if (isUndefined(stats.dna_size) || isUndefined(stats.gc_content) || isUndefined(stats.num_contigs)) {
-                    console.warn('No stats found on Genome Object...'); 
+                if (isUndefinedOrNull(stats.dna_size) || isUndefinedOrNull(stats.gc_content) || isUndefinedOrNull(stats.num_contigs)) {
+                    console.warn('Incomplete stats found on Genome Object...'); 
                     if (assemblyRef) {
                         console.warn('...fetching from Assembly');
                         const assemblyStats = await this.getStats(assemblyRef);
