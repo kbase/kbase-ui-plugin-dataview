@@ -42,24 +42,29 @@ define([
         <span className="text-danger">Error: ${message}</span>`;
     }
 
+    function overflowWrap(content) {
+        return html`<div style=${{overflowX: 'hidden', textOverflow: 'ellipsis'}} title=${content}>${content}</div>`;
+    }
+
+
     function wrapValue(value, formatter) {
         if (typeof value === 'undefined' || value === null) {
             return na();
         }
         if (formatter) {
             try {
-                return formatter(value);
+                return overflowWrap(formatter(value));
             } catch (ex) {
-                return renderError(ex.message);
+                return overflowWrap(renderError(ex.message));
             }
         }
-        return value;
+        return overflowWrap(value);
     }
 
     class GenomeOverview extends Component {
         renderGenomeOverview() {
             return html`
-            <table className="table table-striped table-bordered">
+            <table className="table table-striped table-bordered" style=${{tableLayout: 'fixed', width: '100%'}}>
                 <colgroup>
                     <col style=${{width: '12em'}} />
                     <col />

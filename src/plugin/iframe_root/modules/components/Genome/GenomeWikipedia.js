@@ -5,7 +5,8 @@ define([
     'dompurify',
     'components/ErrorView',
     'components/Loading',
-    'components/Empty'
+    'components/Empty',
+    './utils'
 ], (
     preact,
     htm,
@@ -13,13 +14,16 @@ define([
     DOMPurify,
     ErrorView,
     Loading,
-    Empty
+    Empty,
+    {filterScientificName, filterTaxonomy}
 ) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
 
     const DEFAULT_IMAGE_WIDTH = 400;
     const DEFAULT_MAX_TEXT_HEIGHT = 300;
+
+   
 
     class GenomeWikipedia extends Component {
         constructor(props) {
@@ -41,22 +45,27 @@ define([
 
                 // Build the term list to try to locate at Wikipedia.
                 const genome = this.props.genomeObject.data;
+                const scientificName = filterScientificName(genome['scientific_name']);
+                const taxonomy = filterTaxonomy(genome['taxonomy'])
                 const taxList = (() => {
-                    if ('taxonomy' in this.props.genomeObject.data) {
-                        const tax = genome['taxonomy'];
+                    if (taxonomy) {
                         let taxList = [];
-                        const nameTokens = genome['scientific_name'].split(/\s+/);
-                        for (let i = nameTokens.length; i > 0; i--) {
-                            taxList.push(nameTokens.slice(0, i).join(' '));
+
+                        // Add the scientific name
+                        if (scientificName) {
+                            const nameTokens = scientificName.split(/\s+/);
+                            for (let i = nameTokens.length; i > 0; i--) {
+                                taxList.push(nameTokens.slice(0, i).join(' '));
+                            }
                         }
-                        if (taxList && taxList !== 'Unknown') {
-                            // parse the taxonomy, a string with semicolon separated components.
-                            taxList = taxList.concat(tax.split(/;\s*/).reverse());
-                        }
+
+                        // parse the taxonomy, a string with semicolon separated components.
+                        taxList = taxList.concat(taxonomy.split(/;\s*/).reverse());
+
                         return taxList;
-                    } else if ('scientific_name' in this.props.genomeObject.data) {
+                    } else if (scientificName) {
                         const taxList = [];
-                        const nameTokens = genome['scientific_name'].split(/\s+/);
+                        const nameTokens = scientificName.split(/\s+/);
                         for (let i = nameTokens.length; i > 0; i--) {
                             taxList.push(nameTokens.slice(0, i).join(' '));
                         }
@@ -121,11 +130,17 @@ define([
             // this.searchedOnce = true;
             // take the first term off the list, so we can pass the rest of it if we need to re-call this functionk
 
+            const originalTerms = termList.slice();
+
 
             let found = null;
             while (!found) {
                 if (termList.length === 0) {
-                    throw new Error('Nothing found!');
+                    return {
+                        error: {
+                            message: `Nothing found for <i>${originalTerms.join(' ')}</i>`
+                        }
+                    };
                 }
                 const searchTerm = termList.shift();
                 const requestURL = this.makeSearchURL(searchTerm);
@@ -140,8 +155,6 @@ define([
 
                 if (data.error) {
                     continue;
-                    // do the next one in the list.
-                    // this.wikipediaLookup(termList, successCallback, errorCallback);
                 }
                 if (data.parse && data.parse.text) {
                     found = {
@@ -153,7 +166,11 @@ define([
             }
 
             if (!found) {
-                throw new Error('Nothing found!');
+                return {
+                    error: {
+                        message: `Nothing found for <i>${originalTerms.join(' ')}</i>`
+                    }
+                };
             }
 
 
@@ -224,11 +241,13 @@ define([
             })();
 
             return {
-                searchTerm: found.searchTerm,
-                description,
-                wikiUri,
-                imageUri,
-                redirectFrom
+                result: {
+                    searchTerm: found.searchTerm,
+                    description,
+                    wikiUri,
+                    imageUri,
+                    redirectFrom
+                }
             };
         }
 
