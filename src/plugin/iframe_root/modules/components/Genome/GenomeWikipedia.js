@@ -74,13 +74,20 @@ define([
                     throw new Error('Cannot lookup genome without taxonomy or scientific_name');
                 })();
 
-                const searchResult = await this.wikipediaLookup(taxList);
-                this.setState({
-                    status: 'SUCCESS',
-                    value: {
-                        searchResult
-                    }
-                });
+                const {result, error} = await this.wikipediaLookup(taxList);
+                if (error) {
+                    this.setState({
+                        status: 'ERROR', 
+                        error
+                    })
+                } else {
+                    this.setState({
+                        status: 'SUCCESS',
+                        value: {
+                            searchResult: result
+                        }
+                    });
+                }
             } catch (ex) {
                 console.error(ex);
                 this.setState({
@@ -202,6 +209,7 @@ define([
                 return null;
             })();
 
+
             // The title is the actual Wikipedia page link, so put that here.
             const wikiUri = `https://www.wikipedia.org/wiki/${found.parse.title}`;
 
@@ -266,15 +274,23 @@ define([
         }
 
         renderSuccess({searchResult: {searchTerm, description, wikiUri, imageUri}}) {
-            // return html`<div>GenomeWikipedia here...</div>`;
             const descriptionStyle = {textAlign: 'justify',
                 maxHeight: `${this.props.maxTextHeight || DEFAULT_MAX_TEXT_HEIGHT}px`,
                 overflowY: 'auto',
                 paddingRight: '5px'
             };
-            if (description === null) {
+            if (!description) {
                 return html`
-                    <div className="alert alert-danger">>No information could be extracted from the WikiPedia entry.</div>
+                    <div>
+                        <div className="alert alert-danger">
+                            No information could be extracted from the Wikipedia entry.
+                        </div>
+                        <p>
+                            <a href="${wikiUri}" target="_blank">
+                                Wikipedia page for <i>${searchTerm}</i> 
+                            </a>
+                        </p>
+                    </div>
                 `;
             }
 
