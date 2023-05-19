@@ -256,10 +256,23 @@ define([
                 currentSearchTerm: this.props.searchTerm,
                 sortBy: 'most-recent'
             };
+            this.initiallyEmpty = !props.searchTerm;
         }
 
         componentDidMount() {
-            this.loadData();
+            if (this.initiallyEmpty) {
+                 this.setState({
+                        ...this.state,
+                        searchState: {
+                            status: 'ERROR',
+                            error: {
+                                message: 'No scientific name or taxonomy available, but you may search for publications.'
+                            }
+                        }
+                    });
+            } else {
+                this.loadData();
+            }
         }
 
         searchURL(term, max) {
@@ -311,6 +324,19 @@ define([
             try {
                 const {pubMaxCount} = this.props;
                 const {currentSearchTerm} = this.state;
+
+                if (!currentSearchTerm) {
+                    this.setState({
+                        ...this.state,
+                        searchState: {
+                            status: 'ERROR',
+                            error: {
+                                message: 'Please enter one or more search terms'
+                            }
+                        }
+                    });
+                    return;
+                }
                 const searchURL = this.searchURL(currentSearchTerm, pubMaxCount || MAX_PUBLICATION_COUNT);
                 const response = await fetch(searchURL);
                 if (response.status !== 200) {
@@ -496,8 +522,9 @@ define([
             switch (this.state.searchState.status) {
             case 'NONE':
             case 'PENDING':
-            case 'ERROR':
                 return html`<${Loading} inline=${true} />`;
+            case 'ERROR':
+                return;
             case 'SUCCESS': {
                 // const orderedByMessage = `ordered by "${SORT_OPTIONS.filter(({value}) => value === this.state.sortBy)[0].label}"`;
                 if (this.state.searchState.value.count > MAX_PUBLICATION_COUNT) {
@@ -522,9 +549,10 @@ define([
         }
 
         searchInputChanged(e) {
+            const currentSearchTerm = e.target.value.trim();
             this.setState({
                 ...this.state,
-                currentSearchTerm: e.target.value
+                currentSearchTerm
             });
         }
 

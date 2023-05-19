@@ -7,6 +7,7 @@ define([
     './Publications',
     './Taxonomy',
     './AssemblyAnnotation',
+    './utils'
 ], (
     preact,
     htm,
@@ -15,11 +16,12 @@ define([
     Overview,
     Publications,
     Taxonomy,
-    AssemblyAnnotation
+    AssemblyAnnotation,
+    {filterScientificName}
 ) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
-
+   
     class Genome extends Component {
         renderTabs() {
             const tabs = [
@@ -41,7 +43,7 @@ define([
                     id: 'publications',
                     title: 'Publications',
                     render: () => {
-                        return html`<${Publications}  searchTerm=${this.props.genomeObject.data.scientific_name} />`;
+                        return html`<${Publications}  searchTerm=${filterScientificName(this.props.genomeObject.data.scientific_name)} />`;
                     }
                 },
                 {
