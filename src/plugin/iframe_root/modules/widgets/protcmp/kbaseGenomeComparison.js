@@ -161,10 +161,10 @@ define([
                         // xss safe
                         table.append($createTableRow('Comparison object', self.ws_id));
                         // xss safe
-                        table.append($createTableRow('Genome1 (x-axis)',null,  `<a href="/#dataview/${self.genome1Ref}" target="_blank">${domSafeText(genome1id)}</a>` +
+                        table.append($createTableRow('Genome1 (x-axis)',null,  `<a href="${self.runtime.europaURL({hash: `dataview/${self.genome1Ref}`}).toString()}" target="_blank">${domSafeText(genome1id)}</a>` +
                         ` (${  self.cmp.proteome1names.length  } genes, ${  count1hits  } have hits)`));
                         // xss safe
-                        table.append($createTableRow('Genome2 (y-axis)', null, `<a href="/#dataview/${self.genome2Ref}" target="_blank">${domSafeText(genome2id)}</a>` +
+                        table.append($createTableRow('Genome2 (y-axis)', null, `<a href="${self.runtime.europaURL({hash: `dataview/${self.genome2Ref}`}).toString()}" target="_blank">${domSafeText(genome2id)}</a>` +
                         ` (${self.cmp.proteome2names.length} genes, ${count2hits} have hits)`));
                         if (self.scale == null)
                             self.scale = self.size * 100 / Math.max(self.cmp.proteome1names.length, self.cmp.proteome2names.length);
@@ -508,10 +508,10 @@ define([
                     labelJ = `<font color="red">${  labelJ  }</font>`;
                 }
                 const tdSt = ` style="border: 0px; margin: 0px; padding: 0px; font-size: 12px; height: ${self.geneRowH}px; text-align: center; vertical-align: middle;"`;
-                let tds = `<td ${tdSt}>` + `<a href="/#dataview/${self.genome1Ref}?sub=Feature&subid=${self.cmp.proteome1names[i]}" target="_blank">${labelI}</a>` + '</td>';
+                let tds = `<td ${tdSt}>` + `<a href="${this.runtime.europaURL({hash: `dataview/${self.genome1Ref}`, params: {sub: 'Feature', subid: self.cmp.proteome1names[i]}}).toString()}" target="_blank">${labelI}</a>` + '</td>';
                 if (rowPos == 0)
                     tds += `<td id="${self.pref}glinks" rowspan="${self.geneRows}" width="30"${sr}/>`;
-                tds += `<td ${tdSt}>` + `<a href="/#dataview/${self.genome2Ref}?sub=Feature&subid=${self.cmp.proteome2names[j]}" target="_blank">${labelJ}</a>` + '</td>';
+                tds += `<td ${tdSt}>` + `<a href="${this.runtime.europaURL({hash: `dataview/${self.genome2Ref}`, params: {sub: 'Feature', subid: self.cmp.proteome2names[j]}}).toString()}" target="_blank">${labelJ}</a>` + '</td>';
                 // xss safe
                 tbl.append(`<tr${sr}>${tds}</tr>`);
                 const y1 = rowPos * (self.geneRowH + 0.2) + rowHalf;

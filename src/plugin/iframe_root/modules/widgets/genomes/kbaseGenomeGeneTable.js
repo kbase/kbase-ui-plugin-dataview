@@ -102,8 +102,10 @@ define([
                             geneFunc = '-';
                         }
                         genesData.push({
-                            id:
-                                `<a href="/#dataview/${genomeRef}?sub=Feature&subid=${geneId}" target="_blank">${geneId}</a>`,
+                            id: self.runtime.europaLink(
+                                {hash: `dataview/${genomeRef}`, params: {sub: 'Feature', subid: geneId}},
+                                geneId
+                            ),
                             contig: contigName,
                             start: geneStart,
                             dir: geneDir,

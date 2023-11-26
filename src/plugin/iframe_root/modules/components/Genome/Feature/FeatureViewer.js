@@ -3,6 +3,7 @@ define([
     'htm',
     'components/Row',
     'components/Col',
+    'components/UILink',
     'lib/format', 
     '../Aliases',
     '../Location',
@@ -16,6 +17,7 @@ define([
     htm,
     Row, 
     Col,
+    UILink,
     {unixEpochToTimestamp},
     Aliases,
     Location,
@@ -54,7 +56,15 @@ define([
                         </tr>
                         <tr>
                             <th>Genome</th>
-                            <td><a href=${`/#dataview/${this.props.objectInfo.ref}`} target="_blank">${scientificName}</a></td>
+                            <td>
+                                <${UILink} 
+                                    origin=${this.props.runtime.origin()} 
+                                    hashPath=${{hash: `dataview/${this.props.objectInfo.ref}`}}
+                                    newWindow=${true}
+                                >
+                                    ${scientificName}
+                                </>
+                            </td>
                         </tr>
                         <tr>
                             <th>Length</th>
@@ -98,13 +108,16 @@ define([
             }
 
             return cdss.map((cds) => {
-                const url = `/#dataview/${this.props.objectInfo.ref}?sub=cds&subid=${cds}`;
                 if (this.props.isCDSCompatible) {
                     return html`
                         <div>
-                            <a href=${url} target="_blank">
+                            <${UILink} 
+                                origin=${this.props.runtime.origin()}
+                                hashPath=${{hash: `dataview/${this.props.objectInfo.ref}`, params: {sub: cds, subid: cds}}}
+                                newWindow=${true}
+                            >
                                 ${cds}
-                            </a>
+                            </>
                         </div>
                     `;
                 } else {

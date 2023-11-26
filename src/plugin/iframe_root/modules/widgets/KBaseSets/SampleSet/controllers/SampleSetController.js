@@ -64,6 +64,7 @@ define([
 
                 // Count total # of unique narrative workspaces
                 return {
+                    runtime: this.runtime,
                     sampleSet,
                     samples,
                     samplesWithCounts,

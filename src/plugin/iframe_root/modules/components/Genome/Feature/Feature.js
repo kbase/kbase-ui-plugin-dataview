@@ -82,7 +82,11 @@ define([
 
         renderSuccess({featureInfo, isCDSCompatible}) {
             return html`
-                <${FeatureViewer} featureData=${featureInfo} isCDSCompatible=${isCDSCompatible} objectInfo=${this.props.objectInfo}/>
+                <${FeatureViewer} 
+                    runtime=${this.props.runtime}
+                    featureData=${featureInfo} 
+                    isCDSCompatible=${isCDSCompatible} 
+                    objectInfo=${this.props.objectInfo}/>
             `;
         }
        

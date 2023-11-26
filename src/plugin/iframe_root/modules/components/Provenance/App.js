@@ -2,6 +2,7 @@ define([
     'preact',
     'htm',
     'components/SankeyGraph',
+    'components/UILink',
     './NodeDetail',
     'components/Row',
     'components/Col',
@@ -12,6 +13,7 @@ define([
     preact,
     htm,
     SankeyGraph,
+    UILink,
     NodeDetail,
     Row, Col,
     styles
@@ -102,12 +104,14 @@ define([
             `;
             }
             return html`
-                <a href="/#provenance/${this.props.objectInfo.ref}" 
-                    target="_blank"
+                <${UILink}
+                    origin=${this.props.runtime.origin()}
+                    hashPath=${{hash: `provenance/${this.props.objectInfo.ref}`}}
+                    newWindow=${true}
                     className="btn btn-default"
                 >
-                    Open in separate window
-                </a>
+                Open in separate window
+                </>
             `;
         }
 
@@ -148,14 +152,18 @@ define([
 
         renderSankeyGraph() {
             const {graph, objRefToNodeIdx} = this.props.value;
+            const overlay = this.props.loading ? html`<div className="-sankeyOverlay -loading" />` : '';
             return html`
-                <${SankeyGraph} 
-                        graph=${graph} 
-                        objRefToNodeIdx=${objRefToNodeIdx} 
-                        runtime=${this.props.runtime} 
-                        onNodeOver=${this.props.onNodeOver}
-                        onNodeOut=${this.props.onNodeOut}
-                />
+                <div className="-sankeyWrapper">
+                    ${overlay}
+                    <${SankeyGraph} 
+                            graph=${graph} 
+                            objRefToNodeIdx=${objRefToNodeIdx} 
+                            runtime=${this.props.runtime} 
+                            onNodeOver=${this.props.onNodeOver}
+                            onNodeOut=${this.props.onNodeOut}
+                    />
+                </div>
             `;
         }
 
@@ -223,8 +231,6 @@ define([
         }
 
         renderGraphToolbar() {
-            // 
-                            // ${this.renderShowAllVersionsToggle()}
             return html`
                 <div style=${styles.graphToolbar}>
                     <div style=${styles.graphToolbarHeaderRow}>
@@ -255,7 +261,7 @@ define([
 
         render() {
             return html`
-                <div style=${styles.main}>
+                <div style=${styles.main} className="ProvenanceApp">
                     <div style=${styles.headerRow}>
                         <div style=${styles.controlRow}>
                             <div style=${styles.status}>
@@ -285,7 +291,10 @@ define([
                             <//>
 
                             <${Col} style=${{flex: '1 1 0', marginRight: '0.5em'}}>
-                                <${NodeDetail} node=${this.props.selectedNode} />
+                                <${NodeDetail} 
+                                    runtime=${this.props.runtime} 
+                                    node=${this.props.selectedNode} 
+                                />
                             <//>
                         <//>
                     </div>

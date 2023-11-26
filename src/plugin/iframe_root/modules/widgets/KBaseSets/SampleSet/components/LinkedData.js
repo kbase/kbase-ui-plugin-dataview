@@ -6,6 +6,7 @@ define([
     'components/Nullable',
     'components/DataPillGroup',
     'components/DataPill',
+    'components/UILink',
     'lib/preactUtils',
     './LinkedData.styles',
 
@@ -18,12 +19,11 @@ define([
     Nullable,
     DataPillGroup,
     DataPill,
+    UILink,
     {htmlToString},
     styles
 ) => {
     const html = htm.bind(h);
-
-
 
     class LinkedData extends Component {
         constructor(props) {
@@ -46,9 +46,12 @@ define([
                     }
                 },
                 render: (sampleName, row) => {
-                    return html`
-                        <a href=${`/#samples/view/${row.sampleId}/${row.sampleVersion}`} target="_blank">${sampleName}</a>
-                    `;
+                    return html`<${UILink}
+                            hashPath=${{hash: `samples/view/${row.sampleId}/${row.sampleVersion}`}}
+                            newWindow=${true}
+                        >
+                            ${sampleName}
+                        </>`;
                 }
             }, {
                 id: 'objectTypeName',
@@ -62,9 +65,12 @@ define([
                     }
                 },
                 render: (typeName, row) => {
-                    return html`
-                        <a href=${`/#spec/type/${row.objectType}`} target="_blank">${typeName}</a>
-                    `;
+                    return html`<${UILink}
+                            hashPath=${{hash: `spec/type/${row.objectType}`}}
+                            newWindow=${true}
+                        >
+                            ${typeName}
+                        </>`;
                 }
             }, {
                 id: 'objectRef',
@@ -78,9 +84,12 @@ define([
                     }
                 },
                 render: (ref) => {
-                    return html`
-                        <a href=${`/#dataview/${ref}`} target="_blank">${ref}</a>
-                    `;
+                    return html`<${UILink}
+                        hashPath=${{hash: `dataview/${ref}`}}
+                        newWindow=${true}
+                        >
+                            ${ref}
+                        </>`;
                 }
             }, {
                 id: 'objectName',
@@ -94,9 +103,12 @@ define([
                     }
                 },
                 render: (name, row) => {
-                    return html`
-                        <a href=${`/#dataview/${row.objectRef}`} target="_blank">${name}</a>
-                    `;
+                    return html`<${UILink}
+                    hashPath=${{hash: `dataview/${row.objectRef}`}}
+                    newWindow=${true}
+                    >
+                        ${name}
+                    </>`;
                 }
             }, {
                 id: 'linkCount',
@@ -138,7 +150,12 @@ define([
                                         ${Intl.DateTimeFormat('en-US').format(created)}
                                     </td>
                                     <td>
-                                        <a href="/#people/${createdby}" target="_blank">${createdby}</a>
+                                        <${UILink}
+                                            hashPath=${{hash: `people/${createdby}`}}
+                                            newWindow=${true}
+                                        >
+                                            ${createdby}
+                                        </>
                                     </td>
                                 </tr>
                             `;
@@ -177,10 +194,6 @@ define([
                 bordered: true,
                 flex: true
             };
-
-            // const onRowClick = (row) => {
-            //     window.open(`/#samples/view/${row.id}/${row.version}`, '_blank');
-            // };
 
             return html`
                 <${DataTable} ...${props}/>
@@ -246,7 +259,6 @@ define([
                     }
                     }
                 });
-
         }
 
         applyFilterSort(filter, sortOption) {
@@ -289,7 +301,6 @@ define([
             const sortValue = ev.target.value;
             this.applyFilterSort(this.state.currentFilter, sortValue);
         }
-
 
         renderSortControl() {
             const sortBy = [

@@ -7,6 +7,7 @@ define([
     'components/SimpleError',
     'components/SimpleInfo',
     'components/Loading',
+    'components/UILink',
     './components/Main',
     './models/TheModel',
     './controllers/SampleSetController',
@@ -22,6 +23,7 @@ define([
     SimpleError,
     SimpleInfo,
     Loading,
+    UILink,
     Main,
     TheModel,
     SampleSetController,
@@ -79,7 +81,12 @@ define([
                         `;
                     case 'ontology-term':
                         return html`
-                            <a href="/#ontology/term/${schema.namespace}/${value}" target="_blank">${value}</a>
+                            <${UILink}
+                                hashPath=${{hash: `ontology/term/${schema.namespace}/${value}`}}
+                                newWindow=${true}
+                            >
+                                ${value}
+                            </>
                         `;
                     default:
                         return value;

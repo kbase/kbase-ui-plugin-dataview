@@ -1,26 +1,17 @@
 define([
     'preact',
     'bluebird',
-    // 'kb_lib/html',
-    // 'kbaseUI/widget/widgetSet',
     'kb_service/utils',
     'kb_service/client/workspace',
     'components/Provenance/Controller',
     'css!./provenancePanel.css'
-], (preact, Promise, apiUtils, Workspace, Provenance) => {
-
-    // const html = htm.bind(preact.h);
-    // const t = htmlTags.tag,
-    //     div = t('div');
-
-    // function renderBSPanel(config) {
-    //     const div = html.tag('div');
-    //     return div({class: 'panel panel-default'}, [
-    //         div({class: 'panel-heading'}, [div({class: 'panel-title'}, config.title)]),
-    //         div({class: 'panel-body'}, [config.content])
-    //     ]);
-    // }
-
+], (
+    preact, 
+    Promise, 
+    apiUtils, 
+    Workspace, 
+    Provenance
+) => {
     function widget(config) {
         const runtime = config.runtime;
         const widgetSet = runtime.service('widget').newWidgetSet();
