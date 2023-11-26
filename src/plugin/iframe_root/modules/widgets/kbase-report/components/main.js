@@ -34,6 +34,7 @@ define([
             this.report = params.report;
             this.links = params.links;
             this.createdObjects = params.createdObjects;
+            this.runtime = params.runtime;
 
             this.hasWarnings = false;
             if (this.report.warnings && this.report.warnings.length > 0) {
@@ -229,7 +230,8 @@ define([
                             component: {
                                 name: CreateObjectsComponent.quotedName(),
                                 params: {
-                                    createdObjects: 'createdObjects'
+                                    createdObjects: 'createdObjects',
+                                    runtime: 'runtime'
                                 }
                             }
                         }

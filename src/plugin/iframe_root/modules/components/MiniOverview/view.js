@@ -2,11 +2,8 @@ define([
     'preact',
     'htm',
     'jquery',
-    'uuid',
-    '../Row',
-    '../Col',
-    '../CollapsiblePanel',
     'kb_common/utils',
+    'components/UILink',
 
     'bootstrap',
     'css!./style.css'
@@ -14,11 +11,8 @@ define([
     preact,
     htm,
     $,
-    Uuid,
-    Row,
-    Col,
-    CollapsiblePanel,
-    Utils
+    Utils,
+    UILink
 ) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
@@ -96,7 +90,7 @@ define([
                     data-toggle="tooltip"
                     data-placement="bottom"
                     title="View the actual JSON for this object"
-                    href=${`/#jsonview/${this.props.objectInfo.ref}`}
+                    href=${this.props.runtime.europaURL({hash: `jsonview/${this.props.objectInfo.ref}`}).toString()}
                     target="_parent">
                     JSON View
                 </a>
@@ -149,9 +143,12 @@ define([
                     </div>
                     <div className="MiniOverview-savedCol">
                         Saved ${dateFormat(this.props.objectInfo.save_date)} by ${' '}
-                        <a href="${`/#people/${this.props.objectInfo.saved_by}`}" target="_blank">
+                        <${UILink}
+                            hashPath=${{hash: `people/${this.props.objectInfo.saved_by}`}}
+                            newWindow=${true}
+                        >
                             ${this.props.objectInfo.saved_by}
-                        </a>
+                        </>
                     </div>
                     <div className="MiniOverview-accessCol">
                         ${this.renderAccessIcon()}

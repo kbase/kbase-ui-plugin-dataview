@@ -2,19 +2,21 @@ define([
     'preact',
     'htm',
     'components/Empty',
-    'components/DataTable4'
+    'components/DataTable4',
+    'components/UILink'
 ], (
     {Component, h},
     htm,
     Empty,
-    DataTable
+    DataTable,
+    UILink
 ) => {
     const html = htm.bind(h);
 
     const columns = [
         {
             id: 'objectRef',
-            label: 'Object Ref',
+            label: 'Object Rex',
             sortable: true,
             styles: {
                 column: {
@@ -22,7 +24,13 @@ define([
                 }
             },
             render: (objectRef) => {
-                return html`<a href="/#dataview/${objectRef}" target="_blank" title=${objectRef}>${objectRef}</a>`;
+                return html`<${UILink}
+                    hashPath=${{hash: `dataview/${objectRef}`}}
+                    title=${objectRef}
+                    newWindow=${true}
+                >
+                    ${objectRef}
+                </>`;
             },
             sortComparator: (a, b) => {
                 if (a.values.workspaceId !== b.values.workspaceId) {
@@ -44,7 +52,13 @@ define([
                 }
             },
             render: (objectName, {objectRef}) => {
-                return html`<a href="/#dataview/${objectRef}" target="_blank" title=${objectName}>${objectName}</a>`;
+                return html`<${UILink}
+                    hashPath=${{hash: `dataview/${objectRef}`}}
+                    title=${objectName}
+                    newWindow=${true}
+                >
+                    ${objectName}
+                </>`;
             }
         },
         {
@@ -56,8 +70,14 @@ define([
                     flex: '1 1 0'
                 }
             },
-            render: (typeName, {type}) => {
-                return html`<a href="/#spec/type/${type}" target="_blank" title=${type}>${typeName}</b>`;
+            render: (typeName, {typeId}) => {
+                return html`<${UILink}
+                    hashPath=${{hash: `spec/type/${typeId}`}}
+                    title=${typeId}
+                    newWindow=${true}
+                >
+                    ${typeName}
+                </>`;
             }
         },
         {
@@ -99,7 +119,13 @@ define([
                 }
             },
             render: (linkedBy) => {
-                return html`<a href="/#people/${linkedBy}" target="_blank" title=${linkedBy}>${linkedBy}</a>`;
+                return html`<${UILink}
+                    hashPath=${{hash: `people/${linkedBy}`}}
+                    title=${linkedBy}
+                    newWindow=${true}
+                >
+                    ${linkedBy}
+                </>`
             }
         }
     ];
@@ -130,6 +156,7 @@ define([
                         objectVersion: objectInfo.version,
                         objectName: objectInfo.name,
                         typeName: objectInfo.typeName,
+                        typeId: objectInfo.type,
                         dataId: link.dataid,
                         linkedAt: link.created,
                         linkedBy: link.createdby
@@ -143,9 +170,7 @@ define([
         }
 
         renderNone() {
-            return html`
-            <${Empty} message="no data linked to this sample" />
-            `;
+            return html`<${Empty} message="no data linked to this sample" />`;
         }
 
         render() {

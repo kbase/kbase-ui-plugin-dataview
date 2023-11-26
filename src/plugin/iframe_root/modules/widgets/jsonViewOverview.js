@@ -3,7 +3,7 @@ define(['kb_common/html'], (html) => {
         return [object.info[6], object.info[0], object.info[4]].join('/');
     }
 
-    function factory() {
+    function factory({runtime}) {
         let container;
         const t = html.tag,
             div = t('div'),
@@ -15,7 +15,7 @@ define(['kb_common/html'], (html) => {
         function renderOverview(object) {
             const ref = objectRef(object);
             return table({class: 'table table-striped'}, [
-                tr([td('Dataview'), td(a({href: `/#dataview/${ref}`, target: '_parent'}, ref))])
+                tr([td('Dataview'), td(a({href: runtime.europaURL({hash: `dataview/${ref}`}).toString(), target: '_top'}, ref))])
             ]);
         }
 

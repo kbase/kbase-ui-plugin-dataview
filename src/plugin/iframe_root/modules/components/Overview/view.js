@@ -5,6 +5,7 @@ define([
     'uuid',
     'kb_common/utils',
     'components/DataTable7',
+    'components/UILink',
     '../Panel',
     './view.styles',
 
@@ -17,6 +18,7 @@ define([
     Uuid,
     Utils,
     DataTable,
+    UILink,
     Panel,
     styles
 ) => {
@@ -76,31 +78,32 @@ define([
             if (!this.props.workspaceInfo.metadata['narrative_nice_name']) {
                 return;
             }
+            const pathname = `narrative/${this.props.workspaceInfo.id}`;
             return html`
                 <tr>
                     <th>In Narrative</th>
                     <td>
-                        <a href="${`/narrative/${this.props.workspaceInfo.id}`}" target="_blank">
+                        <${UILink} origin=${this.props.runtime.origin()} hashPath=${{pathname}} newWindow=${true}>
                             ${this.props.workspaceInfo.metadata.narrative_nice_name}
-                        </a>
+                        </>
                     </td>
                 </tr>
             `;
         }
 
         renderPermalinkRow() {
-            const {protocol, host} = window.location;
-            let permalink = `${protocol}//${host}/#dataview/${this.props.objectInfo.ref}`;
+            let params = undefined;
             if (this.props.sub && this.props.sub.subid) {
-                permalink += `?${this.props.sub.sub}&${this.props.sub.subid}`;
+                params = {sub: this.props.sub, subid: this.props.sub.subid}
             }
+
+            const hashPath = {hash: `dataview/${this.props.objectInfo.ref}`, params};
+
             return html`
                 <tr>
                     <th>Permalink</th>
                     <td>
-                        <a href="${permalink}" target="_parent">
-                            ${permalink}
-                        </a>
+                        <${UILink} origin=${this.props.runtime.origin()} hashPath=${hashPath} linkIsLabel=${true} />
                     </td>
                 </tr>
             `;
@@ -116,26 +119,27 @@ define([
         }
 
         renderTypeRow() {
+            const hash = `spec/type/${this.props.objectInfo.type}`;
             return html`
                 <tr>
                     <th>Type</th>
                     <td>${(this.props.sub && this.props.sub.sub) ? `${this.props.sub.sub} in ` : ''}
-                        <a href="${`/#spec/type/${this.props.objectInfo.type}`}" target="_blank">
-                            ${this.props.objectInfo.typeName}
-                        </a>
+                        <${UILink} origin=${this.props.runtime.origin()} hashPath=${{hash}} label=${this.props.objectInfo.typeName} newWindow=${true} />
+                      
                     </td>
                 </tr>
             `;
         }
 
         renderTypeModuleRow() {
+            const hash = `spec/module/${this.props.objectInfo.typeModule}`
             return html`
                 <tr>
                     <th>Type Module</th>
                     <td>${(this.props.sub && this.props.sub.sub) ? `${this.props.sub.sub} in ` : ''}
-                        <a href="${`/#spec/module/${this.props.objectInfo.typeModule}`}" target="_blank">
+                        <${UILink} hashPath=${{hash}} origin=${this.props.runtime.origin()} newWindow=${true}>
                             ${this.props.objectInfo.typeModule}
-                        </a>
+                        </>
                     </td>
                 </tr>
             `;
@@ -153,13 +157,14 @@ define([
         }
 
         renderLastUpdatedRow() {
+            const hash = `people/${this.props.objectInfo.saved_by}`;
             return html`
                 <tr>
                     <th>Last Updated</th>
                     <td>${dateFormatShort(this.props.objectInfo.save_date)} by ${' '}
-                        <a href="${`/#people/${this.props.objectInfo.saved_by}`}" target="_blank">
+                        <${UILink} origin=${this.props.runtime.origin()} hashPath=${{hash}} newWindow=${true}>
                             ${this.props.objectInfo.saved_by}
-                        </a>
+                        </>
                     </td>
                 </tr>
             `;
@@ -254,17 +259,19 @@ define([
                     `;
                 }
                 const tableBody = this.props.versions.map((version) => {
+                    const versionHash = `dataview/${version.wsid}/${version.id}/${version.version}`;
                     return html`
                         <tr>
                             <td>
-                                <a href=${`/#dataview/${version.wsid}/${version.id}/${version.version}`}
-                                   target="_parent">
-                                        ${`v${version.version}`}
-                                </a>
+                                <${UILink} origin=${this.props.runtime.origin()} hashPath=${{hash: versionHash}}>
+                                    ${`v${version.version}`}
+                                </>
                             </td>
                             <td>
                                 Saved on ${dateFormatShort(version.save_date)} by${' '}
-                                <a href="/#people/${version.saved_by}" target="_parent">${version.saved_by}</a>
+                                <${UILink} origin=${this.props.runtime.origin()} hashPath=${{hash: `people/${version.saved_by}`}}>
+                                    ${version.saved_by}
+                                </>
                             </td>
                         </tr>
                     `;
@@ -295,9 +302,13 @@ define([
                 },
                 render: (name, ref) => {
                     return html`
-                        <a href=${`/#dataview/${ref.wsid}/${ref.id}/${ref.version}`}
+                        <${UILink} 
+                            origin=${this.props.runtime.origin()} 
+                            hashPath=${{hash: `dataview/${ref.wsid}/${ref.id}/${ref.version}`}}
                             title=${name}
-                            target="_parent">${ref.name}</a>
+                        >
+                            ${ref.name}
+                        </>
                     `;
                     return name;
                 }
@@ -309,10 +320,11 @@ define([
                 },
                 render: (type, ref) => {
                     return html`
-                    <a href=${`/#spec/type/${ref.type}`} 
-                        title=${type}
-                        target="_parent">${ref.typeName}</a>
-                    `;
+                        <${UILink}
+                            origin=${this.props.runtime.origin()}
+                            hashPath=${{hash: `spec/type/${ref.type}`}}>
+                            ${ref.typeName}
+                        </>`;
                 }
             },{
                 id: 'save_date',
@@ -331,7 +343,12 @@ define([
                 },
                 render: (savedBy, ref) => {
                     return html`
-                        <a href=${`/#people/${ref.saved_by}`} target="_parent">${ref.saved_by}</a>
+                        <${UILink}
+                            origin=${this.props.runtime.origin()}
+                            hashPath=${{hash: `people/${ref.saved_by}`}}
+                        >
+                            ${ref.saved_by}
+                        </>
                     `;
                 }
             }];
@@ -538,17 +555,22 @@ define([
                 },
                 render: (_, {ref, info}) => {
                     if (info === null) {
-                        return html`
-                            <a href=${`/#dataview/${ref}`}
-                                title=${ref}
-                                target="_parent">${ref}</a>
-                        `;
+                        return html`<${UILink} 
+                            hashPath=${{hash: `dataview/${ref}`}}
+                            title=${ref}
+                            newWindow=${false}
+                        >
+                            ${ref}
+                        </>`;
                     }
-                    return html`
-                        <a href=${`/#dataview/${info.wsid}/${info.id}/${info.version}`}
-                            title=${info.name}
-                            target="_parent">${info.name}</a>
-                    `;
+                    return html`<${UILink}
+                        origin=${this.props.runtime.origin()}
+                        hashPath=${{hash: `dataview/${info.wsid}/${info.id}/${info.version}`}}
+                        title=${info.name}
+                        newWindow=${false}
+                    >
+                        ${info.name}
+                    </>`;
                 }
             }, {
                 id: 'type',
@@ -560,11 +582,14 @@ define([
                     if (info === null) {
                         return html`<i>inaccessible</i>`;
                     }
-                    return html`
-                    <a href=${`/#spec/type/${info.type}`} 
+                    return html`<${UILink}
+                        origin=${this.props.runtime.origin()}
+                        hashPath=${{hash: `spec/type/${info.type}`}}
                         title=${info.type}
-                        target="_parent">${info.typeName}</a>
-                    `;
+                        newWindow=${false}
+                    >
+                        ${info.typeName}
+                    </>`;
                 }
             },{
                 id: 'save_date',
@@ -588,9 +613,13 @@ define([
                     if (info === null) {
                        return html`<i>inaccessible</i>`;
                     }
-                    return html`
-                        <a href=${`/#people/${info.saved_by}`} target="_parent">${info.saved_by}</a>
-                    `;
+                    return html`<${UILink}
+                        origin=${this.props.runtime.origin()}
+                        hashPath=${{hash: `people/${info.saved_by}`}}
+                        newWindow=${false}
+                    >   
+                        ${info.saved_by}
+                    </>`;
                 }
             }];
 
@@ -705,7 +734,14 @@ define([
             `;
         }
 
-         renderReferencesPanelWithRelation(parentId) {
+        /**
+         * This is not used. Don't know why, probably an effort to create a references
+         * table resilient to object problems.
+         * 
+         * @param {*} parentId 
+         * @returns 
+         */
+        renderReferencesPanelWithRelation(parentId) {
             const body = (() => {
                 if (this.props.too_many_out_refs) {
                     return html`

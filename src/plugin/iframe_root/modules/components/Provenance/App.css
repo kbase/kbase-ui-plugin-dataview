@@ -20,3 +20,20 @@
     text-align: right;
     padding-right: 2em;
 }
+
+.ProvenanceApp .-sankeyWrapper {
+    position: relative;
+}
+
+.ProvenanceApp .-sankeyWrapper > .-sankeyOverlay {
+    position: absolute;
+    left: 0; top: 0; right: 0; bottom: 0;
+    z-index: 1000;
+}
+
+.ProvenanceApp .-sankeyWrapper > .-sankeyOverlay.-loading {
+    background-color: rgba(200, 200, 200, 0.5);
+}
+
+
+

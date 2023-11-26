@@ -3,12 +3,14 @@ define([
     'htm',
     'components/DataTable4',
     'components/Container',
+    'components/UILink',
     './SampleSet.styles'
 ], (
     {Component, h},
     htm,
     DataTable,
     Container,
+    UILink,
     styles
 ) => {
     const html = htm.bind(h);
@@ -43,10 +45,13 @@ define([
                     }
                 },
                 render: (name, sample) => {
-                    return html`
-                        <a href=${`/#samples/view/${sample.id}/${sample.version}`} 
-                           title=${name}
-                           target="_blank">${name}</a>
+                    return html`<${UILink}
+                        origin=${this.props.runtime.origin()}
+                        hashPath=${{hash: `samples/view/${sample.id}/${sample.version}`}}
+                        newWindow=${true}
+                    >
+                        ${name}
+                    </>
                     `;
                 },
                 sortable: true,
@@ -152,12 +157,14 @@ define([
                     }
                 },
                 render: (savedBy) => {
-                    return html`
-                        <a href=${`/#user/${savedBy}`}
-                           target="_blank"
-                           title=${this.props.userProfiles[savedBy].user.realname}
-                           >${this.props.userProfiles[savedBy].user.realname}</a>
-                    `;
+                    return html`<${UILink}
+                        origin=${this.props.runtime.origin()}
+                        hashPath=${{hash: `user/${savedBy}`}}
+                        title=${this.props.userProfiles[savedBy].user.realname}
+                        newWindow=${true}
+                    >
+                        ${this.props.userProfiles[savedBy].user.realname}
+                    </>`;
                 }
             }];
 

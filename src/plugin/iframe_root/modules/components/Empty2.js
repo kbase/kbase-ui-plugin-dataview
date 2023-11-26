@@ -18,8 +18,15 @@ define([
             if (this.props.message) {
                 message = html`<span>${this.props.message}</span>`;
             }
+            const style = (() => {
+                if (this.props.inline) {
+                    return {...styles.wrapper, ...styles.inline};
+                }
+                return styles.wrapper;
+            })();
+          
             return html`
-                <div style=${styles.wrapper}>
+                <div style=${style}>
                     <div style=${styles.message}>${message}</div>
                 </div>
             `;

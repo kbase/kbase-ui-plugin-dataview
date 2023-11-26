@@ -146,8 +146,16 @@ define([
         /* Adds nodes and links for all referencing objects, with the link terminating at a
            node which is the target object (or one of it's versions, if the showAllVersions flag is on)
         */
+
+        async fetchReferencingObjects(ref) {
+            if (!this.cachedReferencingObjects) {
+                this.cachedReferencingObjects = await this.model.getReferencingObjects(ref);
+            }
+            return this.cachedReferencingObjects;
+        }
+
         async getReferencingObjects(objectInfo, {graph}) {
-            const referencingObjects = await this.model.getReferencingObjects(objectInfo.ref);
+            const referencingObjects = await this.fetchReferencingObjects(objectInfo.ref);
 
             let filteredCount = 0;
             let totalCount = 0;
@@ -230,8 +238,15 @@ define([
             graph.links.push(makeLink(nodeId, 0, 1, 'none'));
         }
 
+        async fetchObjectProvenance(ref) {
+            if (!this.cachedObjectProvenance) {
+                return this.cachedObjectProvenance = await this.model.getOutgoingReferences(ref);
+            }
+            return this.cachedObjectProvenance;
+        }
+
         async getObjectProvenance(ref, {graph}) {
-            const [truncated, objectReferences] = await this.model.getOutgoingReferences(ref);
+            const [truncated, objectReferences] = await this.fetchObjectProvenance(ref);
             const uniqueRefs = new Set();
 
             // Each object reference is a unique ref already.
@@ -307,6 +322,7 @@ define([
                     totalObjectsInOtherNarratives, 
                     truncated
                 } = await this.getReferencingObjects(objectInfo, graphState);
+
                 const {totalReferencedObjects, isCopied} =  await this.getObjectProvenance(objectInfo.ref, graphState);
 
                 // TODO: restore selected NODE
@@ -509,7 +525,7 @@ define([
         renderReloading(value) {
             return html`
                 <${App} 
-                     omitOtherNarratives=${this.state.omitOtherNarratives}
+                    omitOtherNarratives=${this.state.omitOtherNarratives}
                     omitReports=${this.state.omitReports}
                     showAllVersions=${this.state.showAllVersions}
                     nodeLabelType=${this.state.nodeLabelType}
@@ -534,6 +550,7 @@ define([
                     totalReports=${this.state.value.totalReports}
                     totalObjectsInOtherNarratives=${this.state.value.totalObjectsInOtherNarratives}
                     totalVersions=${this.state.value.totalVersions}
+                    loading=${this.state.status === 'RELOADING'}
                 />
             `;
         }

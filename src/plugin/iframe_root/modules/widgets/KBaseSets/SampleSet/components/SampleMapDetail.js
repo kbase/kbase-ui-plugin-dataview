@@ -2,11 +2,13 @@ define([
     'jquery',
     'preact',
     'htm',
+    'components/UILink',
     './common'
 ], (
     $,
     {Component, h},
     htm,
+    UILink,
     {constants, pluralize}
 ) => {
     const html = htm.bind(h);
@@ -131,10 +133,20 @@ define([
                             ${index + 1}
                         </div>
                         <div>
-                            <a href="/#samples/view/${id}/${version}" target="_blank">${node_tree[0].id}</a>
+                            <${UILink}
+                                hashPath=${{hash: `samples/view/${id}/${version}`}}
+                                newWindow=${true}
+                            >
+                                ${node_tree[0].id}
+                            </>
                         </div>
                         <div>
-                            <a href="/#samples/view/${id}/${version}" target="_blank">${name}</a>
+                            <${UILink}
+                                hashPath=${{hash: `samples/view/${id}/${version}`}}
+                                newWindow=${true}
+                            >
+                                ${name}
+                            </>
                         </div>
                     </div>
                 `;

@@ -30,11 +30,15 @@ define([
             }
             return html`
                 <${Fragment}>
-                    <${SampleSet} sampleSet=${this.props.sampleSet} samples=${this.props.samples}
-                                  totalCount=${this.props.totalCount} userProfiles=${this.props.userProfiles}/>
-                        ${truncatedMessage}
-                    </
+                    <${SampleSet} 
+                        runtime=${this.props.runtime}
+                        sampleSet=${this.props.sampleSet} 
+                        samples=${this.props.samples}
+                        totalCount=${this.props.totalCount} 
+                        userProfiles=${this.props.userProfiles}
                     />
+                        ${truncatedMessage}
+                    </>
             `;
         }
         renderSummary() {

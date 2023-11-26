@@ -59,6 +59,56 @@ define([
             return this.service(name);
         }
 
+        origin() {
+            return this.config('deploy.ui.origin');
+        }
+
+        // Europa URL and Link
+
+        europaURL(hashPath) {
+            const {hash, pathname, params} = hashPath;
+
+            const url = new URL(this.configDB.getItem('deploy.ui.origin'));
+            
+            if (pathname) {
+                url.pathname = pathname;
+            }
+            if (params && Object.keys(params).length > 0) {
+                const searchParams = new URLSearchParams(params);
+                if (hash) {
+                    // Use our special notation for params on the hash
+                    url.hash = url.hash + `${hash}$${searchParams}`;
+                } else {
+                    // Otherwise, assume we just want a standard search component
+                    searchParams.forEach((value, key) => {
+                        url.searchParams.set(key, value);
+                    });
+                }
+            } else {
+                if (hash) {
+                    url.hash = `#${hash}`;
+                }
+            }
+            
+            return url;
+        }
+
+        europaLink(hashPath, label, options={}) {
+            const url = this.europaURL(hashPath);
+
+            const $link = $(document.createElement('a'))
+                .attr('href', url.toString())
+                .text(label);
+
+            if (typeof options.newWindow === 'undefined' || options.newWindow) {
+                $link.attr('target', '_blank');
+            } else {
+                $link.attr('target', '_top');
+            }
+
+            return $link.get(0).outerHTML;
+        }
+
         // COMM
 
         send(channel, message, data) {

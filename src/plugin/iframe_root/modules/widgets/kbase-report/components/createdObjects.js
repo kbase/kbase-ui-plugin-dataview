@@ -23,7 +23,11 @@ define(['kb_knockout/registry', 'kb_knockout/lib/generators', 'kb_knockout/lib/v
         constructor(params) {
             super(params);
 
-            this.createdObjects = params.createdObjects;
+            this.createdObjects = params.createdObjects.map((createdObject) => {
+                const typeURL = params.runtime.europaURL({hash: `spec/type/${createdObject.fullType}`});
+                const objectURL = params.runtime.europaURL({hash: `dataview/${createdObject.ref}`});
+                return {...createdObject, typeURL, objectURL};
+            })  
         }
     }
 
@@ -92,7 +96,7 @@ define(['kb_knockout/registry', 'kb_knockout/lib/generators', 'kb_knockout/lib/v
                                 dataBind: {
                                     text: 'type',
                                     attr: {
-                                        href: '"/#spec/type/" + fullType'
+                                        href: 'typeURL'
                                     }
                                 },
                                 target: '_blank'
@@ -103,7 +107,7 @@ define(['kb_knockout/registry', 'kb_knockout/lib/generators', 'kb_knockout/lib/v
                                 dataBind: {
                                     text: 'name',
                                     attr: {
-                                        href: '"/#dataview/" + ref'
+                                        href: 'objectURL'
                                     }
                                 },
                                 target: '_blank'

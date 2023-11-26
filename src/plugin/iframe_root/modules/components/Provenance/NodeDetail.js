@@ -4,6 +4,7 @@ define([
     'components/Row',
     'components/Col',
     'components/Alert',
+    'components/UILink',
 
     'css!./NodeDetail.css'
 ], (
@@ -11,33 +12,12 @@ define([
     htm,
     Row,
     Col,
-    Alert
+    Alert,
+    UILink
 ) => {
     const {Component, Fragment} = preact;
     const html = htm.bind(preact.h);
 
-
-    function renderRow(rowTitle, rowContent, title) {
-        if (typeof title === 'undefined') {
-            title = rowContent;
-        }
-        return html`
-            <tr>
-                <th>${rowTitle}</th>
-                <td>
-                    <div class="CellContent" title=${title}>
-                        ${rowContent}
-                    </div>
-                </td>
-            </tr>
-        `;
-    }
-
-    function renderLinkRow(rowTitle, url, label, title) {
-        return renderRow(
-            rowTitle,
-            html`<a href=${url} target="_blank">${label}</a>`, title || label);
-    }
 
     function authScrub(objectList) {
         if (objectList && objectList.constructor === Array) {
@@ -98,6 +78,38 @@ define([
     }
 
     class NodeDetail extends Component {
+
+        renderRow(rowTitle, rowContent, title) {
+            if (typeof title === 'undefined') {
+                title = rowContent;
+            }
+            return html`
+                <tr>
+                    <th>${rowTitle}</th>
+                    <td>
+                        <div class="CellContent" title=${title}>
+                            ${rowContent}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        renderLinkRow(rowTitle, hash, label, title) {
+            return this.renderRow(
+                rowTitle,
+                html`<${UILink}
+                    origin=${this.props.runtime.origin()}
+                    hashPath=${{hash}}
+                    newWindow=${true}
+                >
+                    ${label}
+                </>`, 
+                title || label
+                // html`<a href=${url} target="_blank">${label}</a>`
+            );
+        }
+
         renderObjectDetails() {
             if (this.props.node.nodeInfo === null) {
                 return html`
@@ -108,11 +120,11 @@ define([
             return html`
                 <table class="table table-striped table-bordered ObjectDetails">
                     <tbody>
-                        ${renderLinkRow('Name',`/#dataview/${objectInfo.ref}`, objectInfo.name)}
-                        ${renderLinkRow('Object ID', `/#dataview/${objectInfo.ref}`, objectInfo.ref)}
-                        ${renderLinkRow('Type', `/#spec/type/${objectInfo.type}`, objectInfo.type)}
-                        ${renderRow('Saved on', html` ${formatDate(objectInfo.save_date)}`,  formatDate(objectInfo.save_date))}
-                        ${renderLinkRow('Saved by', `/#people/${objectInfo.saved_by}`, objectInfo.saved_by)}
+                        ${this.renderLinkRow('Name',`dataview/${objectInfo.ref}`, objectInfo.name)}
+                        ${this.renderLinkRow('Object ID', `dataview/${objectInfo.ref}`, objectInfo.ref)}
+                        ${this.renderLinkRow('Type', `spec/type/${objectInfo.type}`, objectInfo.type)}
+                        ${this.renderRow('Saved on', html` ${formatDate(objectInfo.save_date)}`,  formatDate(objectInfo.save_date))}
+                        ${this.renderLinkRow('Saved by', `people/${objectInfo.saved_by}`, objectInfo.saved_by)}
                     </tbody>
                 </table>
             `;
@@ -127,7 +139,7 @@ define([
             const objectInfo = this.props.node.nodeInfo.info;
             if (objectInfo.metadata && Object.keys(objectInfo.metadata).length > 0) {
                 const rows = Object.entries(objectInfo.metadata).map(([key, value]) => {
-                    return renderRow(key, value);
+                    return this.renderRow(key, value);
                 });
                 return html`
                     <table class="table table-striped table-bordered">
@@ -160,16 +172,16 @@ define([
                  } ProvenanceAction;*/
             const rows = [];
             if ('description' in provenanceAction) {
-                rows.push(renderRow(`${prefix}Description`, provenanceAction['description']));
+                rows.push(this.renderRow(`${prefix}Description`, provenanceAction['description']));
             }
             if ('service' in provenanceAction) {
-                rows.push(renderRow(`${prefix}Service Name`, provenanceAction['service']));
+                rows.push(this.renderRow(`${prefix}Service Name`, provenanceAction['service']));
             }
             if ('service_ver' in provenanceAction) {
-                rows.push(renderRow(`${prefix}Service Version`, provenanceAction['service_ver']));
+                rows.push(this.renderRow(`${prefix}Service Version`, provenanceAction['service_ver']));
             }
             if ('method' in provenanceAction) {
-                rows.push(renderRow(`${prefix}Method`, provenanceAction['method']));
+                rows.push(this.renderRow(`${prefix}Method`, provenanceAction['method']));
             }
             if ('method_params' in provenanceAction) {
                 rows.push(
@@ -181,13 +193,13 @@ define([
             }
 
             if ('script' in provenanceAction) {
-                rows.push(renderRow(`${prefix  }Command Name`, provenanceAction['script']));
+                rows.push(this.renderRow(`${prefix  }Command Name`, provenanceAction['script']));
             }
             if ('script_ver' in provenanceAction) {
-                rows.push(renderRow(`${prefix  }Script Version`, provenanceAction['script_ver']));
+                rows.push(this.renderRow(`${prefix  }Script Version`, provenanceAction['script_ver']));
             }
             if ('script_command_line' in provenanceAction) {
-                rows.push(renderRow(`${prefix  }Command Line Input`, provenanceAction['script_command_line']));
+                rows.push(this.renderRow(`${prefix  }Command Line Input`, provenanceAction['script_command_line']));
             }
 
             if ('intermediate_incoming' in provenanceAction) {
@@ -221,7 +233,7 @@ define([
             }
 
             if ('time' in provenanceAction) {
-                rows.push(renderRow(`${prefix  }Timestamp`, formatDate(provenanceAction['time'])));
+                rows.push(this.renderRow(`${prefix  }Timestamp`, formatDate(provenanceAction['time'])));
             }
 
             return rows;
@@ -245,9 +257,13 @@ define([
                     <tr>
                         <th>Copied from</th>
                         <td>
-                            <a href="/#dataview/${objectData.copied}" target="_blank">
+                            <${UILink}
+                                origin=${this.props.runtime.origin()}
+                                hashPath=${{hash: `dataview/${objectData.copied}`}}
+                                newWindow=${true}
+                            >
                                 ${objectData.copied}
-                            </a>
+                            </>
                         </td>
                     </tr>
                 `);

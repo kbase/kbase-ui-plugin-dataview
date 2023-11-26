@@ -60,9 +60,6 @@ define([
             this._super(input);
             const self = this;
 
-            // root url path for landing pages
-            const DATAVIEW_URL = '/#dataview';
-
             const type = input.type;
 
             // base class for workspace object classes
@@ -433,11 +430,7 @@ define([
                         // TODO: add testhook field here
                         if (ref && ref.ref) {
                             return (
-                                `<a href="${
-                                    DATAVIEW_URL
-                                }/${
-                                    ref.ref
-                                }" target="_blank" ` +
+                                `<a href="${self.runtime.europaURL({hash: `dataview/${ref.ref}`}).toString()}" target="_blank" ` +
                                 '" class="id-click"' +
                                 `" data-ws="${
                                     ref.ws
@@ -562,7 +555,7 @@ define([
                                     table
                                         .find(`[data-ref="${ref}"]`)
                                         // xss safe usage of html
-                                        .html(`<a href="${DATAVIEW_URL}/${ref}" target="_blank">${name ? domSafeText(name) : content.na()}</a>`);
+                                        .html(`<a href="${self.runtime.europaURL({hash: `dataview/${ref}`}).toString()}" target="_blank">${name ? domSafeText(name) : content.na()}</a>`);
                                     return null;
                                 })
                                 .catch((err) => {

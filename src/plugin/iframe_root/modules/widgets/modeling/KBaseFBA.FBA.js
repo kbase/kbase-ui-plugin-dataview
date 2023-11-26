@@ -786,6 +786,7 @@ define([
                     return self.ExtendGeneTab(info, data);
                 });
             }
+            // TODO: this is broken; output is undefined (at least sometimes)
             return self.ExtendGeneTab(info, output);
         };
 

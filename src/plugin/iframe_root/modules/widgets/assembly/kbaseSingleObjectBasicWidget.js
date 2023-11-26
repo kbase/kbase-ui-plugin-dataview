@@ -32,7 +32,6 @@ define([
         init(options) {
             this._super(options);
 
-            this.options.landingPageURL = '/#dataview/';
             this.workspaceURL = this.runtime.getConfig('services.workspace.url');
 
             this.$errorPane = $('<div>')
