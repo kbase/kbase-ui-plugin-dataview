@@ -25,9 +25,9 @@ define([
             },
             render: (objectRef) => {
                 return html`<${UILink}
+                    to="newwindow"
                     hashPath=${{hash: `dataview/${objectRef}`}}
                     title=${objectRef}
-                    newWindow=${true}
                 >
                     ${objectRef}
                 </>`;
@@ -53,9 +53,9 @@ define([
             },
             render: (objectName, {objectRef}) => {
                 return html`<${UILink}
+                    to="newwindow"
                     hashPath=${{hash: `dataview/${objectRef}`}}
                     title=${objectName}
-                    newWindow=${true}
                 >
                     ${objectName}
                 </>`;
@@ -72,9 +72,9 @@ define([
             },
             render: (typeName, {typeId}) => {
                 return html`<${UILink}
+                    to="newwindow"                
                     hashPath=${{hash: `spec/type/${typeId}`}}
                     title=${typeId}
-                    newWindow=${true}
                 >
                     ${typeName}
                 </>`;
@@ -120,9 +120,9 @@ define([
             },
             render: (linkedBy) => {
                 return html`<${UILink}
+                    to="newwindow"
                     hashPath=${{hash: `people/${linkedBy}`}}
                     title=${linkedBy}
-                    newWindow=${true}
                 >
                     ${linkedBy}
                 </>`

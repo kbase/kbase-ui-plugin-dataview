@@ -46,9 +46,8 @@ define([
                 },
                 render: (name, sample) => {
                     return html`<${UILink}
-                        origin=${this.props.runtime.origin()}
+                        to="newwindow"
                         hashPath=${{hash: `samples/view/${sample.id}/${sample.version}`}}
-                        newWindow=${true}
                     >
                         ${name}
                     </>
@@ -158,10 +157,9 @@ define([
                 },
                 render: (savedBy) => {
                     return html`<${UILink}
-                        origin=${this.props.runtime.origin()}
+                        to="newwindow"
                         hashPath=${{hash: `user/${savedBy}`}}
                         title=${this.props.userProfiles[savedBy].user.realname}
-                        newWindow=${true}
                     >
                         ${this.props.userProfiles[savedBy].user.realname}
                     </>`;

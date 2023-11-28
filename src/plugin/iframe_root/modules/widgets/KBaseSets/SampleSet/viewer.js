@@ -82,8 +82,8 @@ define([
                     case 'ontology-term':
                         return html`
                             <${UILink}
+                                to="newwindow"
                                 hashPath=${{hash: `ontology/term/${schema.namespace}/${value}`}}
-                                newWindow=${true}
                             >
                                 ${value}
                             </>

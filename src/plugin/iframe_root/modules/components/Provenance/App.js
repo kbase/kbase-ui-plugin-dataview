@@ -105,12 +105,11 @@ define([
             }
             return html`
                 <${UILink}
-                    origin=${this.props.runtime.origin()}
+                    to="newwindow"
                     hashPath=${{hash: `provenance/${this.props.objectInfo.ref}`}}
-                    newWindow=${true}
                     className="btn btn-default"
                 >
-                Open in separate window
+                    Open in separate window
                 </>
             `;
         }

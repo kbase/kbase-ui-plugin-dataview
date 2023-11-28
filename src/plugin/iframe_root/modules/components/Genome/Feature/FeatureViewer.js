@@ -58,9 +58,8 @@ define([
                             <th>Genome</th>
                             <td>
                                 <${UILink} 
-                                    origin=${this.props.runtime.origin()} 
+                                    to="newwindow"
                                     hashPath=${{hash: `dataview/${this.props.objectInfo.ref}`}}
-                                    newWindow=${true}
                                 >
                                     ${scientificName}
                                 </>
@@ -112,9 +111,8 @@ define([
                     return html`
                         <div>
                             <${UILink} 
-                                origin=${this.props.runtime.origin()}
+                                to="newwindow"
                                 hashPath=${{hash: `dataview/${this.props.objectInfo.ref}`, params: {sub: cds, subid: cds}}}
-                                newWindow=${true}
                             >
                                 ${cds}
                             </>

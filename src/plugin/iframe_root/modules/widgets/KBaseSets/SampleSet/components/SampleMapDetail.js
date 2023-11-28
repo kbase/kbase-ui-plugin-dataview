@@ -134,16 +134,16 @@ define([
                         </div>
                         <div>
                             <${UILink}
+                                to="newwindow"
                                 hashPath=${{hash: `samples/view/${id}/${version}`}}
-                                newWindow=${true}
                             >
                                 ${node_tree[0].id}
                             </>
                         </div>
                         <div>
                             <${UILink}
+                                to="newwindow"
                                 hashPath=${{hash: `samples/view/${id}/${version}`}}
-                                newWindow=${true}
                             >
                                 ${name}
                             </>
