@@ -83,7 +83,7 @@ define([
                 <tr>
                     <th>In Narrative</th>
                     <td>
-                        <${UILink} origin=${this.props.runtime.origin()} hashPath=${{pathname}} newWindow=${true}>
+                        <${UILink} to="newwindow" hashPath=${{pathname}} newWindow=${true}>
                             ${this.props.workspaceInfo.metadata.narrative_nice_name}
                         </>
                     </td>
@@ -103,7 +103,7 @@ define([
                 <tr>
                     <th>Permalink</th>
                     <td>
-                        <${UILink} origin=${this.props.runtime.origin()} hashPath=${hashPath} linkIsLabel=${true} />
+                        <${UILink} to="newwindow" hashPath=${hashPath} linkIsLabel=${true} />
                     </td>
                 </tr>
             `;
@@ -124,8 +124,7 @@ define([
                 <tr>
                     <th>Type</th>
                     <td>${(this.props.sub && this.props.sub.sub) ? `${this.props.sub.sub} in ` : ''}
-                        <${UILink} origin=${this.props.runtime.origin()} hashPath=${{hash}} label=${this.props.objectInfo.typeName} newWindow=${true} />
-                      
+                        <${UILink} to="newwindow" hashPath=${{hash}} label=${this.props.objectInfo.typeName} />
                     </td>
                 </tr>
             `;
@@ -137,7 +136,7 @@ define([
                 <tr>
                     <th>Type Module</th>
                     <td>${(this.props.sub && this.props.sub.sub) ? `${this.props.sub.sub} in ` : ''}
-                        <${UILink} hashPath=${{hash}} origin=${this.props.runtime.origin()} newWindow=${true}>
+                        <${UILink} to="newwindow" hashPath=${{hash}}>
                             ${this.props.objectInfo.typeModule}
                         </>
                     </td>
@@ -162,7 +161,7 @@ define([
                 <tr>
                     <th>Last Updated</th>
                     <td>${dateFormatShort(this.props.objectInfo.save_date)} by ${' '}
-                        <${UILink} origin=${this.props.runtime.origin()} hashPath=${{hash}} newWindow=${true}>
+                        <${UILink} to="newwindow" hashPath=${{hash}}>
                             ${this.props.objectInfo.saved_by}
                         </>
                     </td>
@@ -263,13 +262,13 @@ define([
                     return html`
                         <tr>
                             <td>
-                                <${UILink} origin=${this.props.runtime.origin()} hashPath=${{hash: versionHash}}>
+                                <${UILink} to="newwindow" hashPath=${{hash: versionHash}}>
                                     ${`v${version.version}`}
                                 </>
                             </td>
                             <td>
                                 Saved on ${dateFormatShort(version.save_date)} by${' '}
-                                <${UILink} origin=${this.props.runtime.origin()} hashPath=${{hash: `people/${version.saved_by}`}}>
+                                <${UILink} to="newwindow" hashPath=${{hash: `people/${version.saved_by}`}}>
                                     ${version.saved_by}
                                 </>
                             </td>
@@ -303,7 +302,7 @@ define([
                 render: (name, ref) => {
                     return html`
                         <${UILink} 
-                            origin=${this.props.runtime.origin()} 
+                            to="newwindow"
                             hashPath=${{hash: `dataview/${ref.wsid}/${ref.id}/${ref.version}`}}
                             title=${name}
                         >
@@ -321,7 +320,7 @@ define([
                 render: (type, ref) => {
                     return html`
                         <${UILink}
-                            origin=${this.props.runtime.origin()}
+                            to="newwindow"
                             hashPath=${{hash: `spec/type/${ref.type}`}}>
                             ${ref.typeName}
                         </>`;
@@ -344,7 +343,7 @@ define([
                 render: (savedBy, ref) => {
                     return html`
                         <${UILink}
-                            origin=${this.props.runtime.origin()}
+                            to="newwindow"
                             hashPath=${{hash: `people/${ref.saved_by}`}}
                         >
                             ${ref.saved_by}
@@ -556,18 +555,17 @@ define([
                 render: (_, {ref, info}) => {
                     if (info === null) {
                         return html`<${UILink} 
+                            to="newwindow"
                             hashPath=${{hash: `dataview/${ref}`}}
                             title=${ref}
-                            newWindow=${false}
                         >
                             ${ref}
                         </>`;
                     }
                     return html`<${UILink}
-                        origin=${this.props.runtime.origin()}
+                        to="newwindow"
                         hashPath=${{hash: `dataview/${info.wsid}/${info.id}/${info.version}`}}
                         title=${info.name}
-                        newWindow=${false}
                     >
                         ${info.name}
                     </>`;
@@ -583,10 +581,9 @@ define([
                         return html`<i>inaccessible</i>`;
                     }
                     return html`<${UILink}
-                        origin=${this.props.runtime.origin()}
+                        to="newwindow"
                         hashPath=${{hash: `spec/type/${info.type}`}}
                         title=${info.type}
-                        newWindow=${false}
                     >
                         ${info.typeName}
                     </>`;
@@ -614,9 +611,8 @@ define([
                        return html`<i>inaccessible</i>`;
                     }
                     return html`<${UILink}
-                        origin=${this.props.runtime.origin()}
+                        to="newwindow"
                         hashPath=${{hash: `people/${info.saved_by}`}}
-                        newWindow=${false}
                     >   
                         ${info.saved_by}
                     </>`;
@@ -655,75 +651,6 @@ define([
                     </div>
                 `; 
 
-                // const tableBody = this.props.out_references.map(({ref, relation, info}) => {
-                //     if (info) {
-                //         return html`
-                //             <tr>
-                //                 <td>
-                //                     <a href=${`/#dataview/${ref}`}
-                //                     target="_blank">${info.name}</a>
-                //                 </td>
-                //                 <td>
-                //                     <a href=${`/#spec/type/${info.type}`} target="_blank">${info.typeName}</a>
-                //                 </td>
-                //                 <td>
-                //                     ${dateFormatShort(info.save_date)}
-                //                 </td>
-                //                 <td>
-                //                     <a href=${`/#people/${info.saved_by}`} target="_blank">${info.saved_by}</a>
-                //                 </td>
-                //             </tr>
-                //         `;
-                //     }
-
-                //     // This case probably never occurs?
-                //     if (ref) {
-                //         return html`
-                //             <tr>
-                //                 <td>
-                //                     <a href=${`/#dataview/${ref}`}
-                //                     target="_blank">${ref}</a>
-                //                 </td>
-                //                 <td>Unknown</td>
-                //                 <td colspan="2">
-                //                     Object inaccessible
-                //                 </td>
-                //             </tr>
-                //         `;
-                //     }
-                //     return html`
-                //         <tr>
-                //             <td>
-                //                <i>Unknown</i>
-                //             </td>
-                //             <td>
-                //                 <a href=${`/#spec/type/${this.props.objectInfo.typeName}`} target="_blank">${this.props.objectInfo.typeName}</a>
-                //             </td>
-                //             <td>
-                //                 <i>Unknown</i>
-                //             </td>
-                //             <td>
-                //                <i>Unknown</i>
-                //             </td>
-                //         </tr>
-                //     `;
-                // });
-
-                // return html`
-                //     <table className="table kb-references-table" >
-                //         <thead>
-                //         <tr>
-                //             <th>Name</th>
-                //             <th>Type</th>
-                //             <th>Saved</th>
-                //             <th>By</td>
-                //         </tr>
-                //         </thead>
-                //         <tbody>
-                //         ${tableBody}
-                //         </tbody>
-                //     </table>
-                // `;
             })();
 
             return html`

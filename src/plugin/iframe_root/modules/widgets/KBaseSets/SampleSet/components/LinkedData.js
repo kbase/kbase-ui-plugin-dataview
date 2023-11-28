@@ -47,8 +47,8 @@ define([
                 },
                 render: (sampleName, row) => {
                     return html`<${UILink}
+                            to="newwindow"
                             hashPath=${{hash: `samples/view/${row.sampleId}/${row.sampleVersion}`}}
-                            newWindow=${true}
                         >
                             ${sampleName}
                         </>`;
@@ -66,8 +66,8 @@ define([
                 },
                 render: (typeName, row) => {
                     return html`<${UILink}
+                            to="newwindow"
                             hashPath=${{hash: `spec/type/${row.objectType}`}}
-                            newWindow=${true}
                         >
                             ${typeName}
                         </>`;
@@ -85,8 +85,8 @@ define([
                 },
                 render: (ref) => {
                     return html`<${UILink}
+                        to="newwindow"
                         hashPath=${{hash: `dataview/${ref}`}}
-                        newWindow=${true}
                         >
                             ${ref}
                         </>`;
@@ -104,8 +104,8 @@ define([
                 },
                 render: (name, row) => {
                     return html`<${UILink}
+                    to="newwindow"
                     hashPath=${{hash: `dataview/${row.objectRef}`}}
-                    newWindow=${true}
                     >
                         ${name}
                     </>`;
@@ -151,8 +151,8 @@ define([
                                     </td>
                                     <td>
                                         <${UILink}
+                                            to="newwindow"
                                             hashPath=${{hash: `people/${createdby}`}}
-                                            newWindow=${true}
                                         >
                                             ${createdby}
                                         </>

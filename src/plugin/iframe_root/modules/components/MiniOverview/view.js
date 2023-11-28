@@ -144,8 +144,8 @@ define([
                     <div className="MiniOverview-savedCol">
                         Saved ${dateFormat(this.props.objectInfo.save_date)} by ${' '}
                         <${UILink}
+                            to="newwindow"
                             hashPath=${{hash: `people/${this.props.objectInfo.saved_by}`}}
-                            newWindow=${true}
                         >
                             ${this.props.objectInfo.saved_by}
                         </>

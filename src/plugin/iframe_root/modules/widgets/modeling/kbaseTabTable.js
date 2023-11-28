@@ -9,6 +9,7 @@ define([
     'lib/domUtils',
     'content',
     'lib/jqueryUtils',
+    'europaSupport',
 
     // for effect
     'kbaseUI/widget/legacy/tabs',
@@ -32,7 +33,8 @@ define([
     KBModeling,
     {domSafeText},
     content,
-    {$errorAlert}
+    {$errorAlert},
+    {kbaseUIURL, europaKBaseUIURL}
 ) => {
     const IMAGE_URL = 'http://bioseed.mcs.anl.gov/~chenry/jpeg/';
 
@@ -430,7 +432,7 @@ define([
                         // TODO: add testhook field here
                         if (ref && ref.ref) {
                             return (
-                                `<a href="${self.runtime.europaURL({hash: `dataview/${ref.ref}`}).toString()}" target="_blank" ` +
+                                `<a href="${europaKBaseUIURL(`dataview/${ref.ref}`).toString()}" target="_blank" ` +
                                 '" class="id-click"' +
                                 `" data-ws="${
                                     ref.ws
@@ -555,7 +557,7 @@ define([
                                     table
                                         .find(`[data-ref="${ref}"]`)
                                         // xss safe usage of html
-                                        .html(`<a href="${self.runtime.europaURL({hash: `dataview/${ref}`}).toString()}" target="_blank">${name ? domSafeText(name) : content.na()}</a>`);
+                                        .html(`<a href="${europaKBaseUIURL(`dataview/${ref}`).toString()}" target="_blank">${name ? domSafeText(name) : content.na()}</a>`);
                                     return null;
                                 })
                                 .catch((err) => {

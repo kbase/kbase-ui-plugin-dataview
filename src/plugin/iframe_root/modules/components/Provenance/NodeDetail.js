@@ -99,9 +99,8 @@ define([
             return this.renderRow(
                 rowTitle,
                 html`<${UILink}
-                    origin=${this.props.runtime.origin()}
+                    to="newwindow"
                     hashPath=${{hash}}
-                    newWindow=${true}
                 >
                     ${label}
                 </>`, 
@@ -258,9 +257,8 @@ define([
                         <th>Copied from</th>
                         <td>
                             <${UILink}
-                                origin=${this.props.runtime.origin()}
+                                to="newwindow"
                                 hashPath=${{hash: `dataview/${objectData.copied}`}}
-                                newWindow=${true}
                             >
                                 ${objectData.copied}
                             </>

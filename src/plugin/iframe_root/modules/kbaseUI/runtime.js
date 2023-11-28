@@ -109,6 +109,67 @@ define([
             return $link.get(0).outerHTML;
         }
 
+        /**
+         * Dedicated to links within kbase-ui, including self-links within the catalog plugin.
+         *
+         * @param {*} path
+         * @param {*} label
+         * @param {*} options
+         * @returns A jquery object wrapping an anchor link to a kbase-ui endpoint.
+         */
+        $kbaseUILink(hash, label, options={}) {
+            const url = kbaseUIURL(hash);
+            const $link = $(document.createElement('a'))
+                .attr('href', url.toString())
+                .attr('target', '_parent');
+
+            if (options.icon) {
+                $link.append($('<span>')
+                    .addClass(`fa fa-${options.icon}`));
+            }
+
+            $link.append($('<span> </span>'));
+            $link.append($('<span>').text(label));
+
+            if (options.stopPropagation) {
+                $link.on('click', (e) => {e.stopPropagation();});
+            }
+
+            return $link;
+        }
+
+        /**
+         * Creates a jQuery HTML anchor link with for a kbase-ui endpoint, via the
+         * Europa top level ui. The only useful such use-case is opening such a
+         * link in a new window. See $kbaseUILink above for the case of opening a plugin
+         * or other kbase-ui link via kbase-ui itself.
+         *
+         * @param {*} hash
+         * @param {*} label
+         * @param {*} options
+         * @returns
+         */
+        $europaKBaseUILink(hash, label, options={}) {
+            const url = europaURL({hash}, true);
+            const $link = $(document.createElement('a'))
+                .attr('href', url.toString())
+                .attr('target', '_blank');
+
+            if (options.icon) {
+                $link.append($('<span>')
+                    .addClass(`fa fa-${options.icon}`));
+            }
+
+            $link.append($('<span> </span>'));
+            $link.append($('<span>').text(label));
+
+            if (options.stopPropagation) {
+                $link.on('click', (e) => {e.stopPropagation();});
+            }
+
+            return $link;
+        }
+
         // COMM
 
         send(channel, message, data) {
