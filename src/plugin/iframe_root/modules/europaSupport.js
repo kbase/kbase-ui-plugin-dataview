@@ -1,4 +1,43 @@
 define([], () => {
+    function UIURL({path, params, type}, newWindow=false) {
+        if (!path || !type) {
+            throw new Error('Both "path" and "type" are required');
+        }
+        const url = new URL(window.location.origin);
+        switch (type) {
+            case 'kbaseui': {
+                if (newWindow) {
+                    const hostname = window.location.hostname.split('.').slice(1).join('.');
+                    url.hostname = hostname;
+                    url.pathname = `legacy/${path}`;
+                    if (params && Object.keys(params).length > 0) {
+                        for (const [key, value] of Object.entries(params)) {
+                            url.searchParams.set(key, value);
+                        }
+                    }
+                } else {
+                    // In the same window, we will be issuing the 
+                    url.hash = `#${path}`
+                    if (params && Object.keys(params).length > 0) {
+                        url.hash += `$${new URLSearchParams(params).toString()}`
+                    }
+                }
+                break;
+            }
+            case 'europaui': {
+                const hostname = window.location.hostname.split('.').slice(1).join('.');
+                url.hostname = hostname;
+                url.pathname = path;
+                if (params && Object.keys(params).length > 0) {
+                    for (const [key, value] of Object.entries(params)) {
+                        url.searchParams.set(key, value);
+                    }
+                }
+            }
+        }
+        return url;
+    }
+
     function kbaseUIURL(hash, params) {
         const url = new URL(window.location.origin);
         url.hash = `#${hash}`;
@@ -65,5 +104,5 @@ define([], () => {
         return otherUIURL(hashPath);
     }
 
-    return {kbaseUIURL, europaKBaseUIURL, otherUIURL, europaURL};
+    return {UIURL, kbaseUIURL, europaKBaseUIURL, otherUIURL, europaURL};
 });

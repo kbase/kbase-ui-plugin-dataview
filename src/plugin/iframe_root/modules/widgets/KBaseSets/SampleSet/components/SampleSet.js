@@ -1,6 +1,7 @@
 define([
     'preact',
     'htm',
+    'europaSupport',
     'components/DataTable4',
     'components/Container',
     'components/UILink',
@@ -8,6 +9,7 @@ define([
 ], (
     {Component, h},
     htm,
+    {UIURL},
     DataTable,
     Container,
     UILink,
@@ -193,7 +195,8 @@ define([
             };
 
             const onRowClick = (row) => {
-                window.open(`/#samples/view/${row.id}/${row.version}`, '_blank');
+                const url = UIURL({path: `samples/view/${row.id}/${row.version}`, type: 'kbaseui'}, true);
+                window.open(url, '_blank');
             };
 
             return html`

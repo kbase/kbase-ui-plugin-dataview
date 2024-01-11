@@ -31,7 +31,7 @@ define([
                             mapping = mapping.sub[sub]; // ha, crazy line, i know.
                         } else {
                             throw new Error(
-                                `Sub was specified, but config has no correct sub handler, sub:${sub}config:`
+                                `Sub was specified, but config has no correct sub handler, sub:${sub}`
                             );
                         }
                     } else {

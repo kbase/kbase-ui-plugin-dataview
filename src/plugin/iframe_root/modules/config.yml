@@ -146,19 +146,6 @@ install:
     - module: widgets/GenomePanel
       name: kb_dataview_genomes_genome
       type: es6
-    - module: widgets/genomes/kbaseGenomeWideOverview
-      name: kb_dataview_genomes_wideOverview
-      type: kbwidget
-    - module: widgets/genomes/kbaseGenomeOverview
-      name: kb_dataview_genomes_overview
-      type: kbwidget
-      css: true
-    - module: widgets/genomes/kbaseWikiDescription
-      name: kb_dataview_genomes_wikiDescription
-      type: kbwidget
-    - module: widgets/genomes/kbaseLitWidget
-      name: kb_dataview_genomes_literature
-      type: kbwidget
     - module: widgets/genomes/kbaseGenePage
       name: kb_dataview_genomes_genePage
       type: kbwidget
@@ -168,39 +155,7 @@ install:
     - module: widgets/genomes/FeaturePage
       name: kb_dataview_genomes_featurePage
       type: es6
-    - module: widgets/genomes/kbaseGenomeGeneTable
-      name: kb_dataview_genomes_geneTable
-      type: kbwidget
-    - module: widgets/genomes/kbaseGeneInstanceInfo
-      name: kb_dataview_genomes_geneInstanceInfo
-      type: kbwidget
-    - module: widgets/genomes/kbaseGeneSequence
-      name: kb_dataview_genomes_geneSequence
-      type: kbwidget
-    # -
-    #     module: widgets/genomes/kbaseGeneBiochemistry
-    #     name: kb_dataview_genomes_geneBiochemistry
-    #     type:   kbwidget
-    # -
-    #     module: widgets/genomes/kbaseGenomeLineage
-    #     name: kb_dataview_genomes_lineage
-    #     type: kbwidget
-    # -
-    #     module: kb_dataview_genomes_wideTaxonomy
-    #     name: kb_dataview_genomes_wideTaxonomy
-    #     type: kbwidget
-    # -
-    #     module: kb_dataview_genomes_wideAssemblyAnnotation
-    #     name: kb_dataview_genomes_wideAssemblyAnnotation
-    #     type: kbwidget
-    # -
-    #     module: kb_dataview_genomes_multiContigBrowser
-    #     name: kb_dataview_genomes_multiContigBrowser
-    #     type: kbwidget
-    # -
-    #     module: kb_dataview_genomes_seedFunctions
-    #     name: kb_dataview_genomes_seedFunctions
-    #     type: kbwidget
+   
     - module: widgets/genomes/kbasePanGenome
       name: kb_dataview_genomes_pangenome
       type: kbwidget

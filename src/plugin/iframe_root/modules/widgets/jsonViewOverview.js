@@ -1,4 +1,4 @@
-define(['kb_common/html'], (html) => {
+define(['kb_common/html', 'europaSupport'], (html, {UIURL}) => {
     function objectRef(object) {
         return [object.info[6], object.info[0], object.info[4]].join('/');
     }
@@ -15,7 +15,7 @@ define(['kb_common/html'], (html) => {
         function renderOverview(object) {
             const ref = objectRef(object);
             return table({class: 'table table-striped'}, [
-                tr([td('Dataview'), td(a({href: runtime.europaURL({hash: `dataview/${ref}`}).toString(), target: '_top'}, ref))])
+                tr([td('Dataviewx'), td(a({href: UIURL({path: `dataview/${ref}`, type: 'kbaseui'}).toString(), target: '_parent'}, ref))])
             ]);
         }
 
