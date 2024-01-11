@@ -1,9 +1,11 @@
 define([
     'preact',
-    'htm'
+    'htm',
+    'components/UILink'
 ], (
     preact,
-    htm
+    htm,
+    UILink
 ) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
@@ -12,12 +14,16 @@ define([
         buildLineage(lineage) {
             // Trim off the "root" which is always at the top of the lineage.
             const lineageMap = lineage.slice(1).map((taxon, index) => {
-                const url = `/#taxonomy/taxon/${taxon.ns}/${taxon.id}`;
+                // const url = UIURL({path: `/#taxonomy/taxon/${taxon.ns}/${taxon.id}`,
+                // type: 'kbaseui'});
+                const hash = `taxonomy/taxon/${taxon.ns}/${taxon.id}`;
                 return html`
                     <div key=${index}>
-                        <a href=${url} target="_blank">
+                        <${UILink} 
+                            to="newwindow" 
+                            hashPath=${{hash}}>
                             ${taxon.scientific_name}
-                        </a>
+                        </>
                     </div>
                 `;
             });
@@ -28,7 +34,7 @@ define([
 
         render() {
             const {lineage, taxonRef, scientificName} = this.props;
-            const taxonURL = `/#taxonomy/taxon/${taxonRef.ns}/${taxonRef.id}/${taxonRef.ts}`;
+            const taxonPath = `taxonomy/taxon/${taxonRef.ns}/${taxonRef.id}/${taxonRef.ts}`;
             // xss safe
             return html`
                 <table className="table table-bordered">
@@ -39,10 +45,9 @@ define([
                             </th>
                             <td data-field="scientific-name"
                                 style= ${{fontStyle: 'italic'}}>
-                                <a href=${taxonURL}
-                                    target="_blank">
+                                <${UILink} to="newwindow" hashPath=${{hash: taxonPath}}>
                                     ${scientificName}
-                                </a>
+                                </>
                             </td>
                         </tr>
                         <tr>

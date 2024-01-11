@@ -3,6 +3,7 @@ define([
     'htm',
     'components/Row',
     'components/Col',
+    'components/UILink',
     '../Aliases',
     '../Location',
     '../DNASequence',
@@ -15,6 +16,7 @@ define([
     htm,
     Row, 
     Col,
+    UILink,
     Aliases,
     Location,
     DNASequence,
@@ -28,9 +30,15 @@ define([
             if (!featureId) { 
                 return;
             }
-            const url = `/#dataview/${this.props.objectInfo.ref}?sub=feature&subid=${featureId}`;
+            const hash = `dataview/${this.props.objectInfo.ref}`;
+            const params = {
+                sub: 'feature',
+                subid: featureId
+            };
             return html`
-                <a href=${url} target="_blank">${featureId}</a>
+                <${UILink} to="newwindow" hashPath=${{hash, params}}>
+                    ${featureId}
+                </>
             `;
         }
 
@@ -63,7 +71,6 @@ define([
 
         renderOverview() {
             const {cds: {location, aliases, parent_gene, note, warnings}, scientificName, genomeId} = this.props.cdsData;
-            const genomeLink = `/#dataview/${this.props.objectInfo.ref}`;
             return html`
                 <table className="table table-striped -overview">
                     <colgroup>
@@ -73,7 +80,11 @@ define([
                     <tbody>
                         <tr>
                             <th>Genome</th>
-                            <td><a href=${genomeLink} target="_blank">${genomeId}</a></td>
+                            <td><${UILink} to="newwindow" 
+                                hashPath=${{hash: `dataview/${this.props.objectInfo.ref}`}} >
+                                ${genomeId}
+                                </>
+                            </td>
                         </tr>
                         <tr>
                             <th>Scientific name</th>

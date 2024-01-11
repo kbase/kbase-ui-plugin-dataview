@@ -1,6 +1,7 @@
 define([
     'preact',
     'htm',
+    'europaSupport',
     'components/Tabs',
     './Spreadsheet',
     './SampleMap',
@@ -10,6 +11,7 @@ define([
 ], (
     {Component, Fragment, h},
     htm,
+    {UIURL},
     Tabs,
     Spreadsheet,
     SampleMap,
@@ -76,7 +78,8 @@ define([
 
         onRowClick(sampleRow) {
             const {id, version} = sampleRow;
-            window.open(`/#samples/view/${id}/${version}`, '_blank');
+            const url = UIURL({path: `samples/view/${id}/${version}`, type: 'kbaseui'}, true)
+            window.open(url, '_blank');
         }
 
         render() {

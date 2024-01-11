@@ -4,6 +4,7 @@ define([
     'lib/format',
     'components/DataTable',
     'components/Empty2',
+    'components/UILink',
     './LinkedSamples.styles'
 ], (
     preact,
@@ -11,6 +12,7 @@ define([
     fmt,
     DataTable,
     Empty,
+    UILink,
     styles
 ) => {
     const {Component} = preact;
@@ -39,8 +41,8 @@ define([
                 isSortable: true,
                 render: (name, row) => {
                     return html`
-                    <a href="/#samples/view/${row.id}/${row.version}" target="_blank">${name}</a>
-                `;
+                        <${UILink} to="newwindow" hashPath=${{hash: `samples/view/${row.id}/${row.version}`}}>${name}</>
+                    `;
                 }
             }, {
                 id: 'dataid',
@@ -68,7 +70,9 @@ define([
                 isSortable: true,
                 render: (savedBy) => {
                     return html`
-                    <a href="/#people/${savedBy}" target="_blank">${savedBy}</a>
+                    <${UILink} to="newwindow" hashPath=${{hash: `people/${savedBy}`}}>
+                        ${savedBy}
+                    </i>
                 `;
                 }
             }, {
@@ -114,52 +118,6 @@ define([
             return html`
                 <${DataTable} heights=${{row: 40, col: 40}} ...${props}/>
             `;
-            // const table = this.props.linkedSamples.map(({link, sample}) => {
-            //     return {
-            //
-            //     }
-            //     // return html`
-            //     // <tr>
-            //     //     <td>${link.dataid || '∅'}</td>
-            //     //     <td><a href="/#samples/view/${link.id}/${link.version}" target="_blank">${sample.name}</a></td>
-            //     //     <td>${sample.node_tree[0].id}</td>
-            //     //     <td>${this.renderTimestamp(sample.save_date)}</td>
-            //     //     <td><a href="/#people/${sample.user}" target="_blank">${sample.user}</a></td>
-            //     //     <td style=${{textAlign: 'right', paddingRight: '2em'}}>${sample.version}</td>
-            //     // </tr>
-            //     // `;
-            // });
-            // <td>${(sample.sgetMetadataValueample, 'material', '-')}</td>
-            // const rows = this.props.linkedSamples.map(({link, sample}) => {
-            //     return html`
-            //     <tr>
-            //         <td>${link.dataid || '∅'}</td>
-            //         <td><a href="/#samples/view/${link.id}/${link.version}" target="_blank">${sample.name}</a></td>
-            //         <td>${sample.node_tree[0].id}</td>
-            //         <td>${this.renderTimestamp(sample.save_date)}</td>
-            //         <td><a href="/#people/${sample.user}" target="_blank">${sample.user}</a></td>
-            //         <td style=${{textAlign: 'right', paddingRight: '2em'}}>${sample.version}</td>
-            //     </tr>
-            //     `;
-            // });
-            //
-            // return html`
-            // <table className="table">
-            //     <thead>
-            //         <tr>
-            //             <th style=${{width: '15em', whiteSpace: 'nowrap'}}>Path to Sample</th>
-            //             <th style=${{whiteSpace: 'nowrap'}}>Sample Name</th>
-            //             <th style=${{whiteSpace: 'nowrap'}}>Id</th>
-            //             <th style=${{width: '12em', whiteSpace: 'nowrap'}}>Saved</th>
-            //             <th style=${{width: '8em', whiteSpace: 'nowrap'}}>By</th>
-            //             <th style=${{width: '5em', whiteSpace: 'nowrap'}}>Version</th>
-            //         </tr>
-            //     </thead>
-            //     <tbody>
-            //         ${rows}
-            //     </tbody>
-            // </table>
-            // `;
         }
 
         renderNoLinkedSamples() {

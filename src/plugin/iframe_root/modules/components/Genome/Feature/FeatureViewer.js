@@ -112,7 +112,7 @@ define([
                         <div>
                             <${UILink} 
                                 to="newwindow"
-                                hashPath=${{hash: `dataview/${this.props.objectInfo.ref}`, params: {sub: cds, subid: cds}}}
+                                hashPath=${{hash: `dataview/${this.props.objectInfo.ref}`, params: {sub: 'cds', subid: cds}}}
                             >
                                 ${cds}
                             </>

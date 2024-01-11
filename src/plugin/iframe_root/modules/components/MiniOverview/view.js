@@ -4,6 +4,7 @@ define([
     'jquery',
     'kb_common/utils',
     'components/UILink',
+    'europaSupport',
 
     'bootstrap',
     'css!./style.css'
@@ -12,9 +13,11 @@ define([
     htm,
     $,
     Utils,
-    UILink
+    UILink,
+    europaSupport
 ) => {
     const {Component} = preact;
+    const {UIURL} = europaSupport;
     const html = htm.bind(preact.h);
 
     function dateFormat(dateString) {
@@ -90,9 +93,9 @@ define([
                     data-toggle="tooltip"
                     data-placement="bottom"
                     title="View the actual JSON for this object"
-                    href=${this.props.runtime.europaURL({hash: `jsonview/${this.props.objectInfo.ref}`}).toString()}
+                    href=${UIURL({path: `jsonview/${this.props.objectInfo.ref}`, type: 'kbaseui'}).toString()}
                     target="_parent">
-                    JSON View
+                    JSON Viewx
                 </a>
             `;
         }
@@ -121,7 +124,7 @@ define([
                 ${' '}
                     ${jsonViewButton}
                 </div>
-            `;
+            `;Z
         }
 
         render() {

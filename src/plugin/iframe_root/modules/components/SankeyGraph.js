@@ -4,6 +4,7 @@ define([
     'jquery',
     'd3',
     'ResizeObserver',
+    'europaSupport',
 
     // For effect
     'd3_sankey',
@@ -13,7 +14,8 @@ define([
     htm,
     $,
     d3,
-    ResizeObserver
+    ResizeObserver,
+    {UIURL}
 ) => {
     const {Component} = preact;
     const html = htm.bind(preact.h);
@@ -376,7 +378,7 @@ define([
                         alert('Cannot expand this node.');
                     } else {
                         const path = `provenance/${encodeURI(`${d.info.ref}`)}`;
-                        const url = `${window.location.origin}/#${path}`;
+                        const url = UIURL({path, type: 'kbaseui'}, true)
                         window.open(url);
                     }
                 })

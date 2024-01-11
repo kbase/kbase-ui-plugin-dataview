@@ -90,13 +90,14 @@ define([
             // Apply parameters.
             
             if (params && Object.keys(params).length > 0) {
-
+                const searchParams = new URLSearchParams(params);
                 switch (this.props.to) {
                     case 'newwindow': 
                     case 'europa': 
-                        searchParams.forEach((value, key) => {
-                            url.searchParams.set(key, value);
-                        });
+                        // searchParams.forEach((value, key) => {
+                        //     url.searchParams.set(key, value);
+                        // });
+                        url.pathname = url.pathname + '$' + searchParams.toString();
                         break;
                     case 'kbaseui': 
                         url.hash += `${hash}$${searchParams.toString()}`;
