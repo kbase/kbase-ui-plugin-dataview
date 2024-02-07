@@ -140,15 +140,9 @@ install:
       type: kbwidget
 
     # KBASE GENOMES
-    - module: widgets/genomes/kbaseGenomePage
-      name: kb_dataview_genomes_genomex
-      type: kbwidget
     - module: widgets/GenomePanel
       name: kb_dataview_genomes_genome
       type: es6
-    - module: widgets/genomes/kbaseGenePage
-      name: kb_dataview_genomes_genePage
-      type: kbwidget
     - module: widgets/genomes/CDSPage
       name: kb_dataview_genomes_cdsPage
       type: es6
@@ -798,21 +792,6 @@ install:
             - from: workspaceId
               to: workspaceID
           sub:
-            featurex:
-              widget:
-                name: kb_dataview_genomes_genePage
-                config:
-                  jqueryName: KBaseGenePage
-              panel: false
-              scrolling: true
-              default: true
-              options:
-                - from: objectId
-                  to: genomeID
-                - from: workspaceId
-                  to: workspaceID
-                - from: featureID
-                  to: featureID
             feature:
               widget:
                 name: kb_dataview_genomes_featurePage
