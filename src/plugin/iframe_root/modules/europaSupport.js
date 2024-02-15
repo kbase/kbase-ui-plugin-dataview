@@ -3,12 +3,12 @@ define([], () => {
         if (!path || !type) {
             throw new Error('Both "path" and "type" are required');
         }
-        const url = new URL(window.location.origin);
+        let url;
+
         switch (type) {
             case 'kbaseui': {
                 if (newWindow) {
-                    const hostname = window.location.hostname.split('.').slice(1).join('.');
-                    url.hostname = hostname;
+                    url = europaBaseURL();
                     url.pathname = `legacy/${path}`;
                     if (params && Object.keys(params).length > 0) {
                         for (const [key, value] of Object.entries(params)) {
@@ -17,6 +17,7 @@ define([], () => {
                     }
                 } else {
                     // In the same window, we will be issuing the 
+                    url = kbaseUIRBaseURL();
                     url.hash = `#${path}`
                     if (params && Object.keys(params).length > 0) {
                         url.hash += `$${new URLSearchParams(params).toString()}`
@@ -25,8 +26,7 @@ define([], () => {
                 break;
             }
             case 'europaui': {
-                const hostname = window.location.hostname.split('.').slice(1).join('.');
-                url.hostname = hostname;
+                url = europaBaseURL();
                 url.pathname = path;
                 if (params && Object.keys(params).length > 0) {
                     for (const [key, value] of Object.entries(params)) {
@@ -39,7 +39,7 @@ define([], () => {
     }
 
     function kbaseUIURL(hash, params) {
-        const url = new URL(window.location.origin);
+        const url = kbaseUIRBaseURL();
         url.hash = `#${hash}`;
         if (params && Object.keys(params).length > 0) {
             const searchParams = new URLSearchParams(params);
@@ -50,7 +50,7 @@ define([], () => {
     }
 
     function europaKBaseUIURL(hash, params) {
-        const url = topLevelBaseURL()
+        const url = europaBaseURL()
         url.pathname = `legacy/${hash}`;
         if (params && Object.keys(params).length > 0) {
             for (const [key, value] of Object.entries(params)) {
@@ -60,25 +60,8 @@ define([], () => {
         return url;
     }
 
-    function topLevelBaseURL() {
-        let hostname;
-        if (!window.location.hostname.endsWith('kbase.us')) {
-            hostname = 'ci.kbase.us';
-        } else {
-            hostname = window.location.hostname.split('.').slice(1).join('.');
-        }
-        return new URL(`https://${hostname}`);
-    }
-
     function otherUIURL({hash, pathname, params}) {
-        let hostname;
-        if (!window.location.hostname.endsWith('kbase.us')) {
-            hostname = 'ci.kbase.us';
-        } else {
-            hostname = window.location.hostname.split('.').slice(1).join('.');
-        }
-        const url = new URL(`https://${hostname}`);
-
+        const url = europaBaseURL()
         url.pathname = hash ? `legacy/${hash}` : pathname || '';
 
         // So in this case we use a standard search fragment.
@@ -102,6 +85,21 @@ define([], () => {
         }
 
         return otherUIURL(hashPath);
+    }
+
+    function europaBaseURL() {
+        const europaHostname = window.parent.location.hostname.split('.')
+            .slice(-3)
+            .join('.');
+        const url = new URL(window.location.origin);
+        url.hostname = europaHostname;
+        return url;
+    }
+
+    function kbaseUIRBaseURL() {
+        const url = new URL(window.parent.location.origin);
+        url.pathname = window.parent.location.pathname;
+        return url;
     }
 
     return {UIURL, kbaseUIURL, europaKBaseUIURL, otherUIURL, europaURL};
