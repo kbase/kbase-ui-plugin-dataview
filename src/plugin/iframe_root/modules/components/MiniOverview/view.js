@@ -95,7 +95,7 @@ define([
                     title="View the actual JSON for this object"
                     href=${UIURL({path: `jsonview/${this.props.objectInfo.ref}`, type: 'kbaseui'}).toString()}
                     target="_parent">
-                    JSON Viewx
+                    JSON View
                 </a>
             `;
         }
