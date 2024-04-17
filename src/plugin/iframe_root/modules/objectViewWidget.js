@@ -125,24 +125,22 @@ define([
                 }
             });
 
-            if (runtime.featureEnabled('object-link-to-term')) {
-                tabs.push({
-                    id: 'linkedOntologyTerms',
-                    title: 'Linked Ontology Terms',
-                    render: () => {
-                        return html`
-                            <${WidgetWrapper}
-                                    id="kb_dataview_linkedOntologyTerms"
-                                    params=${params}
-                                    runtime=${runtime}
-                                    key=${new Uuid(4).format()}
-                                    config=${{}}
-                                    scrolling=${true}
-                            />
-                        `;
-                    }
-                });
-            }
+            tabs.push({
+                id: 'linkedOntologyTerms',
+                title: 'Linked Ontology Terms',
+                render: () => {
+                    return html`
+                        <${WidgetWrapper}
+                                id="kb_dataview_linkedOntologyTerms"
+                                params=${params}
+                                runtime=${runtime}
+                                key=${new Uuid(4).format()}
+                                config=${{}}
+                                scrolling=${true}
+                        />
+                    `;
+                }
+            });
 
             preact.render(preact.h(Tabs, {tabs, paneStyle: {}}), document.getElementById('tabs123'));
         }
