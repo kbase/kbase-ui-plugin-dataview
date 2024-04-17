@@ -90,24 +90,22 @@ define([
                 }
             ];
 
-            if (runtime.featureEnabled('similar_genomes')) {
-                tabs.push({
-                    id: 'relatedData',
-                    title: 'Related Data',
-                    render: () => {
-                        return html`
-                            <${WidgetWrapper}
-                                    id="kb_dataview_relatedData"
-                                    params=${params}
-                                    runtime=${runtime}
-                                    key=${new Uuid(4).format()}
-                                    config=${{}}
-                                    scrolling=${true}
-                            />
-                        `;
-                    }
-                });
-            }
+            tabs.push({
+                id: 'relatedData',
+                title: 'Related Data',
+                render: () => {
+                    return html`
+                        <${WidgetWrapper}
+                                id="kb_dataview_relatedData"
+                                params=${params}
+                                runtime=${runtime}
+                                key=${new Uuid(4).format()}
+                                config=${{}}
+                                scrolling=${true}
+                        />
+                    `;
+                }
+            });
 
             tabs.push({
                 id: 'linkedSamples',
