@@ -87,60 +87,57 @@ define([
                     render: () => {
                         return html`<${Provenance} runtime=${runtime} environment="embedded" ...${params} />`;
                     }
+                },
+                {
+                    id: 'relatedData',
+                    title: 'Related Data',
+                    render: () => {
+                        return html`
+                            <${WidgetWrapper}
+                                    id="kb_dataview_relatedData"
+                                    params=${params}
+                                    runtime=${runtime}
+                                    key=${new Uuid(4).format()}
+                                    config=${{}}
+                                    scrolling=${true}
+                            />
+                        `;
+                    }
+                },
+                {
+                    id: 'linkedSamples',
+                    title: 'Linked Samples',
+                    render: () => {
+                        return html`
+                            <${WidgetWrapper}
+                                    id="kb_dataview_linkedSamples"
+                                    params=${params}
+                                    runtime=${runtime}
+                                    key=${new Uuid(4).format()}
+                                    config=${{}}
+                                    scrolling=${true},
+                                    style=${{flex: '1 1 0', display: 'flex', flexDirection: 'column'}}
+                            />
+                        `;
+                    }
+                },
+                {
+                    id: 'linkedOntologyTerms',
+                    title: 'Linked Ontology Terms',
+                    render: () => {
+                        return html`
+                            <${WidgetWrapper}
+                                    id="kb_dataview_linkedOntologyTerms"
+                                    params=${params}
+                                    runtime=${runtime}
+                                    key=${new Uuid(4).format()}
+                                    config=${{}}
+                                    scrolling=${true}
+                            />
+                        `;
+                    }
                 }
             ];
-
-            tabs.push({
-                id: 'relatedData',
-                title: 'Related Data',
-                render: () => {
-                    return html`
-                        <${WidgetWrapper}
-                                id="kb_dataview_relatedData"
-                                params=${params}
-                                runtime=${runtime}
-                                key=${new Uuid(4).format()}
-                                config=${{}}
-                                scrolling=${true}
-                        />
-                    `;
-                }
-            });
-
-            tabs.push({
-                id: 'linkedSamples',
-                title: 'Linked Samples',
-                render: () => {
-                    return html`
-                        <${WidgetWrapper}
-                                id="kb_dataview_linkedSamples"
-                                params=${params}
-                                runtime=${runtime}
-                                key=${new Uuid(4).format()}
-                                config=${{}}
-                                scrolling=${true},
-                                style=${{flex: '1 1 0', display: 'flex', flexDirection: 'column'}}
-                        />
-                    `;
-                }
-            });
-
-            tabs.push({
-                id: 'linkedOntologyTerms',
-                title: 'Linked Ontology Terms',
-                render: () => {
-                    return html`
-                        <${WidgetWrapper}
-                                id="kb_dataview_linkedOntologyTerms"
-                                params=${params}
-                                runtime=${runtime}
-                                key=${new Uuid(4).format()}
-                                config=${{}}
-                                scrolling=${true}
-                        />
-                    `;
-                }
-            });
 
             preact.render(preact.h(Tabs, {tabs, paneStyle: {}}), document.getElementById('tabs123'));
         }
